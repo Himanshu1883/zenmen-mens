@@ -622,7 +622,7 @@ export default function Services() {
         id="services"
         style={{
           position: "relative",
-          background: "#080705",
+          background: "#050A18",
           overflow: "hidden",
         }}
       >
@@ -658,7 +658,7 @@ export default function Services() {
             zIndex: 1,
             maxWidth: "1400px",
             margin: "0 auto",
-            padding: "clamp(64px, 8vw, 120px) clamp(20px, 5vw, 72px)",
+            // padding: "clamp(64px, 8vw, 120px) clamp(20px, 5vw, 72px)",
           }}
         >
           {/* ── Header ── */}
@@ -745,7 +745,7 @@ export default function Services() {
                 style={{
                   fontFamily: "'Jost', sans-serif",
                   fontSize: "14px",
-                  color: "rgba(205,200,192,0.60)",
+                  color: "white",
                   lineHeight: 1.9,
                   fontWeight: 300,
                   maxWidth: "360px",

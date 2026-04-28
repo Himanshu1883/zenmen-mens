@@ -22,8 +22,11 @@ export default function Navbar() {
     // className={`navbar ${scrolled ? "scrolled" : ""} flex items-center justify-between px-6`}
     >
       {/* LEFT */}
-      <Link href="/" className="logo">
-        <div className="logo-icon rotate-hover" />
+      <Link href="/" className="logo flex items-center gap-3">
+        <div className="logo-icon rotate-hover">
+          {/* <span className="slash" /> */}
+        </div>
+
         <div>
           <span className="logo-text">ZENmen</span>
           <span className="logo-sub">Bespoke Tailoring</span>

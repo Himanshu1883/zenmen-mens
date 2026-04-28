@@ -186,7 +186,7 @@ export default function Hero() {
           min-height: 600px;
           position: relative;
           overflow: hidden;
-          background: #0a0806;
+          background: #050A18;
           font-family: 'Montserrat', sans-serif;
         }
 

@@ -174,7 +174,7 @@ export default function CollectionPage() {
           }
         }
       `}</style>
-      <main className="bg-[#070707] text-[#F3EEE4]">
+      <main className="bg-[#050A18] text-[#F3EEE4]">
         <div className="relative w-full pt-20 md:pt-20">
           <div className="relative h-[58vh] min-h-[440px] w-full overflow-hidden border-y border-[#c8a96e2c]">
             <div className="absolute inset-0 grid grid-cols-3 md:grid-cols-6">
