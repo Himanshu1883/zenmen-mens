@@ -280,7 +280,7 @@ export default function CollectionPage() {
                     </button>
                   </div>
 
-                  <div className="p-12">
+                  <div className="p-4">
                     <h3 className="font-['Cormorant_Garamond'] text-2xl font-light text-[#f8f4ec]">
                       {product.name}
                     </h3>

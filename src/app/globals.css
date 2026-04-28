@@ -1,10 +1,8 @@
 @import "tailwindcss";
 
-@theme {
-  --spacing: 0.25rem;
+*, *::before, *::after {
+  box-sizing: border-box;
 }
-
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
     --gold: #C8A96E;
@@ -19,6 +17,7 @@
     --text-light: #BDBDB5;
     --white: #FAF8F4;
     --border: rgba(200,169,110,0.2);
+    --spacing: 0.25rem;
   }
 
   html { scroll-behavior: smooth; }
