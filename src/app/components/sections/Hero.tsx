@@ -151,11 +151,11 @@ export default function Hero() {
   const slide = heroSlides[current];
 
   const overlayGradient = {
-    left: "linear-gradient(to right, rgba(10,8,6,0.92) 0%, rgba(10,8,6,0.6) 50%, rgba(10,8,6,0.15) 100%)",
+    left: "linear-gradient(to right, rgba(10,8,6,0.75) 0%, rgba(10,8,6,0.4) 50%, rgba(10,8,6,0.1) 100%)",
     right:
-      "linear-gradient(to left, rgba(10,8,6,0.92) 0%, rgba(10,8,6,0.6) 50%, rgba(10,8,6,0.15) 100%)",
+      "linear-gradient(to left, rgba(10,8,6,0.75) 0%, rgba(10,8,6,0.4) 50%, rgba(10,8,6,0.1) 100%)",
     center:
-      "linear-gradient(to top, rgba(10,8,6,0.95) 0%, rgba(10,8,6,0.5) 45%, rgba(10,8,6,0.1) 100%)",
+      "linear-gradient(to top, rgba(10,8,6,0.8) 0%, rgba(10,8,6,0.35) 45%, rgba(10,8,6,0.08) 100%)",
   }[slide.overlayDir];
 
   const textJustify = {
@@ -194,7 +194,7 @@ export default function Hero() {
         .fw-slide-img {
           position: absolute; inset: 0; width: 100%; height: 100%;
           object-fit: cover; object-position: center;
-          filter: brightness(0.72) contrast(1.08) saturate(0.9);
+          // filter: brightness(0.92) contrast(1.08) saturate(0.9);
           transition: opacity 0.9s ease;
           transform: scale(1.06);
         }
@@ -403,7 +403,7 @@ export default function Hero() {
         .banner-full-overlay {
           position: absolute; inset: 0; display: flex; flex-direction: column;
           justify-content: flex-end; align-items: flex-start; padding: 48px 60px;
-          background: linear-gradient(to top, rgba(10,8,6,0.88) 0%, rgba(10,8,6,0.2) 55%, transparent 100%);
+          // background: linear-gradient(to top, rgba(10,8,6,0.88) 0%, rgba(10,8,6,0.2) 55%, transparent 100%);
         }
         .banner-full-tag { font-size: 9px; letter-spacing: 4px; color: #c9a84c; text-transform: uppercase; font-weight: 600; margin-bottom: 10px; }
         .banner-full-title { font-family: 'Playfair Display', serif; font-size: 52px; font-weight: 700; color: #f5f0e8; line-height: 1.05; margin-bottom: 14px; }

@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+@theme {
+  --spacing: 0.25rem;
+}
+
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
@@ -24,7 +28,6 @@
     background: var(--black);
     color: var(--text);
     overflow-x: hidden;
-    cursor: pointer;
   }
 
   /* Custom Cursor */

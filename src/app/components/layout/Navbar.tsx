@@ -6,11 +6,11 @@ import Link from "next/link";
 import { useState } from "react";
 
 const links = [
-  { href: "#services", label: "Services" },
-  { href: "#process", label: "Process" },
-  { href: "#products", label: "Collection" },
-  { href: "#testimonials", label: "Stories" },
-  { href: "#contact", label: "Contact" },
+  { href: "/services", label: "Services" },
+  { href: "/process", label: "Process" },
+  { href: "/collection", label: "Collection" },
+  { href: "/stories", label: "Stories" },
+  { href: "/contact", label: "Contact" },
 ];
 
 export default function Navbar() {
@@ -19,7 +19,7 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`navbar ${scrolled ? "scrolled" : ""} flex items-center justify-between px-6`}
+    // className={`navbar ${scrolled ? "scrolled" : ""} flex items-center justify-between px-6`}
     >
       {/* LEFT */}
       <Link href="/" className="logo">
@@ -37,13 +37,13 @@ export default function Navbar() {
             key={l.href}
             className="group transition-transform duration-200 hover:-translate-y-[2px]"
           >
-            <a
+            <Link
               href={l.href}
               className="relative text-[11px] tracking-[3px] uppercase text-#FAF8F4 transition-colors duration-300 group-hover:text-[#C8A96E]"
             >
               {l.label}
               <span className="absolute left-0 -bottom-2 h-[1px] w-0 bg-[#C8A96E] transition-all duration-300 group-hover:w-full"></span>
-            </a>
+            </Link>
           </li>
         ))}
       </ul>
@@ -91,9 +91,9 @@ export default function Navbar() {
         </button>
 
         {/* CTA (hide on small) */}
-        <a href="#contact" className="nav-cta hidden md:block">
+        <Link href="/contact" className="nav-cta hidden md:block">
           Book Appointment
-        </a>
+        </Link>
 
         {/* HAMBURGER */}
         <button
@@ -108,22 +108,23 @@ export default function Navbar() {
       {open && (
         <div className="fixed top-20 left-0 w-full bg-black border-t border-[#2A2A2A] flex flex-col items-center gap-6 py-6 md:hidden z-50">
           {links.map((l) => (
-            <a
+            <Link
               key={l.href}
               href={l.href}
               onClick={() => setOpen(false)}
               className="text-[12px] tracking-[3px] uppercase text-[#888880] hover:text-[#C8A96E] transition"
             >
               {l.label}
-            </a>
+            </Link>
           ))}
 
-          <a
-            href="#contact"
+          <Link
+            href="/contact"
+            onClick={() => setOpen(false)}
             className="border border-[#C8A96E] px-6 py-2 text-[#C8A96E] text-[11px] tracking-[3px] uppercase"
           >
             Book Appointment
-          </a>
+          </Link>
         </div>
       )}
     </nav>
