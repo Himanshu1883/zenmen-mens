@@ -4,12 +4,42 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 const reels = [
-  { id: "5399", src: "/reels/img_5399.mp4", title: "ZENMEN Studio 01" },
-  { id: "5400", src: "/reels/img_5400.mp4", title: "ZENMEN Studio 02" },
-  { id: "5401", src: "/reels/img_5401.mp4", title: "ZENMEN Studio 03" },
-  { id: "5402", src: "/reels/img_5402.mp4", title: "ZENMEN Studio 04" },
-  { id: "5403", src: "/reels/img_5403.mp4", title: "ZENMEN Studio 05" },
-  { id: "5404", src: "/reels/img_5404.mov", title: "ZENMEN Studio 06" },
+  {
+    id: "5399",
+    src: "/reels/img_5399.mp4",
+    title: "ZENMEN Studio 01",
+    href: "https://www.instagram.com/_zenmen/",
+  },
+  {
+    id: "5400",
+    src: "/reels/img_5400.mp4",
+    title: "ZENMEN Studio 02",
+    href: "https://www.instagram.com/_zenmen/",
+  },
+  {
+    id: "5401",
+    src: "/reels/img_5401.mp4",
+    title: "ZENMEN Studio 03",
+    href: "https://www.instagram.com/_zenmen/",
+  },
+  {
+    id: "5402",
+    src: "/reels/img_5402.mp4",
+    title: "ZENMEN Studio 04",
+    href: "https://www.instagram.com/_zenmen/",
+  },
+  {
+    id: "5403",
+    src: "/reels/img_5403.mp4",
+    title: "ZENMEN Studio 05",
+    href: "https://www.instagram.com/_zenmen/",
+  },
+  {
+    id: "5404",
+    src: "/reels/img_5404.mov",
+    title: "ZENMEN Studio 06",
+    href: "https://www.instagram.com/_zenmen/",
+  },
 ];
 
 export default function Reels() {
@@ -65,7 +95,14 @@ export default function Reels() {
 
         <div className="mt-4 flex items-end justify-between">
           <h2 className="font-['Playfair_Display'] text-[2.5rem] font-light leading-[1.08] text-[#f7f2e8] md:text-5xl lg:text-[3.4rem]">
-            Behind <span className="italic" style={{ color: "transparent", WebkitTextStroke: "1px #c8a96e" }}>The</span> Craft
+            Behind{" "}
+            <span
+              className="italic"
+              style={{ color: "transparent", WebkitTextStroke: "1px #c8a96e" }}
+            >
+              The
+            </span>{" "}
+            Craft
           </h2>
           <p className="hidden font-['Cormorant_Garamond'] text-[10px] uppercase tracking-[0.3em] text-[#c8a96e33] md:block">
             {String(reels.length).padStart(2, "0")} Episodes
@@ -91,18 +128,47 @@ export default function Reels() {
           <ChevronRight size={20} />
         </button>
 
-        <div className="pointer-events-none absolute left-0 top-0 z-20 h-full w-8" style={{ background: "linear-gradient(to right, #030813, transparent)" }} />
-        <div className="pointer-events-none absolute right-0 top-0 z-20 h-full w-20 md:w-28" style={{ background: "linear-gradient(to left, #030813 30%, rgba(3,8,19,0.6) 65%, transparent 100%)" }} />
+        <div
+          className="pointer-events-none absolute left-0 top-0 z-20 h-full w-8"
+          style={{
+            background: "linear-gradient(to right, #030813, transparent)",
+          }}
+        />
+        <div
+          className="pointer-events-none absolute right-0 top-0 z-20 h-full w-20 md:w-28"
+          style={{
+            background:
+              "linear-gradient(to left, #030813 30%, rgba(3,8,19,0.6) 65%, transparent 100%)",
+          }}
+        />
 
         <div
           ref={trackRef}
           className="w-full overflow-x-auto overflow-y-visible pb-8"
-          style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch", scrollSnapType: "x proximity" }}
+          style={{
+            scrollbarWidth: "none",
+            WebkitOverflowScrolling: "touch",
+            scrollSnapType: "x proximity",
+          }}
         >
           <div className="flex w-max gap-4 px-6 pr-28 sm:gap-5 sm:px-10 md:pr-36 lg:px-16">
             {reels.map((reel, index) => (
-              <article key={reel.id} className="relative flex-shrink-0" style={{ scrollSnapAlign: "start" }}>
-                <div className="relative overflow-hidden" style={{ borderRadius: "2px", boxShadow: "0 20px 56px rgba(0,0,0,0.5), 0 0 0 0.5px rgba(200,169,110,0.15)" }}>
+              <a
+                key={reel.id}
+                href={reel.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative block flex-shrink-0"
+                style={{ scrollSnapAlign: "start" }}
+              >
+                <article
+                  className="relative overflow-hidden"
+                  style={{
+                    borderRadius: "2px",
+                    boxShadow:
+                      "0 20px 56px rgba(0,0,0,0.5), 0 0 0 0.5px rgba(200,169,110,0.15)",
+                  }}
+                >
                   <video
                     ref={(node) => {
                       videoRefs.current[index] = node;
@@ -127,14 +193,16 @@ export default function Reels() {
                       {String(reels.length).padStart(2, "0")}
                     </p>
                     <div className="flex items-end justify-between gap-3">
-                      <p className="truncate font-['Playfair_Display'] text-[1.1rem] font-light leading-snug text-[#f8f4ec]">{reel.title}</p>
+                      <p className="truncate font-['Playfair_Display'] text-[1.1rem] font-light leading-snug text-[#f8f4ec]">
+                        {reel.title}
+                      </p>
                       <span className="flex-shrink-0 border border-[rgba(200,169,110,0.32)] bg-[rgba(200,169,110,0.04)] px-[9px] py-[4px] font-['Cormorant_Garamond'] text-[8px] uppercase tracking-[0.26em] text-[#c8a96eaa]">
                         Reel
                       </span>
                     </div>
                   </div>
-                </div>
-              </article>
+                </article>
+              </a>
             ))}
           </div>
         </div>
