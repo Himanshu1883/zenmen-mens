@@ -182,7 +182,11 @@ function AccordionItem({
   );
 }
 
-export default function ProductDetailClient({ productId }: { productId: number }) {
+export default function ProductDetailClient({
+  productId,
+}: {
+  productId: number;
+}) {
   const product =
     collectionProducts.find((item) => item.id === productId) ??
     collectionProducts[0];
@@ -247,7 +251,7 @@ export default function ProductDetailClient({ productId }: { productId: number }
         }}
       />
 
-      <Navbar />
+      {/* <Navbar /> */}
 
       <div className="relative z-10 mx-auto flex max-w-[1440px] items-center gap-2 px-8 pb-0 pt-[100px] text-[.65rem] uppercase tracking-[.22em] text-[#9e9585] lg:px-16">
         <Link
@@ -540,4 +544,3 @@ export default function ProductDetailClient({ productId }: { productId: number }
     </main>
   );
 }
-
