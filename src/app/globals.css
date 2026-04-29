@@ -509,7 +509,7 @@
   }
 
   /* Products */
-  #products { background: var(--charcoal); }
+  #products { background: var(--dark); }
 
   .products-filter {
     display: flex;

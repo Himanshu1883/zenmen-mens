@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 // textAlign: "left" | "center" | "right"
 const heroSlides = [
   {
-    img: "https://images.unsplash.com/photo-1617127365659-c47fa864d8bc?w=1800&q=90",
+    img: "/zenmen_founder_hero.jpeg",
     tag: "Premium Tailoring · SS 2025",
     title: ["Crafted for the", "Modern", "Gentleman"],
     titleItalic: 1, // index of italic word
@@ -18,7 +18,7 @@ const heroSlides = [
     overlayDir: "left", // gradient direction: left=text-left-dark, right=text-right-dark, center=bottom-dark
   },
   {
-    img: "https://images.unsplash.com/photo-1598808503746-f34c53b9323e?w=1800&q=90",
+    img: "zenmen_kurta.png",
     tag: "The Sherwani Edit · 2025",
     title: ["Royal Heritage,", "Modern", "Soul"],
     titleItalic: 1,
@@ -30,7 +30,7 @@ const heroSlides = [
     overlayDir: "right",
   },
   {
-    img: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=1800&q=90",
+    img: "/zenmen_suit.png",
     tag: "Bespoke Suiting · AW 2025",
     title: ["Power Dressing,", "Perfected", "By Hand"],
     titleItalic: 1,
@@ -88,20 +88,20 @@ const collageItems = [
     tag: "Featured",
   },
   {
-    img: "/new.jpg",
+    img: "/zenmen_shirt.jpeg",
     label: "Dress Shirts",
     desc: "Egyptian cotton, 200-thread count",
     tag: null,
   },
   {
-    img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&q=85",
+    img: "zenmen_blackcoat.jpeg",
     label: "Bespoke Suits",
     desc: "Full canvas construction",
     tag: null,
   },
   {
-    img: "/sherwani.webp",
-    label: "Sherwanis",
+    img: "/zenmen_kurta.png",
+    label: "Kurtas",
     desc: "Hand-embroidered, heritage craft",
     tag: "Bestseller",
   },
@@ -372,7 +372,7 @@ export default function Hero() {
         }
         .collage-cell { position: relative; overflow: hidden; cursor: pointer; }
         .collage-cell img {
-          width: 100%; height: 100%; object-fit: cover; object-position: top center;
+          width: 100%; height: 100%; object-fit: cover; object-position: center;
           filter: brightness(0.65) contrast(1.08); transition: filter 0.5s, transform 0.6s;
         }
         .collage-cell:hover img { filter: brightness(0.85) contrast(1.08); transform: scale(1.05); }
@@ -394,9 +394,9 @@ export default function Hero() {
 
         /* ── EDITORIAL BANNERS ── */
         .banners-section { width: 100%; background: #0a0806; font-family: 'Montserrat', sans-serif; }
-        .banner-full { position: relative; width: 100%; height: 520px; overflow: hidden; }
+        .banner-full { position: relative; width: 100%; height: 550px; overflow: hidden; }
         .banner-full img {
-          width: 100%; height: 100%; object-fit: cover; object-position: center top;
+          width: 100%; height: 100%; object-fit: cover; object-position: center;
           filter: brightness(0.55) contrast(1.08); transition: transform 8s ease;
         }
         .banner-full:hover img { transform: scale(1.03); }
@@ -585,10 +585,7 @@ export default function Hero() {
 
         {/* Banner 1 — Full width, text bottom-left */}
         <div className="banner-full">
-          <img
-            src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=1600&q=90"
-            alt="Bespoke Suiting"
-          />
+          <img src="/zenmen_white_suite.png" alt="Bespoke Suiting" />
           <div className="banner-full-overlay">
             <div className="banner-full-tag">Bespoke Atelier · SS 2025</div>
             <h2 className="banner-full-title">
@@ -712,9 +709,9 @@ export default function Hero() {
           </div>
           <div className="duo-cell">
             <img
-              src="/new.jpg"
+              src="/zenmen_shirt_black.jpeg"
               alt="Shirts"
-              style={{ objectPosition: "center 40%" }}
+              style={{ objectPosition: "center 45%" }}
             />
             <div className="duo-overlay">
               <div className="duo-tag">Shirt Bar · Luxury Cotton</div>
@@ -784,7 +781,7 @@ export default function Hero() {
         id="collection"
         style={{
           width: "100%",
-          background: "#0a0806",
+          background: "#050A18",
           borderTop: "1px solid rgba(201,168,76,0.2)",
           fontFamily: "'Montserrat', sans-serif",
         }}

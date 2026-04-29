@@ -1,161 +1,37 @@
-"use client";
+﻿"use client";
 
+import Link from "next/link";
 import { ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
 import { useMemo, useState } from "react";
-
-type DemoProduct = {
-  id: number;
-  name: string;
-  fit: string;
-  price: string;
-  images: [string, string];
-  badge?: string;
-};
-
-const demoProducts: DemoProduct[] = [
-  {
-    id: 1,
-    name: "Midnight Peak Blazer",
-    fit: "Slim Fit",
-    price: "Rs. 8,990",
-    badge: "New",
-    images: [
-      "https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1617127365659-c47fa864d8bc?auto=format&fit=crop&w=1200&q=80",
-    ],
-  },
-  {
-    id: 2,
-    name: "Stoneline Double Suit",
-    fit: "Classic Fit",
-    price: "Rs. 11,490",
-    badge: "Best Seller",
-    images: [
-      "https://images.unsplash.com/photo-1592878904946-b3cd8ae243d0?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1543087903-1ac2ec7aa8c5?auto=format&fit=crop&w=1200&q=80",
-    ],
-  },
-  {
-    id: 3,
-    name: "Ivory Ceremony Set",
-    fit: "Tailored Fit",
-    price: "Rs. 10,790",
-    images: [
-      "https://images.unsplash.com/photo-1610652492500-ded49ceeb378?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=1200&q=80",
-    ],
-  },
-  {
-    id: 4,
-    name: "Urban Noir Tux",
-    fit: "Modern Fit",
-    price: "Rs. 13,290",
-    images: [
-      "/new.jpg",
-      "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1200&q=80",
-    ],
-  },
-  {
-    id: 5,
-    name: "Monarch Linen Suit",
-    fit: "Relaxed Fit",
-    price: "Rs. 9,490",
-    badge: "Limited",
-    images: [
-      "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1490111718993-d98654ce6cf7?auto=format&fit=crop&w=1200&q=80",
-    ],
-  },
-  {
-    id: 6,
-    name: "Ashmark Wedding Suit",
-    fit: "Tailored Fit",
-    price: "Rs. 12,990",
-    images: [
-      "https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=1200&q=80",
-    ],
-  },
-  {
-    id: 7,
-    name: "Golden Hour Bandhgala",
-    fit: "Structured Fit",
-    price: "Rs. 14,190",
-    images: [
-      "https://images.unsplash.com/photo-1539533113208-f6df8cc8b543?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1520975954732-35dd22299614?auto=format&fit=crop&w=1200&q=80",
-    ],
-  },
-  {
-    id: 8,
-    name: "Charcoal Precision Set",
-    fit: "Classic Fit",
-    price: "Rs. 10,490",
-    images: [
-      "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1490578474895-699cd4e2cf59?auto=format&fit=crop&w=1200&q=80",
-    ],
-  },
-  {
-    id: 9,
-    name: "Riviera Summer Blazer",
-    fit: "Slim Fit",
-    price: "Rs. 7,990",
-    images: [
-      "https://images.unsplash.com/photo-1617137968427-85924c800a22?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1588361861040-ac9b1018f6d5?auto=format&fit=crop&w=1200&q=80",
-    ],
-  },
-  {
-    id: 10,
-    name: "Royal Ink 3-Piece",
-    fit: "Signature Fit",
-    price: "Rs. 15,290",
-    badge: "Premium",
-    images: [
-      "https://images.unsplash.com/photo-1520367745676-159420ff8e6f?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1618886614638-80e3c103d31a?auto=format&fit=crop&w=1200&q=80",
-    ],
-  },
-  {
-    id: 11,
-    name: "Graphite Evening Suit",
-    fit: "Modern Fit",
-    price: "Rs. 11,990",
-    images: [
-      "https://images.unsplash.com/photo-1614252369475-531eba835eb1?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=1200&q=80",
-    ],
-  },
-  {
-    id: 12,
-    name: "Velvet Night Jacket",
-    fit: "Luxury Fit",
-    price: "Rs. 13,790",
-    images: [
-      "https://images.unsplash.com/photo-1591729652476-67dd45a4f4a3?auto=format&fit=crop&w=1200&q=80",
-      "https://images.unsplash.com/photo-1539701938214-0d9736e1c16b?auto=format&fit=crop&w=1200&q=80",
-    ],
-  },
-];
+import { categoryFilters, collectionProducts, colorFilters } from "./collectionData";
 
 export default function CollectionPage() {
-  const initialIndexes = useMemo(
-    () =>
-      demoProducts.reduce<Record<number, number>>((acc, item) => {
-        acc[item.id] = 0;
-        return acc;
-      }, {}),
-    [],
-  );
-  const [activeImage, setActiveImage] =
-    useState<Record<number, number>>(initialIndexes);
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedColor, setSelectedColor] = useState("All");
+  const [search, setSearch] = useState("");
 
-  const switchImage = (id: number, dir: "prev" | "next") => {
+  const filteredProducts = useMemo(
+    () =>
+      collectionProducts.filter((product) => {
+        const categoryMatch =
+          selectedCategory === "All" || product.category === selectedCategory;
+        const colorMatch = selectedColor === "All" || product.color === selectedColor;
+        const searchMatch =
+          search.trim() === "" ||
+          product.title.toLowerCase().includes(search.trim().toLowerCase());
+        return categoryMatch && colorMatch && searchMatch;
+      }),
+    [search, selectedCategory, selectedColor],
+  );
+
+  const [activeImage, setActiveImage] = useState<Record<number, number>>({});
+
+  const switchImage = (id: number, dir: "prev" | "next", length: number) => {
+    if (length <= 1) return;
     setActiveImage((prev) => {
       const current = prev[id] ?? 0;
       const nextValue =
-        dir === "next" ? (current + 1) % 2 : (current - 1 + 2) % 2;
+        dir === "next" ? (current + 1) % length : (current - 1 + length) % length;
       return { ...prev, [id]: nextValue };
     });
   };
@@ -179,10 +55,10 @@ export default function CollectionPage() {
           <div className="relative h-[58vh] min-h-[440px] w-full overflow-hidden border-y border-[#c8a96e2c]">
             <div className="absolute inset-0 grid grid-cols-3 md:grid-cols-6">
               {[
-                "/sherwani.webp",
-                "https://images.unsplash.com/photo-1617127365659-c47fa864d8bc?auto=format&fit=crop&w=1200&q=80",
-                "https://images.unsplash.com/photo-1542327897-d73f4005b533?auto=format&fit=crop&w=1200&q=80",
-                "https://images.unsplash.com/photo-1603252109303-2751441dd157?auto=format&fit=crop&w=1200&q=80",
+                "/zenmen_kurta_hero.jpeg",
+                "/zenmen_white.jpeg",
+                "/zenmen_shirts.jpeg",
+                "zenmen_blackcoat.jpeg",
                 "/sherwani.webp",
                 "/new.jpg",
               ].map((src, idx) => (
@@ -200,7 +76,7 @@ export default function CollectionPage() {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(200,169,110,0.22),transparent_45%)]" />
 
             <div className="relative z-10 flex h-full w-full flex-col items-center justify-end px-6 pb-10 text-center md:pb-14">
-              <p className="mb-4 inline-block w-fit border rounded-xl border-[#c8a96e66] bg-black/30 px-4 py-2 text-[10px] tracking-[0.35em] text-[#d6bb89] uppercase">
+              <p className="mb-4 inline-block w-fit rounded-xl border border-[#c8a96e66] bg-black/30 px-4 py-2 text-[10px] tracking-[0.35em] text-[#d6bb89] uppercase">
                 ZENmen Edits
               </p>
               <h1 className="max-w-5xl font-['Cormorant_Garamond'] text-5xl font-light leading-[0.95] text-[#f8f4ec] drop-shadow-[0_2px_8px_rgba(0,0,0,0.55)] md:text-7xl">
@@ -220,18 +96,61 @@ export default function CollectionPage() {
               <p className="text-[10px] tracking-[0.32em] text-[#c8a96e] uppercase">
                 Featured Products
               </p>
-              <h2 className="mt-3 font-['Playfair Display'] text-4xl font-light md:text-5xl">
-                Men's Collections
+              <h2 className="mt-3 font-['Playfair_Display'] text-4xl font-light md:text-5xl">
+                Men&apos;s Collections
               </h2>
             </div>
-            {/* <p className="max-w-md text-sm leading-7 text-[#bdb6a6]">
-              12 demo products in 3 rows, each card with 2 images and
-              interactive controls.
-            </p> */}
+          </div>
+
+          <div className="mb-8 grid grid-cols-1 gap-4 rounded-xl border border-[#c8a96e2f] bg-[#0b1224] p-4 sm:grid-cols-2 lg:grid-cols-4">
+            <input
+              type="text"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search products..."
+              className="h-11 rounded-lg border border-[#c8a96e44] bg-[#0f1830] px-3 text-sm text-[#f3eee4] outline-none transition focus:border-[#d6bb89]"
+            />
+            <select
+              value={selectedCategory}
+              onChange={(event) => setSelectedCategory(event.target.value)}
+              className="h-11 rounded-lg border border-[#c8a96e44] bg-[#0f1830] px-3 text-sm text-[#f3eee4] outline-none transition focus:border-[#d6bb89]"
+            >
+              {categoryFilters.map((category) => (
+                <option key={category} value={category} className="bg-[#0f1830]">
+                  Category: {category}
+                </option>
+              ))}
+            </select>
+            <select
+              value={selectedColor}
+              onChange={(event) => setSelectedColor(event.target.value)}
+              className="h-11 rounded-lg border border-[#c8a96e44] bg-[#0f1830] px-3 text-sm text-[#f3eee4] outline-none transition focus:border-[#d6bb89]"
+            >
+              {colorFilters.map((color) => (
+                <option key={color} value={color} className="bg-[#0f1830]">
+                  Color: {color}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={() => {
+                setSearch("");
+                setSelectedCategory("All");
+                setSelectedColor("All");
+              }}
+              className="h-11 rounded-lg border border-[#c8a96e66] bg-[#c8a96e22] px-4 text-sm tracking-[0.18em] text-[#e4cfa6] uppercase transition hover:bg-[#c8a96e44]"
+            >
+              Clear Filters
+            </button>
+          </div>
+
+          <div className="mb-6 text-xs tracking-[0.18em] text-[#bdb6a6] uppercase">
+            Showing {filteredProducts.length} of {collectionProducts.length} products
           </div>
 
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {demoProducts.map((product, index) => {
+            {filteredProducts.map((product, index) => {
               const imgIndex = activeImage[product.id] ?? 0;
               return (
                 <article
@@ -239,58 +158,66 @@ export default function CollectionPage() {
                   className="group translate-y-7 animate-[fadeInUp_0.7s_ease_forwards] overflow-hidden rounded-xl border border-[#c8a96e33] bg-[#111111] opacity-0 shadow-[0_16px_40px_rgba(0,0,0,0.45)] transition duration-500 hover:border-[#c8a96e8a]"
                   style={{ animationDelay: `${index * 70}ms` }}
                 >
-                  <div className="relative aspect-[3/4] overflow-hidden">
-                    {product.badge && (
-                      <span className="absolute left-3 top-3 z-20 border border-[#c8a96e88] bg-black/70 px-3 py-1 text-[10px] tracking-[0.2em] text-[#d6bb89] uppercase">
-                        {product.badge}
-                      </span>
-                    )}
+                  <Link href={`/collection/product-detail?id=${product.id}`} className="block">
+                    <div className="relative aspect-[3/4] overflow-hidden">
+                      {product.badge && (
+                        <span className="absolute left-3 top-3 z-20 border border-[#c8a96e88] bg-black/70 px-3 py-1 text-[10px] tracking-[0.2em] text-[#d6bb89] uppercase">
+                          {product.badge}
+                        </span>
+                      )}
 
-                    <img
-                      src={product.images[imgIndex]}
-                      alt={`${product.name} preview ${imgIndex + 1}`}
-                      className="h-full w-full object-cover transition duration-500"
-                    />
+                      <img
+                        src={product.images[imgIndex]?.src}
+                        alt={`${product.title} preview ${imgIndex + 1}`}
+                        className="h-full w-full object-cover transition duration-500"
+                      />
 
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent" />
+                    </div>
+                  </Link>
 
+                  <div className="pointer-events-none absolute inset-x-0 top-[32%] z-20 flex items-center justify-between px-3">
                     <button
                       type="button"
-                      onClick={() => switchImage(product.id, "prev")}
-                      className="absolute left-3 top-1/2 z-20 -translate-y-1/2 rounded-full border border-[#f8f4ec61] bg-black/45 p-2 text-[#f8f4ec] opacity-0 transition duration-300 group-hover:opacity-100 hover:border-[#c8a96e] hover:text-[#c8a96e] cursor-grab"
-                      aria-label={`Show previous image for ${product.name}`}
+                      onClick={() =>
+                        switchImage(product.id, "prev", product.images.length)
+                      }
+                      className="pointer-events-auto rounded-full border border-[#f8f4ec61] bg-black/45 p-2 text-[#f8f4ec] opacity-0 transition duration-300 group-hover:opacity-100 hover:border-[#c8a96e] hover:text-[#c8a96e]"
+                      aria-label={`Show previous image for ${product.title}`}
                     >
                       <ChevronLeft size={24} />
                     </button>
                     <button
                       type="button"
-                      onClick={() => switchImage(product.id, "next")}
-                      className="absolute right-3 top-1/2 z-20 -translate-y-1/2 rounded-full border border-[#f8f4ec61] bg-black/45 p-2 text-[#f8f4ec] opacity-0 transition duration-300 group-hover:opacity-100 hover:border-[#c8a96e] hover:text-[#c8a96e] cursor-grab"
-                      aria-label={`Show next image for ${product.name}`}
+                      onClick={() =>
+                        switchImage(product.id, "next", product.images.length)
+                      }
+                      className="pointer-events-auto rounded-full border border-[#f8f4ec61] bg-black/45 p-2 text-[#f8f4ec] opacity-0 transition duration-300 group-hover:opacity-100 hover:border-[#c8a96e] hover:text-[#c8a96e]"
+                      aria-label={`Show next image for ${product.title}`}
                     >
                       <ChevronRight size={24} />
                     </button>
-
-                    <button
-                      type="button"
-                      className="absolute bottom-0 left-0 right-0 z-20 flex h-12 translate-y-full items-center justify-center gap-3 border-t border-[#c8a96e59] bg-[#c8a96e] text-[14px] font-bold tracking-[0.2em] text-black uppercase transition duration-300 group-hover:translate-y-0"
-                    >
-                      <ShoppingBag size={18} />
-                      Add to Cart
-                    </button>
                   </div>
 
-                  <div className="p-4">
+                  <button
+                    type="button"
+                    className="flex h-12 w-full items-center justify-center gap-3 border-y border-[#c8a96e59] bg-[#c8a96e] text-[14px] font-bold tracking-[0.2em] text-black uppercase transition duration-300 hover:bg-[#d6bb89]"
+                  >
+                    <ShoppingBag size={18} />
+                    Add to Cart
+                  </button>
+
+                  <Link href={`/collection/product-detail?id=${product.id}`} className="block p-4">
                     <h3 className="font-['Cormorant_Garamond'] text-2xl font-light text-[#f8f4ec]">
-                      {product.name}
+                      {product.title}
                     </h3>
                     <p className="mt-1 text-[11px] tracking-[0.2em] text-[#9e9585] uppercase">
-                      {product.fit}
+                      {product.category} • {product.color}
                     </p>
                     <p className="mt-3 font-['Cormorant_Garamond'] text-2xl text-[#d6bb89]">
                       {product.price}
                     </p>
-                  </div>
+                  </Link>
                 </article>
               );
             })}

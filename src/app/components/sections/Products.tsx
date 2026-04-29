@@ -428,7 +428,7 @@ export default function Products() {
 
         .products-root {
           font-family: 'Montserrat', sans-serif;
-          background: #080806;
+          background: #050A18;
           min-height: 100vh;
           color: #e8e4d8;
           overflow-x: hidden;
