@@ -5,6 +5,8 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond, Montserrat } from "next/font/google";
 import "./globals.css";
 
+import Providers from "./providers";
+
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
   weight: ["300", "400", "600"],
@@ -35,10 +37,14 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${cormorant.variable} ${montserrat.variable}`}>
       <body>
-        {/* <Cursor /> */}
-        <Navbar />
-        <main>{children}</main>
-        <Footer />
+        <Providers>
+          {" "}
+          {/* 🔥 THIS WAS MISSING */}
+          {/* <Cursor /> */}
+          <Navbar />
+          <main>{children}</main>
+          <Footer />
+        </Providers>
       </body>
     </html>
   );

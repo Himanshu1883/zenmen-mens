@@ -3,10 +3,8 @@ import mongoose from "mongoose";
 const ImageSchema = new mongoose.Schema({
   url: { type: String, required: true },
   alt: String,
-
-  // 🔥 important fields
-  isPrimary: { type: Boolean, default: false }, // main image
-  order: { type: Number, default: 0 }, // sorting
+  isPrimary: { type: Boolean, default: false },
+  order: { type: Number, default: 0 },
 });
 
 const ReviewSchema = new mongoose.Schema(
@@ -19,37 +17,34 @@ const ReviewSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-const VariantSchema = new mongoose.Schema({
-  color: String,
-  images: [ImageSchema],
-  sizes: [
-    {
-      size: String,
-      stock: Number,
-      sku: String,
-    },
-  ],
+const SpecSchema = new mongoose.Schema({
+  label: String,
+  value: String,
 });
 
 const ProductSchema = new mongoose.Schema(
   {
-    // 🔹 BASIC INFO
+    // 🔥 BASIC
     title: { type: String, required: true },
     slug: { type: String, unique: true },
     tagline: String,
     description: String,
 
-    // 🔹 PRICING
-    price: { type: Number, required: true },
-    comparePrice: Number, // original price (for discount)
-    discount: Number,
-
-    // 🔹 CATEGORY
+    // 🔥 CATEGORY
     category: String,
     subCategory: String,
-    tags: [String],
 
-    // 🔹 MEDIA
+    // 🔥 PRICING
+    price: { type: Number, required: true },
+    comparePrice: Number,
+    discount: Number,
+
+    // 🔥 MEDIA (YOUR UI USES THIS)
+    // images: {
+    //   type: [ImageSchema],
+    //   validate: [(arr: any[]) => arr.length > 0, "Image required"],
+    // },
+
     images: {
       type: [ImageSchema],
       validate: [
@@ -58,36 +53,37 @@ const ProductSchema = new mongoose.Schema(
       ],
     },
 
-    // 🔹 VARIANTS (IMPORTANT)
-    variants: [VariantSchema],
+    // 🔥 UI TABS
+    details: [String], // bullet list
+    specifications: [SpecSchema], // specs table
+    care: String, // care tab
 
-    // 🔹 OPTIONS
+    // 🔥 OPTIONS
     colors: [String],
     sizes: [String],
 
-    // 🔹 DETAILS (for your tabs)
-    details: [String],
-    specifications: [
-      {
-        label: String,
-        value: String,
-      },
-    ],
-
-    // 🔹 INVENTORY
+    // 🔥 INVENTORY
     stock: Number,
     isAvailable: { type: Boolean, default: true },
 
-    // 🔹 REVIEWS
+    // 🔥 REVIEWS (for stars UI)
     reviews: [ReviewSchema],
     rating: { type: Number, default: 0 },
     numReviews: { type: Number, default: 0 },
 
-    // 🔹 FLAGS
-    badge: String, // "New", "Best Seller"
+    // 🔥 UI FLAGS
+    badge: String,
     isFeatured: { type: Boolean, default: false },
 
-    // 🔹 SEO
+    // 🔥 ACCORDION (shipping, returns etc.)
+    accordion: [
+      {
+        title: String,
+        content: String,
+      },
+    ],
+
+    // 🔥 SEO
     seoTitle: String,
     seoDescription: String,
   },

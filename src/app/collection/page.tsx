@@ -1,40 +1,101 @@
 ﻿"use client";
 
-import Link from "next/link";
 import { ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
-import { useMemo, useState } from "react";
-import { categoryFilters, collectionProducts, colorFilters } from "./collectionData";
+import Link from "next/link";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { categoryFilters, colorFilters } from "./collectionData";
+import { fetchProducts } from "@/app/store/productSlice";
+
+import type { AppDispatch, RootState } from "@/app/store/store";
+import { useDispatch, useSelector } from "react-redux";
 
 export default function CollectionPage() {
+  const [activeImage, setActiveImage] = useState<Record<string, number>>({});
+  const dispatch = useDispatch<AppDispatch>();
+  const { products, loading } = useSelector(
+    (state: RootState) => state.products,
+  );
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedColor, setSelectedColor] = useState("All");
   const [search, setSearch] = useState("");
+  // const [hydrated, setHydrated] = useState(false);
+  const productsCountRef = useRef(products.length);
+  const loadingRef = useRef(loading);
 
-  const filteredProducts = useMemo(
-    () =>
-      collectionProducts.filter((product) => {
-        const categoryMatch =
-          selectedCategory === "All" || product.category === selectedCategory;
-        const colorMatch = selectedColor === "All" || product.color === selectedColor;
-        const searchMatch =
-          search.trim() === "" ||
-          product.title.toLowerCase().includes(search.trim().toLowerCase());
-        return categoryMatch && colorMatch && searchMatch;
-      }),
-    [search, selectedCategory, selectedColor],
-  );
+  useEffect(() => {
+    productsCountRef.current = products.length;
+    loadingRef.current = loading;
+  }, [products.length, loading]);
 
-  const [activeImage, setActiveImage] = useState<Record<number, number>>({});
+  useEffect(() => {
+    if (!loading && products.length === 0) {
+      dispatch(fetchProducts());
+    }
+  }, [dispatch, loading, products.length]);
 
-  const switchImage = (id: number, dir: "prev" | "next", length: number) => {
-    if (length <= 1) return;
+  useEffect(() => {
+    const ensureProductsLoaded = () => {
+      if (!loadingRef.current && productsCountRef.current === 0) {
+        dispatch(fetchProducts());
+      }
+    };
+
+    const onPageShow = () => ensureProductsLoaded();
+    const onFocus = () => ensureProductsLoaded();
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        ensureProductsLoaded();
+      }
+    };
+
+    window.addEventListener("pageshow", onPageShow);
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    return () => {
+      window.removeEventListener("pageshow", onPageShow);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, [dispatch]);
+
+  const filteredProducts = useMemo(() => {
+    if (!products || products.length === 0) return [];
+
+    return products.filter((product) => {
+      const categoryMatch =
+        selectedCategory === "All" || product.category === selectedCategory;
+
+      const colorMatch =
+        selectedColor === "All" || product.colors?.includes(selectedColor);
+
+      const searchMatch =
+        search.trim() === "" ||
+        product.title.toLowerCase().includes(search.trim().toLowerCase());
+
+      return categoryMatch && colorMatch && searchMatch;
+    });
+  }, [products, search, selectedCategory, selectedColor]);
+
+  const switchImage = (id: string, dir: "prev" | "next", length: number) => {
+    if (!length || length <= 1) return;
     setActiveImage((prev) => {
       const current = prev[id] ?? 0;
       const nextValue =
-        dir === "next" ? (current + 1) % length : (current - 1 + length) % length;
+        dir === "next"
+          ? (current + 1) % length
+          : (current - 1 + length) % length;
       return { ...prev, [id]: nextValue };
     });
   };
+
+  if (loading) {
+    return (
+      <div className="text-center py-20 text-[#d6bb89]">
+        Loading products...
+      </div>
+    );
+  }
 
   return (
     <>
@@ -58,7 +119,7 @@ export default function CollectionPage() {
                 "/zenmen_kurta_hero.jpeg",
                 "/zenmen_white.jpeg",
                 "/zenmen_shirts.jpeg",
-                "zenmen_blackcoat.jpeg",
+                "/zenmen_blackcoat.jpeg",
                 "/sherwani.webp",
                 "/new.jpg",
               ].map((src, idx) => (
@@ -116,7 +177,11 @@ export default function CollectionPage() {
               className="h-11 rounded-lg border border-[#c8a96e44] bg-[#0f1830] px-3 text-sm text-[#f3eee4] outline-none transition focus:border-[#d6bb89]"
             >
               {categoryFilters.map((category) => (
-                <option key={category} value={category} className="bg-[#0f1830]">
+                <option
+                  key={category}
+                  value={category}
+                  className="bg-[#0f1830]"
+                >
                   Category: {category}
                 </option>
               ))}
@@ -146,19 +211,22 @@ export default function CollectionPage() {
           </div>
 
           <div className="mb-6 text-xs tracking-[0.18em] text-[#bdb6a6] uppercase">
-            Showing {filteredProducts.length} of {collectionProducts.length} products
+            Showing {filteredProducts.length} of {products.length} products
           </div>
 
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {filteredProducts.map((product, index) => {
-              const imgIndex = activeImage[product.id] ?? 0;
+              const imgIndex = activeImage[product._id] ?? 0;
               return (
                 <article
-                  key={product.id}
+                  key={product._id}
                   className="group translate-y-7 animate-[fadeInUp_0.7s_ease_forwards] overflow-hidden rounded-xl border border-[#c8a96e33] bg-[#111111] opacity-0 shadow-[0_16px_40px_rgba(0,0,0,0.45)] transition duration-500 hover:border-[#c8a96e8a]"
                   style={{ animationDelay: `${index * 70}ms` }}
                 >
-                  <Link href={`/collection/product-detail?id=${product.id}`} className="block">
+                  <Link
+                    href={`/collection/product-detail?id=${product._id}`}
+                    className="block"
+                  >
                     <div className="relative aspect-[3/4] overflow-hidden">
                       {product.badge && (
                         <span className="absolute left-3 top-3 z-20 border border-[#c8a96e88] bg-black/70 px-3 py-1 text-[10px] tracking-[0.2em] text-[#d6bb89] uppercase">
@@ -167,9 +235,13 @@ export default function CollectionPage() {
                       )}
 
                       <img
-                        src={product.images[imgIndex]?.src}
-                        alt={`${product.title} preview ${imgIndex + 1}`}
-                        className="h-full w-full object-cover transition duration-500"
+                        src={
+                          product.images?.[imgIndex]?.url ||
+                          product.images?.[0]?.url ||
+                          "/new.jpg"
+                        }
+                        alt={product.title}
+                        className="h-full w-full object-cover"
                       />
 
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent" />
@@ -180,7 +252,7 @@ export default function CollectionPage() {
                     <button
                       type="button"
                       onClick={() =>
-                        switchImage(product.id, "prev", product.images.length)
+                        switchImage(product._id, "prev", product.images?.length ?? 0)
                       }
                       className="pointer-events-auto rounded-full border border-[#f8f4ec61] bg-black/45 p-2 text-[#f8f4ec] opacity-0 transition duration-300 group-hover:opacity-100 hover:border-[#c8a96e] hover:text-[#c8a96e]"
                       aria-label={`Show previous image for ${product.title}`}
@@ -190,7 +262,7 @@ export default function CollectionPage() {
                     <button
                       type="button"
                       onClick={() =>
-                        switchImage(product.id, "next", product.images.length)
+                        switchImage(product._id, "next", product.images?.length ?? 0)
                       }
                       className="pointer-events-auto rounded-full border border-[#f8f4ec61] bg-black/45 p-2 text-[#f8f4ec] opacity-0 transition duration-300 group-hover:opacity-100 hover:border-[#c8a96e] hover:text-[#c8a96e]"
                       aria-label={`Show next image for ${product.title}`}
@@ -207,12 +279,15 @@ export default function CollectionPage() {
                     Add to Cart
                   </button>
 
-                  <Link href={`/collection/product-detail?id=${product.id}`} className="block p-4">
+                  <Link
+                    href={`/collection/product-detail?id=${product._id}`}
+                    className="block p-4"
+                  >
                     <h3 className="font-['Cormorant_Garamond'] text-2xl font-light text-[#f8f4ec]">
                       {product.title}
                     </h3>
                     <p className="mt-1 text-[11px] tracking-[0.2em] text-[#9e9585] uppercase">
-                      {product.category} • {product.color}
+                      {product.category} • {product.colors?.[0]}
                     </p>
                     <p className="mt-3 font-['Cormorant_Garamond'] text-2xl text-[#d6bb89]">
                       {product.price}

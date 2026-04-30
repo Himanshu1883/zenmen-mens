@@ -1,8 +1,25 @@
 ﻿"use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import { collectionProducts } from "../collectionData";
+import { useEffect, useMemo, useState } from "react";
+
+type Product = {
+  _id: string;
+  title: string;
+  slug?: string;
+  tagline?: string;
+  description?: string;
+  category?: string;
+  price: number | string;
+  colors?: string[];
+  sizes?: string[];
+  badge?: string;
+  details?: string[];
+  care?: string;
+  rating?: number;
+  numReviews?: number;
+  images?: { url: string; alt?: string }[];
+};
 
 const COLORS = [
   { name: "Midnight Navy", cls: "bg-[#1a2a4a]" },
@@ -185,17 +202,43 @@ function AccordionItem({
 export default function ProductDetailClient({
   productId,
 }: {
-  productId: number;
+  productId: string;
 }) {
-  const product =
-    collectionProducts.find((item) => item.id === productId) ??
-    collectionProducts[0];
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function loadProducts() {
+      try {
+        const res = await fetch("/api/products", { cache: "no-store" });
+        if (!res.ok) throw new Error("Failed to fetch products");
+        const data = (await res.json()) as Product[];
+        if (isMounted) {
+          setProducts(Array.isArray(data) ? data : []);
+        }
+      } catch {
+        if (isMounted) setProducts([]);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+    loadProducts();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const product = useMemo(
+    () =>
+      products.find((item) => item._id === productId || item.slug === productId) ??
+      products[0],
+    [products, productId],
+  );
 
   const [activeImage, setActiveImage] = useState(0);
-  const [selectedSize, setSelectedSize] = useState(product.sizes[0] ?? "M");
-  const [selectedColor, setSelectedColor] = useState(
-    product.color ?? COLORS[0].name,
-  );
+  const [selectedSize, setSelectedSize] = useState("M");
+  const [selectedColor, setSelectedColor] = useState(COLORS[0].name);
   const [activeTab, setActiveTab] = useState<
     "desc" | "details" | "specs" | "care"
   >("desc");
@@ -203,38 +246,67 @@ export default function ProductDetailClient({
   const [addedToCart, setAddedToCart] = useState(false);
   const [wishlisted, setWishlisted] = useState(false);
 
-  const rating = 4.6;
-  const reviewCount = 42;
+  useEffect(() => {
+    if (!product) return;
+    setActiveImage(0);
+    setSelectedSize(product.sizes?.[0] ?? "M");
+    setSelectedColor(product.colors?.[0] ?? COLORS[0].name);
+  }, [product]);
+
+  const rating = product?.rating ?? 4.6;
+  const reviewCount = product?.numReviews ?? 42;
   const stars = Array.from({ length: 5 }, (_, i) => i < Math.floor(rating));
 
   const specs = [
-    { label: "Category", value: product.category },
-    { label: "Color", value: product.color },
+    { label: "Category", value: product?.category ?? "-" },
+    { label: "Color", value: product?.colors?.[0] ?? "-" },
     {
       label: "Fit",
-      value: product.category === "Kurta" ? "Relaxed" : "Tailored",
+      value: product?.category === "Kurta" ? "Relaxed" : "Tailored",
     },
-    { label: "Sizes", value: product.sizes.join(", ") },
+    { label: "Sizes", value: product?.sizes?.join(", ") ?? "-" },
   ];
 
   const relatedProducts = useMemo(
-    () =>
-      collectionProducts
+    () => {
+      if (!product) return [];
+      return (
+      products
         .filter(
           (item) =>
-            item.id !== product.id &&
+            item._id !== product._id &&
             (item.category === product.category ||
-              item.color === product.color),
+              item.colors?.[0] === product.colors?.[0]),
         )
-        .slice(0, 4),
-    [product],
+        .slice(0, 4)
+      );
+    },
+    [product, products],
   );
 
   const mosaicData = useMemo(
-    () =>
-      collectionProducts.filter((item) => item.id !== product.id).slice(0, 5),
-    [product.id],
+    () => {
+      if (!product) return [];
+      return products.filter((item) => item._id !== product._id).slice(0, 5);
+    },
+    [product, products],
   );
+
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-[#050A18] pt-28 text-center text-[#d6bb89]">
+        Loading product...
+      </main>
+    );
+  }
+
+  if (!product) {
+    return (
+      <main className="min-h-screen bg-[#050A18] pt-28 text-center text-[#d6bb89]">
+        Product not found.
+      </main>
+    );
+  }
 
   function handleAddToCart() {
     setAddedToCart(true);
@@ -278,21 +350,21 @@ export default function ProductDetailClient({
               {product.badge ?? "Featured"}
             </div>
             <img
-              src={product.images[activeImage].src}
+              src={product.images?.[activeImage]?.url ?? product.images?.[0]?.url ?? "/new.jpg"}
               alt={product.title}
               className="h-[520px] w-full object-cover transition-all duration-700 hover:scale-[1.03] sm:h-[640px]"
             />
           </div>
 
           <div className="mt-3 grid grid-cols-4 gap-3">
-            {product.images.map((img, i) => (
+            {(product.images ?? []).map((img, i) => (
               <button
-                key={`${product.id}-thumb-${i + 1}`}
+                key={`${product._id}-thumb-${i + 1}`}
                 onClick={() => setActiveImage(i)}
                 className={`rounded-[3px] border-[1.5px] bg-transparent p-0 transition-all duration-200 ${activeImage === i ? "border-[#c8a96e]" : "border-transparent hover:border-[rgba(200,169,110,0.4)]"}`}
               >
                 <img
-                  src={img.src}
+                  src={img.url}
                   alt={`Thumbnail ${i + 1}`}
                   className="block h-[90px] w-full object-cover"
                 />
@@ -327,7 +399,7 @@ export default function ProductDetailClient({
               )}
               {activeTab === "details" && (
                 <ul className="grid list-none grid-cols-1 gap-3 sm:grid-cols-2">
-                  {product.details.map((d) => (
+                  {(product.details ?? []).map((d) => (
                     <li
                       key={d}
                       className="flex items-start gap-2.5 text-[.82rem] text-[#c6bda8]"
@@ -371,7 +443,7 @@ export default function ProductDetailClient({
               {product.title}
             </h1>
             <p className="text-[.82rem] leading-[1.8] text-[#9e9585]">
-              {product.tagline}
+              {product.tagline ?? "Crafted for timeless style and everyday confidence."}
             </p>
 
             <div className="mt-4 flex items-center gap-3 border-t border-[rgba(200,169,110,0.18)] pt-4">
@@ -417,7 +489,7 @@ export default function ProductDetailClient({
               </span>
             </p>
             <div className="mb-5 flex flex-wrap gap-2">
-              {product.sizes.map((s) => (
+              {(product.sizes ?? ["M"]).map((s) => (
                 <button
                   key={s}
                   onClick={() => setSelectedSize(s)}
@@ -476,12 +548,12 @@ export default function ProductDetailClient({
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {relatedProducts.map((item) => (
             <Link
-              key={item.id}
-              href={`/collection/product-detail?id=${item.id}`}
+              key={item._id}
+              href={`/collection/product-detail?id=${item._id}`}
               className="group block overflow-hidden rounded-[3px] border border-[rgba(200,169,110,0.18)] bg-[#111827] text-inherit no-underline transition-all duration-300 hover:-translate-y-1 hover:border-[rgba(200,169,110,0.45)]"
             >
               <img
-                src={item.images[0].src}
+                src={item.images?.[0]?.url ?? "/new.jpg"}
                 alt={item.title}
                 className="block h-[280px] w-full object-cover transition-transform duration-500 group-hover:scale-[1.06]"
               />
@@ -490,7 +562,7 @@ export default function ProductDetailClient({
                   {item.title}
                 </p>
                 <p className="text-[.6rem] uppercase tracking-[.18em] text-[#9e9585]">
-                  {item.category} · {item.color}
+                  {item.category} · {item.colors?.[0] ?? "-"}
                 </p>
                 <p className="mt-2 text-[1.25rem] text-[#c8a96e]">
                   {item.price}
@@ -516,13 +588,13 @@ export default function ProductDetailClient({
         >
           {mosaicData.map((item, i) => (
             <Link
-              key={`${item.id}-mosaic`}
-              href={`/collection/product-detail?id=${item.id}`}
+              key={`${item._id}-mosaic`}
+              href={`/collection/product-detail?id=${item._id}`}
               className="group relative cursor-pointer overflow-hidden rounded-[3px] border border-[rgba(200,169,110,0.18)] no-underline"
               style={i === 0 ? { gridColumn: "1 / 3", gridRow: "1 / 3" } : {}}
             >
               <img
-                src={item.images[0].src}
+                src={item.images?.[0]?.url ?? "/new.jpg"}
                 alt={item.title}
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.07]"
               />
