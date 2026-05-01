@@ -3,6 +3,7 @@
 import { useScrolled } from "@/app/hooks/useScrolled";
 import { Menu, ShoppingCartIcon, User, X } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 const links = [
@@ -14,6 +15,7 @@ const links = [
 ];
 
 export default function Navbar() {
+  const pathname = usePathname();
   const scrolled = useScrolled();
   const [open, setOpen] = useState(false);
 
@@ -42,10 +44,22 @@ export default function Navbar() {
           >
             <Link
               href={l.href}
-              className="relative text-[11px] tracking-[3px] uppercase text-#FAF8F4 transition-colors duration-300 group-hover:text-[#C8A96E]"
+              className={`relative text-[11px] tracking-[3px] uppercase transition-colors duration-300
+    ${
+      pathname === l.href
+        ? "text-[#C8A96E]"
+        : "text-[#FAF8F4] hover:text-[#C8A96E]"
+    }
+  `}
             >
               {l.label}
-              <span className="absolute left-0 -bottom-2 h-[1px] w-0 bg-[#C8A96E] transition-all duration-300 group-hover:w-full"></span>
+
+              {/* underline */}
+              <span
+                className={`absolute left-0 -bottom-2 h-[1px] bg-[#C8A96E] transition-all duration-300
+      ${pathname === l.href ? "w-full" : "w-0 group-hover:w-full"}
+    `}
+              ></span>
             </Link>
           </li>
         ))}
@@ -115,7 +129,13 @@ export default function Navbar() {
               key={l.href}
               href={l.href}
               onClick={() => setOpen(false)}
-              className="text-[12px] tracking-[3px] uppercase text-[#888880] hover:text-[#C8A96E] transition"
+              className={`text-[12px] tracking-[3px] uppercase transition
+  ${
+    pathname === l.href
+      ? "text-[#C8A96E]"
+      : "text-[#888880] hover:text-[#C8A96E]"
+  }
+`}
             >
               {l.label}
             </Link>

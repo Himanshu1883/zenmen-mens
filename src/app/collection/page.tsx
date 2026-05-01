@@ -1,15 +1,16 @@
 ﻿"use client";
 
+import { fetchProducts } from "@/app/store/productSlice";
 import { ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { categoryFilters, colorFilters } from "./collectionData";
-import { fetchProducts } from "@/app/store/productSlice";
 
 import type { AppDispatch, RootState } from "@/app/store/store";
 import { useDispatch, useSelector } from "react-redux";
 
 export default function CollectionPage() {
+  const formatPrice = (n: number) => `₹${n.toLocaleString("en-IN")}`;
   const [activeImage, setActiveImage] = useState<Record<string, number>>({});
   const dispatch = useDispatch<AppDispatch>();
   const { products, loading } = useSelector(
@@ -26,6 +27,10 @@ export default function CollectionPage() {
     productsCountRef.current = products.length;
     loadingRef.current = loading;
   }, [products.length, loading]);
+
+  // useEffect(() => {
+  //   if (!loading) dispatch(fetchProducts()); // ✅ only fetch once ever
+  // }, [loading, dispatch]);
 
   useEffect(() => {
     if (!loading && products.length === 0) {
@@ -252,7 +257,11 @@ export default function CollectionPage() {
                     <button
                       type="button"
                       onClick={() =>
-                        switchImage(product._id, "prev", product.images?.length ?? 0)
+                        switchImage(
+                          product._id,
+                          "prev",
+                          product.images?.length ?? 0,
+                        )
                       }
                       className="pointer-events-auto rounded-full border border-[#f8f4ec61] bg-black/45 p-2 text-[#f8f4ec] opacity-0 transition duration-300 group-hover:opacity-100 hover:border-[#c8a96e] hover:text-[#c8a96e]"
                       aria-label={`Show previous image for ${product.title}`}
@@ -262,7 +271,11 @@ export default function CollectionPage() {
                     <button
                       type="button"
                       onClick={() =>
-                        switchImage(product._id, "next", product.images?.length ?? 0)
+                        switchImage(
+                          product._id,
+                          "next",
+                          product.images?.length ?? 0,
+                        )
                       }
                       className="pointer-events-auto rounded-full border border-[#f8f4ec61] bg-black/45 p-2 text-[#f8f4ec] opacity-0 transition duration-300 group-hover:opacity-100 hover:border-[#c8a96e] hover:text-[#c8a96e]"
                       aria-label={`Show next image for ${product.title}`}
@@ -289,8 +302,8 @@ export default function CollectionPage() {
                     <p className="mt-1 text-[11px] tracking-[0.2em] text-[#9e9585] uppercase">
                       {product.category} • {product.colors?.[0]}
                     </p>
-                    <p className="mt-3 font-['Cormorant_Garamond'] text-2xl text-[#d6bb89]">
-                      {product.price}
+                    <p className="mt-3 font-sans text-2xl text-[#d6bb89]">
+                      {formatPrice(product.price)}
                     </p>
                   </Link>
                 </article>

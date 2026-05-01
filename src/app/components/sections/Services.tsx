@@ -25,8 +25,7 @@ const services: Service[] = [
     description:
       "Full canvas construction, over 30 measurements, and multiple fittings ensure a suit that is uniquely yours — from single to double-breasted.",
     price: "Starting from ₹18,000",
-    image:
-      "https://images.unsplash.com/photo-1594938298603-c8148c4b4f8a?w=900&q=85&fit=crop",
+    image: "/black_tuxedo.jpeg",
     tag: "Signature",
     accent: "#C8A96E",
   },
@@ -36,8 +35,7 @@ const services: Service[] = [
     description:
       "Egyptian cotton, Italian poplin, or Oxford weaves — crafted with your preferred collar, cuffs, and fit for every occasion.",
     price: "Starting from ₹2,500",
-    image:
-      "https://images.unsplash.com/photo-1620012253295-c15cc3e65df4?w=900&q=85&fit=crop",
+    image: "/red_shirt.jpeg",
     tag: "Essential",
     accent: "#a8c4d4",
   },

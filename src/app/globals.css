@@ -29,7 +29,6 @@
     font-family: 'Montserrat', sans-serif;
     background: var(--black);
     color: var(--text);
-    overflow-x: hidden;
   }
 
   /* Navigation */
@@ -46,6 +45,7 @@
     backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--border);
     transition: all 0.3s;
+    cursor: pointer;
   }
   nav.scrolled { height: 64px; background: rgba(5,10,24,0.99); }
 
@@ -133,8 +133,8 @@
 
   .nav-cta {
     background: transparent;
-    border: 1px solid var(--gold);
-    color: var(--gold);
+    border: 1px solid var(--mid);
+    color: var(--text);
     padding: 10px 18px;
     font-size: 9px;
     letter-spacing: 2px;
@@ -146,8 +146,8 @@
     border-radius: 8px;
   }
   .nav-cta:hover {
-    background: var(--gold);
-    color: var(--black);
+     background: transparent;
+    color: var(--gold);
   }
 
   /* Hero */

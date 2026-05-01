@@ -128,38 +128,6 @@ function StarIcon({ filled }: { filled: boolean }) {
   );
 }
 
-function Navbar() {
-  return (
-    <nav className="fixed left-0 right-0 top-0 z-50 flex h-[72px] items-center justify-between border-b border-[rgba(200,169,110,0.18)] bg-[rgba(5,10,24,0.85)] px-8 backdrop-blur-xl">
-      <span className="font-['Cinzel'] text-[1.1rem] tracking-[.25em] text-[#c8a96e]">
-        ZENMEN
-      </span>
-      <ul className="hidden list-none gap-10 md:flex">
-        {[
-          { label: "Collection", href: "/collection" },
-          { label: "Atelier", href: "#" },
-          { label: "About", href: "#" },
-          { label: "Contact", href: "#" },
-        ].map((l) => (
-          <li key={l.label}>
-            <Link
-              href={l.href}
-              className="text-[.7rem] uppercase tracking-[.25em] text-[#c6bda8] no-underline transition-colors hover:text-[#c8a96e]"
-            >
-              {l.label}
-            </Link>
-          </li>
-        ))}
-      </ul>
-      <div className="flex items-center gap-5 text-[#F3EEE4]">
-        <button className="cursor-pointer border-0 bg-transparent opacity-70 transition-opacity hover:opacity-100">
-          <IconSearch />
-        </button>
-      </div>
-    </nav>
-  );
-}
-
 function AccordionItem({
   item,
   isOpen,
@@ -231,8 +199,9 @@ export default function ProductDetailClient({
 
   const product = useMemo(
     () =>
-      products.find((item) => item._id === productId || item.slug === productId) ??
-      products[0],
+      products.find(
+        (item) => item._id === productId || item.slug === productId,
+      ) ?? products[0],
     [products, productId],
   );
 
@@ -267,36 +236,28 @@ export default function ProductDetailClient({
     { label: "Sizes", value: product?.sizes?.join(", ") ?? "-" },
   ];
 
-  const relatedProducts = useMemo(
-    () => {
-      if (!product) return [];
-      return (
-      products
-        .filter(
-          (item) =>
-            item._id !== product._id &&
-            (item.category === product.category ||
-              item.colors?.[0] === product.colors?.[0]),
-        )
-        .slice(0, 4)
-      );
-    },
-    [product, products],
-  );
+  const relatedProducts = useMemo(() => {
+    if (!product) return [];
+    return products
+      .filter(
+        (item) =>
+          item._id !== product._id &&
+          (item.category === product.category ||
+            item.colors?.[0] === product.colors?.[0]),
+      )
+      .slice(0, 4);
+  }, [product, products]);
 
-  const mosaicData = useMemo(
-    () => {
-      if (!product) return [];
-      return products.filter((item) => item._id !== product._id).slice(0, 5);
-    },
-    [product, products],
-  );
+  const mosaicData = useMemo(() => {
+    if (!product) return [];
+    return products.filter((item) => item._id !== product._id).slice(0, 5);
+  }, [product, products]);
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#050A18] pt-28 text-center text-[#d6bb89]">
-        Loading product...
-      </main>
+      <div className="text-center py-20 text-[#d6bb89]">
+        Loading products...
+      </div>
     );
   }
 
@@ -323,9 +284,8 @@ export default function ProductDetailClient({
         }}
       />
 
-      {/* <Navbar /> */}
-
-      <div className="relative z-10 mx-auto flex max-w-[1440px] items-center gap-2 px-8 pb-0 pt-[100px] text-[.65rem] uppercase tracking-[.22em] text-[#9e9585] lg:px-16">
+      {/* Breadcrumb */}
+      <div className="relative z-10 mx-auto flex items-center gap-2 px-8 pb-0 pt-[100px] text-[.65rem] uppercase tracking-[.22em] text-[#9e9585] lg:px-16">
         <Link
           href="/"
           className="text-[#9e9585] no-underline transition-colors hover:text-[#c8a96e]"
@@ -343,25 +303,44 @@ export default function ProductDetailClient({
         <span className="text-[#c8a96e]">{product.title}</span>
       </div>
 
-      <div className="relative z-10 mx-auto grid max-w-[1440px] grid-cols-1 gap-12 px-8 pb-20 pt-10 lg:gap-16 lg:px-16 xl:grid-cols-[1fr_420px]">
-        <div>
+      {/*
+        KEY LAYOUT CHANGE:
+        - The outer grid is now `items-start` so both columns start at the top
+        - The LEFT column (image) gets `xl:sticky xl:top-[88px] xl:self-start` — it pins in place
+        - The RIGHT column (aside/details) has NO sticky — it scrolls freely as the user reads
+        - `xl:max-h-[calc(100vh-100px)] xl:overflow-y-auto` on the aside creates a
+          scrollable panel for the details without the page needing to scroll,
+          giving a premium split-panel feel with a hidden scrollbar for cleanliness
+      */}
+      <div className="relative z-10 mx-auto grid max-w-[1440px] grid-cols-1 items-start gap-12 px-8 pb-20 pt-10 lg:gap-16 lg:px-16 xl:grid-cols-[1fr_420px]">
+        {/* ── LEFT: sticky image gallery ── */}
+        <div className="xl:sticky xl:top-[88px] xl:self-start">
           <div className="relative overflow-hidden rounded-[4px] border border-[rgba(200,169,110,0.18)] bg-[#0d1527]">
             <div className="absolute left-6 top-6 z-10 rounded-[2px] border border-[rgba(200,169,110,0.18)] bg-[rgba(5,10,24,0.75)] px-4 py-1.5 text-[.6rem] uppercase tracking-[.28em] text-[#c8a96e] backdrop-blur-xl">
               {product.badge ?? "Featured"}
             </div>
             <img
-              src={product.images?.[activeImage]?.url ?? product.images?.[0]?.url ?? "/new.jpg"}
+              src={
+                product.images?.[activeImage]?.url ??
+                product.images?.[0]?.url ??
+                "/new.jpg"
+              }
               alt={product.title}
               className="h-[520px] w-full object-cover transition-all duration-700 hover:scale-[1.03] sm:h-[640px]"
             />
           </div>
 
+          {/* Thumbnails */}
           <div className="mt-3 grid grid-cols-4 gap-3">
             {(product.images ?? []).map((img, i) => (
               <button
                 key={`${product._id}-thumb-${i + 1}`}
                 onClick={() => setActiveImage(i)}
-                className={`rounded-[3px] border-[1.5px] bg-transparent p-0 transition-all duration-200 ${activeImage === i ? "border-[#c8a96e]" : "border-transparent hover:border-[rgba(200,169,110,0.4)]"}`}
+                className={`rounded-[3px] border-[1.5px] bg-transparent p-0 transition-all duration-200 ${
+                  activeImage === i
+                    ? "border-[#c8a96e]"
+                    : "border-transparent hover:border-[rgba(200,169,110,0.4)]"
+                }`}
               >
                 <img
                   src={img.url}
@@ -371,70 +350,17 @@ export default function ProductDetailClient({
               </button>
             ))}
           </div>
-
-          <div className="mt-10 overflow-hidden rounded-[4px] border border-[rgba(200,169,110,0.18)] bg-[#0d1527]">
-            <div className="flex border-b border-[rgba(200,169,110,0.18)]">
-              {(["desc", "details", "specs", "care"] as const).map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`flex-1 border-0 bg-transparent py-4 font-['Jost'] text-[.65rem] uppercase tracking-[.2em] transition-all ${activeTab === tab ? "-mb-px border-b-[1.5px] border-[#c8a96e] bg-[rgba(200,169,110,0.06)] text-[#c8a96e]" : "text-[#9e9585] hover:text-[#c6bda8]"}`}
-                >
-                  {tab === "desc"
-                    ? "Description"
-                    : tab === "details"
-                      ? "Details"
-                      : tab === "specs"
-                        ? "Specs"
-                        : "Care"}
-                </button>
-              ))}
-            </div>
-
-            <div className="p-8">
-              {activeTab === "desc" && (
-                <p className="text-[.88rem] leading-[1.9] text-[#c6bda8]">
-                  {product.description}
-                </p>
-              )}
-              {activeTab === "details" && (
-                <ul className="grid list-none grid-cols-1 gap-3 sm:grid-cols-2">
-                  {(product.details ?? []).map((d) => (
-                    <li
-                      key={d}
-                      className="flex items-start gap-2.5 text-[.82rem] text-[#c6bda8]"
-                    >
-                      <span className="mt-[7px] h-1 w-1 flex-shrink-0 rounded-full bg-[#c8a96e]" />
-                      {d}
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {activeTab === "specs" && (
-                <div className="grid grid-cols-2">
-                  {specs.map((s) => (
-                    <div key={s.label} className="contents">
-                      <span className="border-b border-[rgba(200,169,110,0.18)] py-3 text-[.72rem] uppercase tracking-[.15em] text-[#9e9585]">
-                        {s.label}
-                      </span>
-                      <span className="border-b border-[rgba(200,169,110,0.18)] py-3 text-right text-[.82rem] text-[#c6bda8]">
-                        {s.value}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {activeTab === "care" && (
-                <p className="text-[.88rem] leading-[1.9] text-[#c6bda8]">
-                  Dry clean only. Steam preferred. Store on a shaped hanger away
-                  from direct sunlight.
-                </p>
-              )}
-            </div>
-          </div>
         </div>
 
-        <aside className="xl:sticky xl:top-[88px] xl:h-fit">
+        {/* ── RIGHT: scrollable details panel ── */}
+        <aside
+          className="
+            xl:max-h-[calc(100vh-108px)]
+            xl:overflow-y-auto
+            xl:[scrollbar-width:none]
+            xl:[&::-webkit-scrollbar]:hidden
+          "
+        >
           <div className="rounded-[4px] border border-[rgba(200,169,110,0.18)] bg-[#0d1527] p-8 sm:p-9">
             <p className="mb-2 text-[.6rem] uppercase tracking-[.35em] text-[#c8a96e]">
               {product.category} · Limited Edition
@@ -443,7 +369,8 @@ export default function ProductDetailClient({
               {product.title}
             </h1>
             <p className="text-[.82rem] leading-[1.8] text-[#9e9585]">
-              {product.tagline ?? "Crafted for timeless style and everyday confidence."}
+              {product.tagline ??
+                "Crafted for timeless style and everyday confidence."}
             </p>
 
             <div className="mt-4 flex items-center gap-3 border-t border-[rgba(200,169,110,0.18)] pt-4">
@@ -458,11 +385,12 @@ export default function ProductDetailClient({
             </div>
 
             <div className="my-7 border-y border-[rgba(200,169,110,0.18)] py-6">
-              <p className="font-['Cormorant_Garamond'] text-[3rem] font-light leading-none text-[#e8d4a8]">
+              <p className="text-[3rem] font-light leading-none text-[#e8d4a8]">
                 {product.price}
               </p>
             </div>
 
+            {/* Color picker */}
             <div className="mb-5">
               <p className="mb-3 flex items-center justify-between text-[.62rem] uppercase tracking-[.22em] text-[#9e9585]">
                 Color
@@ -476,12 +404,17 @@ export default function ProductDetailClient({
                     key={c.name}
                     title={c.name}
                     onClick={() => setSelectedColor(c.name)}
-                    className={`relative h-7 w-7 rounded-full border-0 transition-transform hover:scale-110 ${c.cls} ${selectedColor === c.name ? "ring-[1.5px] ring-[#c8a96e] ring-offset-2 ring-offset-[#0d1527]" : ""}`}
+                    className={`relative h-7 w-7 rounded-full border-0 transition-transform hover:scale-110 ${c.cls} ${
+                      selectedColor === c.name
+                        ? "ring-[1.5px] ring-[#c8a96e] ring-offset-2 ring-offset-[#0d1527]"
+                        : ""
+                    }`}
                   />
                 ))}
               </div>
             </div>
 
+            {/* Size picker */}
             <p className="mb-3 flex items-center justify-between text-[.62rem] uppercase tracking-[.22em] text-[#9e9585]">
               Size
               <span className="normal-case tracking-normal text-[#c6bda8]">
@@ -493,17 +426,26 @@ export default function ProductDetailClient({
                 <button
                   key={s}
                   onClick={() => setSelectedSize(s)}
-                  className={`h-11 min-w-[48px] cursor-pointer rounded-[3px] border px-3 font-['Jost'] text-[.78rem] tracking-[.08em] transition-all ${selectedSize === s ? "border-[#c8a96e] bg-[rgba(200,169,110,0.12)] text-[#f7e5c3]" : "border-[rgba(200,169,110,0.28)] bg-transparent text-[#c6bda8] hover:border-[rgba(200,169,110,0.65)] hover:text-[#f8f4ec]"}`}
+                  className={`h-11 min-w-[48px] cursor-pointer rounded-[3px] border px-3 font-['Jost'] text-[.78rem] tracking-[.08em] transition-all ${
+                    selectedSize === s
+                      ? "border-[#c8a96e] bg-[rgba(200,169,110,0.12)] text-[#f7e5c3]"
+                      : "border-[rgba(200,169,110,0.28)] bg-transparent text-[#c6bda8] hover:border-[rgba(200,169,110,0.65)] hover:text-[#f8f4ec]"
+                  }`}
                 >
                   {s}
                 </button>
               ))}
             </div>
 
+            {/* CTA buttons */}
             <div className="flex flex-col gap-3">
               <button
                 onClick={handleAddToCart}
-                className={`flex h-[52px] items-center justify-center gap-2.5 rounded-[3px] border-0 font-['Jost'] text-[.72rem] font-medium uppercase tracking-[.25em] transition-all ${addedToCart ? "bg-[#4a7c59] text-white" : "bg-[#c8a96e] text-[#050A18] hover:bg-[#e8d4a8]"}`}
+                className={`flex h-[52px] items-center justify-center gap-2.5 rounded-[3px] border-0 font-['Jost'] text-[.72rem] font-medium uppercase tracking-[.25em] transition-all ${
+                  addedToCart
+                    ? "bg-[#4a7c59] text-white"
+                    : "bg-[#c8a96e] text-[#050A18] hover:bg-[#e8d4a8]"
+                }`}
               >
                 <IconBag />
                 {addedToCart ? "Added to Cart" : "Add to Cart"}
@@ -513,6 +455,7 @@ export default function ProductDetailClient({
               </button>
             </div>
 
+            {/* Wishlist */}
             <button
               onClick={() => setWishlisted((w) => !w)}
               className="mt-3 flex w-full items-center justify-center gap-2 border-0 bg-transparent opacity-60 transition-opacity hover:opacity-100"
@@ -523,6 +466,7 @@ export default function ProductDetailClient({
               </span>
             </button>
 
+            {/* Accordion + tabs */}
             <div className="mt-6 border-t border-[rgba(200,169,110,0.18)]">
               {ACCORDION_ITEMS.map((item) => (
                 <AccordionItem
@@ -534,12 +478,80 @@ export default function ProductDetailClient({
                   }
                 />
               ))}
+
+              <div className="mt-10 px-4 overflow-hidden rounded-[4px] border border-[rgba(200,169,110,0.18)] bg-[#0d1527]">
+                <div className="flex gap-1 border-b border-[rgba(200,169,110,0.18)]">
+                  {(["desc", "details", "specs", "care"] as const).map(
+                    (tab) => (
+                      <button
+                        key={tab}
+                        onClick={() => setActiveTab(tab)}
+                        className={`flex-1 border-0 bg-transparent py-4 font-['Jost'] text-[.65rem] uppercase tracking-[.2em] transition-all ${
+                          activeTab === tab
+                            ? "-mb-px border-b-[1.5px] border-[#c8a96e] bg-[rgba(200,169,110,0.06)] text-[#c8a96e]"
+                            : "text-[#9e9585] hover:text-[#c6bda8]"
+                        }`}
+                      >
+                        {tab === "desc"
+                          ? "Description"
+                          : tab === "details"
+                            ? "Details"
+                            : tab === "specs"
+                              ? "Specs"
+                              : "Care"}
+                      </button>
+                    ),
+                  )}
+                </div>
+
+                <div className="p-8">
+                  {activeTab === "desc" && (
+                    <p className="text-[.88rem] leading-[1.9] text-[#c6bda8]">
+                      {product.description}
+                    </p>
+                  )}
+                  {activeTab === "details" && (
+                    <ul className="grid list-none grid-cols-1 gap-3 sm:grid-cols-2">
+                      {(product.details ?? []).map((d) => (
+                        <li
+                          key={d}
+                          className="flex items-start gap-2.5 text-[.82rem] text-[#c6bda8]"
+                        >
+                          <span className="mt-[7px] h-1 w-1 flex-shrink-0 rounded-full bg-[#c8a96e]" />
+                          {d}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {activeTab === "specs" && (
+                    <div className="grid grid-cols-2">
+                      {specs.map((s) => (
+                        <div key={s.label} className="contents">
+                          <span className="border-b border-[rgba(200,169,110,0.18)] py-3 text-[.72rem] uppercase tracking-[.15em] text-[#9e9585]">
+                            {s.label}
+                          </span>
+                          <span className="border-b border-[rgba(200,169,110,0.18)] py-3 text-right text-[.82rem] text-[#c6bda8]">
+                            {s.value}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {activeTab === "care" && (
+                    <p className="text-[.88rem] leading-[1.9] text-[#c6bda8]">
+                      Dry clean only. Steam preferred. Store on a shaped hanger
+                      away from direct sunlight.
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </aside>
       </div>
 
-      <section className="relative z-10 mx-auto max-w-[1440px] px-8 py-14 lg:px-16">
+      {/* You May Also Desire */}
+      <section className="relative z-10 mx-auto px-8 py-14 lg:px-16">
         <div className="mb-8 flex items-baseline justify-between">
           <h2 className="font-['Cormorant_Garamond'] text-[2.2rem] font-light text-[#f8f4ec]">
             You May Also Desire
@@ -573,7 +585,8 @@ export default function ProductDetailClient({
         </div>
       </section>
 
-      <section className="relative z-10 mx-auto max-w-[1440px] px-8 py-14 lg:px-16">
+      {/* More from the Collection */}
+      <section className="relative z-10 mx-auto px-8 py-14 lg:px-16">
         <div className="mb-8 flex items-baseline justify-between">
           <h2 className="font-['Cormorant_Garamond'] text-[2.2rem] font-light text-[#f8f4ec]">
             More from the Collection
