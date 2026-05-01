@@ -174,6 +174,8 @@ export default function ProductDetailClient({
 }) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const formatPrice = (price: number | string) =>
+    `₹${Number(price).toLocaleString("en-IN")}`;
 
   useEffect(() => {
     let isMounted = true;
@@ -386,7 +388,7 @@ export default function ProductDetailClient({
 
             <div className="my-7 border-y border-[rgba(200,169,110,0.18)] py-6">
               <p className="text-[3rem] font-light leading-none text-[#e8d4a8]">
-                {product.price}
+                {formatPrice(product.price)}
               </p>
             </div>
 
@@ -577,7 +579,7 @@ export default function ProductDetailClient({
                   {item.category} · {item.colors?.[0] ?? "-"}
                 </p>
                 <p className="mt-2 text-[1.25rem] text-[#c8a96e]">
-                  {item.price}
+                  {formatPrice(item.price)}
                 </p>
               </div>
             </Link>
@@ -619,7 +621,7 @@ export default function ProductDetailClient({
                   {item.title}
                 </span>
                 <span className="mt-0.5 block text-[.75rem] text-[#c8a96e]">
-                  {item.price}
+                  {formatPrice(item.price)}
                 </span>
               </div>
             </Link>
