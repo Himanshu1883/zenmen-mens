@@ -501,7 +501,7 @@ export default function FounderSection() {
               >
                 {/* ─ Placeholder ─ Replace with Next.js <Image> ─ */}
                 <Image
-                  src="/zenmen_founder_hero.jpeg" // ← your image path in /public
+                  src="/khaki_shirt_5.jpeg" // ← your image path in /public
                   alt="Founder of ZENMEN"
                   fill
                   style={{ objectFit: "cover", objectPosition: "center top" }}

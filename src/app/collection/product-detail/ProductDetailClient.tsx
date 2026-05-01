@@ -98,6 +98,27 @@ function IconBag() {
   );
 }
 
+function IconWhatsApp() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M12.032 3.024c-4.967 0-9 4.033-9 9 0 1.59.414 3.153 1.2 4.53L3 21.024l4.545-1.212a8.97 8.97 0 0 0 4.287 1.092c4.967 0 9-4.033 9-9s-4.033-9-9-9z"
+        fill="currentColor"
+      />
+      <path
+        d="M16.968 13.68c-.276-.144-1.632-.804-1.884-.9-.252-.096-.432-.144-.612.144-.18.288-.696.9-.852 1.08-.156.18-.312.204-.588.06-.804-.372-1.68-.828-2.352-1.488a8.973 8.973 0 0 1-1.62-2.052c-.144-.252-.012-.384.108-.504.108-.108.252-.288.384-.432.12-.144.168-.24.252-.408.084-.168.036-.312-.024-.432-.06-.12-.612-1.476-.84-2.028-.216-.528-.444-.456-.612-.468-.156-.012-.336-.012-.516-.012a.96.96 0 0 0-.696.324 2.94 2.94 0 0 0-.912 2.148c0 1.26.912 2.472 1.032 2.64.12.168 1.764 2.736 4.272 3.84.6.264 1.056.42 1.416.54.6.192 1.152.156 1.584.096.48-.072 1.476-.6 1.68-1.188.204-.588.204-1.092.144-1.2-.06-.096-.216-.156-.48-.3z"
+        fill="white"
+      />
+    </svg>
+  );
+}
+
 function IconChevron() {
   return (
     <svg
@@ -217,6 +238,12 @@ export default function ProductDetailClient({
   const [addedToCart, setAddedToCart] = useState(false);
   const [wishlisted, setWishlisted] = useState(false);
 
+  // Check if selected color is available in product colors
+  const isColorAvailable = useMemo(() => {
+    if (!product?.colors) return false;
+    return product.colors.includes(selectedColor);
+  }, [product, selectedColor]);
+
   useEffect(() => {
     if (!product) return;
     setActiveImage(0);
@@ -254,6 +281,13 @@ export default function ProductDetailClient({
     if (!product) return [];
     return products.filter((item) => item._id !== product._id).slice(0, 5);
   }, [product, products]);
+
+  const handleWhatsAppInquiry = () => {
+    const phoneNumber = "9196507 53273"; // Replace with your actual WhatsApp number
+    const message = `Hi Zenmen, I'm interested in the "${product?.title}" in ${selectedColor} color, size ${selectedSize}. Is this available?`;
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, "_blank");
+  };
 
   if (loading) {
     return (
@@ -305,15 +339,6 @@ export default function ProductDetailClient({
         <span className="text-[#c8a96e]">{product.title}</span>
       </div>
 
-      {/*
-        KEY LAYOUT CHANGE:
-        - The outer grid is now `items-start` so both columns start at the top
-        - The LEFT column (image) gets `xl:sticky xl:top-[88px] xl:self-start` — it pins in place
-        - The RIGHT column (aside/details) has NO sticky — it scrolls freely as the user reads
-        - `xl:max-h-[calc(100vh-100px)] xl:overflow-y-auto` on the aside creates a
-          scrollable panel for the details without the page needing to scroll,
-          giving a premium split-panel feel with a hidden scrollbar for cleanliness
-      */}
       <div className="relative z-10 mx-auto grid max-w-[1440px] grid-cols-1 items-start gap-12 px-8 pb-20 pt-10 lg:gap-16 lg:px-16 xl:grid-cols-[1fr_420px]">
         {/* ── LEFT: sticky image gallery ── */}
         <div className="xl:sticky xl:top-[88px] xl:self-start">
@@ -328,7 +353,7 @@ export default function ProductDetailClient({
                 "/new.jpg"
               }
               alt={product.title}
-              className="h-[520px] w-full object-cover transition-all duration-700 hover:scale-[1.03] sm:h-[640px]"
+              className="h-[520px] w-full object-cover object-[center_15%] transition-all duration-700 hover:scale-[1.03] sm:h-[640px]"
             />
           </div>
 
@@ -347,7 +372,7 @@ export default function ProductDetailClient({
                 <img
                   src={img.url}
                   alt={`Thumbnail ${i + 1}`}
-                  className="block h-[90px] w-full object-cover"
+                  className="block h-[150px] w-full object-cover object-[center_15%]"
                 />
               </button>
             ))}
@@ -396,8 +421,19 @@ export default function ProductDetailClient({
             <div className="mb-5">
               <p className="mb-3 flex items-center justify-between text-[.62rem] uppercase tracking-[.22em] text-[#9e9585]">
                 Color
-                <span className="normal-case tracking-normal text-[#c6bda8]">
+                <span
+                  className={`normal-case tracking-normal ${
+                    !isColorAvailable && selectedColor !== COLORS[0].name
+                      ? "text-[#c8a96e]"
+                      : "text-[#c6bda8]"
+                  }`}
+                >
                   {selectedColor}
+                  {!isColorAvailable && selectedColor !== COLORS[0].name && (
+                    <span className="ml-2 text-[.55rem] text-[#c8a96e]">
+                      (Custom Order)
+                    </span>
+                  )}
                 </span>
               </p>
               <div className="flex gap-2.5">
@@ -410,10 +446,29 @@ export default function ProductDetailClient({
                       selectedColor === c.name
                         ? "ring-[1.5px] ring-[#c8a96e] ring-offset-2 ring-offset-[#0d1527]"
                         : ""
+                    } ${
+                      !product.colors?.includes(c.name) &&
+                      c.name !== product.colors?.[0]
+                        ? "opacity-60 ring-1 ring-[rgba(200,169,110,0.3)]"
+                        : ""
                     }`}
-                  />
+                  >
+                    {!product.colors?.includes(c.name) &&
+                      c.name !== product.colors?.[0] && (
+                        <span className="absolute inset-0 flex items-center justify-center">
+                          <span className="h-full w-[1.5px] rotate-45 bg-[rgba(200,169,110,0.5)]" />
+                        </span>
+                      )}
+                  </button>
                 ))}
               </div>
+              <p className="mt-2 text-[.65rem] text-white">
+                {!isColorAvailable && selectedColor !== product.colors?.[0]
+                  ? "✨ This color is available on custom order. Contact us for details."
+                  : product.colors?.includes(selectedColor)
+                    ? "✓ In stock and ready to ship"
+                    : "Select a color to check availability"}
+              </p>
             </div>
 
             {/* Size picker */}
@@ -439,22 +494,46 @@ export default function ProductDetailClient({
               ))}
             </div>
 
-            {/* CTA buttons */}
+            {/* CTA buttons - Conditional based on color availability */}
             <div className="flex flex-col gap-3">
-              <button
-                onClick={handleAddToCart}
-                className={`flex h-[52px] items-center justify-center gap-2.5 rounded-[3px] border-0 font-['Jost'] text-[.72rem] font-medium uppercase tracking-[.25em] transition-all ${
-                  addedToCart
-                    ? "bg-[#4a7c59] text-white"
-                    : "bg-[#c8a96e] text-[#050A18] hover:bg-[#e8d4a8]"
-                }`}
-              >
-                <IconBag />
-                {addedToCart ? "Added to Cart" : "Add to Cart"}
-              </button>
-              <button className="h-[52px] rounded-[3px] border border-[rgba(200,169,110,0.38)] bg-transparent font-['Jost'] text-[.72rem] uppercase tracking-[.25em] text-[#e8dcc6] transition-all hover:border-[rgba(200,169,110,0.7)] hover:bg-[rgba(200,169,110,0.07)]">
-                Buy Now · Express Checkout
-              </button>
+              {isColorAvailable || selectedColor === product.colors?.[0] ? (
+                // Normal Add to Cart button for available colors
+                <button
+                  onClick={handleAddToCart}
+                  className={`flex h-[52px] items-center justify-center gap-2.5 rounded-[3px] border-0 font-['Jost'] text-[.72rem] font-medium uppercase tracking-[.25em] transition-all ${
+                    addedToCart
+                      ? "bg-[#4a7c59] text-white"
+                      : "bg-[#c8a96e] text-[#050A18] hover:bg-[#e8d4a8]"
+                  }`}
+                >
+                  <IconBag />
+                  {addedToCart ? "Added to Cart" : "Add to Cart"}
+                </button>
+              ) : (
+                // Book Now with WhatsApp for custom colors
+                <button
+                  onClick={handleWhatsAppInquiry}
+                  className="flex h-[52px] items-center justify-center gap-2.5 rounded-[3px] border-0 bg-[#25D366] text-white transition-all hover:bg-[#20b859] font-['Jost'] text-[.72rem] font-medium uppercase tracking-[.25em]"
+                >
+                  <IconWhatsApp />
+                  Book Now
+                </button>
+              )}
+
+              {/* Buy Now button - changes based on color availability */}
+              {isColorAvailable || selectedColor === product.colors?.[0] ? (
+                <button className="h-[52px] rounded-[3px] border border-[rgba(200,169,110,0.38)] bg-transparent font-['Jost'] text-[.72rem] uppercase tracking-[.25em] text-[#e8dcc6] transition-all hover:border-[rgba(200,169,110,0.7)] hover:bg-[rgba(200,169,110,0.07)]">
+                  Buy Now · Express Checkout
+                </button>
+              ) : (
+                <button
+                  onClick={handleWhatsAppInquiry}
+                  className="h-[52px] rounded-[3px] border border-[rgba(200,169,110,0.38)] bg-transparent font-['Jost'] text-[.72rem] uppercase tracking-[.25em] text-[#e8dcc6] transition-all hover:border-[#25D366] hover:text-[#25D366] flex items-center justify-center gap-2"
+                >
+                  <IconWhatsApp />
+                  Inquire on WhatsApp
+                </button>
+              )}
             </div>
 
             {/* Wishlist */}
@@ -569,7 +648,7 @@ export default function ProductDetailClient({
               <img
                 src={item.images?.[0]?.url ?? "/new.jpg"}
                 alt={item.title}
-                className="block h-[280px] w-full object-cover transition-transform duration-500 group-hover:scale-[1.06]"
+                className="block h-[280px] w-full object-cover object-[center_10%] transition-transform duration-500 group-hover:scale-[1.06]"
               />
               <div className="p-4">
                 <p className="mb-0.5 font-['Cormorant_Garamond'] text-[1.5rem] font-light text-[#f8f4ec]">
@@ -611,7 +690,7 @@ export default function ProductDetailClient({
               <img
                 src={item.images?.[0]?.url ?? "/new.jpg"}
                 alt={item.title}
-                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.07]"
+                className="h-full w-full object-cover object-[center_10%] transition-transform duration-500 group-hover:scale-[1.07]"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[rgba(5,10,24,0.75)] via-[rgba(5,10,24,0.1)] to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5">

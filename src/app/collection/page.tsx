@@ -4,7 +4,7 @@ import { fetchProducts } from "@/app/store/productSlice";
 import { ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { categoryFilters, colorFilters } from "./collectionData";
+// import { categoryFilters, colorFilters } from "./collectionData";
 
 import type { AppDispatch, RootState } from "@/app/store/store";
 import { useDispatch, useSelector } from "react-redux";
@@ -176,7 +176,7 @@ export default function CollectionPage() {
               placeholder="Search products..."
               className="h-11 rounded-lg border border-[#c8a96e44] bg-[#0f1830] px-3 text-sm text-[#f3eee4] outline-none transition focus:border-[#d6bb89]"
             />
-            <select
+            {/* <select
               value={selectedCategory}
               onChange={(event) => setSelectedCategory(event.target.value)}
               className="h-11 rounded-lg border border-[#c8a96e44] bg-[#0f1830] px-3 text-sm text-[#f3eee4] outline-none transition focus:border-[#d6bb89]"
@@ -201,7 +201,7 @@ export default function CollectionPage() {
                   Color: {color}
                 </option>
               ))}
-            </select>
+            </select> */}
             <button
               type="button"
               onClick={() => {
@@ -246,7 +246,7 @@ export default function CollectionPage() {
                           "/new.jpg"
                         }
                         alt={product.title}
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-cover object-[center_20%]"
                       />
 
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent" />

@@ -394,7 +394,7 @@ export default function Hero() {
 
         /* ── EDITORIAL BANNERS ── */
         .banners-section { width: 100%; background: #0a0806; font-family: 'Montserrat', sans-serif; }
-        .banner-full { position: relative; width: 100%; height: 550px; overflow: hidden; }
+        .banner-full { position: relative; width: 100%; height: 650px; overflow: hidden; }
         .banner-full img {
           width: 100%; height: 100%; object-fit: cover; object-position: center;
           filter: brightness(0.55) contrast(1.08); transition: transform 8s ease;
@@ -584,8 +584,8 @@ export default function Hero() {
         <div className="gold-divider" />
 
         {/* Banner 1 — Full width, text bottom-left */}
-        <div className="banner-full">
-          <img src="/zenmen_white_suite.png" alt="Bespoke Suiting" />
+        {/* <div className="banner-full">
+          <img src="/founder_model_1.png" alt="Bespoke Suiting" />
           <div className="banner-full-overlay">
             <div className="banner-full-tag">Bespoke Atelier · SS 2025</div>
             <h2 className="banner-full-title">
@@ -606,7 +606,7 @@ export default function Hero() {
               </a>
             </div>
           </div>
-        </div>
+        </div>  */}
 
         <div className="gold-divider" />
 
