@@ -251,6 +251,8 @@ export default function ProductDetailClient({
     setSelectedColor(product.colors?.[0] ?? COLORS[0].name);
   }, [product]);
 
+  
+
   const rating = product?.rating ?? 4.6;
   const reviewCount = product?.numReviews ?? 42;
   const stars = Array.from({ length: 5 }, (_, i) => i < Math.floor(rating));

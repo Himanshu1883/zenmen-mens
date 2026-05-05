@@ -2,8 +2,8 @@
 
 import { useScrolled } from "@/app/hooks/useScrolled";
 import { Menu, ShoppingCartIcon, User, X } from "lucide-react";
-import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -835,55 +835,166 @@ export default function Navbar() {
             </button>
           </div>
           <div className="auth-tabs">
-            <button className={`auth-tab${authMode === "login" ? " active" : ""}`} onClick={() => setAuthMode("login")}>Login</button>
-            <button className={`auth-tab${authMode === "signup" ? " active" : ""}`} onClick={() => setAuthMode("signup")}>Sign Up</button>
+            <button
+              className={`auth-tab${authMode === "login" ? " active" : ""}`}
+              onClick={() => setAuthMode("login")}
+            >
+              Login
+            </button>
+            <button
+              className={`auth-tab${authMode === "signup" ? " active" : ""}`}
+              onClick={() => setAuthMode("signup")}
+            >
+              Sign Up
+            </button>
           </div>
           <div className="auth-body">
             {status === "authenticated" ? (
               <div style={{ textAlign: "center", marginBottom: "10px" }}>
-                <p style={{ color: "#f7f2e8", fontSize: "14px", marginBottom: "6px" }}>
+                <p
+                  style={{
+                    color: "#f7f2e8",
+                    fontSize: "14px",
+                    marginBottom: "6px",
+                  }}
+                >
                   Signed in as {session?.user?.name || session?.user?.email}
                 </p>
-                <button className="auth-submit" type="button" onClick={() => signOut({ callbackUrl: "/" })}>
+                <button
+                  className="auth-submit"
+                  type="button"
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                >
                   Sign Out
                 </button>
               </div>
             ) : (
-            <button className="auth-google" type="button" onClick={handleGoogleSignIn}>
-              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-                <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.2-1.4 3.6-5.5 3.6-3.3 0-6-2.7-6-6s2.7-6 6-6c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3 14.6 2 12 2 6.5 2 2 6.5 2 12s4.5 10 10 10c5.8 0 9.6-4.1 9.6-9.8 0-.7-.1-1.3-.2-2H12z"/>
-                <path fill="#34A853" d="M2 12c0 1.8.5 3.5 1.4 5l3.3-2.5c-.2-.7-.4-1.6-.4-2.5s.1-1.7.4-2.5L3.4 7C2.5 8.5 2 10.2 2 12z"/>
-                <path fill="#FBBC05" d="M12 22c2.7 0 4.9-.9 6.5-2.4l-3.1-2.4c-.9.6-2 .9-3.4.9-2.6 0-4.9-1.8-5.7-4.2L3 16.4C4.7 19.7 8.1 22 12 22z"/>
-                <path fill="#4285F4" d="M21.6 12.2c0-.7-.1-1.3-.2-2H12v3.9h5.5c-.2 1.1-.8 2.1-1.7 2.8l3.1 2.4c1.8-1.7 2.7-4.1 2.7-7.1z"/>
-              </svg>
-              Sign in with Google
-            </button>
+              <button
+                className="auth-google"
+                type="button"
+                onClick={handleGoogleSignIn}
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    fill="#EA4335"
+                    d="M12 10.2v3.9h5.5c-.2 1.2-1.4 3.6-5.5 3.6-3.3 0-6-2.7-6-6s2.7-6 6-6c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3 14.6 2 12 2 6.5 2 2 6.5 2 12s4.5 10 10 10c5.8 0 9.6-4.1 9.6-9.8 0-.7-.1-1.3-.2-2H12z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M2 12c0 1.8.5 3.5 1.4 5l3.3-2.5c-.2-.7-.4-1.6-.4-2.5s.1-1.7.4-2.5L3.4 7C2.5 8.5 2 10.2 2 12z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M12 22c2.7 0 4.9-.9 6.5-2.4l-3.1-2.4c-.9.6-2 .9-3.4.9-2.6 0-4.9-1.8-5.7-4.2L3 16.4C4.7 19.7 8.1 22 12 22z"
+                  />
+                  <path
+                    fill="#4285F4"
+                    d="M21.6 12.2c0-.7-.1-1.3-.2-2H12v3.9h5.5c-.2 1.1-.8 2.1-1.7 2.8l3.1 2.4c1.8-1.7 2.7-4.1 2.7-7.1z"
+                  />
+                </svg>
+                Sign in with Google
+              </button>
             )}
             <div className="auth-sep">or continue with email</div>
             <form className="auth-grid" onSubmit={(e) => e.preventDefault()}>
               {authMode === "signup" && (
                 <div className="auth-grid two">
-                  <div className="auth-field"><label>First Name</label><input className="auth-input" type="text" placeholder="Aarav" /></div>
-                  <div className="auth-field"><label>Last Name</label><input className="auth-input" type="text" placeholder="Sharma" /></div>
+                  <div className="auth-field">
+                    <label>First Name</label>
+                    <input
+                      className="auth-input"
+                      type="text"
+                      placeholder="Aarav"
+                    />
+                  </div>
+                  <div className="auth-field">
+                    <label>Last Name</label>
+                    <input
+                      className="auth-input"
+                      type="text"
+                      placeholder="Sharma"
+                    />
+                  </div>
                 </div>
               )}
-              <div className="auth-field"><label>Email</label><input className="auth-input" type="email" placeholder="you@example.com" /></div>
+              <div className="auth-field">
+                <label>Email</label>
+                <input
+                  className="auth-input"
+                  type="email"
+                  placeholder="you@example.com"
+                />
+              </div>
               {authMode === "signup" && (
-                <div className="auth-field"><label>Phone Number</label><input className="auth-input" type="tel" placeholder="+91 98765 43210" /></div>
+                <div className="auth-field">
+                  <label>Phone Number</label>
+                  <input
+                    className="auth-input"
+                    type="tel"
+                    placeholder="+91 98765 43210"
+                  />
+                </div>
               )}
-              <div className="auth-field"><label>Password</label><input className="auth-input" type="password" placeholder="••••••••" /></div>
+              <div className="auth-field">
+                <label>Password</label>
+                <input
+                  className="auth-input"
+                  type="password"
+                  placeholder="••••••••"
+                />
+              </div>
               {authMode === "signup" && (
-                <div className="auth-field"><label>Confirm Password</label><input className="auth-input" type="password" placeholder="••••••••" /></div>
+                <div className="auth-field">
+                  <label>Confirm Password</label>
+                  <input
+                    className="auth-input"
+                    type="password"
+                    placeholder="••••••••"
+                  />
+                </div>
               )}
               <div className="auth-row">
-                <label className="auth-check"><input type="checkbox" /><span>{authMode === "login" ? "Remember me" : "I agree to Terms & Privacy"}</span></label>
-                {authMode === "login" && <a href="#" className="auth-link">Forgot password?</a>}
+                <label className="auth-check">
+                  <input type="checkbox" />
+                  <span>
+                    {authMode === "login"
+                      ? "Remember me"
+                      : "I agree to Terms & Privacy"}
+                  </span>
+                </label>
+                {authMode === "login" && (
+                  <a href="#" className="auth-link">
+                    Forgot password?
+                  </a>
+                )}
               </div>
-              <button className="auth-submit" type="submit">{authMode === "login" ? "Sign In Securely" : "Create Premium Account"}</button>
+              <button className="auth-submit" type="submit">
+                {authMode === "login"
+                  ? "Sign In Securely"
+                  : "Create Premium Account"}
+              </button>
             </form>
             <p className="auth-foot">
-              {authMode === "login" ? "New to ZENmen?" : "Already have an account?"}{" "}
-              <button type="button" className="auth-link" style={{ background: "transparent", border: 0, cursor: "pointer" }} onClick={() => setAuthMode((m) => (m === "login" ? "signup" : "login"))}>
+              {authMode === "login"
+                ? "New to ZENmen?"
+                : "Already have an account?"}{" "}
+              <button
+                type="button"
+                className="auth-link"
+                style={{
+                  background: "transparent",
+                  border: 0,
+                  cursor: "pointer",
+                }}
+                onClick={() =>
+                  setAuthMode((m) => (m === "login" ? "signup" : "login"))
+                }
+              >
                 {authMode === "login" ? "Create one" : "Sign in"}
               </button>
             </p>
