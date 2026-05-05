@@ -83,12 +83,20 @@ export default function CollectionPage() {
   }, [products, search, selectedCategory, selectedColor]);
 
   const categoryFilters = useMemo(
-    () => ["All", ...Array.from(new Set(products.map((p) => p.category).filter(Boolean)))],
+    () => [
+      "All",
+      ...Array.from(new Set(products.map((p) => p.category).filter(Boolean))),
+    ],
     [products],
   );
 
   const colorFilters = useMemo(
-    () => ["All", ...Array.from(new Set(products.flatMap((p) => p.colors ?? []).filter(Boolean)))],
+    () => [
+      "All",
+      ...Array.from(
+        new Set(products.flatMap((p) => p.colors ?? []).filter(Boolean)),
+      ),
+    ],
     [products],
   );
 
@@ -126,14 +134,32 @@ export default function CollectionPage() {
           }
         }
         @keyframes autoSlidePrimary {
-          0%, 14%, 100% { transform: translateX(0); }
-          22%, 78% { transform: translateX(-100%); }
-          86% { transform: translateX(0); }
+          0%,
+          14%,
+          100% {
+            transform: translateX(0);
+          }
+          22%,
+          78% {
+            transform: translateX(-100%);
+          }
+          86% {
+            transform: translateX(0);
+          }
         }
         @keyframes autoSlideSecondary {
-          0%, 14%, 100% { transform: translateX(100%); }
-          22%, 78% { transform: translateX(0); }
-          86% { transform: translateX(100%); }
+          0%,
+          14%,
+          100% {
+            transform: translateX(100%);
+          }
+          22%,
+          78% {
+            transform: translateX(0);
+          }
+          86% {
+            transform: translateX(100%);
+          }
         }
         .product-preview-media {
           position: relative;
@@ -281,28 +307,34 @@ export default function CollectionPage() {
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {filteredProducts.map((product, index) => {
-              const imgIndex = activeImage[product._id] ?? 0;
+              const productId = String(product._id);
+              const imgIndex = activeImage[productId] ?? 0;
               const images = product.images ?? [];
-              const primary = images[imgIndex]?.url || images[0]?.url || "/new.jpg";
-              const altIndex = images.length > 1 ? (imgIndex + 1) % images.length : 0;
+              const primary =
+                images[imgIndex]?.url || images[0]?.url || "/new.jpg";
+              const altIndex =
+                images.length > 1 ? (imgIndex + 1) % images.length : 0;
               const secondary = images[altIndex]?.url || primary;
               const hasImagePair = Boolean(primary && secondary);
               const autoPreview =
                 hasImagePair &&
-                (product._id
+                (productId
                   .split("")
-                  .reduce((sum, ch) => sum + ch.charCodeAt(0), 0) +
+                  .reduce(
+                    (sum: number, ch: string) => sum + ch.charCodeAt(0),
+                    0,
+                  ) +
                   index) %
                   3 ===
                   0;
               return (
                 <article
-                  key={product._id}
+                  key={productId}
                   className={`group preview-card translate-y-7 animate-[fadeInUp_0.7s_ease_forwards] overflow-hidden rounded-xl border border-[#c8a96e33] bg-[#111111] opacity-0 shadow-[0_16px_40px_rgba(0,0,0,0.45)] transition duration-500 hover:border-[#c8a96e8a] ${autoPreview ? "auto-preview" : ""}`}
                   style={{ animationDelay: `${index * 70}ms` }}
                 >
                   <Link
-                    href={`/collection/product-detail?id=${product._id}`}
+                    href={`/collection/product-detail?id=${productId}`}
                     className="block"
                   >
                     <div className="product-preview-media relative aspect-[3/4] overflow-hidden">
