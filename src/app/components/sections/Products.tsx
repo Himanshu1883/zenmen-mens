@@ -1,143 +1,41 @@
 "use client";
-import { useState } from "react";
 
-const products: Product[] = [
-  {
-    id: "midnight-charcoal",
-    name: "Midnight Charcoal Suit",
-    material: "Italian Wool · Slim Fit",
-    price: 32000,
-    category: "suit",
-    badge: "New",
-    accent: "#C9A96E",
-    bg: "linear-gradient(145deg,#0e0e0c 0%,#1a1a15 60%,#222018 100%)",
-    description:
-      "Full canvas construction with hand-stitched lapels in premium Italian wool.",
-  },
-  {
-    id: "oxford-white",
-    name: "Oxford White Formal",
-    material: "Egyptian Cotton · Regular Fit",
-    price: 3200,
-    category: "shirt",
-    accent: "#a8b8c8",
-    bg: "linear-gradient(145deg,#0d0d0f 0%,#16161a 60%,#1c1c20 100%)",
-    description:
-      "Woven from 100% Egyptian cotton with a spread collar and mother-of-pearl buttons.",
-  },
-  {
-    id: "slim-wool-trouser",
-    name: "Slim Fit Wool Trousers",
-    material: "Super 120s Wool · Slim",
-    price: 7500,
-    category: "trouser",
-    badge: "Bestseller",
-    accent: "#b8a090",
-    bg: "linear-gradient(145deg,#0f0e0d 0%,#181614 60%,#1e1c1a 100%)",
-    description:
-      "Crafted from Super 120s wool with a half-canvas waistband and hand-finished hems.",
-  },
-  {
-    id: "sand-linen",
-    name: "Sand Linen Three-Piece",
-    material: "Irish Linen · Classic Fit",
-    price: 28500,
-    category: "suit",
-    accent: "#d4c4a0",
-    bg: "linear-gradient(145deg,#0e0e0c 0%,#181710 60%,#201e14 100%)",
-    description:
-      "A distinguished three-piece in lightweight Irish linen for summer occasions.",
-  },
-  {
-    id: "royal-blue",
-    name: "Royal Blue Herringbone",
-    material: "Premium Cotton Blend · Slim",
-    price: 4800,
-    category: "shirt",
-    badge: "Limited",
-    accent: "#7090c8",
-    bg: "linear-gradient(145deg,#0c0c10 0%,#141418 60%,#1a1820 100%)",
-    description:
-      "A subtle herringbone weave in deep royal blue with contrast stitching.",
-  },
-  {
-    id: "navy-trouser",
-    name: "Navy Formal Trousers",
-    material: "Worsted Wool · Regular Fit",
-    price: 6200,
-    category: "trouser",
-    accent: "#8898b0",
-    bg: "linear-gradient(145deg,#0c0e10 0%,#14161a 60%,#1a1c1e 100%)",
-    description:
-      "Versatile navy worsted wool trousers — a true wardrobe cornerstone.",
-  },
-  {
-    id: "double-breasted",
-    name: "Double Breasted Classic",
-    material: "British Tweed · Classic Fit",
-    price: 38000,
-    category: "suit",
-    accent: "#C9A96E",
-    bg: "linear-gradient(145deg,#0e0c10 0%,#181420 60%,#1e1a24 100%)",
-    description:
-      "A bold double-breasted silhouette in heritage British tweed with peak lapels.",
-  },
-  {
-    id: "mandarin-linen",
-    name: "Mandarin Collar Linen",
-    material: "100% Linen · Relaxed Fit",
-    price: 2900,
-    category: "shirt",
-    accent: "#c8b890",
-    bg: "linear-gradient(145deg,#0e0e0c 0%,#181814 60%,#1c1c18 100%)",
-    description:
-      "A modern mandarin collar in breathable 100% linen, perfect for warm occasions.",
-  },
-];
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchProducts } from "@/app/store/productSlice";
+import type { AppDispatch, RootState } from "@/app/store/store";
 
-const categories = ["all", "suit", "shirt", "trouser"];
-
-const icons = {
-  suit: (
-    <svg
-      width="28"
-      height="28"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.2"
-    >
-      <path d="M8 2L6 6l-2 2v14h16V8l-2-2-2-4" />
-      <path d="M8 2l4 4 4-4" />
-      <path d="M12 6v16" />
-    </svg>
-  ),
-  shirt: (
-    <svg
-      width="28"
-      height="28"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.2"
-    >
-      <path d="M20 3l-4 1-4-1-4 1-4-1v4l3 2v13h10V9l3-2V3z" />
-    </svg>
-  ),
-  trouser: (
-    <svg
-      width="28"
-      height="28"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.2"
-    >
-      <path d="M4 2h16v8l-4 12H4V2z" />
-      <path d="M20 10l-4 12h-4V2" />
-    </svg>
-  ),
+type ProductImage = {
+  url: string;
+  isPrimary?: boolean;
+  order?: number;
 };
+
+type Product = {
+  _id: string;
+  title: string;
+  slug?: string;
+  tagline?: string;
+  description?: string;
+  category?: string;
+  subCategory?: string;
+  price: number;
+  comparePrice?: number;
+  discount?: number;
+  colors?: string[];
+  sizes?: string[];
+  badge?: string;
+  details?: string[];
+  care?: string;
+  rating?: number;
+  numReviews?: number;
+  images?: ProductImage[];
+  isAvailable?: boolean;
+  isFeatured?: boolean;
+};
+
+const categories = ["all", "Ethnic", "Western"];
 
 const formatPrice = (n: number) =>
   new Intl.NumberFormat("en-IN", {
@@ -146,278 +44,86 @@ const formatPrice = (n: number) =>
     maximumFractionDigits: 0,
   }).format(n);
 
-type SilhouetteProps = {
-  category: string;
-  accent: string;
-};
-
-function SilhouetteSVG({ category, accent }: SilhouetteProps) {
-  if (category === "suit")
-    return (
-      <svg
-        viewBox="0 0 160 220"
-        width="100%"
-        height="100%"
-        style={{ display: "block" }}
-      >
-        <defs>
-          <linearGradient id={`sg-${accent}`} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor={accent} stopOpacity="0.18" />
-            <stop offset="100%" stopColor={accent} stopOpacity="0.04" />
-          </linearGradient>
-        </defs>
-        <ellipse
-          cx="80"
-          cy="38"
-          rx="22"
-          ry="26"
-          fill={`url(#sg-${accent})`}
-          stroke={accent}
-          strokeWidth="0.6"
-          strokeOpacity="0.5"
-        />
-        <path
-          d="M40 70 Q58 55 80 64 Q102 55 120 70 L130 170 H30 Z"
-          fill={`url(#sg-${accent})`}
-          stroke={accent}
-          strokeWidth="0.6"
-          strokeOpacity="0.4"
-        />
-        <path
-          d="M80 64 L74 120"
-          stroke={accent}
-          strokeWidth="0.8"
-          strokeOpacity="0.5"
-        />
-        <path
-          d="M80 64 L86 120"
-          stroke={accent}
-          strokeWidth="0.8"
-          strokeOpacity="0.5"
-        />
-        <path
-          d="M58 70 L38 140"
-          stroke={accent}
-          strokeWidth="0.5"
-          strokeOpacity="0.3"
-          strokeDasharray="2 3"
-        />
-        <path
-          d="M102 70 L122 140"
-          stroke={accent}
-          strokeWidth="0.5"
-          strokeOpacity="0.3"
-          strokeDasharray="2 3"
-        />
-        <path
-          d="M60 130 Q80 123 100 130"
-          stroke={accent}
-          strokeWidth="0.6"
-          strokeOpacity="0.35"
-          fill="none"
-        />
-        <circle cx="80" cy="90" r="1.5" fill={accent} fillOpacity="0.6" />
-        <circle cx="80" cy="100" r="1.5" fill={accent} fillOpacity="0.6" />
-        <circle cx="80" cy="110" r="1.5" fill={accent} fillOpacity="0.6" />
-      </svg>
-    );
-  if (category === "shirt")
-    return (
-      <svg
-        viewBox="0 0 160 220"
-        width="100%"
-        height="100%"
-        style={{ display: "block" }}
-      >
-        <defs>
-          <linearGradient id={`sg2-${accent}`} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor={accent} stopOpacity="0.18" />
-            <stop offset="100%" stopColor={accent} stopOpacity="0.04" />
-          </linearGradient>
-        </defs>
-        <ellipse
-          cx="80"
-          cy="40"
-          rx="18"
-          ry="22"
-          fill={`url(#sg2-${accent})`}
-          stroke={accent}
-          strokeWidth="0.6"
-          strokeOpacity="0.5"
-        />
-        <path
-          d="M45 72 L35 110 L50 115 L50 175 L110 175 L110 115 L125 110 L115 72 Q96 60 80 66 Q64 60 45 72Z"
-          fill={`url(#sg2-${accent})`}
-          stroke={accent}
-          strokeWidth="0.6"
-          strokeOpacity="0.4"
-        />
-        <path
-          d="M80 66 L80 175"
-          stroke={accent}
-          strokeWidth="0.8"
-          strokeOpacity="0.35"
-          strokeDasharray="2 3"
-        />
-        <path
-          d="M68 75 L68 90 Q74 88 80 90 Q86 88 92 90 L92 75"
-          stroke={accent}
-          strokeWidth="0.7"
-          strokeOpacity="0.5"
-          fill="none"
-        />
-        <circle cx="80" cy="110" r="1.5" fill={accent} fillOpacity="0.6" />
-        <circle cx="80" cy="122" r="1.5" fill={accent} fillOpacity="0.6" />
-        <circle cx="80" cy="134" r="1.5" fill={accent} fillOpacity="0.6" />
-      </svg>
-    );
+function IconChevronRight() {
   return (
     <svg
-      viewBox="0 0 160 220"
-      width="100%"
-      height="100%"
-      style={{ display: "block" }}
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
     >
-      <defs>
-        <linearGradient id={`sg3-${accent}`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor={accent} stopOpacity="0.18" />
-          <stop offset="100%" stopColor={accent} stopOpacity="0.04" />
-        </linearGradient>
-      </defs>
-      <path
-        d="M50 40 L110 40 L118 130 L92 130 L92 200 L68 200 L68 130 L42 130 Z"
-        fill={`url(#sg3-${accent})`}
-        stroke={accent}
-        strokeWidth="0.6"
-        strokeOpacity="0.45"
-      />
-      <path
-        d="M50 40 L68 130"
-        stroke={accent}
-        strokeWidth="0.5"
-        strokeOpacity="0.3"
-      />
-      <path
-        d="M110 40 L92 130"
-        stroke={accent}
-        strokeWidth="0.5"
-        strokeOpacity="0.3"
-      />
-      <path
-        d="M80 40 L80 200"
-        stroke={accent}
-        strokeWidth="0.8"
-        strokeOpacity="0.35"
-        strokeDasharray="2 3"
-      />
-      <path
-        d="M45 80 L115 80"
-        stroke={accent}
-        strokeWidth="0.5"
-        strokeOpacity="0.25"
-      />
+      <polyline points="9 18 15 12 9 6" />
     </svg>
   );
 }
 
-type Product = {
-  id: string;
-  name: string;
-  material: string;
-  price: number;
-  category: "suit" | "shirt" | "trouser";
-  badge?: string;
-  accent: string;
-  bg: string;
-  description: string;
-};
+export default function Products() {
+  const dispatch = useDispatch<AppDispatch>();
+  const { products, loading, loaded } = useSelector(
+    (state: RootState) => state.products,
+  ) as { products: Product[]; loading: boolean; loaded: boolean };
+  const [activeCategory, setActiveCategory] = useState("all");
 
-type ProductCardProps = {
-  product: Product;
-  index: number;
-};
+  useEffect(() => {
+    if (!loading && !loaded) {
+      dispatch(fetchProducts());
+    }
+  }, [dispatch, loading, loaded]);
 
-function ProductCard({ product, index }: ProductCardProps) {
-  const [hovered, setHovered] = useState(false);
-  const [added, setAdded] = useState(false);
+  const filteredProducts =
+    activeCategory === "all"
+      ? products
+      : products.filter((p) => p.category === activeCategory);
 
-  const handleAdd = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1800);
+  const displayProducts = filteredProducts.slice(0, 8);
+
+  const getCategoryIcon = (category?: string) => {
+    if (category === "Ethnic") {
+      return (
+        <svg
+          width="28"
+          height="28"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.2"
+        >
+          <path d="M12 2L2 7l10 5 10-5-10-5z" />
+          <path d="M2 17l10 5 10-5" />
+          <path d="M2 12l10 5 10-5" />
+        </svg>
+      );
+    }
+    return (
+      <svg
+        width="28"
+        height="28"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.2"
+      >
+        <path d="M20 3l-4 1-4-1-4 1-4-1v4l3 2v13h10V9l3-2V3z" />
+      </svg>
+    );
   };
 
-  return (
-    <div
-      className={`product-card${hovered ? " hovered" : ""}`}
-      style={{ animationDelay: `${index * 80}ms` }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      {product.badge && (
-        <div
-          className="badge"
-          style={{ color: product.accent, borderColor: product.accent + "55" }}
-        >
-          {product.badge}
-        </div>
-      )}
-
-      <div className="card-img" style={{ background: product.bg }}>
-        <div className="card-silhouette">
-          <SilhouetteSVG category={product.category} accent={product.accent} />
-        </div>
-        <div
-          className="card-shimmer"
-          style={{
-            background: `linear-gradient(135deg, transparent 40%, ${product.accent}08 100%)`,
-          }}
-        />
-        <div className={`card-overlay${hovered ? " visible" : ""}`}>
-          <button
-            className="quick-view-btn"
-            style={{
-              color: product.accent,
-              borderColor: product.accent + "80",
-            }}
-          >
-            Quick View
-          </button>
+  if (loading || !loaded) {
+    return (
+      <div className="products-root">
+        <div className="grain-overlay" />
+        <div className="products-inner">
+          <div className="flex justify-center items-center min-h-[400px]">
+            <div className="text-[#C9A96E] text-lg tracking-wider animate-pulse">
+              CURATING COLLECTION...
+            </div>
+          </div>
         </div>
       </div>
-
-      <div className="card-body">
-        <div className="card-cat" style={{ color: product.accent + "bb" }}>
-          {product.category.charAt(0).toUpperCase() + product.category.slice(1)}
-        </div>
-        <h3 className="card-name">{product.name}</h3>
-        <p className="card-material">{product.material}</p>
-        <p className="card-desc">{product.description}</p>
-
-        <div className="card-footer">
-          <span className="card-price">{formatPrice(product.price)}</span>
-          <button
-            className={`add-btn${added ? " added" : ""}`}
-            style={{
-              background: added ? product.accent : "transparent",
-              borderColor: product.accent,
-              color: added ? "#0a0a08" : product.accent,
-            }}
-            onClick={handleAdd}
-          >
-            {added ? "Added ✓" : "Add to Bag"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default function Products() {
-  const [active, setActive] = useState("all");
-
-  const filtered =
-    active === "all" ? products : products.filter((p) => p.category === active);
+    );
+  }
 
   return (
     <>
@@ -514,38 +220,83 @@ export default function Products() {
         }
 
         .product-card {
-          background: #0f0e0c;
+          background: #0d0e12;
           border: 1px solid #ffffff0a;
           border-radius: 2px;
-          overflow: hidden; cursor: pointer;
+          overflow: hidden;
           transition: border-color 0.4s ease, transform 0.4s ease;
           animation: cardIn 0.5s both;
           position: relative;
+          text-decoration: none;
+          display: block;
         }
-        .product-card.hovered {
-          border-color: #ffffff18;
+        .product-card:hover {
+          border-color: rgba(201, 169, 110, 0.3);
           transform: translateY(-4px);
         }
 
         .badge {
-          position: absolute; top: 20px; left: 20px; z-index: 10;
+          position: absolute; top: 20px; left: 10px; z-index: 10;
           font-family: 'Montserrat', sans-serif;
           font-size: 9px; font-weight: 600;
           letter-spacing: 0.25em; text-transform: uppercase;
           padding: 5px 12px; border: 1px solid;
           border-radius: 0;
+          background: rgba(5, 10, 24, 0.8);
+          backdrop-filter: blur(4px);
         }
 
         .card-img {
           position: relative; height: 340px; overflow: hidden;
+          background: linear-gradient(145deg, #0a0c12 0%, #111318 100%);
         }
-        .card-silhouette {
-          position: absolute; inset: 0;
-          display: flex; align-items: center; justify-content: center;
-          padding: 32px 48px;
+        .card-img img {
+          width: 100%; height: 100%; object-fit: cover;
+          transition: transform 0.6s ease;
         }
-        .card-shimmer {
-          position: absolute; inset: 0; pointer-events: none;
+        .product-card:hover .card-img img {
+          transform: scale(1.05);
+        }
+        .card-img-hover-track {
+          position: absolute;
+          inset: 0;
+        }
+        .card-img-primary,
+        .card-img-secondary {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 0.6s ease;
+        }
+        .card-img-primary {
+          transform: translateX(0);
+        }
+        .card-img-secondary {
+          transform: translateX(100%);
+        }
+        .product-card:hover .card-img-primary {
+          transform: translateX(-100%);
+        }
+        .product-card:hover .card-img-secondary {
+          transform: translateX(0);
+        }
+        @keyframes autoSlidePrimary {
+          0%, 14%, 100% { transform: translateX(0); }
+          22%, 78% { transform: translateX(-100%); }
+          86% { transform: translateX(0); }
+        }
+        @keyframes autoSlideSecondary {
+          0%, 14%, 100% { transform: translateX(100%); }
+          22%, 78% { transform: translateX(0); }
+          86% { transform: translateX(100%); }
+        }
+        .product-card.auto-preview .card-img-primary {
+          animation: autoSlidePrimary 6.5s ease-in-out infinite;
+        }
+        .product-card.auto-preview .card-img-secondary {
+          animation: autoSlideSecondary 6.5s ease-in-out infinite;
         }
         .card-overlay {
           position: absolute; inset: 0;
@@ -554,16 +305,17 @@ export default function Products() {
           background: linear-gradient(0deg, rgba(0,0,0,0.55) 0%, transparent 50%);
           opacity: 0; transition: opacity 0.35s ease;
         }
-        .card-overlay.visible { opacity: 1; }
+        .product-card:hover .card-overlay { opacity: 1; }
 
         .quick-view-btn {
           font-family: 'Montserrat', sans-serif;
           font-size: 10px; font-weight: 500;
           letter-spacing: 0.25em; text-transform: uppercase;
-          padding: 10px 24px; border: 1px solid;
+          padding: 10px 24px; border: 1px solid #C9A96E;
           background: rgba(0,0,0,0.6); cursor: pointer;
           border-radius: 0;
           transition: background 0.2s ease;
+          color: #C9A96E;
         }
         .quick-view-btn:hover { background: rgba(0,0,0,0.9); }
 
@@ -576,53 +328,129 @@ export default function Products() {
           font-size: 10px; font-weight: 500;
           letter-spacing: 0.3em; text-transform: uppercase;
           margin-bottom: 10px;
+          color: #C9A96E;
         }
 
         .card-name {
           font-family: 'Cormorant Garamond', serif;
           font-size: 26px; font-weight: 400;
-          color: #f0ece0; line-height: 1.15;
+          color: #f0ece0; line-height: 1.2;
           margin-bottom: 8px;
         }
 
-        .card-material {
+        .card-sub {
           font-size: 11px; font-weight: 400;
-          letter-spacing: 0.12em; color: #C9A96E;
-          margin-bottom: 14px; text-transform: uppercase;
+          letter-spacing: 0.12em; color: #a09884;
+          // margin-bottom: 14px;
+          text-transform: uppercase;
         }
 
         .card-desc {
           font-size: 13px; font-weight: 300;
-          line-height: 1.75; color: white/50;
-          margin-bottom: 24px;
+          line-height: 1.65; color: #b0a894;
+          margin-bottom: 20px;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
         }
 
         .card-footer {
-          display: flex; align-items: center; justify-content: space-between;
-          border-top: 1px solid #ffffff08; padding-top: 20px;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 14px;
+          border-top: 1px solid #ffffff08; padding-top: 10px;
+        }
+        .card-price-wrap {
+          width: 100%;
+          text-align: left;
+        }
+        .card-footer .add-btn {
+          align-self: center;
         }
 
         .card-price {
-          font-family: 'Cormorant Garamond', serif;
+          // font-family: 'Cormorant Garamond', serif;
           font-size: 24px; font-weight: 400;
-          color: #d4c8a8;
+          color: white;
           letter-spacing: 0.02em;
         }
 
+        .card-price-compare {
+          font-size: 14px;
+          color: #8a8270;
+          text-decoration: line-through;
+          margin-left: 8px;
+        }
+
         .add-btn {
+          position: relative;
+          isolation: isolate;
+          overflow: hidden;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
           font-family: 'Montserrat', sans-serif;
           font-size: 10px; font-weight: 500;
-          letter-spacing: 0.2em; text-transform: uppercase;
-          padding: 10px 20px; border: 1px solid;
-          cursor: pointer; border-radius: 0;
-          transition: all 0.3s ease;
+          letter-spacing: 0.22em; text-transform: uppercase;
+          padding: 8px 16px;
+          border: 1px solid #C9A96E66;
+          cursor: pointer;
+          border-radius: 0;
+          transition: color 0.35s ease, border-color 0.35s ease, transform 0.25s ease;
+          background: transparent;
+          color: #C9A96E;
+          min-width: 132px;
+          justify-content: space-between;
         }
-        .add-btn:hover { opacity: 0.85; }
+        .add-btn::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(90deg, #C9A96E 0%, #d8b57a 60%, #e8cc97 100%);
+          transform: translateX(-105%);
+          transition: transform 0.45s cubic-bezier(.22,.61,.36,1);
+          z-index: -1;
+        }
+        .add-btn-label {
+          position: relative;
+          z-index: 1;
+        }
+        .add-btn-icon {
+          position: relative;
+          z-index: 1;
+          width: 16px;
+          height: 16px;
+          border-radius: 0;
+          border: none;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 13px;
+          font-weight: 400;
+          line-height: 1;
+          transition: transform 0.35s ease;
+        }
+        .add-btn:hover {
+          color: #1a1409;
+          border-color: #e5c58c;
+          transform: translateY(-1px);
+        }
+        .add-btn:hover::before {
+          transform: translateX(0);
+        }
+        .add-btn:hover .add-btn-icon {
+          transform: rotate(90deg);
+        }
 
         .products-count {
           font-size: 12px; letter-spacing: 0.15em;
-          color: white; text-transform: uppercase;
+          color: #8a8270; text-transform: uppercase;
           margin-bottom: 24px;
+        }
+        .products-count span {
+          color: #C9A96E;
         }
 
         .divider {
@@ -631,10 +459,44 @@ export default function Products() {
           margin-bottom: 48px;
         }
 
+        .view-collection-btn {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          width: 100%;
+          margin-top: 64px;
+          padding: 20px 32px;
+          background: rgba(201, 169, 110, 0.05);
+          border: 1px solid rgba(201, 169, 110, 0.2);
+          text-decoration: none;
+          transition: all 0.3s ease;
+        }
+        .view-collection-btn:hover {
+          background: rgba(201, 169, 110, 0.12);
+          border-color: rgba(201, 169, 110, 0.4);
+        }
+        .view-collection-text {
+          font-family: 'Montserrat', sans-serif;
+          font-size: 13px;
+          font-weight: 500;
+          letter-spacing: 0.25em;
+          text-transform: uppercase;
+          color: #C9A96E;
+        }
+        .view-collection-icon {
+          color: #C9A96E;
+          transition: transform 0.3s ease;
+        }
+        .view-collection-btn:hover .view-collection-icon {
+          transform: translateX(8px);
+        }
+
         @media (max-width: 640px) {
           .products-inner { padding: 48px 20px 80px; }
           .products-grid { grid-template-columns: 1fr; }
-          .products-filter-btn { padding: 12px 16px 14px; font-size: 11px; }
+          .products-filter-btn { padding: 12px 16px 14px; font-size: 10px; }
+          .view-collection-btn { padding: 16px 20px; }
+          .view-collection-text { font-size: 11px; }
         }
       `}</style>
 
@@ -666,12 +528,10 @@ export default function Products() {
               return (
                 <button
                   key={cat}
-                  className={`products-filter-btn ${active === cat ? "active" : ""}`}
-                  onClick={() => setActive(cat)}
+                  className={`products-filter-btn ${activeCategory === cat ? "active" : ""}`}
+                  onClick={() => setActiveCategory(cat)}
                 >
-                  {cat === "all"
-                    ? "All Pieces"
-                    : cat.charAt(0).toUpperCase() + cat.slice(1) + "s"}
+                  {cat === "all" ? "All Pieces" : cat}
                   <span className="products-filter-count">{count}</span>
                 </button>
               );
@@ -679,14 +539,154 @@ export default function Products() {
           </div>
 
           <div className="products-count">
-            Showing {filtered.length} of {products.length} pieces
+            Showing <span>{displayProducts.length}</span> of{" "}
+            {filteredProducts.length} pieces
           </div>
 
           <div className="products-grid">
-            {filtered.map((p, i) => (
-              <ProductCard key={p.id} product={p} index={i} />
-            ))}
+            {displayProducts.map((product, index) => {
+              const primaryImage =
+                product.images?.find((img) => img.isPrimary) ||
+                product.images?.[0];
+              const secondaryImage = product.images?.find(
+                (img) => img.url !== primaryImage?.url,
+              );
+              const hasImagePair = Boolean(primaryImage && secondaryImage);
+              const autoPreviewSeed =
+                product._id
+                  .split("")
+                  .reduce((sum, ch) => sum + ch.charCodeAt(0), 0) + index;
+              const shouldAutoPreview =
+                hasImagePair && autoPreviewSeed % 3 === 0;
+              const hasDiscount = product.discount && product.discount > 0;
+              const discountedPrice = hasDiscount
+                ? product.price * (1 - (product.discount || 0) / 100)
+                : product.price;
+
+              return (
+                <Link
+                  key={product._id}
+                  href={`/collection/product-detail?id=${product._id}`}
+                  className={`product-card ${shouldAutoPreview ? "auto-preview" : ""}`}
+                  style={{ animationDelay: `${index * 80}ms` }}
+                >
+                  {product.badge && (
+                    <div
+                      className="badge"
+                      style={{ color: "#C9A96E", borderColor: "#C9A96E55" }}
+                    >
+                      {product.badge}
+                    </div>
+                  )}
+
+                  <div className="card-img">
+                    {primaryImage && secondaryImage ? (
+                      <div className="card-img-hover-track">
+                        <img
+                          src={primaryImage.url}
+                          alt={product.title}
+                          loading="lazy"
+                          className="card-img-primary"
+                        />
+                        <img
+                          src={secondaryImage.url}
+                          alt={`${product.title} alternate view`}
+                          loading="lazy"
+                          className="card-img-secondary"
+                        />
+                      </div>
+                    ) : primaryImage ? (
+                      <img
+                        src={primaryImage.url}
+                        alt={product.title}
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="card-silhouette flex items-center justify-center h-full">
+                        {getCategoryIcon(product.category)}
+                      </div>
+                    )}
+                    <div className="card-overlay">
+                      <button
+                        className="quick-view-btn"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          window.location.href = `/collection/product-detail?id=${product._id}`;
+                        }}
+                      >
+                        Quick View
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="card-body">
+                    <div className="card-cat">
+                      {product.category} ·{" "}
+                      {product.subCategory || "Ready to Wear"}
+                    </div>
+                    <h3 className="card-name">{product.title}</h3>
+                    <p className="card-sub">
+                      {product.tagline ||
+                        product.colors?.[0] ||
+                        "Premium Quality"}
+                    </p>
+                    {/* <p className="card-desc">
+                      {product.description?.slice(0, 100)}...
+                    </p> */}
+
+                    <div className="card-footer">
+                      <div className="card-price-wrap">
+                        <span className="card-price">
+                          {formatPrice(
+                            hasDiscount ? discountedPrice : product.price,
+                          )}
+                        </span>
+                        {hasDiscount && (
+                          <span className="card-price-compare">
+                            {formatPrice(product.price)}
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        className="add-btn"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          // Add to cart logic
+                          console.log("Add to cart:", product.title);
+                        }}
+                      >
+                        <span className="add-btn-label">Add to Bag</span>
+                        <span className="add-btn-icon">+</span>
+                      </button>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
+
+          {filteredProducts.length > 8 && (
+            <Link href="/collection" className="view-collection-btn">
+              <span className="view-collection-text">View Full Collection</span>
+              <span className="view-collection-icon">
+                <IconChevronRight />
+              </span>
+            </Link>
+          )}
+
+          {displayProducts.length === 0 && (
+            <div className="text-center py-16">
+              <p className="text-[#a09884] text-lg">
+                No products found in this category.
+              </p>
+              <button
+                onClick={() => setActiveCategory("all")}
+                className="mt-6 px-8 py-3 border border-[#C9A96E] text-[#C9A96E] text-sm uppercase tracking-wider hover:bg-[rgba(201,169,110,0.1)] transition-all"
+              >
+                View All Products
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </>

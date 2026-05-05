@@ -1,8 +1,11 @@
 ﻿"use client";
 
-import { useEffect, useRef, useState } from "react";
+import { fetchProducts } from "@/app/store/productSlice";
+import type { AppDispatch, RootState } from "@/app/store/store";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
-// ── HERO SLIDES ─────────────────────────────────────────────────────────────
+// -- HERO SLIDES -------------------------------------------------------------
 // textAlign: "left" | "center" | "right"
 const heroSlides = [
   {
@@ -79,7 +82,7 @@ const heroSlides = [
   },
 ];
 
-// ── COLLECTION GRID ──────────────────────────────────────────────────────────
+// -- COLLECTION GRID ----------------------------------------------------------
 const collageItems = [
   {
     img: "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=600&q=85",
@@ -114,12 +117,27 @@ const collageItems = [
 ];
 
 export default function Hero() {
+  const dispatch = useDispatch<AppDispatch>();
+  const { products, loading, loaded } = useSelector(
+    (state: RootState) => state.products,
+  );
   const [current, setCurrent] = useState(0);
   const [prev, setPrev] = useState<number | null>(null);
   const [animKey, setAnimKey] = useState(0);
+  const [collageStart, setCollageStart] = useState(0);
+  const [prevCollageStart, setPrevCollageStart] = useState<number | null>(null);
   const transitioningRef = useRef(false);
   const currentRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const collageTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const collageTransitioningRef = useRef(false);
+  const collageSlidesDoneRef = useRef(0);
+
+  useEffect(() => {
+    if (!loading && !loaded) {
+      dispatch(fetchProducts());
+    }
+  }, [dispatch, loading, loaded]);
 
   const goTo = (idx: number) => {
     if (transitioningRef.current || idx === currentRef.current) return;
@@ -147,6 +165,69 @@ export default function Hero() {
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, []);
+
+  const collageSource = useMemo(() => {
+    const fromStore = (products ?? [])
+      .filter(
+        (p: any) => p?.title && (p?.images?.[0]?.url || p?.images?.[1]?.url),
+      )
+      .map((p: any, index: number) => ({
+        img: p.images?.[0]?.url || p.images?.[1]?.url || "/new.jpg",
+        label: p.title,
+        desc: `${p.category || "Collection"}${p.colors?.[0] ? ` · ${p.colors[0]}` : ""}`,
+        tag:
+          index % 4 === 0 ? "Featured" : index % 5 === 0 ? "Bestseller" : null,
+      }));
+
+    return fromStore.length > 0 ? fromStore : collageItems;
+  }, [products]);
+
+  const collageVisible = useMemo(() => {
+    const size = 5;
+    if (collageSource.length <= size) return collageSource;
+    return Array.from({ length: size }, (_, i) => {
+      const idx = (collageStart + i) % collageSource.length;
+      return collageSource[idx];
+    });
+  }, [collageSource, collageStart]);
+
+  const collagePrevVisible = useMemo(() => {
+    if (prevCollageStart === null) return [];
+    const size = 5;
+    if (collageSource.length <= size) return collageSource;
+    return Array.from({ length: size }, (_, i) => {
+      const idx = (prevCollageStart + i) % collageSource.length;
+      return collageSource[idx];
+    });
+  }, [collageSource, prevCollageStart]);
+
+  const goToNextCollageSet = () => {
+    if (collageSource.length <= 5 || collageTransitioningRef.current) return;
+    collageTransitioningRef.current = true;
+    setPrevCollageStart(collageStart);
+    setCollageStart((prevIndex) => (prevIndex + 5) % collageSource.length);
+    setTimeout(() => {
+      setPrevCollageStart(null);
+      collageTransitioningRef.current = false;
+    }, 650);
+  };
+
+  useEffect(() => {
+    if (collageSource.length <= 5) return;
+    collageSlidesDoneRef.current = 0;
+    collageTimerRef.current = setInterval(() => {
+      if (collageSlidesDoneRef.current >= 3) {
+        if (collageTimerRef.current) clearInterval(collageTimerRef.current);
+        return;
+      }
+      collageSlidesDoneRef.current += 1;
+      goToNextCollageSet();
+    }, 4200);
+
+    return () => {
+      if (collageTimerRef.current) clearInterval(collageTimerRef.current);
+    };
+  }, [collageSource.length, collageStart]);
 
   const slide = heroSlides[current];
 
@@ -179,7 +260,7 @@ export default function Hero() {
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Montserrat:wght@300;400;500;600&display=swap');
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* ── FULL-WIDTH HERO ── */
+        /* -- FULL-WIDTH HERO -- */
         .fw-hero {
           width: 100%;
           height: 100vh;
@@ -346,14 +427,14 @@ export default function Hero() {
           pointer-events: none;
         }
 
-        /* ── GOLD DIVIDER ── */
+        /* -- GOLD DIVIDER -- */
         .gold-divider {
           width: 100%; height: 1px;
           background: linear-gradient(to right, transparent, #c9a84c 30%, #c9a84c 70%, transparent);
           opacity: 0.3;
         }
 
-        /* ── COLLECTION SECTION ── */
+        /* -- COLLECTION SECTION -- */
         .collage-header {
           display: flex; align-items: center; justify-content: space-between;
           padding: 28px 32px 20px;
@@ -367,12 +448,40 @@ export default function Hero() {
         .collage-grid {
           display: grid;
           grid-template-columns: 1.1fr 1fr 1fr 1.4fr 1fr;
-          grid-template-rows: 280px;
+          grid-template-rows: 380px;
           gap: 3px; padding: 0 3px 3px;
+        }
+        .collage-viewport {
+          position: relative;
+          overflow: hidden;
+        }
+        .collage-grid-track {
+          display: grid;
+          grid-template-columns: 1.1fr 1fr 1fr 1.4fr 1fr;
+          grid-template-rows: 380px;
+          gap: 3px;
+          padding: 0 3px 3px;
+          width: 100%;
+        }
+        .collage-grid-track.current-enter {
+          animation: collageSlideIn 650ms cubic-bezier(.22,.61,.36,1) both;
+        }
+        .collage-grid-track.prev-exit {
+          position: absolute;
+          inset: 0;
+          animation: collageSlideOut 650ms cubic-bezier(.22,.61,.36,1) both;
+        }
+        @keyframes collageSlideIn {
+          from { transform: translateX(100%); }
+          to { transform: translateX(0); }
+        }
+        @keyframes collageSlideOut {
+          from { transform: translateX(0); }
+          to { transform: translateX(-100%); }
         }
         .collage-cell { position: relative; overflow: hidden; cursor: pointer; }
         .collage-cell img {
-          width: 100%; height: 100%; object-fit: cover; object-position: center;
+          width: 100%; height: 100%; object-fit: cover; object-position: top center;
           filter: brightness(0.65) contrast(1.08); transition: filter 0.5s, transform 0.6s;
         }
         .collage-cell:hover img { filter: brightness(0.85) contrast(1.08); transform: scale(1.05); }
@@ -392,7 +501,7 @@ export default function Hero() {
           color: #c9a84c; padding: 3px 8px;
         }
 
-        /* ── EDITORIAL BANNERS ── */
+        /* -- EDITORIAL BANNERS -- */
         .banners-section { width: 100%; background: #0a0806; font-family: 'Montserrat', sans-serif; }
         .banner-full { position: relative; width: 100%; height: 650px; overflow: hidden; }
         .banner-full img {
@@ -453,7 +562,7 @@ export default function Hero() {
         .duo-cta { display: inline-block; font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase; color: #c9a84c; border-bottom: 1px solid rgba(201,168,76,0.5); padding-bottom: 2px; cursor: pointer; }
       `}</style>
 
-      {/* ══ SECTION 1: FULL-WIDTH CINEMATIC HERO ══ */}
+      {/* -- SECTION 1: FULL-WIDTH CINEMATIC HERO -- */}
       <section className="fw-hero" id="home">
         {/* Slide images */}
         {heroSlides.map((s, i) => (
@@ -468,10 +577,10 @@ export default function Hero() {
         {/* Top bar — brand + nav */}
         <div className="fw-topbar">
           <div>
-            <div className="fw-brand-est">Est. 2010</div>
-            <div className="fw-brand-name">ZENmen</div>
+            {/* <div className="fw-brand-est">Est. 2010</div>
+            <div className="fw-brand-name">ZENmen</div> */}
           </div>
-          <div className="fw-topbar-right">
+          {/* <div className="fw-topbar-right">
             <a href="#collection" className="fw-nav-link">
               Collection
             </a>
@@ -488,7 +597,7 @@ export default function Hero() {
             >
               Book Fitting
             </a>
-          </div>
+          </div> */}
         </div>
 
         {/* Overlay gradient */}
@@ -579,7 +688,7 @@ export default function Hero() {
         </div>
       </section>
 
-      {/* ══ SECTION 3: EDITORIAL BANNERS ══ */}
+      {/* -- SECTION 3: EDITORIAL BANNERS -- */}
       <div className="banners-section">
         <div className="gold-divider" />
 
@@ -704,7 +813,7 @@ export default function Hero() {
               <p className="duo-sub">
                 Italian wool layers for polished winter presence.
               </p>
-              <span className="duo-cta">View Winter Edit →</span>
+              <span className="duo-cta">View Winter Edit ?</span>
             </div>
           </div>
           <div className="duo-cell">
@@ -723,7 +832,7 @@ export default function Hero() {
               <p className="duo-sub">
                 Egyptian cotton, built to impress from dawn to dusk.
               </p>
-              <span className="duo-cta">Browse Shirts →</span>
+              <span className="duo-cta">Browse Shirts ?</span>
             </div>
           </div>
         </div>
@@ -776,7 +885,7 @@ export default function Hero() {
         {/* <div className="gold-divider" /> */}
       </div>
 
-      {/* ══ SECTION 2: COLLECTION GRID ══ */}
+      {/* -- SECTION 2: COLLECTION GRID -- */}
       <section
         id="collection"
         style={{
@@ -792,17 +901,38 @@ export default function Hero() {
           </h2>
           <span className="collage-subtitle">Explore Every Category</span>
         </div>
-        <div className="collage-grid">
-          {collageItems.map((item, i) => (
-            <div className="collage-cell" key={i}>
-              <img src={item.img} alt={item.label} />
-              <div className="collage-cell-overlay">
-                <div className="collage-cell-label">{item.label}</div>
-                <div className="collage-cell-desc">{item.desc}</div>
-              </div>
-              {item.tag && <div className="collage-cell-tag">{item.tag}</div>}
+        <div className="collage-viewport">
+          {prevCollageStart !== null && (
+            <div className="collage-grid-track prev-exit">
+              {collagePrevVisible.map((item, i) => (
+                <div className="collage-cell" key={`prev-${i}`}>
+                  <img src={item.img} alt={item.label} />
+                  <div className="collage-cell-overlay">
+                    <div className="collage-cell-label">{item.label}</div>
+                    <div className="collage-cell-desc">{item.desc}</div>
+                  </div>
+                  {item.tag && (
+                    <div className="collage-cell-tag">{item.tag}</div>
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
+          )}
+          <div
+            className={`collage-grid-track ${prevCollageStart !== null ? "current-enter" : ""}`}
+            key={`${collageStart}-${collageSource.length}`}
+          >
+            {collageVisible.map((item, i) => (
+              <div className="collage-cell" key={i}>
+                <img src={item.img} alt={item.label} />
+                <div className="collage-cell-overlay">
+                  <div className="collage-cell-label">{item.label}</div>
+                  <div className="collage-cell-desc">{item.desc}</div>
+                </div>
+                {item.tag && <div className="collage-cell-tag">{item.tag}</div>}
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </>

@@ -82,6 +82,16 @@ export default function CollectionPage() {
     });
   }, [products, search, selectedCategory, selectedColor]);
 
+  const categoryFilters = useMemo(
+    () => ["All", ...Array.from(new Set(products.map((p) => p.category).filter(Boolean)))],
+    [products],
+  );
+
+  const colorFilters = useMemo(
+    () => ["All", ...Array.from(new Set(products.flatMap((p) => p.colors ?? []).filter(Boolean)))],
+    [products],
+  );
+
   const switchImage = (id: string, dir: "prev" | "next", length: number) => {
     if (!length || length <= 1) return;
     setActiveImage((prev) => {
@@ -114,6 +124,56 @@ export default function CollectionPage() {
             opacity: 1;
             transform: translateY(0);
           }
+        }
+        @keyframes autoSlidePrimary {
+          0%, 14%, 100% { transform: translateX(0); }
+          22%, 78% { transform: translateX(-100%); }
+          86% { transform: translateX(0); }
+        }
+        @keyframes autoSlideSecondary {
+          0%, 14%, 100% { transform: translateX(100%); }
+          22%, 78% { transform: translateX(0); }
+          86% { transform: translateX(100%); }
+        }
+        .product-preview-media {
+          position: relative;
+          overflow: hidden;
+        }
+        .product-preview-track {
+          position: absolute;
+          inset: 0;
+        }
+        .product-preview-primary,
+        .product-preview-secondary {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center 20%;
+          transition: transform 0.6s ease;
+        }
+        .product-preview-primary {
+          transform: translateX(0);
+        }
+        .product-preview-secondary {
+          transform: translateX(100%);
+        }
+        .preview-card:hover .product-preview-primary {
+          transform: translateX(-100%);
+        }
+        .preview-card:hover .product-preview-secondary {
+          transform: translateX(0);
+        }
+        .preview-card.auto-preview .product-preview-primary {
+          animation: autoSlidePrimary 6.5s ease-in-out infinite;
+        }
+        .preview-card.auto-preview .product-preview-secondary {
+          animation: autoSlideSecondary 6.5s ease-in-out infinite;
+        }
+        .preview-card.auto-preview:hover .product-preview-primary,
+        .preview-card.auto-preview:hover .product-preview-secondary {
+          animation-play-state: paused;
         }
       `}</style>
       <main className="bg-[#050A18] text-[#F3EEE4]">
@@ -176,7 +236,7 @@ export default function CollectionPage() {
               placeholder="Search products..."
               className="h-11 rounded-lg border border-[#c8a96e44] bg-[#0f1830] px-3 text-sm text-[#f3eee4] outline-none transition focus:border-[#d6bb89]"
             />
-            {/* <select
+            <select
               value={selectedCategory}
               onChange={(event) => setSelectedCategory(event.target.value)}
               className="h-11 rounded-lg border border-[#c8a96e44] bg-[#0f1830] px-3 text-sm text-[#f3eee4] outline-none transition focus:border-[#d6bb89]"
@@ -201,7 +261,7 @@ export default function CollectionPage() {
                   Color: {color}
                 </option>
               ))}
-            </select> */}
+            </select>
             <button
               type="button"
               onClick={() => {
@@ -219,35 +279,59 @@ export default function CollectionPage() {
             Showing {filteredProducts.length} of {products.length} products
           </div>
 
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {filteredProducts.map((product, index) => {
               const imgIndex = activeImage[product._id] ?? 0;
+              const images = product.images ?? [];
+              const primary = images[imgIndex]?.url || images[0]?.url || "/new.jpg";
+              const altIndex = images.length > 1 ? (imgIndex + 1) % images.length : 0;
+              const secondary = images[altIndex]?.url || primary;
+              const hasImagePair = Boolean(primary && secondary);
+              const autoPreview =
+                hasImagePair &&
+                (product._id
+                  .split("")
+                  .reduce((sum, ch) => sum + ch.charCodeAt(0), 0) +
+                  index) %
+                  3 ===
+                  0;
               return (
                 <article
                   key={product._id}
-                  className="group translate-y-7 animate-[fadeInUp_0.7s_ease_forwards] overflow-hidden rounded-xl border border-[#c8a96e33] bg-[#111111] opacity-0 shadow-[0_16px_40px_rgba(0,0,0,0.45)] transition duration-500 hover:border-[#c8a96e8a]"
+                  className={`group preview-card translate-y-7 animate-[fadeInUp_0.7s_ease_forwards] overflow-hidden rounded-xl border border-[#c8a96e33] bg-[#111111] opacity-0 shadow-[0_16px_40px_rgba(0,0,0,0.45)] transition duration-500 hover:border-[#c8a96e8a] ${autoPreview ? "auto-preview" : ""}`}
                   style={{ animationDelay: `${index * 70}ms` }}
                 >
                   <Link
                     href={`/collection/product-detail?id=${product._id}`}
                     className="block"
                   >
-                    <div className="relative aspect-[3/4] overflow-hidden">
+                    <div className="product-preview-media relative aspect-[3/4] overflow-hidden">
                       {product.badge && (
                         <span className="absolute left-3 top-3 z-20 border border-[#c8a96e88] bg-black/70 px-3 py-1 text-[10px] tracking-[0.2em] text-[#d6bb89] uppercase">
                           {product.badge}
                         </span>
                       )}
 
-                      <img
-                        src={
-                          product.images?.[imgIndex]?.url ||
-                          product.images?.[0]?.url ||
-                          "/new.jpg"
-                        }
-                        alt={product.title}
-                        className="h-full w-full object-cover object-[center_20%]"
-                      />
+                      {hasImagePair ? (
+                        <div className="product-preview-track">
+                          <img
+                            src={primary}
+                            alt={product.title}
+                            className="product-preview-primary"
+                          />
+                          <img
+                            src={secondary}
+                            alt={`${product.title} alternate view`}
+                            className="product-preview-secondary"
+                          />
+                        </div>
+                      ) : (
+                        <img
+                          src={primary}
+                          alt={product.title}
+                          className="h-full w-full object-cover object-[center_20%]"
+                        />
+                      )}
 
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent" />
                     </div>
