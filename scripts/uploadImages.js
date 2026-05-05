@@ -13,7 +13,7 @@ cloudinary.config({
 });
 
 // IMAGE FOLDER
-const IMAGE_FOLDER = "./assests/allCollections";
+const IMAGE_FOLDER = "./assests/current";
 
 // ✅ ADD THIS (store uploaded data)
 const uploaded = [];
