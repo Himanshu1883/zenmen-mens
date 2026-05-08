@@ -121,14 +121,9 @@ export default function Navbar() {
   const [authLoading, setAuthLoading] = useState(false);
   const prevStatusRef = useRef<typeof status>("loading");
   const accountMenuRef = useRef<HTMLDivElement | null>(null);
-  const userRole =
-    (
-      session?.user as
-        | (typeof session.user & {
-            role?: string;
-          })
-        | undefined
-    )?.role || "user";
+  const userRole = session?.user
+    ? (session.user as typeof session.user & { role?: string }).role
+    : "user";
   const isAdmin = userRole === "admin";
 
   useEffect(() => {
