@@ -107,7 +107,7 @@ export default function Navbar() {
   const [authOpen, setAuthOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [collectionMenuOpen, setCollectionMenuOpen] = useState(false);
-  const [activeCollectionItem, setActiveCollectionItem] = useState(
+  const [activeCollectionItem, setActiveCollectionItem] = useState<typeof collectionMenuItems[number]>(
     collectionMenuItems[0],
   );
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
