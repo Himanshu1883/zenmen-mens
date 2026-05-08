@@ -4,8 +4,9 @@ import { useScrolled } from "@/app/hooks/useScrolled";
 import { Menu, ShoppingCartIcon, User, X } from "lucide-react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 const links = [
   { href: "/services", label: "Services" },
@@ -14,6 +15,76 @@ const links = [
   { href: "/stories", label: "Stories" },
   { href: "/contact", label: "Contact" },
 ];
+
+const collectionMenuItems = [
+  {
+    label: "Kurta-Pajama",
+    href: "/collection?category=kurta-pajama",
+    image: "/zenmen_kurta_hero.jpeg",
+  },
+  {
+    label: "Pants/Trousers",
+    href: "/collection?category=pants-trousers",
+    image: "/zenmen_white.jpeg",
+  },
+  {
+    label: "Shirt",
+    href: "/collection?category=shirt",
+    image: "/zenmen_shirts.jpeg",
+  },
+  {
+    label: "Suit",
+    href: "/collection?category=suit",
+    image: "/zenmen_blackcoat.jpeg",
+  },
+  {
+    label: "Designer Suits",
+    href: "/collection?category=designer-suits",
+    image: "/sherwani.webp",
+  },
+  {
+    label: "Double Breasted Suit",
+    href: "/collection?category=double-breasted-suit",
+    image: "/zenmen_blackcoat.jpeg",
+  },
+  {
+    label: "Three Piece Suit",
+    href: "/collection?category=three-piece-suit",
+    image: "/new.jpg",
+  },
+  {
+    label: "Five Piece Suit",
+    href: "/collection?category=five-piece-suit",
+    image: "/sherwani.webp",
+  },
+  {
+    label: "Two Piece Suit",
+    href: "/collection?category=two-piece-suit",
+    image: "/zenmen_white.jpeg",
+  },
+  {
+    label: "Indo-Western",
+    href: "/collection?category=indo-western",
+    image: "/sherwani.webp",
+  },
+  {
+    label: "Designer Shirt",
+    href: "/collection?category=designer-shirt",
+    image: "/zenmen_shirts.jpeg",
+  },
+  { label: "Buttons", href: "/collection?category=buttons", image: "/new.jpg" },
+  {
+    label: "Tie",
+    href: "/collection?category=tie",
+    image: "/zenmen_white.jpeg",
+  },
+  { label: "Broches", href: "/collection?category=broches", image: "/new.jpg" },
+  {
+    label: "Jodhpuri Suit",
+    href: "/collection?category=jodhpuri-suit",
+    image: "/sherwani.webp",
+  },
+] as const;
 
 /* ── Sample cart items – replace with real cart state ── */
 const SAMPLE_ITEMS: {
@@ -24,19 +95,67 @@ const SAMPLE_ITEMS: {
   qty: number;
 }[] = [];
 
+const LOGIN_TOAST_KEY = "zenmen:login-toast-pending";
+
 export default function Navbar() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
+  const router = useRouter();
   const scrolled = useScrolled();
   const [open, setOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const [collectionMenuOpen, setCollectionMenuOpen] = useState(false);
+  const [activeCollectionItem, setActiveCollectionItem] = useState(
+    collectionMenuItems[0],
+  );
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
-  const [mounted, setMounted] = useState(false);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [authLoading, setAuthLoading] = useState(false);
+  const prevStatusRef = useRef<typeof status>("loading");
+  const accountMenuRef = useRef<HTMLDivElement | null>(null);
+  const userRole =
+    (
+      session?.user as
+        | (typeof session.user & {
+            role?: string;
+          })
+        | undefined
+    )?.role || "user";
+  const isAdmin = userRole === "admin";
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    const prev = prevStatusRef.current;
+    const loginToastPending =
+      typeof window !== "undefined" &&
+      window.sessionStorage.getItem(LOGIN_TOAST_KEY) === "1";
+
+    if (
+      status === "authenticated" &&
+      (prev === "unauthenticated" || loginToastPending)
+    ) {
+      const displayName = session?.user?.name?.trim();
+      toast.success(
+        displayName ? `Welcome back, ${displayName}` : "Logged in successfully",
+      );
+      if (loginToastPending) {
+        window.sessionStorage.removeItem(LOGIN_TOAST_KEY);
+      }
+    }
+
+    if (prev === "authenticated" && status === "unauthenticated") {
+      toast.success("Logged out successfully");
+    }
+
+    prevStatusRef.current = status;
+  }, [session?.user?.name, status]);
 
   useEffect(() => {
     if (!cartOpen && !authOpen) return;
@@ -52,10 +171,131 @@ export default function Navbar() {
     };
   }, [cartOpen, authOpen]);
 
+  useEffect(() => {
+    const onPointerDown = (event: MouseEvent) => {
+      if (!accountMenuRef.current) return;
+      if (!accountMenuRef.current.contains(event.target as Node)) {
+        setAccountMenuOpen(false);
+      }
+    };
+
+    const onHistoryNavigation = () => {
+      setAccountMenuOpen(false);
+    };
+
+    document.addEventListener("mousedown", onPointerDown);
+    window.addEventListener("popstate", onHistoryNavigation);
+    window.addEventListener("pageshow", onHistoryNavigation);
+
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      window.removeEventListener("popstate", onHistoryNavigation);
+      window.removeEventListener("pageshow", onHistoryNavigation);
+    };
+  }, []);
+
   const subtotal = SAMPLE_ITEMS.reduce((s, i) => s + i.price * i.qty, 0);
   const handleGoogleSignIn = async () => {
     setAuthOpen(false);
+    if (typeof window !== "undefined") {
+      window.sessionStorage.setItem(LOGIN_TOAST_KEY, "1");
+    }
     await signIn("google", { callbackUrl: "/" });
+  };
+
+  const handleCredentialsAuth = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (authLoading) return;
+
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail || !password) {
+      toast.error("Email and password are required");
+      return;
+    }
+
+    if (authMode === "signup") {
+      const fullName = `${firstName} ${lastName}`.trim();
+      if (!fullName) {
+        toast.error("Please enter your name");
+        return;
+      }
+      if (password.length < 6) {
+        toast.error("Password must be at least 6 characters");
+        return;
+      }
+      if (password !== confirmPassword) {
+        toast.error("Passwords do not match");
+        return;
+      }
+      if (!agreeTerms) {
+        toast.error("Please agree to Terms & Privacy");
+        return;
+      }
+    }
+
+    setAuthLoading(true);
+    try {
+      if (authMode === "signup") {
+        const fullName = `${firstName} ${lastName}`.trim();
+        const registerRes = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: fullName,
+            email: cleanEmail,
+            password,
+            phone,
+          }),
+        });
+
+        if (!registerRes.ok) {
+          const data = (await registerRes.json().catch(() => null)) as {
+            error?: string;
+          } | null;
+          toast.error(data?.error || "Could not create account");
+          return;
+        }
+      }
+
+      if (typeof window !== "undefined") {
+        window.sessionStorage.setItem(LOGIN_TOAST_KEY, "1");
+      }
+
+      const result = await signIn("credentials", {
+        email: cleanEmail,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        toast.error("Invalid email or password");
+        return;
+      }
+
+      setAuthOpen(false);
+      setFirstName("");
+      setLastName("");
+      setEmail("");
+      setPhone("");
+      setPassword("");
+      setConfirmPassword("");
+      setAgreeTerms(false);
+      setAuthMode("login");
+      router.refresh();
+    } catch {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    setAccountMenuOpen(false);
+    setAuthOpen(false);
+    const result = await signOut({ redirect: false, callbackUrl: "/" });
+    if (result?.url) {
+      router.push(result.url);
+    }
   };
 
   return (
@@ -143,6 +383,104 @@ export default function Navbar() {
           transition: width 0.35s cubic-bezier(0.22,1,0.36,1);
         }
         .znav-link:hover::after, .znav-link.active::after { width: 100%; }
+        .znav-collection-wrap {
+          position: relative;
+          padding-bottom: 18px;
+          margin-bottom: -18px;
+        }
+        .znav-collection-dropdown {
+          position: absolute;
+          top: calc(100% + 6px);
+          left: 50%;
+          transform: translateX(-50%) translateY(10px) scale(0.98);
+          width: min(900px, 82vw);
+          border: 1px solid rgba(200,169,110,0.34);
+          background: linear-gradient(155deg, rgba(9,14,26,0.98), rgba(6,10,19,0.98));
+          border-radius: 16px;
+          box-shadow: 0 34px 65px rgba(0,0,0,0.56);
+          backdrop-filter: blur(14px);
+          display: grid;
+          grid-template-columns: 1.15fr 1fr;
+          gap: 18px;
+          padding: 16px;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.28s ease, transform 0.28s cubic-bezier(0.22,1,0.36,1);
+        }
+        .znav-collection-dropdown.open {
+          opacity: 1;
+          transform: translateX(-50%) translateY(0) scale(1);
+          pointer-events: auto;
+        }
+        .znav-collection-list {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+          align-content: start;
+        }
+        .znav-collection-item {
+          display: block;
+          border: 1px solid transparent;
+          border-radius: 10px;
+          padding: 9px 10px;
+          text-decoration: none;
+          color: rgba(247,242,232,0.82);
+          font-family: 'Cormorant Garamond', serif;
+          font-size: 11px;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          transition: border-color 0.25s ease, color 0.25s ease, background 0.25s ease, transform 0.25s ease;
+        }
+        .znav-collection-item:hover,
+        .znav-collection-item.active {
+          border-color: rgba(200,169,110,0.45);
+          color: #c8a96e;
+          background: rgba(200,169,110,0.08);
+          transform: translateX(2px);
+        }
+        .znav-collection-preview {
+          position: relative;
+          overflow: hidden;
+          border-radius: 12px;
+          border: 1px solid rgba(200,169,110,0.34);
+          min-height: 270px;
+          background: #0a1222;
+        }
+        .znav-collection-preview::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(180deg, rgba(8,13,24,0.08) 0%, rgba(8,13,24,0.62) 74%, rgba(8,13,24,0.86) 100%);
+          pointer-events: none;
+        }
+        .znav-collection-preview img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 0.65s cubic-bezier(0.22,1,0.36,1);
+        }
+        .znav-collection-dropdown:hover .znav-collection-preview img {
+          transform: scale(1.05);
+        }
+        .znav-collection-preview-label {
+          position: absolute;
+          left: 16px;
+          bottom: 16px;
+          z-index: 2;
+          color: #f7f2e8;
+          font-family: 'Playfair Display', serif;
+          font-size: 22px;
+          letter-spacing: 0.02em;
+        }
+        .znav-collection-preview-sub {
+          display: block;
+          margin-top: 5px;
+          font-family: 'Cormorant Garamond', serif;
+          font-size: 10px;
+          letter-spacing: 0.22em;
+          text-transform: uppercase;
+          color: rgba(200,169,110,0.8);
+        }
 
         /* ── Icon button ── */
         .znav-icon {
@@ -160,6 +498,82 @@ export default function Navbar() {
           border-color: rgba(200,169,110,0.5);
           color: #c8a96e;
           background: rgba(200,169,110,0.06);
+        }
+        .znav-account-wrap {
+          position: relative;
+          display: flex;
+          align-items: center;
+        }
+        .znav-account-menu {
+          position: absolute;
+          top: calc(100% + 12px);
+          right: 0;
+          min-width: 228px;
+          border: 1px solid rgba(200,169,110,0.35);
+          background: linear-gradient(165deg, rgba(11,19,35,0.98), rgba(8,14,26,0.98));
+          box-shadow: 0 28px 52px rgba(0,0,0,0.5);
+          backdrop-filter: blur(16px);
+          padding: 12px;
+          border-radius: 12px;
+          opacity: 0;
+          transform: translateY(8px) scale(0.98);
+          pointer-events: none;
+          transition: opacity 0.28s ease, transform 0.28s cubic-bezier(0.22,1,0.36,1);
+        }
+        .znav-account-menu.open {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+          pointer-events: auto;
+        }
+        .znav-account-menu-head {
+          padding: 2px 2px 10px;
+          border-bottom: 1px solid rgba(200,169,110,0.16);
+          margin-bottom: 8px;
+        }
+        .znav-account-menu-name {
+          font-family: 'Playfair Display', serif;
+          font-size: 15px;
+          color: #f7f2e8;
+          line-height: 1.2;
+        }
+        .znav-account-menu-role {
+          margin-top: 4px;
+          font-family: 'Cormorant Garamond', serif;
+          font-size: 10px;
+          letter-spacing: 0.2em;
+          text-transform: uppercase;
+          color: rgba(200,169,110,0.72);
+        }
+        .znav-account-menu-item {
+          width: 100%;
+          display: block;
+          text-align: left;
+          text-decoration: none;
+          border: 1px solid transparent;
+          border-radius: 9px;
+          color: rgba(247,242,232,0.86);
+          padding: 10px 12px;
+          font-family: 'Cormorant Garamond', serif;
+          font-size: 12px;
+          letter-spacing: 0.22em;
+          text-transform: uppercase;
+          background: transparent;
+          cursor: pointer;
+          transition: border-color 0.24s ease, color 0.24s ease, background 0.24s ease;
+        }
+        .znav-account-menu-item:hover {
+          border-color: rgba(200,169,110,0.42);
+          color: #c8a96e;
+          background: rgba(200,169,110,0.08);
+        }
+        .znav-account-menu-item.logout {
+          margin-top: 4px;
+          color: rgba(255, 197, 179, 0.95);
+        }
+        .znav-account-menu-item.logout:hover {
+          border-color: rgba(255, 159, 122, 0.45);
+          color: #ffae8f;
+          background: rgba(255, 117, 78, 0.08);
         }
 
         /* ── CTA button ── */
@@ -681,12 +1095,57 @@ export default function Navbar() {
         >
           {links.map((l) => (
             <li key={l.href}>
-              <Link
-                href={l.href}
-                className={`znav-link${pathname === l.href ? " active" : ""}`}
-              >
-                {l.label}
-              </Link>
+              {l.href === "/collection" ? (
+                <div
+                  className="znav-collection-wrap"
+                  onMouseEnter={() => setCollectionMenuOpen(true)}
+                  onMouseLeave={() => setCollectionMenuOpen(false)}
+                >
+                  <Link
+                    href={l.href}
+                    className={`znav-link${pathname === l.href ? " active" : ""}`}
+                  >
+                    {l.label}
+                  </Link>
+
+                  <div
+                    className={`znav-collection-dropdown${collectionMenuOpen ? " open" : ""}`}
+                  >
+                    <div className="znav-collection-list">
+                      {collectionMenuItems.map((item) => (
+                        <Link
+                          key={item.label}
+                          href={item.href}
+                          className={`znav-collection-item${activeCollectionItem.label === item.label ? " active" : ""}`}
+                          onMouseEnter={() => setActiveCollectionItem(item)}
+                          onClick={() => setCollectionMenuOpen(false)}
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                    <div className="znav-collection-preview">
+                      <img
+                        src={activeCollectionItem.image}
+                        alt={activeCollectionItem.label}
+                      />
+                      <div className="znav-collection-preview-label">
+                        {activeCollectionItem.label}
+                        <span className="znav-collection-preview-sub">
+                          Curated by ZENmen
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <Link
+                  href={l.href}
+                  className={`znav-link${pathname === l.href ? " active" : ""}`}
+                >
+                  {l.label}
+                </Link>
+              )}
             </li>
           ))}
         </ul>
@@ -731,13 +1190,76 @@ export default function Navbar() {
           </a>
 
           {/* User */}
-          <button
-            className="znav-icon sm-flex"
-            aria-label="Account"
-            onClick={() => setAuthOpen(true)}
-          >
-            <User size={16} />
-          </button>
+          <div className="znav-account-wrap sm-flex" ref={accountMenuRef}>
+            <button
+              className="znav-icon"
+              aria-label="Account"
+              onClick={() => {
+                if (status !== "authenticated") {
+                  setAuthOpen(true);
+                  return;
+                }
+                setAccountMenuOpen((prev) => !prev);
+              }}
+            >
+              <User size={16} />
+            </button>
+            <div
+              className={`znav-account-menu${accountMenuOpen ? " open" : ""}`}
+            >
+              <div className="znav-account-menu-head">
+                <p className="znav-account-menu-name">
+                  {session?.user?.name || session?.user?.email || "Welcome"}
+                </p>
+                <p className="znav-account-menu-role">
+                  {isAdmin ? "Administrator" : "Member"}
+                </p>
+              </div>
+
+              {isAdmin ? (
+                <>
+                  <Link
+                    href="/admin"
+                    className="znav-account-menu-item"
+                    onClick={() => setAccountMenuOpen(false)}
+                  >
+                    Admin Dashboard
+                  </Link>
+                  <button
+                    type="button"
+                    className="znav-account-menu-item logout"
+                    onClick={handleSignOut}
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/profile"
+                    className="znav-account-menu-item"
+                    onClick={() => setAccountMenuOpen(false)}
+                  >
+                    Profile
+                  </Link>
+                  <Link
+                    href="/wishlist"
+                    className="znav-account-menu-item"
+                    onClick={() => setAccountMenuOpen(false)}
+                  >
+                    Wishlist
+                  </Link>
+                  <button
+                    type="button"
+                    className="znav-account-menu-item logout"
+                    onClick={handleSignOut}
+                  >
+                    Logout
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
 
           {/* Cart */}
           <button
@@ -863,7 +1385,7 @@ export default function Navbar() {
                 <button
                   className="auth-submit"
                   type="button"
-                  onClick={() => signOut({ callbackUrl: "/" })}
+                  onClick={handleSignOut}
                 >
                   Sign Out
                 </button>
@@ -901,7 +1423,7 @@ export default function Navbar() {
               </button>
             )}
             <div className="auth-sep">or continue with email</div>
-            <form className="auth-grid" onSubmit={(e) => e.preventDefault()}>
+            <form className="auth-grid" onSubmit={handleCredentialsAuth}>
               {authMode === "signup" && (
                 <div className="auth-grid two">
                   <div className="auth-field">
@@ -909,7 +1431,10 @@ export default function Navbar() {
                     <input
                       className="auth-input"
                       type="text"
-                      placeholder="Aarav"
+                      placeholder="John"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      disabled={authLoading}
                     />
                   </div>
                   <div className="auth-field">
@@ -917,7 +1442,10 @@ export default function Navbar() {
                     <input
                       className="auth-input"
                       type="text"
-                      placeholder="Sharma"
+                      placeholder="Doe"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      disabled={authLoading}
                     />
                   </div>
                 </div>
@@ -928,6 +1456,9 @@ export default function Navbar() {
                   className="auth-input"
                   type="email"
                   placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={authLoading}
                 />
               </div>
               {authMode === "signup" && (
@@ -936,7 +1467,10 @@ export default function Navbar() {
                   <input
                     className="auth-input"
                     type="tel"
-                    placeholder="+91 98765 43210"
+                    placeholder="(+91) 98754-78901"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    disabled={authLoading}
                   />
                 </div>
               )}
@@ -945,7 +1479,10 @@ export default function Navbar() {
                 <input
                   className="auth-input"
                   type="password"
-                  placeholder="••••••••"
+                  placeholder="********"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={authLoading}
                 />
               </div>
               {authMode === "signup" && (
@@ -954,13 +1491,21 @@ export default function Navbar() {
                   <input
                     className="auth-input"
                     type="password"
-                    placeholder="••••••••"
+                    placeholder="********"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    disabled={authLoading}
                   />
                 </div>
               )}
               <div className="auth-row">
                 <label className="auth-check">
-                  <input type="checkbox" />
+                  <input
+                    type="checkbox"
+                    checked={agreeTerms}
+                    onChange={(e) => setAgreeTerms(e.target.checked)}
+                    disabled={authLoading}
+                  />
                   <span>
                     {authMode === "login"
                       ? "Remember me"
@@ -973,10 +1518,18 @@ export default function Navbar() {
                   </a>
                 )}
               </div>
-              <button className="auth-submit" type="submit">
+              <button
+                className="auth-submit"
+                type="submit"
+                disabled={authLoading}
+              >
                 {authMode === "login"
-                  ? "Sign In Securely"
-                  : "Create Premium Account"}
+                  ? authLoading
+                    ? "Signing In..."
+                    : "Sign In Securely"
+                  : authLoading
+                    ? "Creating Account..."
+                    : "Create Premium Account"}
               </button>
             </form>
             <p className="auth-foot">
@@ -992,7 +1545,17 @@ export default function Navbar() {
                   cursor: "pointer",
                 }}
                 onClick={() =>
-                  setAuthMode((m) => (m === "login" ? "signup" : "login"))
+                  setAuthMode((m) => {
+                    const next = m === "login" ? "signup" : "login";
+                    setFirstName("");
+                    setLastName("");
+                    setEmail("");
+                    setPhone("");
+                    setPassword("");
+                    setConfirmPassword("");
+                    setAgreeTerms(false);
+                    return next;
+                  })
                 }
               >
                 {authMode === "login" ? "Create one" : "Sign in"}

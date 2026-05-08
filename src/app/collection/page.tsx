@@ -202,9 +202,9 @@ export default function CollectionPage() {
           animation-play-state: paused;
         }
       `}</style>
-      <main className="bg-[#050A18] text-[#F3EEE4]">
-        <div className="relative w-full pt-20 md:pt-20">
-          <div className="relative h-[58vh] min-h-[440px] w-full overflow-hidden border-y border-[#c8a96e2c]">
+      <main className="bg-[linear-gradient(180deg,#f6f1e8_0%,#f0e7db_55%,#eadfce_100%)] text-[#3f3528]">
+        <div className="relative w-full pt-16 md:pt-16">
+          <div className="relative h-[58vh] min-h-[440px] w-full overflow-hidden border-y border-[#c8a96e4f]">
             <div className="absolute inset-0 grid grid-cols-3 md:grid-cols-6">
               {[
                 "/zenmen_kurta_hero.jpeg",
@@ -218,23 +218,23 @@ export default function CollectionPage() {
                   <img
                     src={src}
                     alt={`Collection mood ${idx + 1}`}
-                    className="h-full w-full object-cover opacity-75"
+                    className="h-full w-full object-cover opacity-90"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/35 to-black/70" />
+                  {/* <div className="absolute inset-0 bg-gradient-to-b from-[#f5ecdd]/10 via-[#533d1f]/20 to-[#2e1f0d]/38" /> */}
                 </div>
               ))}
             </div>
 
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(200,169,110,0.22),transparent_45%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(200,169,110,0.3),transparent_45%)]" />
 
             <div className="relative z-10 flex h-full w-full flex-col items-center justify-end px-6 pb-10 text-center md:pb-14">
-              <p className="mb-4 inline-block w-fit rounded-xl border border-[#c8a96e66] bg-black/30 px-4 py-2 text-[10px] tracking-[0.35em] text-[#d6bb89] uppercase">
+              <p className="mb-4 inline-block w-fit rounded-xl border border-[#c8a96e88] bg-[#f8f0e4]/80 px-4 py-2 text-[10px] tracking-[0.35em] text-[#8b6d3f] uppercase">
                 ZENmen Edits
               </p>
-              <h1 className="max-w-5xl font-['Cormorant_Garamond'] text-5xl font-light leading-[0.95] text-[#f8f4ec] drop-shadow-[0_2px_8px_rgba(0,0,0,0.55)] md:text-7xl">
+              <h1 className="max-w-5xl font-['Cormorant_Garamond'] text-5xl font-light leading-[0.95] text-[#f9f3ea] drop-shadow-[0_2px_8px_rgba(26,17,7,0.45)] md:text-7xl">
                 New Season Collection
               </h1>
-              <p className="mt-4 max-w-3xl text-sm leading-7 text-[#d6d1c4] md:text-base">
+              <p className="mt-4 max-w-3xl text-sm leading-7 text-[#f0e7d8] md:text-base">
                 Statement tailoring, sharp silhouettes, and handcrafted textures
                 built for weddings, evenings, and standout everyday presence.
               </p>
@@ -243,7 +243,7 @@ export default function CollectionPage() {
         </div>
 
         <section className="w-full px-4 py-16 sm:px-6 lg:px-8 2xl:px-12 md:py-20">
-          <div className="mb-10 flex flex-col justify-between gap-5 border-b border-[#c8a96e2f] pb-6 md:flex-row md:items-end">
+          <div className="mb-10 flex flex-col justify-between gap-5 border-b border-[#c8a96e45] pb-6 md:flex-row md:items-end">
             <div>
               <p className="text-[10px] tracking-[0.32em] text-[#c8a96e] uppercase">
                 Featured Products
@@ -254,24 +254,24 @@ export default function CollectionPage() {
             </div>
           </div>
 
-          <div className="mb-8 grid grid-cols-1 gap-4 rounded-xl border border-[#c8a96e2f] bg-[#0b1224] p-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mb-8 grid grid-cols-1 gap-4 rounded-xl border border-[#c8a96e42] bg-[#f7f1e7] p-4 sm:grid-cols-2 lg:grid-cols-4">
             <input
               type="text"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search products..."
-              className="h-11 rounded-lg border border-[#c8a96e44] bg-[#0f1830] px-3 text-sm text-[#f3eee4] outline-none transition focus:border-[#d6bb89]"
+              className="h-11 rounded-lg border border-[#c8a96e66] bg-[#fcf9f3] px-3 text-sm text-[#4b3d2a] outline-none transition focus:border-[#b79257]"
             />
             <select
               value={selectedCategory}
               onChange={(event) => setSelectedCategory(event.target.value)}
-              className="h-11 rounded-lg border border-[#c8a96e44] bg-[#0f1830] px-3 text-sm text-[#f3eee4] outline-none transition focus:border-[#d6bb89]"
+              className="h-11 rounded-lg border border-[#c8a96e66] bg-[#fcf9f3] px-3 text-sm text-[#4b3d2a] outline-none transition focus:border-[#b79257]"
             >
               {categoryFilters.map((category) => (
                 <option
                   key={category}
                   value={category}
-                  className="bg-[#0f1830]"
+                  className="bg-[#fcf9f3]"
                 >
                   Category: {category}
                 </option>
@@ -280,10 +280,10 @@ export default function CollectionPage() {
             <select
               value={selectedColor}
               onChange={(event) => setSelectedColor(event.target.value)}
-              className="h-11 rounded-lg border border-[#c8a96e44] bg-[#0f1830] px-3 text-sm text-[#f3eee4] outline-none transition focus:border-[#d6bb89]"
+              className="h-11 rounded-lg border border-[#c8a96e66] bg-[#fcf9f3] px-3 text-sm text-[#4b3d2a] outline-none transition focus:border-[#b79257]"
             >
               {colorFilters.map((color) => (
-                <option key={color} value={color} className="bg-[#0f1830]">
+                <option key={color} value={color} className="bg-[#fcf9f3]">
                   Color: {color}
                 </option>
               ))}
@@ -295,13 +295,13 @@ export default function CollectionPage() {
                 setSelectedCategory("All");
                 setSelectedColor("All");
               }}
-              className="h-11 rounded-lg border border-[#c8a96e66] bg-[#c8a96e22] px-4 text-sm tracking-[0.18em] text-[#e4cfa6] uppercase transition hover:bg-[#c8a96e44]"
+              className="h-11 rounded-lg border border-[#c8a96e8f] bg-[#c8a96e24] px-4 text-sm tracking-[0.18em] text-[#8d6f42] uppercase transition hover:bg-[#c8a96e3f]"
             >
               Clear Filters
             </button>
           </div>
 
-          <div className="mb-6 text-xs tracking-[0.18em] text-[#bdb6a6] uppercase">
+          <div className="mb-6 text-xs tracking-[0.18em] text-[#8f7a5d] uppercase">
             Showing {filteredProducts.length} of {products.length} products
           </div>
 
@@ -330,7 +330,7 @@ export default function CollectionPage() {
               return (
                 <article
                   key={productId}
-                  className={`group preview-card translate-y-7 animate-[fadeInUp_0.7s_ease_forwards] overflow-hidden rounded-xl border border-[#c8a96e33] bg-[#111111] opacity-0 shadow-[0_16px_40px_rgba(0,0,0,0.45)] transition duration-500 hover:border-[#c8a96e8a] ${autoPreview ? "auto-preview" : ""}`}
+                  className={`group preview-card translate-y-7 animate-[fadeInUp_0.7s_ease_forwards] overflow-hidden rounded-xl border border-[#c8a96e4d] bg-[#fbf8f2] opacity-0 shadow-[0_14px_34px_rgba(76,52,21,0.16)] transition duration-500 hover:border-[#c8a96e8a] ${autoPreview ? "auto-preview" : ""}`}
                   style={{ animationDelay: `${index * 70}ms` }}
                 >
                   <Link
@@ -339,7 +339,7 @@ export default function CollectionPage() {
                   >
                     <div className="product-preview-media relative aspect-[3/4] overflow-hidden">
                       {product.badge && (
-                        <span className="absolute left-3 top-3 z-20 border border-[#c8a96e88] bg-black/70 px-3 py-1 text-[10px] tracking-[0.2em] text-[#d6bb89] uppercase">
+                        <span className="absolute left-3 top-3 z-20 border border-[#c8a96e99] bg-[#f7efe2]/90 px-3 py-1 text-[10px] tracking-[0.2em] text-[#8b6d3f] uppercase">
                           {product.badge}
                         </span>
                       )}
@@ -365,7 +365,7 @@ export default function CollectionPage() {
                         />
                       )}
 
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#2e1f0d]/45 via-[#5a4323]/15 to-transparent" />
                     </div>
                   </Link>
 
@@ -379,7 +379,7 @@ export default function CollectionPage() {
                           product.images?.length ?? 0,
                         )
                       }
-                      className="pointer-events-auto rounded-full border border-[#f8f4ec61] bg-black/45 p-2 text-[#f8f4ec] opacity-0 transition duration-300 group-hover:opacity-100 hover:border-[#c8a96e] hover:text-[#c8a96e]"
+                      className="pointer-events-auto rounded-full border border-[#fff4dfb8] bg-[#f8f1e4]/80 p-2 text-[#5e472a] opacity-0 transition duration-300 group-hover:opacity-100 hover:border-[#c8a96e] hover:text-[#8b6d3f]"
                       aria-label={`Show previous image for ${product.title}`}
                     >
                       <ChevronLeft size={24} />
@@ -393,7 +393,7 @@ export default function CollectionPage() {
                           product.images?.length ?? 0,
                         )
                       }
-                      className="pointer-events-auto rounded-full border border-[#f8f4ec61] bg-black/45 p-2 text-[#f8f4ec] opacity-0 transition duration-300 group-hover:opacity-100 hover:border-[#c8a96e] hover:text-[#c8a96e]"
+                      className="pointer-events-auto rounded-full border border-[#fff4dfb8] bg-[#f8f1e4]/80 p-2 text-[#5e472a] opacity-0 transition duration-300 group-hover:opacity-100 hover:border-[#c8a96e] hover:text-[#8b6d3f]"
                       aria-label={`Show next image for ${product.title}`}
                     >
                       <ChevronRight size={24} />
@@ -402,7 +402,7 @@ export default function CollectionPage() {
 
                   <button
                     type="button"
-                    className="flex h-12 w-full items-center justify-center gap-3 border-y border-[#c8a96e59] bg-[#c8a96e] text-[14px] font-bold tracking-[0.2em] text-black uppercase transition duration-300 hover:bg-[#d6bb89]"
+                    className="flex h-12 w-full items-center justify-center gap-3 border-y border-[#c8a96e70] bg-[#c8a96e] text-[14px] font-bold tracking-[0.2em] text-[#2e220f] uppercase transition duration-300 hover:bg-[#d6bb89]"
                   >
                     <ShoppingBag size={18} />
                     Add to Cart
@@ -412,10 +412,10 @@ export default function CollectionPage() {
                     href={`/collection/product-detail?id=${product._id}`}
                     className="block p-4"
                   >
-                    <h3 className="font-['Cormorant_Garamond'] text-2xl font-light text-[#f8f4ec]">
+                    <h3 className="font-['Cormorant_Garamond'] text-2xl font-light text-[#3f3122]">
                       {product.title}
                     </h3>
-                    <p className="mt-1 text-[11px] tracking-[0.2em] text-[#9e9585] uppercase">
+                    <p className="mt-1 text-[11px] tracking-[0.2em] text-[#8f7f66] uppercase">
                       {product.category} • {product.colors?.[0]}
                     </p>
                     <p className="mt-3 font-sans text-2xl text-[#d6bb89]">

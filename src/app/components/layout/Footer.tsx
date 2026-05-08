@@ -1,18 +1,63 @@
 "use client";
 
+import Link from "next/link";
+
 export default function Footer() {
   return (
     <footer>
+      <style>{`
+        .footer-brand .znav-logo { display:flex; align-items:center; gap:10px; text-decoration:none; width: fit-content; }
+        .footer-brand .znav-logo-mark {
+          width: 40px;
+          height: 40px;
+          border-radius: 999px;
+          border: 1px solid rgba(200,169,110,0.35);
+          background: rgba(10,18,36,0.85);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+          flex-shrink: 0;
+        }
+        .footer-brand .znav-logo-img {
+          width: 36px;
+          height: 36px;
+          object-fit: contain;
+          transition: transform 0.75s cubic-bezier(0.22,1,0.36,1);
+        }
+        .footer-brand .znav-logo:hover .znav-logo-img {
+          transform: rotate(360deg);
+        }
+        .footer-brand .znav-logo-text {
+          font-family: 'Playfair Display', serif;
+          font-size: 1.25rem;
+          font-weight: 300;
+          letter-spacing: 0.08em;
+          color: #f7f2e8;
+          line-height: 1;
+        }
+        .footer-brand .znav-logo-sub {
+          display: block;
+          font-family: 'Cormorant Garamond', serif;
+          font-size: 8px;
+          letter-spacing: 0.38em;
+          text-transform: uppercase;
+          color: rgba(200,169,110,0.65);
+          margin-top: 3px;
+        }
+      `}</style>
       <div className="footer-top">
         {/* Brand */}
         <div className="footer-brand">
-          <div className="logo">
-            <div className="logo-icon"></div>
+          <Link href="/" className="znav-logo">
+            <span className="znav-logo-mark" aria-hidden="true">
+              <img src="/logo_zenmen.png" alt="" className="znav-logo-img" />
+            </span>
             <div>
-              <span className="logo-text">ZENmen</span>
-              <span className="logo-sub">Bespoke Tailoring</span>
+              <span className="znav-logo-text">ZENmen</span>
+              <span className="znav-logo-sub">Bespoke Tailoring</span>
             </div>
-          </div>
+          </Link>
 
           <p>
             For over fifteen years, ZENmen has dressed Delhi's most discerning

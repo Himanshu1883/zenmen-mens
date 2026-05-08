@@ -33,6 +33,7 @@ const handler = NextAuth({
           id: user._id.toString(),
           email: user.email,
           name: user.name,
+          role: user.role || "user",
         };
       },
     }),
@@ -56,6 +57,31 @@ const handler = NextAuth({
       }
 
       return true;
+    },
+
+    async jwt({ token, user }) {
+      if (user) {
+        token.role = (user as { role?: string }).role;
+      }
+
+      if (!token.role && token.email) {
+        await connectDB();
+        const dbUser = await User.findOne({ email: token.email }).lean();
+        token.role = dbUser?.role || "user";
+      }
+
+      return token;
+    },
+
+    async session({ session, token }) {
+      if (session.user) {
+        (
+          session.user as typeof session.user & {
+            role?: string;
+          }
+        ).role = (token.role as string) || "user";
+      }
+      return session;
     },
   },
 

@@ -1,10 +1,10 @@
 "use client";
 
+import { fetchProducts } from "@/app/store/productSlice";
+import type { AppDispatch, RootState } from "@/app/store/store";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchProducts } from "@/app/store/productSlice";
-import type { AppDispatch, RootState } from "@/app/store/store";
 
 type ProductImage = {
   url: string;
@@ -134,16 +134,16 @@ export default function Products() {
 
         .products-root {
           font-family: 'Montserrat', sans-serif;
-          background: #050A18;
+          background: linear-gradient(180deg, #f6f1e8 0%, #f1e8db 55%, #eadfce 100%);
           min-height: 100vh;
-          color: #e8e4d8;
+          color: #3f3528;
           overflow-x: hidden;
         }
 
         .grain-overlay {
           position: fixed; inset: 0; pointer-events: none; z-index: 0;
           background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-          opacity: 0.45;
+          opacity: 0.16;
         }
 
         .products-inner {
@@ -167,7 +167,7 @@ export default function Products() {
           font-family: 'Cormorant Garamond', serif;
           font-size: clamp(52px, 7vw, 96px);
           font-weight: 300; line-height: 1.0;
-          color: #f0ece0; letter-spacing: -0.01em;
+          color: #433828; letter-spacing: -0.01em;
           margin-bottom: 12px;
         }
         .section-title em {
@@ -176,7 +176,7 @@ export default function Products() {
 
         .section-sub {
           font-size: 15px; font-weight: 300;
-          color: white; max-width: 480px;
+          color: #6a5a47; max-width: 480px;
           line-height: 1.8; margin-bottom: 64px;
           letter-spacing: 0.02em;
         }
@@ -184,7 +184,7 @@ export default function Products() {
         .products-filter-bar {
           display: flex; gap: 4px;
           margin-bottom: 56px;
-          border-bottom: 1px solid #ffffff0f;
+          border-bottom: 1px solid #b89f7429;
           padding-bottom: 0;
         }
         .products-filter-btn {
@@ -192,12 +192,12 @@ export default function Products() {
           font-size: 12px; font-weight: 500;
           letter-spacing: 0.2em; text-transform: uppercase;
           padding: 14px 28px 16px; border: none; cursor: pointer;
-          background: transparent; color: #665a4a;
+          background: transparent; color: #8f7b5c;
           border-bottom: 2px solid transparent;
           margin-bottom: -1px; transition: all 0.3s ease;
           display: flex; align-items: center; gap: 8px;
         }
-        .products-filter-btn:hover { color: #c4b898; }
+        .products-filter-btn:hover { color: #5c4b36; }
         .products-filter-btn.active {
           color: #C9A96E;
           border-bottom-color: #C9A96E;
@@ -220,8 +220,8 @@ export default function Products() {
         }
 
         .product-card {
-          background: #0d0e12;
-          border: 1px solid #ffffff0a;
+          background: #fbf8f2;
+          border: 1px solid #cdb89240;
           border-radius: 2px;
           overflow: hidden;
           transition: border-color 0.4s ease, transform 0.4s ease;
@@ -231,7 +231,7 @@ export default function Products() {
           display: block;
         }
         .product-card:hover {
-          border-color: rgba(201, 169, 110, 0.3);
+          border-color: rgba(201, 169, 110, 0.55);
           transform: translateY(-4px);
         }
 
@@ -242,13 +242,13 @@ export default function Products() {
           letter-spacing: 0.25em; text-transform: uppercase;
           padding: 5px 12px; border: 1px solid;
           border-radius: 0;
-          background: rgba(5, 10, 24, 0.8);
+          background: rgba(250, 244, 233, 0.92);
           backdrop-filter: blur(4px);
         }
 
         .card-img {
           position: relative; height: 340px; overflow: hidden;
-          background: linear-gradient(145deg, #0a0c12 0%, #111318 100%);
+          background: linear-gradient(145deg, #f2e8da 0%, #e8dbc9 100%);
         }
         .card-img img {
           width: 100%; height: 100%; object-fit: cover;
@@ -302,7 +302,7 @@ export default function Products() {
           position: absolute; inset: 0;
           display: flex; align-items: flex-end; justify-content: center;
           padding-bottom: 28px;
-          background: linear-gradient(0deg, rgba(0,0,0,0.55) 0%, transparent 50%);
+          background: linear-gradient(0deg, rgba(58, 44, 25, 0.26) 0%, transparent 50%);
           opacity: 0; transition: opacity 0.35s ease;
         }
         .product-card:hover .card-overlay { opacity: 1; }
@@ -312,16 +312,16 @@ export default function Products() {
           font-size: 10px; font-weight: 500;
           letter-spacing: 0.25em; text-transform: uppercase;
           padding: 10px 24px; border: 1px solid #C9A96E;
-          background: rgba(0,0,0,0.6); cursor: pointer;
+          background: rgba(255, 248, 236, 0.92); cursor: pointer;
           border-radius: 0;
           transition: background 0.2s ease;
           color: #C9A96E;
         }
-        .quick-view-btn:hover { background: rgba(0,0,0,0.9); }
+        .quick-view-btn:hover { background: rgba(255, 244, 219, 0.98); }
 
         .card-body {
           padding: 28px 28px 24px;
-          border-top: 1px solid #ffffff0a;
+          border-top: 1px solid #ccb58e33;
         }
 
         .card-cat {
@@ -334,20 +334,20 @@ export default function Products() {
         .card-name {
           font-family: 'Cormorant Garamond', serif;
           font-size: 26px; font-weight: 400;
-          color: #f0ece0; line-height: 1.2;
+          color: #3f3122; line-height: 1.2;
           margin-bottom: 8px;
         }
 
         .card-sub {
           font-size: 11px; font-weight: 400;
-          letter-spacing: 0.12em; color: #a09884;
+          letter-spacing: 0.12em; color: #8f7f66;
           // margin-bottom: 14px;
           text-transform: uppercase;
         }
 
         .card-desc {
           font-size: 13px; font-weight: 300;
-          line-height: 1.65; color: #b0a894;
+          line-height: 1.65; color: #7f6d55;
           margin-bottom: 20px;
           display: -webkit-box;
           -webkit-line-clamp: 2;
@@ -360,7 +360,7 @@ export default function Products() {
           flex-direction: column;
           align-items: flex-start;
           gap: 14px;
-          border-top: 1px solid #ffffff08; padding-top: 10px;
+          border-top: 1px solid #ccb58e2b; padding-top: 10px;
         }
         .card-price-wrap {
           width: 100%;
@@ -373,7 +373,7 @@ export default function Products() {
         .card-price {
           // font-family: 'Cormorant Garamond', serif;
           font-size: 24px; font-weight: 400;
-          color: white;
+          color: #2f2518;
           letter-spacing: 0.02em;
         }
 
@@ -446,7 +446,7 @@ export default function Products() {
 
         .products-count {
           font-size: 12px; letter-spacing: 0.15em;
-          color: #8a8270; text-transform: uppercase;
+          color: #8a7557; text-transform: uppercase;
           margin-bottom: 24px;
         }
         .products-count span {
@@ -466,14 +466,14 @@ export default function Products() {
           width: 100%;
           margin-top: 64px;
           padding: 20px 32px;
-          background: rgba(201, 169, 110, 0.05);
-          border: 1px solid rgba(201, 169, 110, 0.2);
+          background: rgba(201, 169, 110, 0.12);
+          border: 1px solid rgba(201, 169, 110, 0.32);
           text-decoration: none;
           transition: all 0.3s ease;
         }
         .view-collection-btn:hover {
-          background: rgba(201, 169, 110, 0.12);
-          border-color: rgba(201, 169, 110, 0.4);
+          background: rgba(201, 169, 110, 0.2);
+          border-color: rgba(201, 169, 110, 0.5);
         }
         .view-collection-text {
           font-family: 'Montserrat', sans-serif;
