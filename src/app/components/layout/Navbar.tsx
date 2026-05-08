@@ -107,9 +107,9 @@ export default function Navbar() {
   const [authOpen, setAuthOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [collectionMenuOpen, setCollectionMenuOpen] = useState(false);
-  const [activeCollectionItem, setActiveCollectionItem] = useState<typeof collectionMenuItems[number]>(
-    collectionMenuItems[0],
-  );
+  const [activeCollectionItem, setActiveCollectionItem] = useState<
+    (typeof collectionMenuItems)[number]
+  >(collectionMenuItems[0]);
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -1111,6 +1111,7 @@ export default function Navbar() {
                         <Link
                           key={item.label}
                           href={item.href}
+                          prefetch={false}
                           className={`znav-collection-item${activeCollectionItem.label === item.label ? " active" : ""}`}
                           onMouseEnter={() => setActiveCollectionItem(item)}
                           onClick={() => setCollectionMenuOpen(false)}
