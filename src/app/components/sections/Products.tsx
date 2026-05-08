@@ -134,9 +134,9 @@ export default function Products() {
 
         .products-root {
           font-family: 'Montserrat', sans-serif;
-          background: linear-gradient(180deg, #f6f1e8 0%, #f1e8db 55%, #eadfce 100%);
+          background: #0f1628;
           min-height: 100vh;
-          color: #3f3528;
+          color: #e8dcc7;
           overflow-x: hidden;
         }
 
@@ -167,7 +167,7 @@ export default function Products() {
           font-family: 'Cormorant Garamond', serif;
           font-size: clamp(52px, 7vw, 96px);
           font-weight: 300; line-height: 1.0;
-          color: #433828; letter-spacing: -0.01em;
+          color: #efe2cc; letter-spacing: -0.01em;
           margin-bottom: 12px;
         }
         .section-title em {
@@ -176,7 +176,7 @@ export default function Products() {
 
         .section-sub {
           font-size: 15px; font-weight: 300;
-          color: #6a5a47; max-width: 480px;
+          color: #b8a58a; max-width: 480px;
           line-height: 1.8; margin-bottom: 64px;
           letter-spacing: 0.02em;
         }
@@ -184,7 +184,7 @@ export default function Products() {
         .products-filter-bar {
           display: flex; gap: 4px;
           margin-bottom: 56px;
-          border-bottom: 1px solid #b89f7429;
+          border-bottom: 1px solid #c9a96e2f;
           padding-bottom: 0;
         }
         .products-filter-btn {
@@ -192,12 +192,12 @@ export default function Products() {
           font-size: 12px; font-weight: 500;
           letter-spacing: 0.2em; text-transform: uppercase;
           padding: 14px 28px 16px; border: none; cursor: pointer;
-          background: transparent; color: #8f7b5c;
+          background: transparent; color: #a58f72;
           border-bottom: 2px solid transparent;
           margin-bottom: -1px; transition: all 0.3s ease;
           display: flex; align-items: center; gap: 8px;
         }
-        .products-filter-btn:hover { color: #5c4b36; }
+        .products-filter-btn:hover { color: #d9c1a0; }
         .products-filter-btn.active {
           color: #C9A96E;
           border-bottom-color: #C9A96E;
@@ -220,8 +220,8 @@ export default function Products() {
         }
 
         .product-card {
-          background: #fbf8f2;
-          border: 1px solid #cdb89240;
+          background: #171411;
+          border: 1px solid #c9a96e33;
           border-radius: 2px;
           overflow: hidden;
           transition: border-color 0.4s ease, transform 0.4s ease;
@@ -242,13 +242,13 @@ export default function Products() {
           letter-spacing: 0.25em; text-transform: uppercase;
           padding: 5px 12px; border: 1px solid;
           border-radius: 0;
-          background: rgba(250, 244, 233, 0.92);
+          background: rgba(27, 23, 19, 0.9);
           backdrop-filter: blur(4px);
         }
 
         .card-img {
           position: relative; height: 340px; overflow: hidden;
-          background: linear-gradient(145deg, #f2e8da 0%, #e8dbc9 100%);
+          background: #0f1628;
         }
         .card-img img {
           width: 100%; height: 100%; object-fit: cover;
@@ -302,7 +302,7 @@ export default function Products() {
           position: absolute; inset: 0;
           display: flex; align-items: flex-end; justify-content: center;
           padding-bottom: 28px;
-          background: linear-gradient(0deg, rgba(58, 44, 25, 0.26) 0%, transparent 50%);
+          background: linear-gradient(0deg, rgba(8, 7, 6, 0.65) 0%, transparent 55%);
           opacity: 0; transition: opacity 0.35s ease;
         }
         .product-card:hover .card-overlay { opacity: 1; }
@@ -312,16 +312,16 @@ export default function Products() {
           font-size: 10px; font-weight: 500;
           letter-spacing: 0.25em; text-transform: uppercase;
           padding: 10px 24px; border: 1px solid #C9A96E;
-          background: rgba(255, 248, 236, 0.92); cursor: pointer;
+          background: rgba(16, 13, 10, 0.92); cursor: pointer;
           border-radius: 0;
           transition: background 0.2s ease;
           color: #C9A96E;
         }
-        .quick-view-btn:hover { background: rgba(255, 244, 219, 0.98); }
+        .quick-view-btn:hover { background: rgba(29, 23, 17, 0.98); }
 
         .card-body {
           padding: 28px 28px 24px;
-          border-top: 1px solid #ccb58e33;
+          border-top: 1px solid #c9a96e2b;
         }
 
         .card-cat {
@@ -334,20 +334,20 @@ export default function Products() {
         .card-name {
           font-family: 'Cormorant Garamond', serif;
           font-size: 26px; font-weight: 400;
-          color: #3f3122; line-height: 1.2;
+          color: #f0e3cf; line-height: 1.2;
           margin-bottom: 8px;
         }
 
         .card-sub {
           font-size: 11px; font-weight: 400;
-          letter-spacing: 0.12em; color: #8f7f66;
+          letter-spacing: 0.12em; color: #ad9a7e;
           // margin-bottom: 14px;
           text-transform: uppercase;
         }
 
         .card-desc {
           font-size: 13px; font-weight: 300;
-          line-height: 1.65; color: #7f6d55;
+          line-height: 1.65; color: #a18d70;
           margin-bottom: 20px;
           display: -webkit-box;
           -webkit-line-clamp: 2;
@@ -360,7 +360,7 @@ export default function Products() {
           flex-direction: column;
           align-items: flex-start;
           gap: 14px;
-          border-top: 1px solid #ccb58e2b; padding-top: 10px;
+          border-top: 1px solid #c9a96e22; padding-top: 10px;
         }
         .card-price-wrap {
           width: 100%;
@@ -373,13 +373,13 @@ export default function Products() {
         .card-price {
           // font-family: 'Cormorant Garamond', serif;
           font-size: 24px; font-weight: 400;
-          color: #2f2518;
+          color: #f0e2ca;
           letter-spacing: 0.02em;
         }
 
         .card-price-compare {
           font-size: 14px;
-          color: #8a8270;
+          color: #9f927d;
           text-decoration: line-through;
           margin-left: 8px;
         }
@@ -433,7 +433,7 @@ export default function Products() {
           transition: transform 0.35s ease;
         }
         .add-btn:hover {
-          color: #1a1409;
+          color: #120f0b;
           border-color: #e5c58c;
           transform: translateY(-1px);
         }
@@ -446,7 +446,7 @@ export default function Products() {
 
         .products-count {
           font-size: 12px; letter-spacing: 0.15em;
-          color: #8a7557; text-transform: uppercase;
+          color: #ab9578; text-transform: uppercase;
           margin-bottom: 24px;
         }
         .products-count span {
@@ -466,13 +466,13 @@ export default function Products() {
           width: 100%;
           margin-top: 64px;
           padding: 20px 32px;
-          background: rgba(201, 169, 110, 0.12);
+          background: rgba(201, 169, 110, 0.08);
           border: 1px solid rgba(201, 169, 110, 0.32);
           text-decoration: none;
           transition: all 0.3s ease;
         }
         .view-collection-btn:hover {
-          background: rgba(201, 169, 110, 0.2);
+          background: rgba(201, 169, 110, 0.16);
           border-color: rgba(201, 169, 110, 0.5);
         }
         .view-collection-text {
@@ -676,12 +676,12 @@ export default function Products() {
 
           {displayProducts.length === 0 && (
             <div className="text-center py-16">
-              <p className="text-[#a09884] text-lg">
+              <p className="text-[#b7a58b] text-lg">
                 No products found in this category.
               </p>
               <button
                 onClick={() => setActiveCategory("all")}
-                className="mt-6 px-8 py-3 border border-[#C9A96E] text-[#C9A96E] text-sm uppercase tracking-wider hover:bg-[rgba(201,169,110,0.1)] transition-all"
+                className="mt-6 px-8 py-3 border border-[#C9A96E] text-[#C9A96E] text-sm uppercase tracking-wider hover:bg-[rgba(201,169,110,0.15)] transition-all"
               >
                 View All Products
               </button>

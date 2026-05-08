@@ -2,10 +2,13 @@ import Footer from "@/app/components/layout/Footer";
 import Navbar from "@/app/components/layout/Navbar";
 // import Cursor from "@/app/components/ui/Cursor";
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Montserrat } from "next/font/google";
+import { Cormorant_Garamond, Montserrat, Geist } from "next/font/google";
 import "./globals.css";
 
 import Providers from "./providers";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -35,7 +38,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${cormorant.variable} ${montserrat.variable}`}>
+    <html lang="en" className={cn(cormorant.variable, montserrat.variable, "font-sans", geist.variable)}>
       <body>
         <Providers>
           {" "}

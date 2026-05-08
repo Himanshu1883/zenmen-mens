@@ -1160,29 +1160,29 @@ export default function Navbar() {
             href="https://www.instagram.com/_zenmen/"
             target="_blank"
             rel="noopener noreferrer"
-            className="znav-icon sm-flex"
-            style={{ textDecoration: "none" }}
-            aria-label="Instagram"
+            className="hidden sm:flex items-center justify-center w-9 h-9 rounded-full border border-white/10 hover:border-transparent transition-all duration-300 group relative overflow-hidden"
           >
+            {/* Gradient Background on Hover */}
+            <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-300 bg-gradient-to-tr from-[#feda75] via-[#d62976] to-[#4f5bd5]" />
+
+            {/* Icon */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
-              width="16"
-              height="16"
+              className="w-4 h-4 text-white z-10 transition group-hover:scale-110"
               fill="none"
               stroke="currentColor"
               strokeWidth="1.5"
             >
               <rect x="3" y="3" width="18" height="18" rx="5" />
               <circle cx="12" cy="12" r="4" />
-              <circle
-                cx="17.5"
-                cy="6.5"
-                r="1"
-                fill="currentColor"
-                stroke="none"
-              />
+              <circle cx="17.5" cy="6.5" r="1" />
             </svg>
+
+            {/* Tooltip */}
+            <span className="absolute -bottom-6 text-[9px] tracking-[2px] text-[#C8A96E] opacity-0 group-hover:opacity-100 transition">
+              Instagram
+            </span>
           </a>
 
           {/* User */}
