@@ -65,7 +65,7 @@ const COLORS = ["#C8A96E", "#c98e87", "#9d6e68", "#7a524c", "#5a3e39"];
 
 export default function Analytics() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mt-16">
       {/* Premium Header */}
       <div className="mb-6">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-white via-[#E8D5A8] to-[#C8A96E] bg-clip-text text-transparent mb-2">

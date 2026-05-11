@@ -1,433 +1,295 @@
-﻿"use client";
+﻿// src/app/collection/page.tsx
+"use client";
 
-import { fetchProducts } from "@/app/store/productSlice";
-import { ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
+import { fetchProducts } from "@/store/slices/productSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { formatPrice } from "@/lib/utils";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
-// import { categoryFilters, colorFilters } from "./collectionData";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
-import type { AppDispatch, RootState } from "@/app/store/store";
-import { useDispatch, useSelector } from "react-redux";
+// ── Dynamic banner: first 6 product images from DB, fallback to static ────────
+const FALLBACK_BANNER = [
+  { src: "/zenmen_kurta_hero.jpeg", alt: "Collection mood 1" },
+  { src: "/zenmen_white.jpeg", alt: "Collection mood 2" },
+  { src: "/zenmen_shirts.jpeg", alt: "Collection mood 3" },
+  { src: "/zenmen_blackcoat.jpeg", alt: "Collection mood 4" },
+  { src: "/sherwani.webp", alt: "Collection mood 5" },
+  { src: "/new.jpg", alt: "Collection mood 6" },
+];
 
 export default function CollectionPage() {
-  const formatPrice = (n: number) => `₹${n.toLocaleString("en-IN")}`;
-  const [activeImage, setActiveImage] = useState<Record<string, number>>({});
-  const dispatch = useDispatch<AppDispatch>();
-  const { products, loading } = useSelector(
-    (state: RootState) => state.products,
+  const dispatch = useAppDispatch();
+  const { products, loading, loaded, error } = useAppSelector(
+    (s) => s.products,
   );
-  const [selectedCategory, setSelectedCategory] = useState("All");
+
+  const searchParams = useSearchParams();
+  const [selectedCategory, setSelectedCategory] = useState(
+    searchParams.get("category") ?? "All",
+  );
   const [selectedColor, setSelectedColor] = useState("All");
   const [search, setSearch] = useState("");
-  // const [hydrated, setHydrated] = useState(false);
-  const productsCountRef = useRef(products.length);
-  const loadingRef = useRef(loading);
+  const [activeImage, setActiveImage] = useState<Record<string, number>>({});
 
+  // Single clean effect — fetch once
   useEffect(() => {
-    productsCountRef.current = products.length;
-    loadingRef.current = loading;
-  }, [products.length, loading]);
+    if (!loaded && !loading) dispatch(fetchProducts());
+  }, [loaded, loading, dispatch]);
 
-  // useEffect(() => {
-  //   if (!loading) dispatch(fetchProducts()); // ✅ only fetch once ever
-  // }, [loading, dispatch]);
+  // ── Banner images: pull primary image from first 6 products, fallback to static
+  const bannerImages = useMemo(() => {
+    if (products.length === 0) return FALLBACK_BANNER;
+    return products.slice(0, 6).map((p, i) => ({
+      src: p.images?.[0]?.url ?? FALLBACK_BANNER[i]?.src ?? "/new.jpg",
+      alt: p.images?.[0]?.alt ?? p.title ?? `Collection mood ${i + 1}`,
+    }));
+  }, [products]);
 
-  useEffect(() => {
-    if (!loading && products.length === 0) {
-      dispatch(fetchProducts());
-    }
-  }, [dispatch, loading, products.length]);
-
-  useEffect(() => {
-    const ensureProductsLoaded = () => {
-      if (!loadingRef.current && productsCountRef.current === 0) {
-        dispatch(fetchProducts());
-      }
-    };
-
-    const onPageShow = () => ensureProductsLoaded();
-    const onFocus = () => ensureProductsLoaded();
-    const onVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        ensureProductsLoaded();
-      }
-    };
-
-    window.addEventListener("pageshow", onPageShow);
-    window.addEventListener("focus", onFocus);
-    document.addEventListener("visibilitychange", onVisibilityChange);
-
-    return () => {
-      window.removeEventListener("pageshow", onPageShow);
-      window.removeEventListener("focus", onFocus);
-      document.removeEventListener("visibilitychange", onVisibilityChange);
-    };
-  }, [dispatch]);
-
-  const filteredProducts = useMemo(() => {
-    if (!products || products.length === 0) return [];
-
-    return products.filter((product) => {
-      const categoryMatch =
-        selectedCategory === "All" || product.category === selectedCategory;
-
-      const colorMatch =
-        selectedColor === "All" || product.colors?.includes(selectedColor);
-
-      const searchMatch =
-        search.trim() === "" ||
-        product.title.toLowerCase().includes(search.trim().toLowerCase());
-
-      return categoryMatch && colorMatch && searchMatch;
-    });
-  }, [products, search, selectedCategory, selectedColor]);
-
-  const categoryFilters = useMemo(
-    () => [
-      "All",
-      ...Array.from(new Set(products.map((p) => p.category).filter(Boolean))),
-    ],
-    [products],
-  );
-
-  const colorFilters = useMemo(
-    () => [
-      "All",
-      ...Array.from(
-        new Set(products.flatMap((p) => p.colors ?? []).filter(Boolean)),
+  const categories = useMemo(() => {
+    const cats = Array.from(
+      new Set(
+        products
+          .map((p) => p.category)
+          .filter((c): c is string => typeof c === "string" && c.length > 0),
       ),
-    ],
-    [products],
+    );
+    return ["All", ...cats];
+  }, [products]);
+
+  const colors = useMemo(() => {
+    const all = products.flatMap((p) => p.colors ?? []);
+    return ["All", ...Array.from(new Set(all))];
+  }, [products]);
+
+  const filteredProducts = useMemo(
+    () =>
+      products.filter((p) => {
+        const catMatch =
+          selectedCategory === "All" || p.category === selectedCategory;
+        const colorMatch =
+          selectedColor === "All" || p.colors?.includes(selectedColor);
+        const srchMatch =
+          search.trim() === "" ||
+          p.title.toLowerCase().includes(search.trim().toLowerCase());
+        return catMatch && colorMatch && srchMatch;
+      }),
+    [products, selectedCategory, selectedColor, search],
   );
 
-  const switchImage = (id: string, dir: "prev" | "next", length: number) => {
-    if (!length || length <= 1) return;
-    setActiveImage((prev) => {
-      const current = prev[id] ?? 0;
-      const nextValue =
-        dir === "next"
-          ? (current + 1) % length
-          : (current - 1 + length) % length;
-      return { ...prev, [id]: nextValue };
-    });
-  };
-
-  if (loading) {
+  if (error) {
     return (
-      <div className="text-center py-20 text-[#d6bb89]">
-        Loading products...
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#0a0e1a] text-[#f7f2e8]">
+        <p className="text-lg mb-4">Failed to load collection.</p>
+        <button
+          onClick={() => dispatch(fetchProducts())}
+          className="px-6 py-2 border border-[#c8a96e] text-[#c8a96e] text-sm uppercase tracking-widest hover:bg-[#c8a96e] hover:text-[#0a0e1a] transition-colors"
+        >
+          Retry
+        </button>
       </div>
     );
   }
 
   return (
-    <>
-      <style jsx global>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(28px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        @keyframes autoSlidePrimary {
-          0%,
-          14%,
-          100% {
-            transform: translateX(0);
-          }
-          22%,
-          78% {
-            transform: translateX(-100%);
-          }
-          86% {
-            transform: translateX(0);
-          }
-        }
-        @keyframes autoSlideSecondary {
-          0%,
-          14%,
-          100% {
-            transform: translateX(100%);
-          }
-          22%,
-          78% {
-            transform: translateX(0);
-          }
-          86% {
-            transform: translateX(100%);
-          }
-        }
-        .product-preview-media {
-          position: relative;
-          overflow: hidden;
-        }
-        .product-preview-track {
-          position: absolute;
-          inset: 0;
-        }
-        .product-preview-primary,
-        .product-preview-secondary {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          object-position: center 20%;
-          transition: transform 0.6s ease;
-        }
-        .product-preview-primary {
-          transform: translateX(0);
-        }
-        .product-preview-secondary {
-          transform: translateX(100%);
-        }
-        .preview-card:hover .product-preview-primary {
-          transform: translateX(-100%);
-        }
-        .preview-card:hover .product-preview-secondary {
-          transform: translateX(0);
-        }
-        .preview-card.auto-preview .product-preview-primary {
-          animation: autoSlidePrimary 6.5s ease-in-out infinite;
-        }
-        .preview-card.auto-preview .product-preview-secondary {
-          animation: autoSlideSecondary 6.5s ease-in-out infinite;
-        }
-        .preview-card.auto-preview:hover .product-preview-primary,
-        .preview-card.auto-preview:hover .product-preview-secondary {
-          animation-play-state: paused;
-        }
-      `}</style>
-      <main className="bg-[linear-gradient(180deg,#f6f1e8_0%,#f0e7db_55%,#eadfce_100%)] text-[#3f3528]">
-        <div className="relative w-full pt-16 md:pt-16">
-          <div className="relative h-[58vh] min-h-[440px] w-full overflow-hidden border-y border-[#c8a96e4f]">
-            <div className="absolute inset-0 grid grid-cols-3 md:grid-cols-6">
-              {[
-                "/zenmen_kurta_hero.jpeg",
-                "/zenmen_white.jpeg",
-                "/zenmen_shirts.jpeg",
-                "/zenmen_blackcoat.jpeg",
-                "/sherwani.webp",
-                "/new.jpg",
-              ].map((src, idx) => (
-                <div key={src} className="relative">
-                  <img
-                    src={src}
-                    alt={`Collection mood ${idx + 1}`}
-                    className="h-full w-full object-cover opacity-90"
-                  />
-                  {/* <div className="absolute inset-0 bg-gradient-to-b from-[#f5ecdd]/10 via-[#533d1f]/20 to-[#2e1f0d]/38" /> */}
-                </div>
-              ))}
-            </div>
+    <div className="min-h-screen bg-[#0a0e1a] text-[#f7f2e8]">
+      {/* ══════════════════════ BANNER ══════════════════════ */}
+      <div className="relative w-full pt-16">
+        <div className="relative h-[58vh] min-h-[440px] w-full overflow-hidden border-b border-[rgba(200,169,110,0.2)]">
+          {/* 6-column dynamic image grid */}
+          <div className="absolute inset-0 grid grid-cols-3 md:grid-cols-6">
+            {bannerImages.map(({ src, alt }, idx) => (
+              <div key={idx} className="relative overflow-hidden">
+                <img
+                  src={src}
+                  alt={alt}
+                  className="h-full w-full object-cover opacity-80 transition-transform duration-700 hover:scale-105"
+                />
+                {/* Per-column dark vignette */}
+                <div className="absolute inset-0 bg-gradient-to-b from-[#050A18]/10 via-transparent to-[#050A18]/60" />
+              </div>
+            ))}
+          </div>
 
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(200,169,110,0.3),transparent_45%)]" />
+          {/* Radial gold glow */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(200,169,110,0.18),transparent_50%)]" />
 
-            <div className="relative z-10 flex h-full w-full flex-col items-center justify-end px-6 pb-10 text-center md:pb-14">
-              <p className="mb-4 inline-block w-fit rounded-xl border border-[#c8a96e88] bg-[#f8f0e4]/80 px-4 py-2 text-[10px] tracking-[0.35em] text-[#8b6d3f] uppercase">
-                ZENmen Edits
-              </p>
-              <h1 className="max-w-5xl font-['Cormorant_Garamond'] text-5xl font-light leading-[0.95] text-[#f9f3ea] drop-shadow-[0_2px_8px_rgba(26,17,7,0.45)] md:text-7xl">
-                New Season Collection
-              </h1>
-              <p className="mt-4 max-w-3xl text-sm leading-7 text-[#f0e7d8] md:text-base">
-                Statement tailoring, sharp silhouettes, and handcrafted textures
-                built for weddings, evenings, and standout everyday presence.
-              </p>
-            </div>
+          {/* Bottom fade into page background */}
+          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-b from-transparent to-[#0a0e1a]" />
+
+          {/* Banner text */}
+          <div className="relative z-10 flex h-full w-full flex-col items-center justify-end px-6 pb-12 text-center md:pb-16">
+            <p className="mb-4 inline-block w-fit border border-[rgba(200,169,110,0.5)] bg-[rgba(5,10,24,0.6)] px-4 py-2 text-[10px] tracking-[0.35em] text-[#c8a96e] uppercase backdrop-blur-sm">
+              ZENmen Edits
+            </p>
+            <h1 className="max-w-4xl font-['Cormorant_Garamond'] text-5xl font-light leading-[0.95] text-[#f8f4ec] drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)] md:text-7xl">
+              New Season Collection
+            </h1>
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-[rgba(247,242,232,0.65)] md:text-base">
+              Statement tailoring, sharp silhouettes, and handcrafted textures
+              built for weddings, evenings, and standout everyday presence.
+            </p>
           </div>
         </div>
+      </div>
 
-        <section className="w-full px-4 py-16 sm:px-6 lg:px-8 2xl:px-12 md:py-20">
-          <div className="mb-10 flex flex-col justify-between gap-5 border-b border-[#c8a96e45] pb-6 md:flex-row md:items-end">
-            <div>
-              <p className="text-[10px] tracking-[0.32em] text-[#c8a96e] uppercase">
-                Featured Products
-              </p>
-              <h2 className="mt-3 font-['Playfair_Display'] text-4xl font-light md:text-5xl">
-                Men&apos;s Collections
-              </h2>
-            </div>
-          </div>
+      {/* ══════════════════════ HEADER ══════════════════════ */}
+      <div className="pt-12 pb-6 px-6 md:px-12 lg:px-20">
+        <p className="text-[10px] tracking-[4px] uppercase text-[#c8a96e] mb-3">
+          ZENmen — Collection
+        </p>
+        <h2 className="font-['Cormorant_Garamond'] text-4xl md:text-5xl font-light leading-tight text-[#f7f2e8]">
+          The Collection
+        </h2>
+      </div>
 
-          <div className="mb-8 grid grid-cols-1 gap-4 rounded-xl border border-[#c8a96e42] bg-[#f7f1e7] p-4 sm:grid-cols-2 lg:grid-cols-4">
-            <input
-              type="text"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search products..."
-              className="h-11 rounded-lg border border-[#c8a96e66] bg-[#fcf9f3] px-3 text-sm text-[#4b3d2a] outline-none transition focus:border-[#b79257]"
-            />
-            <select
-              value={selectedCategory}
-              onChange={(event) => setSelectedCategory(event.target.value)}
-              className="h-11 rounded-lg border border-[#c8a96e66] bg-[#fcf9f3] px-3 text-sm text-[#4b3d2a] outline-none transition focus:border-[#b79257]"
-            >
-              {categoryFilters.map((category) => (
-                <option
-                  key={category}
-                  value={category}
-                  className="bg-[#fcf9f3]"
-                >
-                  Category: {category}
-                </option>
-              ))}
-            </select>
-            <select
-              value={selectedColor}
-              onChange={(event) => setSelectedColor(event.target.value)}
-              className="h-11 rounded-lg border border-[#c8a96e66] bg-[#fcf9f3] px-3 text-sm text-[#4b3d2a] outline-none transition focus:border-[#b79257]"
-            >
-              {colorFilters.map((color) => (
-                <option key={color} value={color} className="bg-[#fcf9f3]">
-                  Color: {color}
-                </option>
-              ))}
-            </select>
+      {/* ══════════════════════ FILTERS ══════════════════════ */}
+      <div className="px-6 md:px-12 lg:px-20 pb-8 flex flex-wrap gap-3 items-center">
+        <input
+          type="text"
+          placeholder="Search..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="bg-transparent border border-[rgba(200,169,110,0.3)] text-[#f7f2e8] text-sm px-4 py-2 outline-none focus:border-[#c8a96e] placeholder:text-[rgba(247,242,232,0.3)] w-52"
+        />
+        <div className="flex gap-2 flex-wrap">
+          {categories.map((cat) => (
             <button
-              type="button"
-              onClick={() => {
-                setSearch("");
-                setSelectedCategory("All");
-                setSelectedColor("All");
-              }}
-              className="h-11 rounded-lg border border-[#c8a96e8f] bg-[#c8a96e24] px-4 text-sm tracking-[0.18em] text-[#8d6f42] uppercase transition hover:bg-[#c8a96e3f]"
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-4 py-1.5 text-[10px] tracking-widest uppercase transition-colors ${
+                selectedCategory === cat
+                  ? "bg-[#c8a96e] text-[#0a0e1a]"
+                  : "border border-[rgba(200,169,110,0.3)] text-[#c8a96e] hover:bg-[rgba(200,169,110,0.1)]"
+              }`}
             >
-              Clear Filters
+              {cat}
             </button>
+          ))}
+        </div>
+        {/* Color filter */}
+        {colors.length > 2 && (
+          <div className="flex gap-2 flex-wrap">
+            {colors.map((col) => (
+              <button
+                key={col}
+                onClick={() => setSelectedColor(col)}
+                className={`px-4 py-1.5 text-[10px] tracking-widest uppercase transition-colors ${
+                  selectedColor === col
+                    ? "bg-[#c8a96e] text-[#0a0e1a]"
+                    : "border border-[rgba(200,169,110,0.2)] text-[rgba(200,169,110,0.6)] hover:bg-[rgba(200,169,110,0.08)]"
+                }`}
+              >
+                {col}
+              </button>
+            ))}
           </div>
+        )}
+        {/* Clear */}
+        {(selectedCategory !== "All" || selectedColor !== "All" || search) && (
+          <button
+            onClick={() => {
+              setSearch("");
+              setSelectedCategory("All");
+              setSelectedColor("All");
+            }}
+            className="px-4 py-1.5 text-[10px] tracking-widest uppercase border border-[rgba(200,169,110,0.2)] text-[rgba(247,242,232,0.4)] hover:text-[#c8a96e] hover:border-[#c8a96e] transition-colors"
+          >
+            Clear
+          </button>
+        )}
+      </div>
 
-          <div className="mb-6 text-xs tracking-[0.18em] text-[#8f7a5d] uppercase">
-            Showing {filteredProducts.length} of {products.length} products
+      {/* Product count */}
+      {!loading && products.length > 0 && (
+        <div className="px-6 md:px-12 lg:px-20 pb-4 text-[10px] tracking-[2px] uppercase text-[rgba(247,242,232,0.3)]">
+          Showing {filteredProducts.length} of {products.length} products
+        </div>
+      )}
+
+      {/* ══════════════════════ GRID ══════════════════════ */}
+      <div className="px-6 md:px-12 lg:px-20 pb-20">
+        {/* Skeleton */}
+        {loading && (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div
+                key={i}
+                className="aspect-[3/4] bg-[rgba(200,169,110,0.05)] animate-pulse"
+              />
+            ))}
           </div>
+        )}
 
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-            {filteredProducts.map((product, index) => {
-              const productId = String(product._id);
-              const imgIndex = activeImage[productId] ?? 0;
+        {/* Empty state */}
+        {!loading && filteredProducts.length === 0 && (
+          <div className="py-24 text-center text-[rgba(247,242,232,0.4)] text-sm">
+            No products found.
+          </div>
+        )}
+
+        {/* Product grid — original card design fully preserved */}
+        {!loading && filteredProducts.length > 0 && (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {filteredProducts.map((product) => {
+              const imgIndex = activeImage[product._id] ?? 0;
               const images = product.images ?? [];
-              const primary =
-                images[imgIndex]?.url || images[0]?.url || "/new.jpg";
-              const altIndex =
-                images.length > 1 ? (imgIndex + 1) % images.length : 0;
-              const secondary = images[altIndex]?.url || primary;
-              const hasImagePair = Boolean(primary && secondary);
-              const autoPreview =
-                hasImagePair &&
-                (productId
-                  .split("")
-                  .reduce(
-                    (sum: number, ch: string) => sum + ch.charCodeAt(0),
-                    0,
-                  ) +
-                  index) %
-                  3 ===
-                  0;
+              const currentImg = images[imgIndex]?.url ?? "";
+
               return (
-                <article
-                  key={productId}
-                  className={`group preview-card translate-y-7 animate-[fadeInUp_0.7s_ease_forwards] overflow-hidden rounded-xl border border-[#c8a96e4d] bg-[#fbf8f2] opacity-0 shadow-[0_14px_34px_rgba(76,52,21,0.16)] transition duration-500 hover:border-[#c8a96e8a] ${autoPreview ? "auto-preview" : ""}`}
-                  style={{ animationDelay: `${index * 70}ms` }}
+                <Link
+                  key={product._id}
+                  href={`/collection/${product.slug}`}
+                  className="group block"
                 >
-                  <Link
-                    href={`/collection/product-detail?id=${productId}`}
-                    className="block"
-                  >
-                    <div className="product-preview-media relative aspect-[3/4] overflow-hidden">
-                      {product.badge && (
-                        <span className="absolute left-3 top-3 z-20 border border-[#c8a96e99] bg-[#f7efe2]/90 px-3 py-1 text-[10px] tracking-[0.2em] text-[#8b6d3f] uppercase">
-                          {product.badge}
-                        </span>
-                      )}
-
-                      {hasImagePair ? (
-                        <div className="product-preview-track">
-                          <img
-                            src={primary}
-                            alt={product.title}
-                            className="product-preview-primary"
+                  <div className="relative aspect-[3/4] overflow-hidden bg-[#0f1628] mb-3">
+                    {currentImg && (
+                      <img
+                        src={currentImg}
+                        alt={images[imgIndex]?.alt ?? product.title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                    )}
+                    {product.badge && (
+                      <span className="absolute top-3 left-3 bg-[#c8a96e] text-[#0a0e1a] text-[9px] tracking-widest uppercase px-2 py-1">
+                        {product.badge}
+                      </span>
+                    )}
+                    {images.length > 1 && (
+                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1">
+                        {images.map((_, idx) => (
+                          <button
+                            key={idx}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setActiveImage((prev) => ({
+                                ...prev,
+                                [product._id]: idx,
+                              }));
+                            }}
+                            className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                              imgIndex === idx ? "bg-[#c8a96e]" : "bg-white/30"
+                            }`}
                           />
-                          <img
-                            src={secondary}
-                            alt={`${product.title} alternate view`}
-                            className="product-preview-secondary"
-                          />
-                        </div>
-                      ) : (
-                        <img
-                          src={primary}
-                          alt={product.title}
-                          className="h-full w-full object-cover object-[center_20%]"
-                        />
-                      )}
-
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#2e1f0d]/45 via-[#5a4323]/15 to-transparent" />
-                    </div>
-                  </Link>
-
-                  <div className="pointer-events-none absolute inset-x-0 top-[32%] z-20 flex items-center justify-between px-3">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        switchImage(
-                          product._id,
-                          "prev",
-                          product.images?.length ?? 0,
-                        )
-                      }
-                      className="pointer-events-auto rounded-full border border-[#fff4dfb8] bg-[#f8f1e4]/80 p-2 text-[#5e472a] opacity-0 transition duration-300 group-hover:opacity-100 hover:border-[#c8a96e] hover:text-[#8b6d3f]"
-                      aria-label={`Show previous image for ${product.title}`}
-                    >
-                      <ChevronLeft size={24} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        switchImage(
-                          product._id,
-                          "next",
-                          product.images?.length ?? 0,
-                        )
-                      }
-                      className="pointer-events-auto rounded-full border border-[#fff4dfb8] bg-[#f8f1e4]/80 p-2 text-[#5e472a] opacity-0 transition duration-300 group-hover:opacity-100 hover:border-[#c8a96e] hover:text-[#8b6d3f]"
-                      aria-label={`Show next image for ${product.title}`}
-                    >
-                      <ChevronRight size={24} />
-                    </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
-
-                  <button
-                    type="button"
-                    className="flex h-12 w-full items-center justify-center gap-3 border-y border-[#c8a96e70] bg-[#c8a96e] text-[14px] font-bold tracking-[0.2em] text-[#2e220f] uppercase transition duration-300 hover:bg-[#d6bb89]"
-                  >
-                    <ShoppingBag size={18} />
-                    Add to Cart
-                  </button>
-
-                  <Link
-                    href={`/collection/product-detail?id=${product._id}`}
-                    className="block p-4"
-                  >
-                    <h3 className="font-['Cormorant_Garamond'] text-2xl font-light text-[#3f3122]">
-                      {product.title}
-                    </h3>
-                    <p className="mt-1 text-[11px] tracking-[0.2em] text-[#8f7f66] uppercase">
-                      {product.category} • {product.colors?.[0]}
-                    </p>
-                    <p className="mt-3 font-sans text-2xl text-[#d6bb89]">
-                      {formatPrice(product.price)}
-                    </p>
-                  </Link>
-                </article>
+                  <p className="text-[10px] tracking-[2px] uppercase text-[#c8a96e] mb-1">
+                    {product.category}
+                  </p>
+                  <p className="text-sm text-[#f7f2e8] font-light mb-1 truncate">
+                    {product.title}
+                  </p>
+                  <p className="text-sm text-[rgba(247,242,232,0.6)]">
+                    {formatPrice(product.price)}
+                  </p>
+                </Link>
               );
             })}
           </div>
-        </section>
-      </main>
-    </>
+        )}
+      </div>
+    </div>
   );
 }

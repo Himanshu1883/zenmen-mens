@@ -1,6 +1,7 @@
+// src/app/providers.tsx
 "use client";
 
-import { store } from "@/app/store/store";
+import { store } from "@/store/store";
 import { SessionProvider } from "next-auth/react";
 import { Provider } from "react-redux";
 import { Toaster } from "sonner";

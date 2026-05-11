@@ -1,0 +1,37 @@
+// src/app/sitemap.ts
+import { connectDB } from "@/lib/db";
+import Product from "@/models/Product";
+import type { MetadataRoute } from "next";
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const baseUrl = process.env.NEXTAUTH_URL ?? "https://zenmen.in";
+
+  await connectDB();
+  const products = await Product.find({}, { slug: 1, updatedAt: 1 }).lean();
+
+  const productUrls: MetadataRoute.Sitemap = products.map((p) => ({
+    url: `${baseUrl}/collection/${p.slug}`,
+    lastModified: p.updatedAt ?? new Date(),
+    changeFrequency: "weekly",
+    priority: 0.8,
+  }));
+
+  return [
+    {
+      url: baseUrl,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 1,
+    },
+    {
+      url: `${baseUrl}/collection`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.9,
+    },
+    { url: `${baseUrl}/services`, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${baseUrl}/process`, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/contact`, changeFrequency: "monthly", priority: 0.5 },
+    ...productUrls,
+  ];
+}

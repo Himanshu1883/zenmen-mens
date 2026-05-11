@@ -34,7 +34,7 @@ export function Navbar({ onMenuClick, sidebarCollapsed }: NavbarProps) {
 
   return (
     <header
-      className={`fixed top-0 right-0 left-0 ${
+      className={`fixed top-16 right-0 left-0 ${
         sidebarCollapsed ? "md:left-20" : "md:left-72"
       } h-20 z-20 transition-all duration-300`}
       style={{

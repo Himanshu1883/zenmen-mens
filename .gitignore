@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Dev output files
+uploaded.json
+
+# Raw assets (host on Cloudinary instead)
+assests/
