@@ -1,9 +1,14 @@
-import { Testimonial } from "@/app/types";
+type Testimonial = {
+  text: string;
+  initials: string;
+  author: string;
+  title: string;
+};
 
 export default function TestimonialCard({ t }: { t: Testimonial }) {
   return (
     <div className="testimonial-card">
-      <span className="quote-mark">"</span>
+      <span className="quote-mark">&quot;</span>
 
       <p className="testimonial-text">{t.text}</p>
 
@@ -18,3 +23,5 @@ export default function TestimonialCard({ t }: { t: Testimonial }) {
     </div>
   );
 }
+
+// nothing just to make commit and push the changes in other files, as they are not being tracked by git due to the recent edits.
