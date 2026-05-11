@@ -1,4 +1,9 @@
-import { Product } from "@/types/product";
+type Product = {
+  category: string;
+  badge?: string;
+  title: string;
+  price: string | number;
+};
 
 export default function ProductCard({ product }: { product: Product }) {
   return (
@@ -25,4 +30,5 @@ export default function ProductCard({ product }: { product: Product }) {
       </div>
     </div>
   );
+
 }
