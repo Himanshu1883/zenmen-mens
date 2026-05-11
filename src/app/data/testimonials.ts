@@ -1,4 +1,10 @@
-import type { Testimonial } from "@/app/types";
+type Testimonial = {
+  id: number;
+  initials: string;
+  text: string;
+  author: string;
+  title: string;
+};
 
 export const testimonials: Testimonial[] = [
   {

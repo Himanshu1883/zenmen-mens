@@ -1,6 +1,11 @@
 // src/app/data/process.ts
 
-import type { ProcessStep } from "@/app/types";
+type ProcessStep = {
+  id: number;
+  num: string;
+  title: string;
+  description: string;
+};
 
 export const processSteps: ProcessStep[] = [
   {

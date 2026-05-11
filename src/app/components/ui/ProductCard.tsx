@@ -1,4 +1,4 @@
-import { Product } from "@/app/types";
+import { Product } from "@/types/product";
 
 export default function ProductCard({ product }: { product: Product }) {
   return (
@@ -20,8 +20,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
       {/* Info */}
       <div className="product-info">
-        <h3 className="product-name">{product.name}</h3>
-        <p className="product-material">{product.material}</p>
+        <h3 className="product-name">{product.title}</h3>
         <span className="product-price">{product.price}</span>
       </div>
     </div>

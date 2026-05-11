@@ -1,6 +1,6 @@
 "use client";
 
-import { Service } from "@/app/types";
+import { Service } from "@/types/";
 import { motion } from "framer-motion";
 
 export default function ServiceCard({ service }: { service: Service }) {
