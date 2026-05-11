@@ -1,11 +1,12 @@
-import { connectDB } from "@/app/lib/db";
-import User from "@/app/models/User";
+import { connectDB } from "@/lib/db";
+import User from "@/models/User";
 import bcrypt from "bcryptjs";
-import NextAuth from "next-auth";
+import NextAuth, { type NextAuthOptions } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 
-const handler = NextAuth({
+// build auth options
+const authOptions: NextAuthOptions = {
   providers: [
     // 🔐 Google Login
     GoogleProvider({
@@ -62,12 +63,7 @@ const handler = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.role = (user as { role?: string }).role;
-      }
-
-      if (!token.role && token.email) {
-        await connectDB();
-        const dbUser = await User.findOne({ email: token.email }).lean();
-        token.role = dbUser?.role || "user";
+        token.id = (user as { id?: string }).id;
       }
 
       return token;
@@ -86,6 +82,8 @@ const handler = NextAuth({
   },
 
   session: { strategy: "jwt" },
-});
+};
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };

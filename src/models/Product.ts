@@ -1,8 +1,9 @@
+// src/models/Product.ts
 import mongoose from "mongoose";
 
 const ImageSchema = new mongoose.Schema({
   url: { type: String, required: true },
-  alt: String,
+  alt: { type: String, default: "" },
   isPrimary: { type: Boolean, default: false },
   order: { type: Number, default: 0 },
 });
@@ -11,7 +12,7 @@ const ReviewSchema = new mongoose.Schema(
   {
     userId: String,
     name: String,
-    rating: Number,
+    rating: { type: Number, min: 1, max: 5 },
     comment: String,
   },
   { timestamps: true },
@@ -24,26 +25,23 @@ const SpecSchema = new mongoose.Schema({
 
 const ProductSchema = new mongoose.Schema(
   {
-    // 🔥 BASIC
-    title: { type: String, required: true },
-    slug: { type: String, unique: true },
+    title: { type: String, required: true, trim: true },
+    slug: {
+      type: String,
+      unique: true,
+      required: true,
+      lowercase: true,
+      trim: true,
+    },
     tagline: String,
     description: String,
 
-    // 🔥 CATEGORY
-    category: String,
+    category: { type: String, index: true },
     subCategory: String,
 
-    // 🔥 PRICING
-    price: { type: Number, required: true },
+    price: { type: Number, required: true, min: 0 },
     comparePrice: Number,
     discount: Number,
-
-    // 🔥 MEDIA (YOUR UI USES THIS)
-    // images: {
-    //   type: [ImageSchema],
-    //   validate: [(arr: any[]) => arr.length > 0, "Image required"],
-    // },
 
     images: {
       type: [ImageSchema],
@@ -53,42 +51,34 @@ const ProductSchema = new mongoose.Schema(
       ],
     },
 
-    // 🔥 UI TABS
-    details: [String], // bullet list
-    specifications: [SpecSchema], // specs table
-    care: String, // care tab
+    details: [String],
+    specifications: [SpecSchema],
+    care: String,
 
-    // 🔥 OPTIONS
     colors: [String],
     sizes: [String],
 
-    // 🔥 INVENTORY
-    stock: Number,
+    stock: { type: Number, default: 0, min: 0 },
     isAvailable: { type: Boolean, default: true },
 
-    // 🔥 REVIEWS (for stars UI)
     reviews: [ReviewSchema],
-    rating: { type: Number, default: 0 },
+    rating: { type: Number, default: 0, min: 0, max: 5 },
     numReviews: { type: Number, default: 0 },
 
-    // 🔥 UI FLAGS
     badge: String,
-    isFeatured: { type: Boolean, default: false },
+    isFeatured: { type: Boolean, default: false, index: true },
 
-    // 🔥 ACCORDION (shipping, returns etc.)
-    accordion: [
-      {
-        title: String,
-        content: String,
-      },
-    ],
+    accordion: [{ title: String, content: String }],
 
-    // 🔥 SEO
     seoTitle: String,
     seoDescription: String,
   },
   { timestamps: true },
 );
+
+// Compound index for collection filtering
+ProductSchema.index({ category: 1, isAvailable: 1 });
+ProductSchema.index({ isFeatured: 1, isAvailable: 1 });
 
 export default mongoose.models.Product ||
   mongoose.model("Product", ProductSchema);

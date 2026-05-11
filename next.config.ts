@@ -1,9 +1,11 @@
+// next.config.ts
 const nextConfig = {
-  turbopack: {
-    root: "C:/Users/Gulab/Desktop/ZENmen/zenmen",
-  },
   images: {
     remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+      },
       {
         protocol: "https",
         hostname: "images.unsplash.com",

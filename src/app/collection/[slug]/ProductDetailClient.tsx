@@ -1,25 +1,13 @@
-﻿"use client";
+// src/app/collection/[slug]/ProductDetailClient.tsx
+"use client";
 
+import { addItem } from "@/store/slices/cartSlice";
+import { useAppDispatch } from "@/store/hooks";
+import { formatPrice } from "@/lib/utils";
+import type { Product } from "@/types/product";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-
-type Product = {
-  _id: string;
-  title: string;
-  slug?: string;
-  tagline?: string;
-  description?: string;
-  category?: string;
-  price: number | string;
-  colors?: string[];
-  sizes?: string[];
-  badge?: string;
-  details?: string[];
-  care?: string;
-  rating?: number;
-  numReviews?: number;
-  images?: { url: string; alt?: string }[];
-};
+import { useAppSelector } from "@/store/hooks";
 
 const COLORS = [
   { name: "Midnight Navy", cls: "bg-[#1a2a4a]" },
@@ -188,49 +176,20 @@ function AccordionItem({
   );
 }
 
-export default function ProductDetailClient({
-  productId,
-}: {
-  productId: string;
-}) {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const formatPrice = (price: number | string) =>
-    `₹${Number(price).toLocaleString("en-IN")}`;
+// ─── Main Component ────────────────────────────────────────────────────────────
+// CHANGED: receives `product` directly instead of `productId` string.
+// The server page fetches the product by slug and passes it here.
+export default function ProductDetailClient({ product }: { product: Product }) {
+  const dispatch = useAppDispatch();
 
-  useEffect(() => {
-    let isMounted = true;
-    async function loadProducts() {
-      try {
-        const res = await fetch("/api/products", { cache: "no-store" });
-        if (!res.ok) throw new Error("Failed to fetch products");
-        const data = (await res.json()) as Product[];
-        if (isMounted) {
-          setProducts(Array.isArray(data) ? data : []);
-        }
-      } catch {
-        if (isMounted) setProducts([]);
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    }
-    loadProducts();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  const product = useMemo(
-    () =>
-      products.find(
-        (item) => item._id === productId || item.slug === productId,
-      ) ?? products[0],
-    [products, productId],
-  );
+  // Pull all products from Redux for related / mosaic sections
+  const allProducts = useAppSelector((s) => s.products.products);
 
   const [activeImage, setActiveImage] = useState(0);
-  const [selectedSize, setSelectedSize] = useState("M");
-  const [selectedColor, setSelectedColor] = useState(COLORS[0].name);
+  const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] ?? "M");
+  const [selectedColor, setSelectedColor] = useState(
+    product.colors?.[0] ?? COLORS[0].name,
+  );
   const [activeTab, setActiveTab] = useState<
     "desc" | "details" | "specs" | "care"
   >("desc");
@@ -238,38 +197,34 @@ export default function ProductDetailClient({
   const [addedToCart, setAddedToCart] = useState(false);
   const [wishlisted, setWishlisted] = useState(false);
 
-  // Check if selected color is available in product colors
-  const isColorAvailable = useMemo(() => {
-    if (!product?.colors) return false;
-    return product.colors.includes(selectedColor);
-  }, [product, selectedColor]);
-
+  // Reset selections if product changes
   useEffect(() => {
-    if (!product) return;
     setActiveImage(0);
     setSelectedSize(product.sizes?.[0] ?? "M");
     setSelectedColor(product.colors?.[0] ?? COLORS[0].name);
-  }, [product]);
+  }, [product._id]);
 
-  
+  const isColorAvailable = useMemo(() => {
+    if (!product.colors) return false;
+    return product.colors.includes(selectedColor);
+  }, [product.colors, selectedColor]);
 
-  const rating = product?.rating ?? 4.6;
-  const reviewCount = product?.numReviews ?? 42;
+  const rating = product.rating ?? 4.6;
+  const reviewCount = product.numReviews ?? 42;
   const stars = Array.from({ length: 5 }, (_, i) => i < Math.floor(rating));
 
   const specs = [
-    { label: "Category", value: product?.category ?? "-" },
-    { label: "Color", value: product?.colors?.[0] ?? "-" },
+    { label: "Category", value: product.category ?? "-" },
+    { label: "Color", value: product.colors?.[0] ?? "-" },
     {
       label: "Fit",
-      value: product?.category === "Kurta" ? "Relaxed" : "Tailored",
+      value: product.category === "Kurta" ? "Relaxed" : "Tailored",
     },
-    { label: "Sizes", value: product?.sizes?.join(", ") ?? "-" },
+    { label: "Sizes", value: product.sizes?.join(", ") ?? "-" },
   ];
 
   const relatedProducts = useMemo(() => {
-    if (!product) return [];
-    return products
+    return allProducts
       .filter(
         (item) =>
           item._id !== product._id &&
@@ -277,43 +232,40 @@ export default function ProductDetailClient({
             item.colors?.[0] === product.colors?.[0]),
       )
       .slice(0, 4);
-  }, [product, products]);
+  }, [allProducts, product._id, product.category, product.colors]);
 
   const mosaicData = useMemo(() => {
-    if (!product) return [];
-    return products.filter((item) => item._id !== product._id).slice(0, 5);
-  }, [product, products]);
+    return allProducts.filter((item) => item._id !== product._id).slice(0, 5);
+  }, [allProducts, product._id]);
 
   const handleWhatsAppInquiry = () => {
-    const phoneNumber = "9196507 53273"; // Replace with your actual WhatsApp number
-    const message = `Hi Zenmen, I'm interested in the "${product?.title}" in ${selectedColor} color, size ${selectedSize}. Is this available?`;
+    const phoneNumber = "919650753273";
+    const message = `Hi Zenmen, I'm interested in the "${product.title}" in ${selectedColor} color, size ${selectedSize}. Is this available?`;
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, "_blank");
   };
 
-  if (loading) {
-    return (
-      <div className="text-center py-20 text-[#d6bb89]">
-        Loading products...
-      </div>
-    );
-  }
-
-  if (!product) {
-    return (
-      <main className="min-h-screen bg-[#050A18] pt-28 text-center text-[#d6bb89]">
-        Product not found.
-      </main>
-    );
-  }
-
+  // CHANGED: now actually dispatches to Redux cart
   function handleAddToCart() {
+    dispatch(
+      addItem({
+        _id: product._id,
+        title: product.title,
+        slug: product.slug,
+        price: product.price,
+        image: product.images?.[0] ?? { url: "" },
+        selectedColor: selectedColor || undefined,
+        selectedSize: selectedSize || undefined,
+        qty: 1,
+      }),
+    );
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
   }
 
   return (
     <main className="relative min-h-screen overflow-x-hidden bg-[#050A18] font-['Jost'] font-light text-[#F3EEE4]">
+      {/* Noise texture */}
       <div
         className="pointer-events-none fixed inset-0 z-0 opacity-[.03]"
         style={{
@@ -363,7 +315,7 @@ export default function ProductDetailClient({
           <div className="mt-3 grid grid-cols-4 gap-3">
             {(product.images ?? []).map((img, i) => (
               <button
-                key={`${product._id}-thumb-${i + 1}`}
+                key={`${product._id}-thumb-${i}`}
                 onClick={() => setActiveImage(i)}
                 className={`rounded-[3px] border-[1.5px] bg-transparent p-0 transition-all duration-200 ${
                   activeImage === i
@@ -373,7 +325,7 @@ export default function ProductDetailClient({
               >
                 <img
                   src={img.url}
-                  alt={`Thumbnail ${i + 1}`}
+                  alt={img.alt ?? `Thumbnail ${i + 1}`}
                   className="block h-[150px] w-full object-cover object-[center_15%]"
                 />
               </button>
@@ -382,14 +334,7 @@ export default function ProductDetailClient({
         </div>
 
         {/* ── RIGHT: scrollable details panel ── */}
-        <aside
-          className="
-            xl:max-h-[calc(100vh-108px)]
-            xl:overflow-y-auto
-            xl:[scrollbar-width:none]
-            xl:[&::-webkit-scrollbar]:hidden
-          "
-        >
+        <aside className="xl:max-h-[calc(100vh-108px)] xl:overflow-y-auto xl:[scrollbar-width:none] xl:[&::-webkit-scrollbar]:hidden">
           <div className="rounded-[4px] border border-[rgba(200,169,110,0.18)] bg-[#0d1527] p-8 sm:p-9">
             <p className="mb-2 text-[.6rem] uppercase tracking-[.35em] text-[#c8a96e]">
               {product.category} · Limited Edition
@@ -402,6 +347,7 @@ export default function ProductDetailClient({
                 "Crafted for timeless style and everyday confidence."}
             </p>
 
+            {/* Stars */}
             <div className="mt-4 flex items-center gap-3 border-t border-[rgba(200,169,110,0.18)] pt-4">
               <div className="flex gap-0.5">
                 {stars.map((filled, i) => (
@@ -413,6 +359,7 @@ export default function ProductDetailClient({
               </span>
             </div>
 
+            {/* Price */}
             <div className="my-7 border-y border-[rgba(200,169,110,0.18)] py-6">
               <p className="text-[3rem] font-light leading-none text-[#e8d4a8]">
                 {formatPrice(product.price)}
@@ -496,10 +443,9 @@ export default function ProductDetailClient({
               ))}
             </div>
 
-            {/* CTA buttons - Conditional based on color availability */}
+            {/* CTA Buttons */}
             <div className="flex flex-col gap-3">
               {isColorAvailable || selectedColor === product.colors?.[0] ? (
-                // Normal Add to Cart button for available colors
                 <button
                   onClick={handleAddToCart}
                   className={`flex h-[52px] items-center justify-center gap-2.5 rounded-[3px] border-0 font-['Jost'] text-[.72rem] font-medium uppercase tracking-[.25em] transition-all ${
@@ -512,17 +458,15 @@ export default function ProductDetailClient({
                   {addedToCart ? "Added to Cart" : "Add to Cart"}
                 </button>
               ) : (
-                // Book Now with WhatsApp for custom colors
                 <button
                   onClick={handleWhatsAppInquiry}
-                  className="flex h-[52px] items-center justify-center gap-2.5 rounded-[3px] border-0 bg-[#25D366] text-white transition-all hover:bg-[#20b859] font-['Jost'] text-[.72rem] font-medium uppercase tracking-[.25em]"
+                  className="flex h-[52px] items-center justify-center gap-2.5 rounded-[3px] border-0 bg-[#25D366] font-['Jost'] text-[.72rem] font-medium uppercase tracking-[.25em] text-white transition-all hover:bg-[#20b859]"
                 >
                   <IconWhatsApp />
                   Book Now
                 </button>
               )}
 
-              {/* Buy Now button - changes based on color availability */}
               {isColorAvailable || selectedColor === product.colors?.[0] ? (
                 <button className="h-[52px] rounded-[3px] border border-[rgba(200,169,110,0.38)] bg-transparent font-['Jost'] text-[.72rem] uppercase tracking-[.25em] text-[#e8dcc6] transition-all hover:border-[rgba(200,169,110,0.7)] hover:bg-[rgba(200,169,110,0.07)]">
                   Buy Now · Express Checkout
@@ -530,7 +474,7 @@ export default function ProductDetailClient({
               ) : (
                 <button
                   onClick={handleWhatsAppInquiry}
-                  className="h-[52px] rounded-[3px] border border-[rgba(200,169,110,0.38)] bg-transparent font-['Jost'] text-[.72rem] uppercase tracking-[.25em] text-[#e8dcc6] transition-all hover:border-[#25D366] hover:text-[#25D366] flex items-center justify-center gap-2"
+                  className="flex h-[52px] items-center justify-center gap-2 rounded-[3px] border border-[rgba(200,169,110,0.38)] bg-transparent font-['Jost'] text-[.72rem] uppercase tracking-[.25em] text-[#e8dcc6] transition-all hover:border-[#25D366] hover:text-[#25D366]"
                 >
                   <IconWhatsApp />
                   Inquire on WhatsApp
@@ -549,7 +493,7 @@ export default function ProductDetailClient({
               </span>
             </button>
 
-            {/* Accordion + tabs */}
+            {/* Accordion + Tabs */}
             <div className="mt-6 border-t border-[rgba(200,169,110,0.18)]">
               {ACCORDION_ITEMS.map((item) => (
                 <AccordionItem
@@ -562,7 +506,7 @@ export default function ProductDetailClient({
                 />
               ))}
 
-              <div className="mt-10 px-4 overflow-hidden rounded-[4px] border border-[rgba(200,169,110,0.18)] bg-[#0d1527]">
+              <div className="mt-10 overflow-hidden rounded-[4px] border border-[rgba(200,169,110,0.18)] bg-[#0d1527] px-4">
                 <div className="flex gap-1 border-b border-[rgba(200,169,110,0.18)]">
                   {(["desc", "details", "specs", "care"] as const).map(
                     (tab) => (
@@ -595,9 +539,9 @@ export default function ProductDetailClient({
                   )}
                   {activeTab === "details" && (
                     <ul className="grid list-none grid-cols-1 gap-3 sm:grid-cols-2">
-                      {(product.details ?? []).map((d) => (
+                      {(product.details ?? []).map((d, i) => (
                         <li
-                          key={d}
+                          key={i}
                           className="flex items-start gap-2.5 text-[.82rem] text-[#c6bda8]"
                         >
                           <span className="mt-[7px] h-1 w-1 flex-shrink-0 rounded-full bg-[#c8a96e]" />
@@ -622,8 +566,8 @@ export default function ProductDetailClient({
                   )}
                   {activeTab === "care" && (
                     <p className="text-[.88rem] leading-[1.9] text-[#c6bda8]">
-                      Dry clean only. Steam preferred. Store on a shaped hanger
-                      away from direct sunlight.
+                      {product.care ??
+                        "Dry clean only. Steam preferred. Store on a shaped hanger away from direct sunlight."}
                     </p>
                   )}
                 </div>
@@ -633,82 +577,88 @@ export default function ProductDetailClient({
         </aside>
       </div>
 
-      {/* You May Also Desire */}
-      <section className="relative z-10 mx-auto px-8 py-14 lg:px-16">
-        <div className="mb-8 flex items-baseline justify-between">
-          <h2 className="font-['Cormorant_Garamond'] text-[2.2rem] font-light text-[#f8f4ec]">
-            You May Also Desire
-          </h2>
-        </div>
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {relatedProducts.map((item) => (
-            <Link
-              key={item._id}
-              href={`/collection/product-detail?id=${item._id}`}
-              className="group block overflow-hidden rounded-[3px] border border-[rgba(200,169,110,0.18)] bg-[#111827] text-inherit no-underline transition-all duration-300 hover:-translate-y-1 hover:border-[rgba(200,169,110,0.45)]"
-            >
-              <img
-                src={item.images?.[0]?.url ?? "/new.jpg"}
-                alt={item.title}
-                className="block h-[280px] w-full object-cover object-[center_10%] transition-transform duration-500 group-hover:scale-[1.06]"
-              />
-              <div className="p-4">
-                <p className="mb-0.5 font-['Cormorant_Garamond'] text-[1.5rem] font-light text-[#f8f4ec]">
-                  {item.title}
-                </p>
-                <p className="text-[.6rem] uppercase tracking-[.18em] text-[#9e9585]">
-                  {item.category} · {item.colors?.[0] ?? "-"}
-                </p>
-                <p className="mt-2 text-[1.25rem] text-[#c8a96e]">
-                  {formatPrice(item.price)}
-                </p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
+      {/* ── You May Also Desire ── */}
+      {relatedProducts.length > 0 && (
+        <section className="relative z-10 mx-auto px-8 py-14 lg:px-16">
+          <div className="mb-8 flex items-baseline justify-between">
+            <h2 className="font-['Cormorant_Garamond'] text-[2.2rem] font-light text-[#f8f4ec]">
+              You May Also Desire
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {relatedProducts.map((item) => (
+              <Link
+                key={item._id}
+                href={`/collection/${item.slug}`}
+                className="group block overflow-hidden rounded-[3px] border border-[rgba(200,169,110,0.18)] bg-[#111827] text-inherit no-underline transition-all duration-300 hover:-translate-y-1 hover:border-[rgba(200,169,110,0.45)]"
+              >
+                <img
+                  src={item.images?.[0]?.url ?? "/new.jpg"}
+                  alt={item.title}
+                  className="block h-[280px] w-full object-cover object-[center_10%] transition-transform duration-500 group-hover:scale-[1.06]"
+                />
+                <div className="p-4">
+                  <p className="mb-0.5 font-['Cormorant_Garamond'] text-[1.5rem] font-light text-[#f8f4ec]">
+                    {item.title}
+                  </p>
+                  <p className="text-[.6rem] uppercase tracking-[.18em] text-[#9e9585]">
+                    {item.category} · {item.colors?.[0] ?? "-"}
+                  </p>
+                  <p className="mt-2 text-[1.25rem] text-[#c8a96e]">
+                    {formatPrice(item.price)}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
-      {/* More from the Collection */}
-      <section className="relative z-10 mx-auto px-8 py-14 lg:px-16">
-        <div className="mb-8 flex items-baseline justify-between">
-          <h2 className="font-['Cormorant_Garamond'] text-[2.2rem] font-light text-[#f8f4ec]">
-            More from the Collection
-          </h2>
-        </div>
-        <div
-          className="grid gap-4"
-          style={{
-            gridTemplateColumns: "repeat(4, 1fr)",
-            gridTemplateRows: "200px 200px",
-          }}
-        >
-          {mosaicData.map((item, i) => (
-            <Link
-              key={`${item._id}-mosaic`}
-              href={`/collection/product-detail?id=${item._id}`}
-              className="group relative cursor-pointer overflow-hidden rounded-[3px] border border-[rgba(200,169,110,0.18)] no-underline"
-              style={i === 0 ? { gridColumn: "1 / 3", gridRow: "1 / 3" } : {}}
-            >
-              <img
-                src={item.images?.[0]?.url ?? "/new.jpg"}
-                alt={item.title}
-                className="h-full w-full object-cover object-[center_10%] transition-transform duration-500 group-hover:scale-[1.07]"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[rgba(5,10,24,0.75)] via-[rgba(5,10,24,0.1)] to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5">
-                <span
-                  className={`block font-['Cormorant_Garamond'] font-light text-[#f8f4ec] ${i === 0 ? "text-[2.2rem]" : "text-[1.6rem]"}`}
-                >
-                  {item.title}
-                </span>
-                <span className="mt-0.5 block text-[.75rem] text-[#c8a96e]">
-                  {formatPrice(item.price)}
-                </span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
+      {/* ── More from the Collection (mosaic) ── */}
+      {mosaicData.length > 0 && (
+        <section className="relative z-10 mx-auto px-8 py-14 lg:px-16">
+          <div className="mb-8 flex items-baseline justify-between">
+            <h2 className="font-['Cormorant_Garamond'] text-[2.2rem] font-light text-[#f8f4ec]">
+              More from the Collection
+            </h2>
+          </div>
+          <div
+            className="grid gap-4"
+            style={{
+              gridTemplateColumns: "repeat(4, 1fr)",
+              gridTemplateRows: "200px 200px",
+            }}
+          >
+            {mosaicData.map((item, i) => (
+              <Link
+                key={`${item._id}-mosaic`}
+                href={`/collection/${item.slug}`}
+                className="group relative cursor-pointer overflow-hidden rounded-[3px] border border-[rgba(200,169,110,0.18)] no-underline"
+                style={i === 0 ? { gridColumn: "1 / 3", gridRow: "1 / 3" } : {}}
+              >
+                <img
+                  src={item.images?.[0]?.url ?? "/new.jpg"}
+                  alt={item.title}
+                  className="h-full w-full object-cover object-[center_10%] transition-transform duration-500 group-hover:scale-[1.07]"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[rgba(5,10,24,0.75)] via-[rgba(5,10,24,0.1)] to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5">
+                  <span
+                    className={`block font-['Cormorant_Garamond'] font-light text-[#f8f4ec] ${
+                      i === 0 ? "text-[2.2rem]" : "text-[1.6rem]"
+                    }`}
+                  >
+                    {item.title}
+                  </span>
+                  <span className="mt-0.5 block text-[.75rem] text-[#c8a96e]">
+                    {formatPrice(item.price)}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </main>
   );
 }

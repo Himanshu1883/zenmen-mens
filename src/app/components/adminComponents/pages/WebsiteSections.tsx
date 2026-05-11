@@ -73,7 +73,7 @@ const mockSections: Section[] = [
 
 export default function WebsiteSections() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mt-16">
       {/* Page Header */}
       <div className="flex items-center justify-between mb-8">
         <div>

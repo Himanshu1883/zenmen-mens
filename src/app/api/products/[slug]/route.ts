@@ -1,28 +1,36 @@
-import { connectDB } from "@/app/lib/db";
-import Product from "@/app/models/Product";
+// src/app/api/products/[slug]/route.ts
+import { connectDB } from "@/lib/db";
+import Product from "@/models/Product";
+import { NextResponse } from "next/server";
 
 export async function GET(
-  req: Request,
+  _req: Request,
   context: { params: Promise<{ slug: string }> },
 ) {
   try {
-    await connectDB();
-
-    // ✅ unwrap params
     const { slug } = await context.params;
 
-    const product = await Product.findOne({
-      slug: { $regex: `^${slug}$`, $options: "i" },
-    });
+    // Sanitise: allow only lowercase letters, digits, hyphens
+    const safeSlug = slug.replace(/[^a-z0-9-]/gi, "").toLowerCase();
 
-    if (!product) {
-      return Response.json({ error: "Product not found" }, { status: 404 });
+    if (!safeSlug) {
+      return NextResponse.json({ error: "Invalid slug" }, { status: 400 });
     }
 
-    return Response.json(product);
-  } catch (error) {
-    console.error(error);
+    await connectDB();
 
-    return Response.json({ error: "Failed to fetch product" }, { status: 500 });
+    const product = await Product.findOne({ slug: safeSlug }).lean();
+
+    if (!product) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(product);
+  } catch (err) {
+    console.error("[GET /api/products/[slug]]", err);
+    return NextResponse.json(
+      { error: "Failed to fetch product" },
+      { status: 500 },
+    );
   }
 }

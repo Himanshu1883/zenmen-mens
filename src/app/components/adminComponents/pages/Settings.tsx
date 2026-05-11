@@ -8,7 +8,7 @@ import { GlassCard } from "../dashboard/GlassCard";
 
 export default function Settings() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mt-16">
       {/* Page Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-semibold text-white mb-2">Settings</h1>
