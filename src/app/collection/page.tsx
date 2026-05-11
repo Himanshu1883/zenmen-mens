@@ -2,7 +2,9 @@
 "use client";
 
 import { fetchProducts } from "@/store/slices/productSlice";
+import { addItem } from "@/store/slices/cartSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { toast } from "sonner";
 import { formatPrice } from "@/lib/utils";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -23,6 +25,7 @@ export default function CollectionPage() {
   const { products, loading, loaded, error } = useAppSelector(
     (s) => s.products,
   );
+  const cartItems = useAppSelector((s) => s.cart.items);
 
   const searchParams = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState(
@@ -235,6 +238,9 @@ export default function CollectionPage() {
               const imgIndex = activeImage[product._id] ?? 0;
               const images = product.images ?? [];
               const currentImg = images[imgIndex]?.url ?? "";
+              const hoverImageIndex =
+                images.length > 1 ? (imgIndex + 1) % images.length : imgIndex;
+              const hoverImg = images[hoverImageIndex]?.url ?? "";
 
               return (
                 <Link
@@ -250,13 +256,57 @@ export default function CollectionPage() {
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
                     )}
+                    {hoverImg && hoverImageIndex !== imgIndex && (
+                      <img
+                        src={hoverImg}
+                        alt={images[hoverImageIndex]?.alt ?? product.title}
+                        className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                      />
+                    )}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const exists = cartItems.find(
+                          (ci) =>
+                            ci._id === product._id &&
+                            ci.selectedColor === product.colors?.[0] &&
+                            ci.selectedSize === product.sizes?.[0],
+                        );
+                        if (exists) {
+                          toast("Already in cart");
+                          return;
+                        }
+                        dispatch(
+                          addItem({
+                            _id: product._id,
+                            title: product.title,
+                            slug: product.slug,
+                            price: product.price,
+                            image: images[imgIndex] ??
+                              images[0] ?? {
+                                url: "",
+                                alt: product.title,
+                              },
+                            selectedColor: product.colors?.[0],
+                            selectedSize: product.sizes?.[0],
+                            qty: 1,
+                          }),
+                        );
+                        toast.success(`${product.title} added to bag`);
+                      }}
+                      className="absolute left-3 right-3 bottom-3 border border-[rgba(200,169,110,0.65)] bg-[rgba(10,14,26,0.88)] px-3 py-2 text-[10px] tracking-[0.22em] uppercase text-[#f7f2e8] opacity-0 translate-y-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0 hover:bg-[#c8a96e] hover:text-[#0a0e1a]"
+                    >
+                      Add to Cart
+                    </button>
                     {product.badge && (
                       <span className="absolute top-3 left-3 bg-[#c8a96e] text-[#0a0e1a] text-[9px] tracking-widest uppercase px-2 py-1">
                         {product.badge}
                       </span>
                     )}
                     {images.length > 1 && (
-                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1">
+                      <div className="absolute bottom-14 left-1/2 z-10 -translate-x-1/2 flex gap-1">
                         {images.map((_, idx) => (
                           <button
                             key={idx}

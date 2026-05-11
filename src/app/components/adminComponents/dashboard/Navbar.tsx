@@ -8,10 +8,16 @@ import {
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 
 interface NavbarProps {
   onMenuClick: () => void;
   sidebarCollapsed: boolean;
+  admin?: {
+    name?: string;
+    role?: string;
+    avatarUrl?: string;
+  };
 }
 
 const pageTitles: Record<string, { title: string; subtitle: string }> = {
@@ -25,8 +31,36 @@ const pageTitles: Record<string, { title: string; subtitle: string }> = {
   "/admin/settings": { title: "Settings", subtitle: "System Configuration" },
 };
 
-export function Navbar({ onMenuClick, sidebarCollapsed }: NavbarProps) {
+export function Navbar({ onMenuClick, sidebarCollapsed, admin }: NavbarProps) {
   const pathname = usePathname();
+
+  const { data: session } = useSession();
+
+  const defaultAdmin = {
+    name: "Sarah Anderson",
+    role: "Admin",
+    avatarUrl:
+      "https://ui-avatars.com/api/?name=Sarah+Anderson&background=C8A96E&color=050a18",
+  };
+
+  const sessionUser = session?.user;
+
+  const currentAdmin = {
+    ...defaultAdmin,
+    ...(admin || {}),
+    // Prefer session values when available
+    name: sessionUser?.name ?? admin?.name ?? defaultAdmin.name,
+    role:
+      // If a custom role is attached to session.user (common pattern), use it
+      // otherwise fall back to admin prop or default
+      (sessionUser as any)?.role ?? admin?.role ?? defaultAdmin.role,
+    avatarUrl:
+      sessionUser?.image ||
+      admin?.avatarUrl ||
+      `https://ui-avatars.com/api/?name=${encodeURIComponent(
+        (sessionUser?.name ?? admin?.name ?? defaultAdmin.name) as string,
+      )}&background=C8A96E&color=050a18`,
+  };
 
   const currentPage = pageTitles[pathname] || pageTitles["/admin"];
   const [searchFocused, setSearchFocused] = useState(false);
@@ -238,24 +272,29 @@ export function Navbar({ onMenuClick, sidebarCollapsed }: NavbarProps) {
                   className="text-sm font-medium leading-tight"
                   style={{ color: "#FAF8F4" }}
                 >
-                  Sarah Anderson
+                  {currentAdmin.name}
                 </p>
                 <p
                   className="text-xs leading-tight mt-0.5"
                   style={{ color: "#9AA5B8" }}
                 >
-                  Admin
+                  {currentAdmin.role}
                 </p>
               </div>
               <div
-                className="w-10 h-10 rounded-full ring-2 transition-all flex-shrink-0"
+                className="w-10 h-10 rounded-full ring-2 transition-all shrink-0"
                 style={{
                   background:
                     "linear-gradient(135deg, #C8A96E 0%, #8B6E3A 100%)",
                 }}
               >
                 <img
-                  src="https://ui-avatars.com/api/?name=Sarah+Anderson&background=C8A96E&color=050a18"
+                  src={
+                    currentAdmin.avatarUrl ||
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      currentAdmin.name || "Admin",
+                    )}&background=C8A96E&color=050a18`
+                  }
                   alt="Profile"
                   className="w-full h-full rounded-full"
                 />

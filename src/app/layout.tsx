@@ -11,6 +11,7 @@ import {
 import "./globals.css";
 import Providers from "./providers";
 import { cn } from "@/lib/utils";
+import RootLayoutClient from "./RootLayoutClient";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -94,7 +95,7 @@ export default function RootLayout({
         <Providers>
           <Navbar />
           <main>{children}</main>
-          <Footer />
+          <RootLayoutClient />
         </Providers>
       </body>
     </html>

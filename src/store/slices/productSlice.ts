@@ -10,7 +10,10 @@ export const fetchProducts = createAsyncThunk(
         next: { revalidate: 60 },
       } as RequestInit);
       if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
-      return (await res.json()) as Product[];
+      const data = await res.json();
+      // Handle both paginated { products: [...], total, pages, page } and direct array responses
+      const products = Array.isArray(data) ? data : (data.products ?? []);
+      return products as Product[];
     } catch (err) {
       return rejectWithValue((err as Error).message);
     }

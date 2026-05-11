@@ -1,6 +1,8 @@
 "use client";
 
 import { useScrolled } from "@/app/hooks/useScrolled";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { removeItem, updateQty } from "@/store/slices/cartSlice";
 import { Menu, ShoppingCartIcon, User, X } from "lucide-react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Link from "next/link";
@@ -9,9 +11,9 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 const links = [
-  { href: "/services", label: "Services" },
-  { href: "/process", label: "Process" },
-  { href: "/collection", label: "Collection" },
+  { href: "/about", label: "About" },
+  // { href: "/services", label: "Services" },
+  { href: "/collection", label: "Collections" },
   { href: "/stories", label: "Stories" },
   { href: "/contact", label: "Contact" },
 ];
@@ -86,18 +88,11 @@ const collectionMenuItems = [
   },
 ] as const;
 
-/* ── Sample cart items – replace with real cart state ── */
-const SAMPLE_ITEMS: {
-  id: number;
-  name: string;
-  subtitle: string;
-  price: number;
-  qty: number;
-}[] = [];
-
 const LOGIN_TOAST_KEY = "zenmen:login-toast-pending";
 
 export default function Navbar() {
+  const dispatch = useAppDispatch();
+  const cartItems = useAppSelector((state) => state.cart.items);
   const { data: session, status } = useSession();
   const pathname = usePathname();
   const router = useRouter();
@@ -189,7 +184,7 @@ export default function Navbar() {
     };
   }, []);
 
-  const subtotal = SAMPLE_ITEMS.reduce((s, i) => s + i.price * i.qty, 0);
+  const subtotal = cartItems.reduce((s, i) => s + i.price * i.qty, 0);
   const handleGoogleSignIn = async () => {
     setAuthOpen(false);
     if (typeof window !== "undefined") {
@@ -1186,7 +1181,7 @@ export default function Navbar() {
           </a>
 
           {/* User */}
-          <div className="znav-account-wrap sm-flex" ref={accountMenuRef}>
+          <div className="znav-account-wrap" ref={accountMenuRef}>
             <button
               className="znav-icon"
               aria-label="Account"
@@ -1264,7 +1259,7 @@ export default function Navbar() {
             aria-label="Cart"
           >
             <ShoppingCartIcon size={16} />
-            {SAMPLE_ITEMS.length > 0 && (
+            {cartItems.length > 0 && (
               <span
                 style={{
                   position: "absolute",
@@ -1590,7 +1585,7 @@ export default function Navbar() {
 
         {/* ── Body ── */}
         <div className="cart-body">
-          {SAMPLE_ITEMS.length === 0 ? (
+          {cartItems.length === 0 ? (
             /* Empty state */
             <div className="cart-empty">
               <div className="cart-empty-icon">
@@ -1621,16 +1616,77 @@ export default function Navbar() {
                 </p>
               </div>
 
-              {SAMPLE_ITEMS.map((item) => (
-                <div key={item.id} className="cart-item">
-                  <div className="cart-item-img">IMG</div>
+              {cartItems.map((item) => (
+                <div
+                  key={`${item._id}-${item.selectedColor ?? ""}-${item.selectedSize ?? ""}`}
+                  className="cart-item"
+                >
+                  <div className="cart-item-img">
+                    {item.image?.url ? (
+                      <img
+                        src={item.image.url}
+                        alt={item.image.alt ?? item.title}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    ) : (
+                      "IMG"
+                    )}
+                  </div>
                   <div>
-                    <p className="cart-item-name">{item.name}</p>
-                    <p className="cart-item-sub">{item.subtitle}</p>
+                    <p className="cart-item-name">{item.title}</p>
+                    <p className="cart-item-sub">
+                      {[item.selectedColor, item.selectedSize]
+                        .filter(Boolean)
+                        .join(" • ") || "Custom piece"}
+                    </p>
                     <div className="cart-item-qty">
-                      <button className="cart-qty-btn">−</button>
+                      <button
+                        className="cart-qty-btn"
+                        onClick={() => {
+                          if (item.qty <= 1) {
+                            dispatch(
+                              removeItem({
+                                _id: item._id,
+                                selectedColor: item.selectedColor,
+                                selectedSize: item.selectedSize,
+                              }),
+                            );
+                          } else {
+                            dispatch(
+                              updateQty({
+                                _id: item._id,
+                                selectedColor: item.selectedColor,
+                                selectedSize: item.selectedSize,
+                                qty: item.qty - 1,
+                              }),
+                            );
+                          }
+                        }}
+                        aria-label="Decrease quantity"
+                      >
+                        −
+                      </button>
                       <span className="cart-qty-num">{item.qty}</span>
-                      <button className="cart-qty-btn">+</button>
+                      <button
+                        className="cart-qty-btn"
+                        onClick={() =>
+                          dispatch(
+                            updateQty({
+                              _id: item._id,
+                              selectedColor: item.selectedColor,
+                              selectedSize: item.selectedSize,
+                              qty: item.qty + 1,
+                            }),
+                          )
+                        }
+                        aria-label="Increase quantity"
+                      >
+                        +
+                      </button>
                     </div>
                   </div>
                   <div
@@ -1643,7 +1699,20 @@ export default function Navbar() {
                     <span className="cart-item-price">
                       ₹{(item.price * item.qty).toLocaleString("en-IN")}
                     </span>
-                    <button className="cart-item-remove">Remove</button>
+                    <button
+                      className="cart-item-remove"
+                      onClick={() =>
+                        dispatch(
+                          removeItem({
+                            _id: item._id,
+                            selectedColor: item.selectedColor,
+                            selectedSize: item.selectedSize,
+                          }),
+                        )
+                      }
+                    >
+                      Remove
+                    </button>
                   </div>
                 </div>
               ))}
@@ -1674,7 +1743,7 @@ export default function Navbar() {
           <button
             type="button"
             className="cart-checkout-btn"
-            disabled={SAMPLE_ITEMS.length === 0}
+            disabled={cartItems.length === 0}
           >
             <span>Secure Checkout</span>
             <svg width="14" height="8" viewBox="0 0 14 8" fill="none">

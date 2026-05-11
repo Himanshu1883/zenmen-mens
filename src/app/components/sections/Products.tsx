@@ -1,13 +1,15 @@
 "use client";
 
-import { fetchProducts } from "@/app/store/productSlice";
-import type { AppDispatch, RootState } from "@/app/store/store";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { addItem } from "@/store/slices/cartSlice";
+import { fetchProducts } from "@/store/slices/productSlice";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { toast } from "sonner";
 
 type ProductImage = {
   url: string;
+  alt?: string;
   isPrimary?: boolean;
   order?: number;
 };
@@ -60,10 +62,15 @@ function IconChevronRight() {
 }
 
 export default function Products() {
-  const dispatch = useDispatch<AppDispatch>();
-  const { products, loading, loaded } = useSelector(
-    (state: RootState) => state.products,
-  ) as { products: Product[]; loading: boolean; loaded: boolean };
+  const dispatch = useAppDispatch();
+  const { products, loading, loaded } = useAppSelector(
+    (state) => state.products,
+  ) as {
+    products: Product[];
+    loading: boolean;
+    loaded: boolean;
+  };
+  const cartItems = useAppSelector((s) => s.cart.items);
   const [activeCategory, setActiveCategory] = useState("all");
 
   useEffect(() => {
@@ -651,8 +658,35 @@ export default function Products() {
                         className="add-btn"
                         onClick={(e) => {
                           e.preventDefault();
-                          // Add to cart logic
-                          console.log("Add to cart:", product.title);
+                          e.stopPropagation();
+                          const exists = cartItems.find(
+                            (ci) =>
+                              ci._id === product._id &&
+                              ci.selectedColor === product.colors?.[0] &&
+                              ci.selectedSize === product.sizes?.[0],
+                          );
+                          if (exists) {
+                            toast("Already in cart");
+                            return;
+                          }
+                          dispatch(
+                            addItem({
+                              _id: product._id,
+                              title: product.title,
+                              slug: product.slug ?? product._id,
+                              price: hasDiscount
+                                ? Math.round(discountedPrice)
+                                : product.price,
+                              image: primaryImage ?? {
+                                url: "",
+                                alt: product.title,
+                              },
+                              selectedColor: product.colors?.[0],
+                              selectedSize: product.sizes?.[0],
+                              qty: 1,
+                            }),
+                          );
+                          toast.success(`${product.title} added to bag`);
                         }}
                       >
                         <span className="add-btn-label">Add to Bag</span>
