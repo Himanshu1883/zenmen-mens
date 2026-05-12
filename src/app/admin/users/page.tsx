@@ -1,8 +1,25 @@
 import Users from "@/app/components/adminComponents/pages/Users";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
+import type { Types } from "mongoose";
 
 type SearchParams = Promise<{ page?: string }>;
+type UserRow = {
+  id: string;
+  name: string;
+  email: string;
+  role: "Admin" | "User";
+  joinedDate: string;
+  status: "Active";
+  orders: number;
+};
+type DbUser = {
+  _id: Types.ObjectId;
+  name?: string;
+  email?: string;
+  role?: "user" | "admin";
+  createdAt: Date | string;
+};
 
 function formatDate(input: Date | string) {
   const d = new Date(input);
@@ -44,7 +61,7 @@ export default async function AdminUsersPage({
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
-  const users = rows.map((u: any) => ({
+  const users: UserRow[] = (rows as DbUser[]).map((u) => ({
     id: String(u._id),
     name: u.name ?? "Unknown User",
     email: u.email ?? "N/A",
