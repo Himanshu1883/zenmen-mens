@@ -63,12 +63,13 @@ function IconChevronRight() {
 
 export default function Products() {
   const dispatch = useAppDispatch();
-  const { products, loading, loaded } = useAppSelector(
+  const { products, loading, loaded, error } = useAppSelector(
     (state) => state.products,
   ) as {
     products: Product[];
     loading: boolean;
     loaded: boolean;
+    error: string | null;
   };
   const cartItems = useAppSelector((s) => s.cart.items);
   const [activeCategory, setActiveCategory] = useState("all");
@@ -117,7 +118,7 @@ export default function Products() {
     );
   };
 
-  if (loading || !loaded) {
+  if (loading && !loaded) {
     return (
       <div className="products-root">
         <div className="grain-overlay" />
@@ -126,6 +127,27 @@ export default function Products() {
             <div className="text-[#C9A96E] text-lg tracking-wider animate-pulse">
               CURATING COLLECTION...
             </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !loaded) {
+    return (
+      <div className="products-root">
+        <div className="grain-overlay" />
+        <div className="products-inner">
+          <div className="flex flex-col justify-center items-center min-h-[400px] gap-5">
+            <div className="text-[#C9A96E] text-sm tracking-[0.2em] uppercase">
+              Unable to load collection
+            </div>
+            <button
+              onClick={() => dispatch(fetchProducts())}
+              className="px-6 py-2 border border-[#C9A96E] text-[#C9A96E] text-[11px] uppercase tracking-[0.2em] hover:bg-[rgba(201,169,110,0.14)] transition-colors"
+            >
+              Retry
+            </button>
           </div>
         </div>
       </div>
@@ -573,7 +595,7 @@ export default function Products() {
               return (
                 <Link
                   key={product._id}
-                  href={`/collection/product-detail?id=${product._id}`}
+                  href={`/collection/${product.slug ?? ""}`}
                   className={`product-card ${shouldAutoPreview ? "auto-preview" : ""}`}
                   style={{ animationDelay: `${index * 80}ms` }}
                 >
@@ -618,7 +640,8 @@ export default function Products() {
                         className="quick-view-btn"
                         onClick={(e) => {
                           e.preventDefault();
-                          window.location.href = `/collection/product-detail?id=${product._id}`;
+                          if (!product.slug) return;
+                          window.location.href = `/collection/${product.slug}`;
                         }}
                       >
                         Quick View

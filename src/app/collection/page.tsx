@@ -254,7 +254,7 @@ export default function CollectionPage() {
               return (
                 <Link
                   key={product._id}
-                  href={`/collection/${product.slug}`}
+                  href={product.slug ? `/collection/${product.slug}` : "/collection"}
                   className="group block"
                 >
                   <div className="relative aspect-[3/4] overflow-hidden bg-[#0f1628] mb-3">
