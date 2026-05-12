@@ -2,8 +2,8 @@
 /* eslint-disable react-hooks/refs */
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 const STATS = [
@@ -249,7 +249,7 @@ export default function AboutPage() {
         }
         .hero-img {
           width: 100%; height: 100%; object-fit: cover;
-          object-position: center 20%;
+          object-position: center 40%;
           filter: brightness(0.45) contrast(1.1);
         }
         .hero-overlay {
@@ -368,23 +368,29 @@ export default function AboutPage() {
           background: var(--ink);
         }
         .timeline-grid {
-          display: grid; grid-template-columns: 1fr 2px 1fr;
-          gap: 0 40px; align-items: start;
+          display: grid;
+          grid-template-columns: minmax(300px, 420px) minmax(0, 1fr);
+          gap: clamp(24px, 3vw, 56px);
+          align-items: start;
+          margin-top: 56px;
         }
-        .timeline-spine {
-          width: 2px; background: var(--border);
-          grid-row: 1 / span 20; align-self: stretch;
+        .timeline-list {
           position: relative;
-        }
-        .timeline-spine-fill {
-          position: absolute; top: 0; left: 0; width: 100%;
-          background: linear-gradient(to bottom, var(--gold), rgba(200,169,110,0.2));
-          transition: height 0.6s cubic-bezier(.22,1,.36,1);
+          border: 1px solid rgba(200,169,110,0.16);
+          background: rgba(7,16,31,0.35);
+          padding: 8px 0;
         }
         .timeline-item {
-          padding: 28px 0; cursor: pointer;
-          border-bottom: 1px solid rgba(200,169,110,0.08);
-          transition: all 0.3s;
+          position: relative;
+          padding: 22px 20px 22px 44px;
+          cursor: pointer;
+          border-bottom: 1px solid rgba(200,169,110,0.1);
+          transition: background-color 0.3s, border-color 0.3s;
+        }
+        .timeline-item:last-child { border-bottom: none; }
+        .timeline-item.active {
+          background: linear-gradient(90deg, rgba(200,169,110,0.1), transparent 78%);
+          border-bottom-color: rgba(200,169,110,0.2);
         }
         .timeline-item:hover .tl-year { color: var(--gold); }
         .tl-year {
@@ -408,17 +414,20 @@ export default function AboutPage() {
         }
         .tl-desc.open { max-height: 120px; opacity: 1; }
         .tl-dot {
-          position: absolute; left: -7px; top: 32px;
-          width: 14px; height: 14px; border-radius: 50%;
+          position: absolute; left: 18px; top: 30px;
+          width: 12px; height: 12px; border-radius: 50%;
           border: 2px solid var(--border); background: var(--ink);
           transition: all 0.3s;
         }
         .tl-dot.active { border-color: var(--gold); background: var(--gold); box-shadow: 0 0 16px rgba(200,169,110,0.5); }
         .tl-right-content {
-          position: sticky; top: 120px;
-          padding: 40px;
+          position: sticky;
+          top: 110px;
+          padding: clamp(24px,3vw,40px);
           border: 1px solid var(--border);
           background: var(--ink2);
+          box-shadow: 0 24px 48px rgba(0,0,0,0.3);
+          min-height: 320px;
         }
 
         /* ── FOUNDER ── */
@@ -436,7 +445,7 @@ export default function AboutPage() {
         }
         .founder-img {
           width: 100%; height: 100%; object-fit: cover;
-          object-position: center 10%;
+          object-position: center 60%;
           filter: brightness(0.85) contrast(1.05);
           transition: transform 8s ease;
         }
@@ -635,9 +644,11 @@ export default function AboutPage() {
         /* ── MOBILE ── */
         @media (max-width: 900px) {
           .stats-grid        { grid-template-columns: repeat(2,1fr); gap: 32px; }
-          .timeline-grid     { grid-template-columns: 1fr; gap: 0; }
-          .timeline-spine    { display: none; }
-          .tl-right-content  { display: none; }
+          .timeline-grid     { grid-template-columns: 1fr; gap: 18px; margin-top: 38px; }
+          .timeline-list     { background: transparent; }
+          .tl-right-content  { position: static; min-height: 0; }
+          .timeline-item     { padding: 18px 16px 18px 36px; }
+          .tl-dot            { left: 12px; top: 26px; }
           .founder-grid      { grid-template-columns: 1fr; }
           .founder-img-wrap  { aspect-ratio: 4/3; max-width: 480px; }
           .values-grid       { grid-template-columns: 1fr; }
@@ -765,19 +776,17 @@ export default function AboutPage() {
             </h2>
           </div>
 
-          <div className="timeline-grid" style={{ marginTop: "60px" }}>
+          <div className="timeline-grid">
             {/* Left — items */}
-            <div>
+            <div className="timeline-list">
               {MILESTONES.map((m, i) => (
                 <div
                   key={m.year}
-                  className="timeline-item"
+                  className={`timeline-item ${activeMilestone === i ? "active" : ""}`}
                   onClick={() => setActiveMilestone(i)}
                   style={{
                     ...fade(timeline.vis, i * 0.1),
                     opacity: timeline.vis ? 1 : 0,
-                    position: "relative",
-                    paddingLeft: "28px",
                   }}
                 >
                   <div
@@ -797,17 +806,6 @@ export default function AboutPage() {
                 </div>
               ))}
             </div>
-
-            {/* Spine */}
-            <div className="timeline-spine">
-              <div
-                className="timeline-spine-fill"
-                style={{
-                  height: `${((activeMilestone + 1) / MILESTONES.length) * 100}%`,
-                }}
-              />
-            </div>
-
             {/* Right — sticky detail */}
             <div className="tl-right-content" style={fade(timeline.vis, 0.3)}>
               <div
@@ -907,7 +905,7 @@ export default function AboutPage() {
               <div className="founder-img-wrap">
                 <img
                   className="founder-img"
-                  src="/founder_model_1.png"
+                  src="/zenmen_green_kurta.jpeg"
                   alt="Founder"
                 />
                 <div className="founder-img-frame" />
@@ -940,7 +938,7 @@ export default function AboutPage() {
                   margin: "24px 0 20px",
                 }}
               />
-              <div className="founder-name">Rohan Zenith</div>
+              <div className="founder-name">Anurag</div>
               <div className="founder-role">
                 Founder & Creative Director, ZENmen
               </div>

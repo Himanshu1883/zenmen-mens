@@ -719,8 +719,8 @@ export default function Navbar() {
           width: min(100vw, 480px);
           display: flex;
           flex-direction: column;
-          background: #07090f;
-          border-left: 0.5px solid rgba(200,169,110,0.15);
+          background: linear-gradient(180deg, #111a2c 0%, #0c1424 100%);
+          border-left: 1px solid rgba(200,169,110,0.28);
           box-shadow: -24px 0 72px rgba(0,0,0,0.6);
           transform: translateX(100%);
           transition: transform 0.45s cubic-bezier(0.22,1,0.36,1);
@@ -748,8 +748,8 @@ export default function Navbar() {
           align-items: center;
           justify-content: space-between;
           padding: 20px clamp(20px, 5vw, 32px) 20px;
-          border-bottom: 0.5px solid rgba(200,169,110,0.1);
-          background: rgba(10,14,26,0.6);
+          border-bottom: 1px solid rgba(200,169,110,0.24);
+          background: rgba(18,28,48,0.9);
         }
         .cart-header-left { display: flex; flex-direction: column; gap: 4px; }
         .cart-eyebrow {
@@ -773,8 +773,8 @@ export default function Navbar() {
           flex-shrink: 0;
           display: flex; align-items: center; justify-content: center;
           width: 40px; height: 40px;
-          border: 0.5px solid rgba(200,169,110,0.28);
-          color: rgba(200,169,110,0.7);
+          border: 1px solid rgba(200,169,110,0.5);
+          color: rgba(247,242,232,0.82);
           background: transparent;
           cursor: pointer;
           transition: border-color 0.3s, color 0.3s, background 0.3s;
@@ -810,11 +810,11 @@ export default function Navbar() {
         }
         .cart-empty-icon {
           width: 56px; height: 56px;
-          border: 0.5px solid rgba(200,169,110,0.2);
+          border: 1px solid rgba(200,169,110,0.35);
           border-radius: 50%;
           display: flex; align-items: center; justify-content: center;
           margin-bottom: 20px;
-          color: rgba(200,169,110,0.4);
+          color: rgba(200,169,110,0.78);
         }
         .cart-empty-title {
           font-family: 'Playfair Display', serif;
@@ -827,7 +827,7 @@ export default function Navbar() {
         .cart-empty-sub {
           font-family: 'Cormorant Garamond', serif;
           font-size: 0.95rem;
-          color: rgba(200,169,110,0.4);
+          color: rgba(247,242,232,0.72);
           margin: 0 0 28px;
           text-align: center;
           line-height: 1.6;
@@ -849,8 +849,8 @@ export default function Navbar() {
         /* ── Info notice ── */
         .cart-notice {
           padding: 14px 16px;
-          border: 0.5px solid rgba(200,169,110,0.12);
-          background: rgba(200,169,110,0.03);
+          border: 1px solid rgba(200,169,110,0.26);
+          background: rgba(200,169,110,0.09);
           border-radius: 1px;
         }
         .cart-notice-label {
@@ -858,13 +858,13 @@ export default function Navbar() {
           font-size: 9px;
           letter-spacing: 0.26em;
           text-transform: uppercase;
-          color: rgba(200,169,110,0.45);
+          color: rgba(200,169,110,0.92);
           margin: 0 0 6px;
         }
         .cart-notice-text {
           font-family: 'Cormorant Garamond', serif;
           font-size: 0.9rem;
-          color: rgba(200,169,110,0.3);
+          color: rgba(247,242,232,0.86);
           margin: 0;
           line-height: 1.55;
         }
@@ -876,12 +876,12 @@ export default function Navbar() {
           gap: 14px;
           align-items: start;
           padding-bottom: 16px;
-          border-bottom: 0.5px solid rgba(200,169,110,0.08);
+          border-bottom: 1px solid rgba(200,169,110,0.2);
         }
         .cart-item-img {
           width: 64px; height: 80px;
-          background: rgba(200,169,110,0.06);
-          border: 0.5px solid rgba(200,169,110,0.12);
+          background: rgba(200,169,110,0.12);
+          border: 1px solid rgba(200,169,110,0.32);
           border-radius: 1px;
           display: flex; align-items: center; justify-content: center;
           flex-shrink: 0;
@@ -889,7 +889,7 @@ export default function Navbar() {
           font-size: 8px;
           letter-spacing: 0.2em;
           text-transform: uppercase;
-          color: rgba(200,169,110,0.3);
+          color: rgba(247,242,232,0.68);
         }
         .cart-item-name {
           font-family: 'Playfair Display', serif;
@@ -904,7 +904,7 @@ export default function Navbar() {
           font-size: 9px;
           letter-spacing: 0.22em;
           text-transform: uppercase;
-          color: rgba(200,169,110,0.45);
+          color: rgba(247,242,232,0.72);
           margin: 0 0 10px;
         }
         .cart-item-qty {
@@ -912,8 +912,8 @@ export default function Navbar() {
         }
         .cart-qty-btn {
           width: 24px; height: 24px;
-          border: 0.5px solid rgba(200,169,110,0.25);
-          color: rgba(200,169,110,0.6);
+          border: 1px solid rgba(200,169,110,0.52);
+          color: rgba(247,242,232,0.9);
           background: transparent;
           cursor: pointer;
           display: flex; align-items: center; justify-content: center;
@@ -921,7 +921,7 @@ export default function Navbar() {
           line-height: 1;
           transition: border-color 0.2s, color 0.2s;
         }
-        .cart-qty-btn:hover { border-color: #c8a96e; color: #c8a96e; }
+        .cart-qty-btn:hover { border-color: #c8a96e; color: #030813; background: #c8a96e; }
         .cart-qty-num {
           font-family: 'Cormorant Garamond', serif;
           font-size: 0.9rem;
@@ -943,7 +943,7 @@ export default function Navbar() {
           font-size: 8px;
           letter-spacing: 0.24em;
           text-transform: uppercase;
-          color: rgba(200,169,110,0.25);
+          color: rgba(247,242,232,0.62);
           background: transparent;
           border: none;
           cursor: pointer;
@@ -951,13 +951,13 @@ export default function Navbar() {
           transition: color 0.2s;
           text-align: right;
         }
-        .cart-item-remove:hover { color: rgba(200,169,110,0.65); }
+        .cart-item-remove:hover { color: #c8a96e; }
 
         /* ── Drawer footer ── */
         .cart-footer {
           flex-shrink: 0;
-          border-top: 0.5px solid rgba(200,169,110,0.1);
-          background: rgba(5,9,22,0.92);
+          border-top: 1px solid rgba(200,169,110,0.24);
+          background: rgba(17,26,44,0.96);
           padding: 20px clamp(20px, 5vw, 32px) clamp(20px, 5vw, 32px);
           display: flex;
           flex-direction: column;
@@ -975,7 +975,7 @@ export default function Navbar() {
           font-size: 10px;
           letter-spacing: 0.32em;
           text-transform: uppercase;
-          color: rgba(200,169,110,0.45);
+          color: rgba(247,242,232,0.84);
         }
         .cart-subtotal-value {
           font-family: 'Playfair Display', serif;
@@ -991,7 +991,7 @@ export default function Navbar() {
           font-size: 9px;
           letter-spacing: 0.22em;
           text-transform: uppercase;
-          color: rgba(200,169,110,0.25);
+          color: rgba(247,242,232,0.72);
           text-align: center;
           margin: 0;
         }
@@ -1018,8 +1018,8 @@ export default function Navbar() {
         }
         .cart-checkout-btn:hover { background: #d8b97e; }
         .cart-checkout-btn:disabled {
-          background: rgba(200,169,110,0.2);
-          color: rgba(200,169,110,0.35);
+          background: rgba(200,169,110,0.45);
+          color: rgba(3,8,19,0.55);
           cursor: not-allowed;
         }
 
@@ -1031,7 +1031,7 @@ export default function Navbar() {
           font-size: 9px;
           letter-spacing: 0.28em;
           text-transform: uppercase;
-          color: rgba(200,169,110,0.3);
+          color: rgba(247,242,232,0.78);
           text-decoration: none;
           transition: color 0.3s;
           cursor: pointer;
@@ -1039,7 +1039,7 @@ export default function Navbar() {
           border: none;
           width: 100%;
         }
-        .cart-continue:hover { color: rgba(200,169,110,0.65); }
+        .cart-continue:hover { color: #c8a96e; }
 
         /* Divider */
         .cart-divider {

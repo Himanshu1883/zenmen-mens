@@ -2,89 +2,49 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Ban, Calendar, Eye, Mail } from "lucide-react";
+import Link from "next/link";
 import { GlassCard } from "../dashboard/GlassCard";
 
-interface User {
+interface UserRow {
   id: string;
   name: string;
   email: string;
-  avatar: string;
   role: "Admin" | "User";
   joinedDate: string;
-  status: "Active" | "Blocked";
+  status: "Active";
   orders: number;
 }
 
-const mockUsers: User[] = [
-  {
-    id: "1",
-    name: "Emma Watson",
-    email: "emma.watson@example.com",
-    avatar:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
-    role: "User",
-    joinedDate: "Jan 15, 2026",
-    status: "Active",
-    orders: 12,
-  },
-  {
-    id: "2",
-    name: "James Anderson",
-    email: "james.anderson@example.com",
-    avatar:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop",
-    role: "User",
-    joinedDate: "Feb 3, 2026",
-    status: "Active",
-    orders: 8,
-  },
-  {
-    id: "3",
-    name: "Sarah Mitchell",
-    email: "sarah.mitchell@example.com",
-    avatar:
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
-    role: "Admin",
-    joinedDate: "Dec 1, 2025",
-    status: "Active",
-    orders: 24,
-  },
-  {
-    id: "4",
-    name: "Michael Chen",
-    email: "michael.chen@example.com",
-    avatar:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
-    role: "User",
-    joinedDate: "Mar 10, 2026",
-    status: "Active",
-    orders: 5,
-  },
-  {
-    id: "5",
-    name: "Olivia Brown",
-    email: "olivia.brown@example.com",
-    avatar:
-      "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=100&h=100&fit=crop",
-    role: "User",
-    joinedDate: "Jan 28, 2026",
-    status: "Active",
-    orders: 15,
-  },
-  {
-    id: "6",
-    name: "David Wilson",
-    email: "david.wilson@example.com",
-    avatar:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop",
-    role: "User",
-    joinedDate: "Feb 14, 2026",
-    status: "Blocked",
-    orders: 2,
-  },
-];
+interface UsersProps {
+  users: UserRow[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
+  stats: {
+    totalUsers: number;
+    activeUsers: number;
+    admins: number;
+    newThisMonth: number;
+  };
+}
 
-export default function Users() {
+function formatNum(value: number) {
+  return value.toLocaleString("en-IN");
+}
+
+export default function Users({ users, pagination, stats }: UsersProps) {
+  const calculatedFrom = (pagination.page - 1) * pagination.pageSize + 1;
+  const from = pagination.total === 0 || users.length === 0 ? 0 : calculatedFrom;
+  const to =
+    pagination.total === 0 || users.length === 0
+      ? 0
+      : Math.min((pagination.page - 1) * pagination.pageSize + users.length, pagination.total);
+  const hasPrev = pagination.page > 1;
+  const hasNext = pagination.page < pagination.totalPages;
+
   return (
     <div className="space-y-6 mt-16">
       {/* Page Header */}
@@ -107,19 +67,27 @@ export default function Users() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <GlassCard className="p-4">
           <p className="text-gray-400 text-sm mb-1">Total Users</p>
-          <p className="text-2xl font-semibold text-white">1,284</p>
+          <p className="text-2xl font-semibold text-white">
+            {formatNum(stats.totalUsers)}
+          </p>
         </GlassCard>
         <GlassCard className="p-4">
           <p className="text-gray-400 text-sm mb-1">Active Users</p>
-          <p className="text-2xl font-semibold text-green-400">1,201</p>
+          <p className="text-2xl font-semibold text-green-400">
+            {formatNum(stats.activeUsers)}
+          </p>
         </GlassCard>
         <GlassCard className="p-4">
           <p className="text-gray-400 text-sm mb-1">Admins</p>
-          <p className="text-2xl font-semibold text-[#C8A96E]">8</p>
+          <p className="text-2xl font-semibold text-[#C8A96E]">
+            {formatNum(stats.admins)}
+          </p>
         </GlassCard>
         <GlassCard className="p-4">
           <p className="text-gray-400 text-sm mb-1">New This Month</p>
-          <p className="text-2xl font-semibold text-white">147</p>
+          <p className="text-2xl font-semibold text-white">
+            {formatNum(stats.newThisMonth)}
+          </p>
         </GlassCard>
       </div>
 
@@ -150,7 +118,7 @@ export default function Users() {
               </tr>
             </thead>
             <tbody>
-              {mockUsers.map((user) => (
+              {users.map((user) => (
                 <tr
                   key={user.id}
                   className="border-b border-white/5 hover:bg-white/5 transition-colors"
@@ -158,7 +126,6 @@ export default function Users() {
                   <td className="p-4">
                     <div className="flex items-center gap-3">
                       <Avatar className="w-10 h-10 border border-[#C8A96E]/30">
-                        <AvatarImage src={user.avatar} />
                         <AvatarFallback className="bg-[#C8A96E]/20 text-[#C8A96E]">
                           {user.name
                             .split(" ")
@@ -203,11 +170,7 @@ export default function Users() {
                   <td className="p-4">
                     <Badge
                       variant="outline"
-                      className={
-                        user.status === "Active"
-                          ? "border-green-500/30 text-green-400 bg-green-500/10"
-                          : "border-red-500/30 text-red-400 bg-red-500/10"
-                      }
+                      className="border-green-500/30 text-green-400 bg-green-500/10"
                     >
                       {user.status}
                     </Badge>
@@ -224,11 +187,7 @@ export default function Users() {
                       <Button
                         size="sm"
                         variant="ghost"
-                        className={`h-8 w-8 p-0 ${
-                          user.status === "Active"
-                            ? "text-gray-400 hover:text-red-400"
-                            : "text-gray-400 hover:text-green-400"
-                        } hover:bg-white/5`}
+                        className="h-8 w-8 p-0 text-gray-400 hover:text-red-400 hover:bg-white/5"
                       >
                         <Ban className="w-4 h-4" />
                       </Button>
@@ -242,22 +201,48 @@ export default function Users() {
 
         {/* Pagination */}
         <div className="flex items-center justify-between p-4 border-t border-white/10">
-          <p className="text-sm text-gray-400">Showing 1-6 of 1,284 users</p>
+          <p className="text-sm text-gray-400">
+            Showing {from}-{to} of {formatNum(pagination.total)} users
+          </p>
           <div className="flex gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              className="border-white/10 text-gray-300"
-              disabled
-            >
-              Previous
-            </Button>
-            <Button
-              size="sm"
-              className="bg-[#C8A96E] hover:bg-[#C8A96E]/90 text-white"
-            >
-              Next
-            </Button>
+            {hasPrev ? (
+              <Button
+                asChild
+                size="sm"
+                variant="outline"
+                className="border-white/10 text-gray-300"
+              >
+                <Link href={`/admin/users?page=${pagination.page - 1}`}>
+                  Previous
+                </Link>
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-white/10 text-gray-300"
+                disabled
+              >
+                Previous
+              </Button>
+            )}
+            {hasNext ? (
+              <Button
+                asChild
+                size="sm"
+                className="bg-[#C8A96E] hover:bg-[#C8A96E]/90 text-white"
+              >
+                <Link href={`/admin/users?page=${pagination.page + 1}`}>Next</Link>
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                className="bg-[#C8A96E] hover:bg-[#C8A96E]/90 text-white"
+                disabled
+              >
+                Next
+              </Button>
+            )}
           </div>
         </div>
       </GlassCard>

@@ -1,14 +1,15 @@
 ﻿// src/app/collection/page.tsx
 "use client";
 
-import { fetchProducts } from "@/store/slices/productSlice";
-import { addItem } from "@/store/slices/cartSlice";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { toast } from "sonner";
 import { formatPrice } from "@/lib/utils";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { addItem } from "@/store/slices/cartSlice";
+import { fetchProducts } from "@/store/slices/productSlice";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 // ── Dynamic banner: first 6 product images from DB, fallback to static ────────
 const FALLBACK_BANNER = [
@@ -21,6 +22,10 @@ const FALLBACK_BANNER = [
 ];
 
 export default function CollectionPage() {
+  const { data: session } = useSession();
+
+  const isAdmin = (session?.user as any)?.role === "admin";
+
   const dispatch = useAppDispatch();
   const { products, loading, loaded, error } = useAppSelector(
     (s) => s.products,
@@ -34,6 +39,10 @@ export default function CollectionPage() {
   const [selectedColor, setSelectedColor] = useState("All");
   const [search, setSearch] = useState("");
   const [activeImage, setActiveImage] = useState<Record<string, number>>({});
+
+  const [editingProduct, setEditingProduct] = useState<any>(null);
+
+  const [editLoading, setEditLoading] = useState(false);
 
   // Single clean effect — fetch once
   useEffect(() => {
@@ -233,7 +242,7 @@ export default function CollectionPage() {
 
         {/* Product grid — original card design fully preserved */}
         {!loading && filteredProducts.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
             {filteredProducts.map((product) => {
               const imgIndex = activeImage[product._id] ?? 0;
               const images = product.images ?? [];
@@ -249,6 +258,20 @@ export default function CollectionPage() {
                   className="group block"
                 >
                   <div className="relative aspect-[3/4] overflow-hidden bg-[#0f1628] mb-3">
+                    {isAdmin && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+
+                          setEditingProduct(product);
+                        }}
+                        className="absolute top-3 right-3 z-20 border border-[#c8a96e] bg-[rgba(10,14,26,0.9)] px-3 py-1 text-[10px] tracking-[0.2em] uppercase text-[#c8a96e] hover:bg-[#c8a96e] hover:text-[#0a0e1a] transition-colors"
+                      >
+                        Edit
+                      </button>
+                    )}
                     {currentImg && (
                       <img
                         src={currentImg}
@@ -340,6 +363,395 @@ export default function CollectionPage() {
           </div>
         )}
       </div>
+      {editingProduct && (
+        <>
+          <style>{`
+      @keyframes zm-modal-in {
+        from { opacity: 0; transform: translateY(16px) scale(0.99); }
+        to   { opacity: 1; transform: translateY(0)   scale(1); }
+      }
+      .zm-overlay {
+        position: fixed; inset: 0; z-index: 999;
+        background: rgba(4, 7, 16, 0.82);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        overflow-y: auto;
+        padding: 40px 16px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        box-sizing: border-box;
+      }
+      .zm-modal {
+        width: 100%; max-width: 660px;
+        background: #090e1c;
+        border: 1px solid rgba(200,169,110,0.22);
+        display: flex; flex-direction: column;
+        animation: zm-modal-in 0.32s cubic-bezier(0.22,1,0.36,1) both;
+        position: relative;
+        max-height: 88vh;
+      }
+      /* ── Header ── */
+      .zm-modal-header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 28px 36px 24px;
+        border-bottom: 1px solid rgba(200,169,110,0.13);
+        flex-shrink: 0;
+      }
+      .zm-eyebrow {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 9px; letter-spacing: 0.38em; text-transform: uppercase;
+        color: rgba(200,169,110,0.6); margin: 0 0 5px;
+      }
+      .zm-modal-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.45rem; font-weight: 300; letter-spacing: 0.04em;
+        color: #f7f2e8; margin: 0; line-height: 1.1;
+      }
+      .zm-close-btn {
+        width: 36px; height: 36px;
+        border: 1px solid rgba(200,169,110,0.2);
+        background: transparent;
+        color: rgba(200,169,110,0.65);
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; font-size: 14px; flex-shrink: 0;
+        transition: border-color 0.2s, color 0.2s, background 0.2s;
+      }
+      .zm-close-btn:hover {
+        border-color: rgba(200,169,110,0.55);
+        color: #f7f2e8;
+        background: rgba(200,169,110,0.07);
+      }
+      /* ── Scrollable body ── */
+      .zm-modal-body {
+        overflow-y: auto; flex: 1;
+        padding: 32px 36px;
+        display: flex; flex-direction: column; gap: 24px;
+      }
+      .zm-modal-body::-webkit-scrollbar { width: 3px; }
+      .zm-modal-body::-webkit-scrollbar-track { background: transparent; }
+      .zm-modal-body::-webkit-scrollbar-thumb {
+        background: rgba(200,169,110,0.28); border-radius: 2px;
+      }
+      /* ── Section badge ── */
+      .zm-badge {
+        display: inline-flex; align-items: center; gap: 8px;
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 9px; letter-spacing: 0.32em; text-transform: uppercase;
+        color: rgba(200,169,110,0.5);
+      }
+      .zm-badge::before {
+        content: ''; width: 24px; height: 1px;
+        background: rgba(200,169,110,0.28);
+      }
+      /* ── Field grid ── */
+      .zm-row {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+      }
+      .zm-field { display: flex; flex-direction: column; gap: 8px; }
+      .zm-field.full { grid-column: 1 / -1; }
+      .zm-label {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 9px; letter-spacing: 0.32em; text-transform: uppercase;
+        color: rgba(200,169,110,0.65);
+      }
+      .zm-input, .zm-textarea {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(200,169,110,0.16);
+        color: #f7f2e8;
+        font-family: 'Jost', sans-serif; font-size: 0.82rem; font-weight: 300;
+        letter-spacing: 0.03em;
+        padding: 11px 14px; outline: none;
+        transition: border-color 0.25s, background 0.25s;
+        width: 100%; box-sizing: border-box;
+      }
+      .zm-input:focus, .zm-textarea:focus {
+        border-color: rgba(200,169,110,0.48);
+        background: rgba(200,169,110,0.04);
+      }
+      .zm-input::placeholder, .zm-textarea::placeholder {
+        color: rgba(247,242,232,0.2);
+      }
+      .zm-textarea { resize: vertical; line-height: 1.7; min-height: 90px; }
+      /* ── Image grid ── */
+      .zm-images {
+        display: grid; grid-template-columns: repeat(4,1fr); gap: 10px;
+      }
+      @media (max-width: 480px) {
+        .zm-images { grid-template-columns: repeat(2,1fr); }
+        .zm-row { grid-template-columns: 1fr; }
+        .zm-field.full { grid-column: auto; }
+        .zm-modal-header, .zm-modal-body, .zm-modal-footer { padding-left: 20px; padding-right: 20px; }
+      }
+      .zm-img-card {
+        position: relative; aspect-ratio: 1;
+        background: #0f1628;
+        border: 1px solid rgba(200,169,110,0.12); overflow: hidden;
+      }
+      .zm-img-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .zm-img-remove {
+        position: absolute; top: 6px; right: 6px;
+        width: 22px; height: 22px;
+        background: rgba(9,14,28,0.92);
+        border: 1px solid rgba(200,169,110,0.3);
+        color: #c8a96e; display: flex; align-items: center; justify-content: center;
+        font-size: 9px; cursor: pointer;
+        transition: background 0.2s;
+      }
+      .zm-img-remove:hover { background: rgba(200,169,110,0.15); }
+      /* ── Featured checkbox row ── */
+      .zm-check-row {
+        display: flex; align-items: center; gap: 12px;
+        padding: 14px 16px;
+        border: 1px solid rgba(200,169,110,0.13);
+        background: rgba(200,169,110,0.03);
+        cursor: pointer;
+      }
+      .zm-check-box {
+        width: 16px; height: 16px;
+        border: 1px solid rgba(200,169,110,0.4);
+        background: transparent; appearance: none; -webkit-appearance: none;
+        cursor: pointer; flex-shrink: 0; position: relative;
+        transition: background 0.2s, border-color 0.2s;
+      }
+      .zm-check-box:checked {
+        background: rgba(200,169,110,0.12); border-color: #c8a96e;
+      }
+      .zm-check-box:checked::after {
+        content: '';
+        position: absolute; width: 8px; height: 5px;
+        border-left: 1.5px solid #c8a96e; border-bottom: 1.5px solid #c8a96e;
+        transform: rotate(-45deg) translate(0,-1px);
+      }
+      .zm-check-text {
+        font-family: 'Jost', sans-serif; font-size: 0.8rem; font-weight: 300;
+        letter-spacing: 0.06em; color: rgba(247,242,232,0.6);
+      }
+      .zm-check-text em { color: #c8a96e; font-style: normal; }
+      /* ── Footer ── */
+      .zm-modal-footer {
+        padding: 20px 36px 28px;
+        border-top: 1px solid rgba(200,169,110,0.1);
+        display: flex; gap: 12px; flex-shrink: 0;
+      }
+      .zm-btn-cancel {
+        background: transparent;
+        border: 1px solid rgba(200,169,110,0.2);
+        color: rgba(200,169,110,0.55);
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 0.72rem; letter-spacing: 0.28em; text-transform: uppercase;
+        padding: 14px 20px; cursor: pointer;
+        transition: border-color 0.25s, color 0.25s;
+      }
+      .zm-btn-cancel:hover {
+        border-color: rgba(200,169,110,0.45);
+        color: rgba(200,169,110,0.85);
+      }
+      .zm-btn-save {
+        flex: 1;
+        background: #c8a96e; border: 1px solid #c8a96e;
+        color: #07090f;
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 0.72rem; letter-spacing: 0.32em; text-transform: uppercase;
+        padding: 14px 20px; cursor: pointer;
+        position: relative; overflow: hidden;
+        transition: color 0.3s;
+      }
+      .zm-btn-save::before {
+        content: '';
+        position: absolute; inset: 0;
+        background: #f7f2e8;
+        transform: scaleX(0); transform-origin: left;
+        transition: transform 0.34s cubic-bezier(0.22,1,0.36,1);
+      }
+      .zm-btn-save:hover::before { transform: scaleX(1); }
+      .zm-btn-save span { position: relative; z-index: 1; }
+      .zm-btn-save:disabled { opacity: 0.55; cursor: not-allowed; }
+      .zm-btn-save:disabled::before { display: none; }
+    `}</style>
+
+          <div className="zm-overlay">
+            <div className="zm-modal">
+              {/* ── Header ── */}
+              <div className="zm-modal-header">
+                <div>
+                  <p className="zm-eyebrow">ZENmen — Admin</p>
+                  <h2 className="zm-modal-title">Edit Product</h2>
+                </div>
+                <button
+                  className="zm-close-btn"
+                  onClick={() => setEditingProduct(null)}
+                  aria-label="Close"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* ── Scrollable body ── */}
+              <div className="zm-modal-body">
+                {/* Essentials */}
+                <span className="zm-badge">Essentials</span>
+
+                <div className="zm-row">
+                  <div className="zm-field full">
+                    <label className="zm-label">Title</label>
+                    <input
+                      className="zm-input"
+                      value={editingProduct.title}
+                      onChange={(e) =>
+                        setEditingProduct({
+                          ...editingProduct,
+                          title: e.target.value,
+                        })
+                      }
+                      placeholder="Product title"
+                    />
+                  </div>
+                  <div className="zm-field">
+                    <label className="zm-label">Price (₹)</label>
+                    <input
+                      type="number"
+                      className="zm-input"
+                      value={editingProduct.price}
+                      onChange={(e) =>
+                        setEditingProduct({
+                          ...editingProduct,
+                          price: Number(e.target.value),
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="zm-field">
+                    <label className="zm-label">Stock</label>
+                    <input
+                      type="number"
+                      className="zm-input"
+                      value={editingProduct.stock}
+                      onChange={(e) =>
+                        setEditingProduct({
+                          ...editingProduct,
+                          stock: Number(e.target.value),
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="zm-field full">
+                    <label className="zm-label">Category</label>
+                    <input
+                      className="zm-input"
+                      value={editingProduct.category}
+                      onChange={(e) =>
+                        setEditingProduct({
+                          ...editingProduct,
+                          category: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="zm-field full">
+                    <label className="zm-label">Description</label>
+                    <textarea
+                      className="zm-textarea"
+                      rows={5}
+                      value={editingProduct.description}
+                      onChange={(e) =>
+                        setEditingProduct({
+                          ...editingProduct,
+                          description: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+
+                {/* Images */}
+                <span className="zm-badge">Product Images</span>
+
+                <div className="zm-images">
+                  {editingProduct.images?.map((img: any, index: number) => (
+                    <div key={index} className="zm-img-card">
+                      <img src={img.url} alt={img.alt} />
+                      <button
+                        type="button"
+                        className="zm-img-remove"
+                        onClick={() =>
+                          setEditingProduct({
+                            ...editingProduct,
+                            images: editingProduct.images.filter(
+                              (_: any, i: number) => i !== index,
+                            ),
+                          })
+                        }
+                        aria-label="Remove image"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Visibility */}
+                <span className="zm-badge">Visibility</span>
+
+                <label className="zm-check-row">
+                  <input
+                    type="checkbox"
+                    className="zm-check-box"
+                    checked={editingProduct.isFeatured}
+                    onChange={(e) =>
+                      setEditingProduct({
+                        ...editingProduct,
+                        isFeatured: e.target.checked,
+                      })
+                    }
+                  />
+                  <span className="zm-check-text">
+                    Mark as <em>Featured Product</em>
+                  </span>
+                </label>
+              </div>
+
+              {/* ── Footer ── */}
+              <div className="zm-modal-footer">
+                <button
+                  className="zm-btn-cancel"
+                  onClick={() => setEditingProduct(null)}
+                >
+                  Discard
+                </button>
+                <button
+                  disabled={editLoading}
+                  className="zm-btn-save"
+                  onClick={async () => {
+                    try {
+                      setEditLoading(true);
+                      const res = await fetch(
+                        `/api/products/${editingProduct.slug}`,
+                        {
+                          method: "PUT",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify(editingProduct),
+                        },
+                      );
+                      if (!res.ok) throw new Error("Update failed");
+                      toast.success("Product updated");
+                      setEditingProduct(null);
+                      dispatch(fetchProducts());
+                    } catch (err) {
+                      console.error(err);
+                      toast.error("Failed to update");
+                    } finally {
+                      setEditLoading(false);
+                    }
+                  }}
+                >
+                  <span>{editLoading ? "Updating…" : "Update Product"}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

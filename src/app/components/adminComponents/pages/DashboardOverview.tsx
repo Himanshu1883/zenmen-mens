@@ -60,7 +60,7 @@ const recentOrders = [
     client: "Marcus Chen",
     item: "3-Piece Suit",
     status: "Fitting",
-    value: "$3,200",
+    value: "₹3,200",
     time: "2h ago",
   },
   {
@@ -68,7 +68,7 @@ const recentOrders = [
     client: "David Park",
     item: "Dress Shirt",
     status: "Completed",
-    value: "$480",
+    value: "₹480",
     time: "5h ago",
   },
   {
@@ -76,7 +76,7 @@ const recentOrders = [
     client: "James Wilson",
     item: "Blazer",
     status: "In Production",
-    value: "$1,850",
+    value: "₹1,850",
     time: "1d ago",
   },
 ];
@@ -134,7 +134,7 @@ export default function DashboardOverview() {
                   <Activity className="w-4 h-4" />
                   Revenue Performance
                 </p>
-                <h2 className="text-5xl font-bold text-white mb-2">$328,450</h2>
+                <h2 className="text-5xl font-bold text-white mb-2">₹328,450</h2>
                 <div className="flex items-center gap-2">
                   <div className="px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20">
                     <span className="text-green-400 text-sm font-semibold flex items-center gap-1">
@@ -309,7 +309,7 @@ export default function DashboardOverview() {
                 <ArrowUpRight className="w-5 h-5 text-green-400" />
               </div>
               <p className="text-gray-400 text-sm mb-1">Avg Order Value</p>
-              <p className="text-4xl font-bold text-white mb-1">$2,847</p>
+              <p className="text-4xl font-bold text-white mb-1">₹2,847</p>
               <p className="text-green-400 text-sm font-medium">
                 +12.3% growth
               </p>

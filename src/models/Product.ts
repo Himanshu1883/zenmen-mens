@@ -6,6 +6,10 @@ const ImageSchema = new mongoose.Schema({
   alt: { type: String, default: "" },
   isPrimary: { type: Boolean, default: false },
   order: { type: Number, default: 0 },
+  public_id: {
+    type: String,
+    required: true,
+  },
 });
 
 const ReviewSchema = new mongoose.Schema(

@@ -395,7 +395,7 @@ nav.scrolled {
 }
 
 /* Section styles */
-section {
+main section {
   padding: 80px 80px;
 }
 
@@ -1076,6 +1076,23 @@ body::after {
   opacity: 0.35;
 }
 
+/* Sonner toaster container must never affect document flow */
+section[aria-label="Notifications alt+T"],
+section[aria-label^="Notifications"] {
+  position: fixed !important;
+  inset: auto 16px 16px auto !important;
+  width: auto !important;
+  max-width: min(420px, calc(100vw - 32px)) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  pointer-events: none;
+  z-index: 9999 !important;
+}
+section[aria-label="Notifications alt+T"] *,
+section[aria-label^="Notifications"] * {
+  pointer-events: auto;
+}
+
 /* Subtle navy radial glow on backgrounds */
 #services::after,
 #products::after,
@@ -1135,7 +1152,7 @@ body::after {
     grid-template-columns: 1fr 1fr;
     gap: 40px;
   }
-  section {
+  main section {
     padding: 80px 40px;
   }
   footer {
@@ -1316,6 +1333,6 @@ body::after {
 
 @media (min-width: 1280px) {
   html {
-    zoom: 0.9;
+    zoom: 0.95;
   }
 }

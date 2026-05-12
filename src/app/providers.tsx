@@ -5,6 +5,7 @@ import { store } from "@/store/store";
 import { SessionProvider } from "next-auth/react";
 import { Provider } from "react-redux";
 import { Toaster } from "sonner";
+import "sonner/dist/styles.css";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
