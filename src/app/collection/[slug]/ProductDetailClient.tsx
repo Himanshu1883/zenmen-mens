@@ -1,13 +1,13 @@
-// src/app/collection/[slug]/ProductDetailClient.tsx
 "use client";
 
+import { useDisplayPrice } from "@/hooks/useDisplayPrice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { addItem } from "@/store/slices/cartSlice";
-import { useAppDispatch } from "@/store/hooks";
-import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/types/product";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { useAppSelector } from "@/store/hooks";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+// ─── Static data ────────────────────────────────────────────────────────────
 
 const COLORS = [
   { name: "Midnight Navy", cls: "bg-[#1a2a4a]" },
@@ -38,21 +38,7 @@ const ACCORDION_ITEMS = [
   },
 ];
 
-function IconSearch() {
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-    >
-      <circle cx="11" cy="11" r="8" />
-      <path d="m21 21-4.35-4.35" />
-    </svg>
-  );
-}
+// ─── Icons ───────────────────────────────────────────────────────────────────
 
 function IconHeart({ filled }: { filled: boolean }) {
   return (
@@ -60,8 +46,8 @@ function IconHeart({ filled }: { filled: boolean }) {
       width="14"
       height="14"
       viewBox="0 0 24 24"
-      fill={filled ? "#c8a96e" : "none"}
-      stroke={filled ? "#c8a96e" : "currentColor"}
+      fill={filled ? "#7da8c7" : "none"}
+      stroke={filled ? "#7da8c7" : "currentColor"}
       strokeWidth="1.5"
     >
       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
@@ -88,13 +74,7 @@ function IconBag() {
 
 function IconWhatsApp() {
   return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
       <path
         d="M12.032 3.024c-4.967 0-9 4.033-9 9 0 1.59.414 3.153 1.2 4.53L3 21.024l4.545-1.212a8.97 8.97 0 0 0 4.287 1.092c4.967 0 9-4.033 9-9s-4.033-9-9-9z"
         fill="currentColor"
@@ -122,20 +102,54 @@ function IconChevron() {
   );
 }
 
+function IconZoomIn() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    >
+      <circle cx="11" cy="11" r="8" />
+      <path d="m21 21-4.35-4.35" />
+      <path d="M11 8v6M8 11h6" />
+    </svg>
+  );
+}
+
+function IconClose() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    >
+      <path d="M18 6 6 18M6 6l12 12" />
+    </svg>
+  );
+}
+
 function StarIcon({ filled }: { filled: boolean }) {
   return (
     <svg
       width="12"
       height="12"
       viewBox="0 0 12 12"
-      fill={filled ? "#c8a96e" : "none"}
-      stroke={filled ? "none" : "#8a7352"}
+      fill={filled ? "#7da8c7" : "none"}
+      stroke={filled ? "none" : "#7da8c7"}
       strokeWidth="1.5"
     >
       <path d="M6 1l1.29 2.61 2.88.42-2.08 2.03.49 2.87L6 7.52l-2.58 1.41.49-2.87L1.83 4.03l2.88-.42z" />
     </svg>
   );
 }
+
+// ─── Accordion ───────────────────────────────────────────────────────────────
 
 function AccordionItem({
   item,
@@ -147,16 +161,16 @@ function AccordionItem({
   onToggle: () => void;
 }) {
   return (
-    <div className="border-b border-[rgba(200,169,110,0.18)]">
+    <div className="border-b border-[#e2e8f0]">
       <button
         onClick={onToggle}
         className="group flex w-full items-center justify-between bg-transparent py-4 text-left"
       >
-        <span className="font-['Jost'] text-[.7rem] uppercase tracking-[.2em] text-[#c6bda8] transition-colors group-hover:text-[#c8a96e]">
+        <span className="font-['Jost'] text-[.7rem] uppercase tracking-[.2em] text-[#475569] transition-colors group-hover:text-[#7da8c7]">
           {item.label}
         </span>
         <span
-          className={`text-[#c8a96e] transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
+          className={`text-[#7da8c7] transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
         >
           <IconChevron />
         </span>
@@ -168,7 +182,7 @@ function AccordionItem({
           paddingBottom: isOpen ? "1rem" : "0",
         }}
       >
-        <p className="text-[.82rem] leading-[1.85] text-[#9e9585]">
+        <p className="text-[.82rem] leading-[1.85] text-[#64748b]">
           {item.content}
         </p>
       </div>
@@ -176,13 +190,278 @@ function AccordionItem({
   );
 }
 
-// ─── Main Component ────────────────────────────────────────────────────────────
-// CHANGED: receives `product` directly instead of `productId` string.
-// The server page fetches the product by slug and passes it here.
+// ─── Image Zoom (desktop hover + mobile tap) ──────────────────────────────────
+
+function ZoomableImage({
+  src,
+  alt,
+  className,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [zoomed, setZoomed] = useState(false);
+  // zoom origin as % of image size
+  const [origin, setOrigin] = useState({ x: 50, y: 50 });
+  const rafRef = useRef<number | null>(null);
+  // for mobile: track pinch/tap
+  const isMobile = useRef(false);
+
+  // detect touch device once
+  useEffect(() => {
+    isMobile.current = window.matchMedia("(pointer: coarse)").matches;
+  }, []);
+
+  useEffect(() => {
+    const el = containerRef.current;
+  
+    if (!el) return;
+  
+    const prevent = (e: TouchEvent) => {
+      if (e.touches.length >= 2 || zoomed) {
+        e.preventDefault();
+      }
+    };
+  
+    el.addEventListener("touchstart", prevent, {
+      passive: false,
+    });
+  
+    el.addEventListener("touchmove", prevent, {
+      passive: false,
+    });
+  
+    return () => {
+      el.removeEventListener(
+        "touchstart",
+        prevent,
+      );
+  
+      el.removeEventListener(
+        "touchmove",
+        prevent,
+      );
+    };
+  }, [zoomed]);
+
+  const lastPinchDist = useRef<number | null>(null);
+const currentScale = useRef(1);
+const MIN_SCALE = 1;
+const MAX_SCALE = 3.5;
+
+  const getRelativePos = useCallback((clientX: number, clientY: number) => {
+    const el = containerRef.current;
+    if (!el) return { x: 50, y: 50 };
+    const rect = el.getBoundingClientRect();
+    const x = Math.min(
+      100,
+      Math.max(0, ((clientX - rect.left) / rect.width) * 100),
+    );
+    const y = Math.min(
+      100,
+      Math.max(0, ((clientY - rect.top) / rect.height) * 100),
+    );
+    return { x, y };
+  }, []);
+
+  const getPinchDistance = (touches: React.TouchList) => {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+  
+  const getPinchMidpoint = (touches: React.TouchList) => {
+    return {
+      clientX: (touches[0].clientX + touches[1].clientX) / 2,
+      clientY: (touches[0].clientY + touches[1].clientY) / 2,
+    };
+  };
+
+  // ── Desktop: zoom on hover, track cursor for pan ──────────────────────────
+
+  const handleMouseEnter = () => {
+    if (isMobile.current) return;
+  
+    currentScale.current = 2;
+  
+    setZoomed(true);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isMobile.current || !zoomed) return;
+    const { clientX, clientY } = e;
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      setOrigin(getRelativePos(clientX, clientY));
+      rafRef.current = null;
+    });
+  };
+
+  const handleMouseLeave = () => {
+    if (isMobile.current) return;
+  
+    setZoomed(false);
+  
+    setOrigin({
+      x: 50,
+      y: 50,
+    });
+  
+    currentScale.current = 1;
+  };
+
+  // ── Mobile: tap anywhere to toggle zoom; when zoomed, tap moves origin ────
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!isMobile.current) return;
+  
+    if (e.touches.length === 2) {
+      // Two fingers — start pinch
+      lastPinchDist.current = getPinchDistance(e.touches);
+      // Set origin to midpoint between fingers
+      setOrigin(getRelativePos(
+        getPinchMidpoint(e.touches).clientX,
+        getPinchMidpoint(e.touches).clientY,
+      ));
+      e.preventDefault();
+      return;
+    }
+  
+    // Single finger
+    if (!zoomed) {
+      setOrigin(getRelativePos(e.touches[0].clientX, e.touches[0].clientY));
+      setZoomed(true);
+      currentScale.current = 2;
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isMobile.current) return;
+  
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      const newDist = getPinchDistance(e.touches);
+      if (lastPinchDist.current === null) {
+        lastPinchDist.current = newDist;
+        return;
+      }
+  
+      const ratio = newDist / lastPinchDist.current;
+      const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, currentScale.current * ratio));
+      currentScale.current = newScale;
+      lastPinchDist.current = newDist;
+  
+      const mid = getPinchMidpoint(e.touches);
+      setOrigin(getRelativePos(mid.clientX, mid.clientY));
+  
+      if (newScale <= MIN_SCALE) {
+        setZoomed(false);
+      } else {
+        setZoomed(true);
+      }
+  
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(() => {
+        // scale is read from currentScale.current in the style below
+        rafRef.current = null;
+      });
+      return;
+    }
+  
+    // Single finger pan (only when zoomed)
+    if (!zoomed || e.touches.length !== 1) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      setOrigin(getRelativePos(touch.clientX, touch.clientY));
+      rafRef.current = null;
+    });
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!isMobile.current) return;
+    if (e.touches.length < 2) {
+      lastPinchDist.current = null;
+      // If pinch ended at min scale, reset fully
+      if (currentScale.current <= MIN_SCALE + 0.05) {
+        setZoomed(false);
+        setOrigin({ x: 50, y: 50 });
+        currentScale.current = 1;
+      }
+    }
+  };
+
+  // close zoom on tap outside or second tap
+  const handleClick = (e: React.MouseEvent) => {
+    if (!isMobile.current) return;
+    // Only close on tap if not a pinch gesture
+    if (lastPinchDist.current !== null) return;
+    if (zoomed) {
+      setZoomed(false);
+      setOrigin({ x: 50, y: 50 });
+      currentScale.current = 1;
+    }
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      className={`relative overflow-hidden ${className ?? ""}`}
+      onMouseEnter={handleMouseEnter}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onClick={handleClick}
+      style={{
+        cursor: zoomed ? "zoom-out" : "zoom-in",
+        touchAction: zoomed ? "none" : "auto",
+      }}
+    >
+      <img
+        src={src}
+        alt={alt}
+        loading="eager"
+        fetchPriority="high"
+        decoding="async"
+        draggable={false}
+        className="block h-full w-full select-none object-cover object-[center_15%]"
+        style={{
+          transform: zoomed ? `scale(${currentScale.current})` : "scale(1)",
+          transformOrigin: `${origin.x}% ${origin.y}%`,
+          transition: zoomed ? "transform 0.08s linear" : "transform 0.2s ease",
+          willChange: "transform",
+        }}
+      />
+
+      {/* Zoom hint badge — only when not zoomed */}
+      {!zoomed && (
+        <div className="pointer-events-none absolute bottom-4 right-4 flex items-center gap-1.5 rounded-sm border border-white/15 bg-[#0f172a]/70 px-2.5 py-1.5 text-[9px] tracking-[0.15em] uppercase text-[#e2e8f0] backdrop-blur-sm">
+          <IconZoomIn />
+          <span className="hidden sm:inline">Zoom</span>
+        </div>
+      )}
+
+      {/* Close hint when zoomed on mobile */}
+      {zoomed && (
+        <div className="pointer-events-none absolute right-4 top-4 flex items-center gap-1.5 rounded-sm border border-white/15 bg-[#0f172a]/70 px-2.5 py-1.5 text-[9px] tracking-[0.15em] uppercase text-[#e2e8f0] backdrop-blur-sm sm:hidden">
+          <IconClose />
+          Tap to exit
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
+
 export default function ProductDetailClient({ product }: { product: Product }) {
   const dispatch = useAppDispatch();
-
-  // Pull all products from Redux for related / mosaic sections
+  const { format: displayPrice } = useDisplayPrice();
   const allProducts = useAppSelector((s) => s.products.products);
 
   const [activeImage, setActiveImage] = useState(0);
@@ -197,17 +476,16 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const [addedToCart, setAddedToCart] = useState(false);
   const [wishlisted, setWishlisted] = useState(false);
 
-  // Reset selections if product changes
   useEffect(() => {
     setActiveImage(0);
     setSelectedSize(product.sizes?.[0] ?? "M");
     setSelectedColor(product.colors?.[0] ?? COLORS[0].name);
   }, [product._id]);
 
-  const isColorAvailable = useMemo(() => {
-    if (!product.colors) return false;
-    return product.colors.includes(selectedColor);
-  }, [product.colors, selectedColor]);
+  const isColorAvailable = useMemo(
+    () => !!product.colors?.includes(selectedColor),
+    [product.colors, selectedColor],
+  );
 
   const rating = product.rating ?? 4.6;
   const reviewCount = product.numReviews ?? 42;
@@ -223,29 +501,32 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     { label: "Sizes", value: product.sizes?.join(", ") ?? "-" },
   ];
 
-  const relatedProducts = useMemo(() => {
-    return allProducts
-      .filter(
-        (item) =>
-          item._id !== product._id &&
-          (item.category === product.category ||
-            item.colors?.[0] === product.colors?.[0]),
-      )
-      .slice(0, 4);
-  }, [allProducts, product._id, product.category, product.colors]);
+  const relatedProducts = useMemo(
+    () =>
+      allProducts
+        .filter(
+          (item) =>
+            item._id !== product._id &&
+            (item.category === product.category ||
+              item.colors?.[0] === product.colors?.[0]),
+        )
+        .slice(0, 4),
+    [allProducts, product._id, product.category, product.colors],
+  );
 
-  const mosaicData = useMemo(() => {
-    return allProducts.filter((item) => item._id !== product._id).slice(0, 5);
-  }, [allProducts, product._id]);
+  const mosaicData = useMemo(
+    () => allProducts.filter((item) => item._id !== product._id).slice(0, 5),
+    [allProducts, product._id],
+  );
 
   const handleWhatsAppInquiry = () => {
-    const phoneNumber = "919650753273";
-    const message = `Hi Zenmen, I'm interested in the "${product.title}" in ${selectedColor} color, size ${selectedSize}. Is this available?`;
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, "_blank");
+    const msg = `Hi Zenmen, I'm interested in the "${product.title}" in ${selectedColor} color, size ${selectedSize}. Is this available?`;
+    window.open(
+      `https://wa.me/919650753273?text=${encodeURIComponent(msg)}`,
+      "_blank",
+    );
   };
 
-  // CHANGED: now actually dispatches to Redux cart
   function handleAddToCart() {
     dispatch(
       addItem({
@@ -263,8 +544,13 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     setTimeout(() => setAddedToCart(false), 2000);
   }
 
+  const currentImageSrc =
+    product.images?.[activeImage]?.url ??
+    product.images?.[0]?.url ??
+    "/new.jpg";
+
   return (
-    <main className="relative min-h-screen overflow-x-hidden bg-[#050A18] font-['Jost'] font-light text-[#F3EEE4]">
+    <main className="relative min-h-screen overflow-x-hidden bg-[#f8fafc] font-['Jost'] font-light text-[#0f172a]">
       {/* Noise texture */}
       <div
         className="pointer-events-none fixed inset-0 z-0 opacity-[.03]"
@@ -275,116 +561,160 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       />
 
       {/* Breadcrumb */}
-      <div className="relative z-10 mx-auto flex items-center gap-2 px-8 pb-0 pt-[100px] text-[.65rem] uppercase tracking-[.22em] text-[#9e9585] lg:px-16">
+      <div className="relative z-10 mx-auto flex items-center gap-2 px-8 pb-0 pt-10 text-[.65rem] uppercase tracking-[.22em] text-[#64748b] lg:px-16">
         <Link
           href="/"
-          className="text-[#9e9585] no-underline transition-colors hover:text-[#c8a96e]"
+          className="text-black no-underline transition-colors hover:text-[#7da8c7]"
         >
           Home
         </Link>
         <span className="opacity-40">/</span>
         <Link
           href="/collection"
-          className="text-[#9e9585] no-underline transition-colors hover:text-[#c8a96e]"
+          className="text-black no-underline transition-colors hover:text-[#7da8c7]"
         >
           Collection
         </Link>
         <span className="opacity-40">/</span>
-        <span className="text-[#c8a96e]">{product.title}</span>
+        <span className="text-[#7da8c7]">{product.title}</span>
       </div>
 
       <div className="relative z-10 mx-auto grid max-w-[1440px] grid-cols-1 items-start gap-12 px-8 pb-20 pt-10 lg:gap-16 lg:px-16 xl:grid-cols-[1fr_420px]">
         {/* ── LEFT: sticky image gallery ── */}
         <div className="xl:sticky xl:top-[88px] xl:self-start">
-          <div className="relative overflow-hidden rounded-[4px] border border-[rgba(200,169,110,0.18)] bg-[#0d1527]">
-            <div className="absolute left-6 top-6 z-10 rounded-[2px] border border-[rgba(200,169,110,0.18)] bg-[rgba(5,10,24,0.75)] px-4 py-1.5 text-[.6rem] uppercase tracking-[.28em] text-[#c8a96e] backdrop-blur-xl">
-              {product.badge ?? "Featured"}
+          <div className="flex items-start gap-3">
+            {/* Desktop thumbnails */}
+            <div className="hidden xl:flex w-[86px] shrink-0 flex-col gap-3">
+              {(product.images ?? []).map((img, i) => (
+                <button
+                  key={`thumb-${i}`}
+                  onClick={() => setActiveImage(i)}
+                  className={`overflow-hidden rounded-[3px] border-[1.5px] bg-transparent p-0 transition-all duration-200 ${
+                    activeImage === i
+                      ? "border-[#7da8c7]"
+                      : "border-[#dbe4ef] hover:border-[#9fbdd5]"
+                  }`}
+                >
+                  <img
+                    src={img.url}
+                    alt={img.alt ?? `Thumbnail ${i + 1}`}
+                    loading="lazy"
+                    decoding="async"
+                    className="block h-[96px] w-full object-cover object-[center_15%]"
+                  />
+                </button>
+              ))}
             </div>
-            <img
-              src={
-                product.images?.[activeImage]?.url ??
-                product.images?.[0]?.url ??
-                "/new.jpg"
-              }
-              alt={product.title}
-              className="h-[520px] w-full object-cover object-[center_15%] transition-all duration-700 hover:scale-[1.03] sm:h-[640px]"
-            />
+
+            {/* Main zoomable image */}
+            <div className="relative min-w-0 flex-1 rounded-[4px] border border-[#dbe4ef] bg-[#f1f5f9] overflow-hidden">
+              {/* Badge */}
+              <div className="absolute left-6 top-6 z-20 rounded-[2px] border border-white/15 bg-[#0f172a]/70 px-4 py-1.5 text-[.6rem] uppercase tracking-[.28em] text-[#7da8c7] pointer-events-none backdrop-blur-sm">
+                {product.badge ?? "Featured"}
+              </div>
+
+              <ZoomableImage
+                src={currentImageSrc}
+                alt={product.title}
+                className="h-[520px] sm:h-[640px] w-full"
+              />
+            </div>
           </div>
 
-          {/* Thumbnails */}
-          <div className="mt-3 grid grid-cols-4 gap-3">
+          {/* Mobile thumbnails */}
+          <div className="mt-3 grid grid-cols-4 gap-3 xl:hidden">
             {(product.images ?? []).map((img, i) => (
               <button
-                key={`${product._id}-thumb-${i}`}
+                key={`thumb-mobile-${i}`}
                 onClick={() => setActiveImage(i)}
-                className={`rounded-[3px] border-[1.5px] bg-transparent p-0 transition-all duration-200 ${
+                className={`rounded-[3px] border-[1.5px] bg-transparent p-0 overflow-hidden transition-all duration-200 ${
                   activeImage === i
-                    ? "border-[#c8a96e]"
-                    : "border-transparent hover:border-[rgba(200,169,110,0.4)]"
+                    ? "border-[#7da8c7]"
+                    : "border-[#dbe4ef] hover:border-[#9fbdd5]"
                 }`}
               >
                 <img
                   src={img.url}
                   alt={img.alt ?? `Thumbnail ${i + 1}`}
-                  className="block h-[150px] w-full object-cover object-[center_15%]"
+                  loading="lazy"
+                  decoding="async"
+                  className="block h-[80px] w-full object-cover object-[center_15%]"
                 />
               </button>
             ))}
           </div>
+
+          {/* Zoom instruction hint */}
+          <p className="mt-3 text-center text-[10px] tracking-[0.1em] uppercase text-[#94a3b8]">
+            <span className="hidden sm:inline">Hover</span>
+            <span className="sm:hidden">Tap</span> image to zoom · drag to
+            explore fabric
+          </p>
         </div>
 
         {/* ── RIGHT: scrollable details panel ── */}
         <aside className="xl:max-h-[calc(100vh-108px)] xl:overflow-y-auto xl:[scrollbar-width:none] xl:[&::-webkit-scrollbar]:hidden">
-          <div className="rounded-[4px] border border-[rgba(200,169,110,0.18)] bg-[#0d1527] p-8 sm:p-9">
-            <p className="mb-2 text-[.6rem] uppercase tracking-[.35em] text-[#c8a96e]">
+          <div className="rounded-[4px] border border-[#dbe4ef] bg-white p-8 sm:p-9">
+            <p className="mb-2 text-[.6rem] uppercase tracking-[.35em] text-[#7da8c7]">
               {product.category} · Limited Edition
             </p>
-            <h1 className="mb-3 font-['Cormorant_Garamond'] text-[3.5rem] font-light leading-[.95] text-[#f8f4ec]">
+            <h1 className="mb-3 font-['Cormorant_Garamond'] text-[3.5rem] font-light leading-[.95] text-[#0f172a]">
               {product.title}
             </h1>
-            <p className="text-[.82rem] leading-[1.8] text-[#9e9585]">
+            <p className="text-[.82rem] leading-[1.8] text-[#475569]">
               {product.tagline ??
                 "Crafted for timeless style and everyday confidence."}
             </p>
 
             {/* Stars */}
-            <div className="mt-4 flex items-center gap-3 border-t border-[rgba(200,169,110,0.18)] pt-4">
+            <div className="mt-4 flex items-center gap-3 border-t border-[#dbe4ef] pt-4">
               <div className="flex gap-0.5">
                 {stars.map((filled, i) => (
                   <StarIcon key={i} filled={filled} />
                 ))}
               </div>
-              <span className="text-[.7rem] tracking-[.1em] text-[#9e9585]">
+              <span className="text-[.7rem] tracking-[.1em] text-[#64748b]">
                 {rating} · {reviewCount} reviews
               </span>
             </div>
 
             {/* Price */}
-            <div className="my-7 border-y border-[rgba(200,169,110,0.18)] py-6">
-              <p className="text-[3rem] font-light leading-none text-[#e8d4a8]">
-                {formatPrice(product.price)}
+            {/* <div className="my-4 border-y border-[#dbe4ef] py-4">
+              <p
+                className="text-[2.5rem] font-normal leading-tight text-[#0f172a]"
+                style={{ color: "#0f172a" }}
+              >
+                {displayPrice(product.price)}
               </p>
-            </div>
+            </div> */}
+
+            <p
+              className="text-[2.5rem] font-normal leading-tight text-[#0f172a]"
+              style={{ color: "#0f172a" }}
+            >
+              {displayPrice(product.price)}
+            </p>
 
             {/* Color picker */}
             <div className="mb-5">
-              <p className="mb-3 flex items-center justify-between text-[.62rem] uppercase tracking-[.22em] text-[#9e9585]">
+              <p className="mb-3 flex items-center justify-between text-[.62rem] uppercase tracking-[.22em] text-[#64748b]">
                 Color
                 <span
                   className={`normal-case tracking-normal ${
                     !isColorAvailable && selectedColor !== COLORS[0].name
-                      ? "text-[#c8a96e]"
-                      : "text-[#c6bda8]"
+                      ? "text-[#7da8c7]"
+                      : "text-[#94a3b8]"
                   }`}
                 >
                   {selectedColor}
                   {!isColorAvailable && selectedColor !== COLORS[0].name && (
-                    <span className="ml-2 text-[.55rem] text-[#c8a96e]">
+                    <span className="ml-2 text-[.55rem] text-[#7da8c7]">
                       (Custom Order)
                     </span>
                   )}
                 </span>
               </p>
+
               <div className="flex gap-2.5">
                 {COLORS.map((c) => (
                   <button
@@ -393,25 +723,26 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                     onClick={() => setSelectedColor(c.name)}
                     className={`relative h-7 w-7 rounded-full border-0 transition-transform hover:scale-110 ${c.cls} ${
                       selectedColor === c.name
-                        ? "ring-[1.5px] ring-[#c8a96e] ring-offset-2 ring-offset-[#0d1527]"
+                        ? "ring-[1.5px] ring-[#7da8c7] ring-offset-2 ring-offset-white"
                         : ""
                     } ${
                       !product.colors?.includes(c.name) &&
                       c.name !== product.colors?.[0]
-                        ? "opacity-60 ring-1 ring-[rgba(200,169,110,0.3)]"
+                        ? "opacity-60 ring-1 ring-[rgba(125,168,199,0.3)]"
                         : ""
                     }`}
                   >
                     {!product.colors?.includes(c.name) &&
                       c.name !== product.colors?.[0] && (
                         <span className="absolute inset-0 flex items-center justify-center">
-                          <span className="h-full w-[1.5px] rotate-45 bg-[rgba(200,169,110,0.5)]" />
+                          <span className="h-full w-[1.5px] rotate-45 bg-[rgba(125,168,199,0.5)]" />
                         </span>
                       )}
                   </button>
                 ))}
               </div>
-              <p className="mt-2 text-[.65rem] text-white">
+
+              <p className="mt-2 text-[.65rem] text-[#64748b]">
                 {!isColorAvailable && selectedColor !== product.colors?.[0]
                   ? "✨ This color is available on custom order. Contact us for details."
                   : product.colors?.includes(selectedColor)
@@ -421,9 +752,9 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             </div>
 
             {/* Size picker */}
-            <p className="mb-3 flex items-center justify-between text-[.62rem] uppercase tracking-[.22em] text-[#9e9585]">
+            <p className="mb-3 flex items-center justify-between text-[.62rem] uppercase tracking-[.22em] text-[#64748b]">
               Size
-              <span className="normal-case tracking-normal text-[#c6bda8]">
+              <span className="normal-case tracking-normal text-[#94a3b8]">
                 {selectedSize}
               </span>
             </p>
@@ -434,8 +765,8 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   onClick={() => setSelectedSize(s)}
                   className={`h-11 min-w-[48px] cursor-pointer rounded-[3px] border px-3 font-['Jost'] text-[.78rem] tracking-[.08em] transition-all ${
                     selectedSize === s
-                      ? "border-[#c8a96e] bg-[rgba(200,169,110,0.12)] text-[#f7e5c3]"
-                      : "border-[rgba(200,169,110,0.28)] bg-transparent text-[#c6bda8] hover:border-[rgba(200,169,110,0.65)] hover:text-[#f8f4ec]"
+                      ? "border-[#7da8c7] bg-[#f0f6fb] text-[#0f172a]"
+                      : "border-[#e2e8f0] bg-transparent text-[#475569] hover:border-[#7da8c7] hover:text-[#0f172a]"
                   }`}
                 >
                   {s}
@@ -450,8 +781,8 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   onClick={handleAddToCart}
                   className={`flex h-[52px] items-center justify-center gap-2.5 rounded-[3px] border-0 font-['Jost'] text-[.72rem] font-medium uppercase tracking-[.25em] transition-all ${
                     addedToCart
-                      ? "bg-[#4a7c59] text-white"
-                      : "bg-[#c8a96e] text-[#050A18] hover:bg-[#e8d4a8]"
+                      ? "bg-[#3b82f6] text-white"
+                      : "bg-[#7da8c7] text-white hover:bg-[#5a8faf]"
                   }`}
                 >
                   <IconBag />
@@ -468,13 +799,13 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               )}
 
               {isColorAvailable || selectedColor === product.colors?.[0] ? (
-                <button className="h-[52px] rounded-[3px] border border-[rgba(200,169,110,0.38)] bg-transparent font-['Jost'] text-[.72rem] uppercase tracking-[.25em] text-[#e8dcc6] transition-all hover:border-[rgba(200,169,110,0.7)] hover:bg-[rgba(200,169,110,0.07)]">
+                <button className="h-[52px] rounded-[3px] border border-[#d6e1ec] bg-transparent font-['Jost'] text-[.72rem] uppercase tracking-[.25em] text-[#0f172a] transition-all hover:border-[#7da8c7] hover:bg-[#f0f6fb]">
                   Buy Now · Express Checkout
                 </button>
               ) : (
                 <button
                   onClick={handleWhatsAppInquiry}
-                  className="flex h-[52px] items-center justify-center gap-2 rounded-[3px] border border-[rgba(200,169,110,0.38)] bg-transparent font-['Jost'] text-[.72rem] uppercase tracking-[.25em] text-[#e8dcc6] transition-all hover:border-[#25D366] hover:text-[#25D366]"
+                  className="flex h-[52px] items-center justify-center gap-2 rounded-[3px] border border-[#d6e1ec] bg-transparent font-['Jost'] text-[.72rem] uppercase tracking-[.25em] text-[#0f172a] transition-all hover:border-[#7da8c7] hover:text-[#7da8c7]"
                 >
                   <IconWhatsApp />
                   Inquire on WhatsApp
@@ -488,13 +819,13 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               className="mt-3 flex w-full items-center justify-center gap-2 border-0 bg-transparent opacity-60 transition-opacity hover:opacity-100"
             >
               <IconHeart filled={wishlisted} />
-              <span className="font-['Jost'] text-[.65rem] uppercase tracking-[.2em] text-[#9e9585]">
+              <span className="font-['Jost'] text-[.65rem] uppercase tracking-[.2em] text-[#64748b]">
                 {wishlisted ? "Saved to Wishlist" : "Add to Wishlist"}
               </span>
             </button>
 
-            {/* Accordion + Tabs */}
-            <div className="mt-6 border-t border-[rgba(200,169,110,0.18)]">
+            {/* Accordion */}
+            <div className="mt-6 border-t border-[#e2e8f0]">
               {ACCORDION_ITEMS.map((item) => (
                 <AccordionItem
                   key={item.id}
@@ -506,8 +837,9 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 />
               ))}
 
-              <div className="mt-10 overflow-hidden rounded-[4px] border border-[rgba(200,169,110,0.18)] bg-[#0d1527] px-4">
-                <div className="flex gap-1 border-b border-[rgba(200,169,110,0.18)]">
+              {/* Tabs */}
+              <div className="mt-10 overflow-hidden rounded-[4px] border border-[#e2e8f0] bg-[#f8fafc] px-4">
+                <div className="flex gap-1 border-b border-[#e2e8f0]">
                   {(["desc", "details", "specs", "care"] as const).map(
                     (tab) => (
                       <button
@@ -515,8 +847,8 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                         onClick={() => setActiveTab(tab)}
                         className={`flex-1 border-0 bg-transparent py-4 font-['Jost'] text-[.65rem] uppercase tracking-[.2em] transition-all ${
                           activeTab === tab
-                            ? "-mb-px border-b-[1.5px] border-[#c8a96e] bg-[rgba(200,169,110,0.06)] text-[#c8a96e]"
-                            : "text-[#9e9585] hover:text-[#c6bda8]"
+                            ? "-mb-px border-b-[1.5px] border-[#7da8c7] bg-[#f0f6fb] text-[#7da8c7]"
+                            : "text-[#64748b] hover:text-[#0f172a]"
                         }`}
                       >
                         {tab === "desc"
@@ -533,7 +865,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
                 <div className="p-8">
                   {activeTab === "desc" && (
-                    <p className="text-[.88rem] leading-[1.9] text-[#c6bda8]">
+                    <p className="text-[.88rem] leading-[1.9] text-[#475569]">
                       {product.description}
                     </p>
                   )}
@@ -542,9 +874,9 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                       {(product.details ?? []).map((d, i) => (
                         <li
                           key={i}
-                          className="flex items-start gap-2.5 text-[.82rem] text-[#c6bda8]"
+                          className="flex items-start gap-2.5 text-[.82rem] text-[#475569]"
                         >
-                          <span className="mt-[7px] h-1 w-1 flex-shrink-0 rounded-full bg-[#c8a96e]" />
+                          <span className="mt-[7px] h-1 w-1 flex-shrink-0 rounded-full bg-[#7da8c7]" />
                           {d}
                         </li>
                       ))}
@@ -554,10 +886,10 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                     <div className="grid grid-cols-2">
                       {specs.map((s) => (
                         <div key={s.label} className="contents">
-                          <span className="border-b border-[rgba(200,169,110,0.18)] py-3 text-[.72rem] uppercase tracking-[.15em] text-[#9e9585]">
+                          <span className="border-b border-[#e2e8f0] py-3 text-[.72rem] uppercase tracking-[.15em] text-[#64748b]">
                             {s.label}
                           </span>
-                          <span className="border-b border-[rgba(200,169,110,0.18)] py-3 text-right text-[.82rem] text-[#c6bda8]">
+                          <span className="border-b border-[#e2e8f0] py-3 text-right text-[.82rem] text-[#475569]">
                             {s.value}
                           </span>
                         </div>
@@ -565,7 +897,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                     </div>
                   )}
                   {activeTab === "care" && (
-                    <p className="text-[.88rem] leading-[1.9] text-[#c6bda8]">
+                    <p className="text-[.88rem] leading-[1.9] text-[#475569]">
                       {product.care ??
                         "Dry clean only. Steam preferred. Store on a shaped hanger away from direct sunlight."}
                     </p>
@@ -581,7 +913,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       {relatedProducts.length > 0 && (
         <section className="relative z-10 mx-auto px-8 py-14 lg:px-16">
           <div className="mb-8 flex items-baseline justify-between">
-            <h2 className="font-['Cormorant_Garamond'] text-[2.2rem] font-light text-[#f8f4ec]">
+            <h2 className="font-['Cormorant_Garamond'] text-[2.2rem] font-light text-[#0f172a]">
               You May Also Desire
             </h2>
           </div>
@@ -590,22 +922,26 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               <Link
                 key={item._id}
                 href={`/collection/${item.slug}`}
-                className="group block overflow-hidden rounded-[3px] border border-[rgba(200,169,110,0.18)] bg-[#111827] text-inherit no-underline transition-all duration-300 hover:-translate-y-1 hover:border-[rgba(200,169,110,0.45)]"
+                className="group block overflow-hidden rounded-[3px] border border-[#e2e8f0] bg-white text-inherit no-underline transition-all duration-300 hover:-translate-y-1 hover:border-[#7da8c7] hover:shadow-[0_8px_32px_rgba(125,168,199,0.15)]"
               >
-                <img
-                  src={item.images?.[0]?.url ?? "/new.jpg"}
-                  alt={item.title}
-                  className="block h-[280px] w-full object-cover object-[center_10%] transition-transform duration-500 group-hover:scale-[1.06]"
-                />
+                <div className="overflow-hidden h-[280px]">
+                  <img
+                    src={item.images?.[0]?.url ?? "/new.jpg"}
+                    alt={item.title}
+                    loading="lazy"
+                    decoding="async"
+                    className="block h-full w-full object-cover object-[center_10%]"
+                  />
+                </div>
                 <div className="p-4">
-                  <p className="mb-0.5 font-['Cormorant_Garamond'] text-[1.5rem] font-light text-[#f8f4ec]">
+                  <p className="mb-0.5 font-['Cormorant_Garamond'] text-[1.5rem] font-light text-[#0f172a]">
                     {item.title}
                   </p>
-                  <p className="text-[.6rem] uppercase tracking-[.18em] text-[#9e9585]">
+                  <p className="text-[.6rem] uppercase tracking-[.18em] text-[#64748b]">
                     {item.category} · {item.colors?.[0] ?? "-"}
                   </p>
-                  <p className="mt-2 text-[1.25rem] text-[#c8a96e]">
-                    {formatPrice(item.price)}
+                  <p className="mt-2 text-[1.25rem] text-[#475569]">
+                    {displayPrice(item.price)}
                   </p>
                 </div>
               </Link>
@@ -618,7 +954,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       {mosaicData.length > 0 && (
         <section className="relative z-10 mx-auto px-8 py-14 lg:px-16">
           <div className="mb-8 flex items-baseline justify-between">
-            <h2 className="font-['Cormorant_Garamond'] text-[2.2rem] font-light text-[#f8f4ec]">
+            <h2 className="font-['Cormorant_Garamond'] text-[2.2rem] font-light text-[#0f172a]">
               More from the Collection
             </h2>
           </div>
@@ -633,25 +969,27 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               <Link
                 key={`${item._id}-mosaic`}
                 href={`/collection/${item.slug}`}
-                className="group relative cursor-pointer overflow-hidden rounded-[3px] border border-[rgba(200,169,110,0.18)] no-underline"
+                className="group relative cursor-pointer overflow-hidden rounded-[3px] border border-[#e2e8f0] no-underline"
                 style={i === 0 ? { gridColumn: "1 / 3", gridRow: "1 / 3" } : {}}
               >
                 <img
                   src={item.images?.[0]?.url ?? "/new.jpg"}
                   alt={item.title}
-                  className="h-full w-full object-cover object-[center_10%] transition-transform duration-500 group-hover:scale-[1.07]"
+                  loading="lazy"
+                  decoding="async"
+                  className="h-full w-full object-cover object-[center_10%]"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[rgba(5,10,24,0.75)] via-[rgba(5,10,24,0.1)] to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[rgba(15,23,42,0.6)] via-[rgba(15,23,42,0.08)] to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5">
                   <span
-                    className={`block font-['Cormorant_Garamond'] font-light text-[#f8f4ec] ${
+                    className={`block font-['Cormorant_Garamond'] font-light text-white ${
                       i === 0 ? "text-[2.2rem]" : "text-[1.6rem]"
                     }`}
                   >
                     {item.title}
                   </span>
-                  <span className="mt-0.5 block text-[.75rem] text-[#c8a96e]">
-                    {formatPrice(item.price)}
+                  <span className="mt-0.5 block text-[.75rem] text-[#7da8c7]">
+                    {displayPrice(item.price)}
                   </span>
                 </div>
               </Link>

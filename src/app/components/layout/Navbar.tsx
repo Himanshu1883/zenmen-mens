@@ -1,1786 +1,302 @@
 "use client";
 
-import { useScrolled } from "@/app/hooks/useScrolled";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { removeItem, updateQty } from "@/store/slices/cartSlice";
-import { Menu, ShoppingCartIcon, User, X } from "lucide-react";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { setCartOpen } from "@/store/slices/cartSlice";
+import { motion } from "framer-motion";
+import { Menu, Search, ShoppingBag, User, X } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
+import { useEffect, useState } from "react";
+import CartDrawer from "./CartDrawer";
+import CurrencySwitcher from "./CurrencySwitcher";
+import MegaMenu from "./MegaMenu";
+import MobileMenu from "./MobileMenu";
+import SearchOverlay from "./SearchOverlay";
+import UserAuthPanel from "./UserAuthPanel";
 
-const links = [
-  { href: "/about", label: "About" },
-  // { href: "/services", label: "Services" },
-  { href: "/collection", label: "Collections" },
-  { href: "/stories", label: "Stories" },
-  { href: "/contact", label: "Contact" },
-];
-
-const collectionMenuItems = [
-  {
-    label: "Kurta-Pajama",
-    href: "/collection?category=kurta-pajama",
-    image: "/zenmen_kurta_hero.jpeg",
-  },
-  {
-    label: "Pants/Trousers",
-    href: "/collection?category=pants-trousers",
-    image: "/zenmen_white.jpeg",
-  },
-  {
-    label: "Shirt",
-    href: "/collection?category=shirt",
-    image: "/zenmen_shirts.jpeg",
-  },
-  {
-    label: "Suit",
-    href: "/collection?category=suit",
-    image: "/zenmen_blackcoat.jpeg",
-  },
-  {
-    label: "Designer Suits",
-    href: "/collection?category=designer-suits",
-    image: "/sherwani.webp",
-  },
-  {
-    label: "Double Breasted Suit",
-    href: "/collection?category=double-breasted-suit",
-    image: "/zenmen_blackcoat.jpeg",
-  },
-  {
-    label: "Three Piece Suit",
-    href: "/collection?category=three-piece-suit",
-    image: "/new.jpg",
-  },
-  {
-    label: "Five Piece Suit",
-    href: "/collection?category=five-piece-suit",
-    image: "/sherwani.webp",
-  },
-  {
-    label: "Two Piece Suit",
-    href: "/collection?category=two-piece-suit",
-    image: "/zenmen_white.jpeg",
-  },
-  {
-    label: "Indo-Western",
-    href: "/collection?category=indo-western",
-    image: "/sherwani.webp",
-  },
-  {
-    label: "Designer Shirt",
-    href: "/collection?category=designer-shirt",
-    image: "/zenmen_shirts.jpeg",
-  },
-  { label: "Buttons", href: "/collection?category=buttons", image: "/new.jpg" },
-  {
-    label: "Tie",
-    href: "/collection?category=tie",
-    image: "/zenmen_white.jpeg",
-  },
-  { label: "Broches", href: "/collection?category=broches", image: "/new.jpg" },
-  {
-    label: "Jodhpuri Suit",
-    href: "/collection?category=jodhpuri-suit",
-    image: "/sherwani.webp",
-  },
-] as const;
-
-const LOGIN_TOAST_KEY = "zenmen:login-toast-pending";
-
-export default function Navbar() {
+const Navbar = () => {
   const dispatch = useAppDispatch();
-  const cartItems = useAppSelector((state) => state.cart.items);
-  const { data: session, status } = useSession();
-  const pathname = usePathname();
-  const router = useRouter();
-  const scrolled = useScrolled();
-  const [open, setOpen] = useState(false);
-  const [cartOpen, setCartOpen] = useState(false);
-  const [authOpen, setAuthOpen] = useState(false);
-  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
-  const [collectionMenuOpen, setCollectionMenuOpen] = useState(false);
-  const [activeCollectionItem, setActiveCollectionItem] = useState<
-    (typeof collectionMenuItems)[number]
-  >(collectionMenuItems[0]);
-  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [agreeTerms, setAgreeTerms] = useState(false);
-  const [authLoading, setAuthLoading] = useState(false);
-  const prevStatusRef = useRef<typeof status>("loading");
-  const accountMenuRef = useRef<HTMLDivElement | null>(null);
-  const userRole = session?.user
-    ? (session.user as typeof session.user & { role?: string }).role
-    : "user";
-  const isAdmin = userRole === "admin";
+  const cartCount = useAppSelector((s) =>
+    s.cart.items.reduce((n, item) => n + item.qty, 0),
+  );
+  const cartOpen = useAppSelector((s) => s.cart.open);
+  const [scrolled, setScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
+  const [isUserAuthOpen, setIsUserAuthOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   useEffect(() => {
-    const prev = prevStatusRef.current;
-    const loginToastPending =
-      typeof window !== "undefined" &&
-      window.sessionStorage.getItem(LOGIN_TOAST_KEY) === "1";
+    let ticking = false;
 
-    if (
-      status === "authenticated" &&
-      (prev === "unauthenticated" || loginToastPending)
-    ) {
-      const displayName = session?.user?.name?.trim();
-      toast.success(
-        displayName ? `Welcome back, ${displayName}` : "Logged in successfully",
-      );
-      if (loginToastPending) {
-        window.sessionStorage.removeItem(LOGIN_TOAST_KEY);
-      }
-    }
-
-    if (prev === "authenticated" && status === "unauthenticated") {
-      toast.success("Logged out successfully");
-    }
-
-    prevStatusRef.current = status;
-  }, [session?.user?.name, status]);
-
-  useEffect(() => {
-    if (!cartOpen && !authOpen) return;
-    const onEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setCartOpen(false);
-      if (e.key === "Escape") setAuthOpen(false);
+    const updateScrollState = () => {
+      const nextScrolled = window.scrollY > 20;
+      setScrolled((prev) => (prev !== nextScrolled ? nextScrolled : prev));
+      ticking = false;
     };
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onEsc);
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", onEsc);
-    };
-  }, [cartOpen, authOpen]);
 
-  useEffect(() => {
-    const onPointerDown = (event: MouseEvent) => {
-      if (!accountMenuRef.current) return;
-      if (!accountMenuRef.current.contains(event.target as Node)) {
-        setAccountMenuOpen(false);
+    const handleScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(updateScrollState);
       }
     };
 
-    const onHistoryNavigation = () => {
-      setAccountMenuOpen(false);
-    };
-
-    document.addEventListener("mousedown", onPointerDown);
-    window.addEventListener("popstate", onHistoryNavigation);
-    window.addEventListener("pageshow", onHistoryNavigation);
-
-    return () => {
-      document.removeEventListener("mousedown", onPointerDown);
-      window.removeEventListener("popstate", onHistoryNavigation);
-      window.removeEventListener("pageshow", onHistoryNavigation);
-    };
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const subtotal = cartItems.reduce((s, i) => s + i.price * i.qty, 0);
-  const handleGoogleSignIn = async () => {
-    setAuthOpen(false);
-    if (typeof window !== "undefined") {
-      window.sessionStorage.setItem(LOGIN_TOAST_KEY, "1");
-    }
-    await signIn("google", { callbackUrl: "/" });
+  const toggleCart = () => {
+    setIsSearchOpen(false);
+    setIsUserAuthOpen(false);
+    setIsMobileMenuOpen(false);
+    dispatch(setCartOpen(!cartOpen));
   };
 
-  const handleCredentialsAuth = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (authLoading) return;
-
-    const cleanEmail = email.trim().toLowerCase();
-    if (!cleanEmail || !password) {
-      toast.error("Email and password are required");
-      return;
-    }
-
-    if (authMode === "signup") {
-      const fullName = `${firstName} ${lastName}`.trim();
-      if (!fullName) {
-        toast.error("Please enter your name");
-        return;
-      }
-      if (password.length < 6) {
-        toast.error("Password must be at least 6 characters");
-        return;
-      }
-      if (password !== confirmPassword) {
-        toast.error("Passwords do not match");
-        return;
-      }
-      if (!agreeTerms) {
-        toast.error("Please agree to Terms & Privacy");
-        return;
-      }
-    }
-
-    setAuthLoading(true);
-    try {
-      if (authMode === "signup") {
-        const fullName = `${firstName} ${lastName}`.trim();
-        const registerRes = await fetch("/api/auth/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: fullName,
-            email: cleanEmail,
-            password,
-            phone,
-          }),
-        });
-
-        if (!registerRes.ok) {
-          const data = (await registerRes.json().catch(() => null)) as {
-            error?: string;
-          } | null;
-          toast.error(data?.error || "Could not create account");
-          return;
-        }
-      }
-
-      if (typeof window !== "undefined") {
-        window.sessionStorage.setItem(LOGIN_TOAST_KEY, "1");
-      }
-
-      const result = await signIn("credentials", {
-        email: cleanEmail,
-        password,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        toast.error("Invalid email or password");
-        return;
-      }
-
-      setAuthOpen(false);
-      setFirstName("");
-      setLastName("");
-      setEmail("");
-      setPhone("");
-      setPassword("");
-      setConfirmPassword("");
-      setAgreeTerms(false);
-      setAuthMode("login");
-      router.refresh();
-    } catch {
-      toast.error("Something went wrong. Please try again.");
-    } finally {
-      setAuthLoading(false);
-    }
+  const toggleSearch = () => {
+    setIsUserAuthOpen(false);
+    setIsMobileMenuOpen(false);
+    dispatch(setCartOpen(false));
+    setIsSearchOpen((v) => !v);
   };
 
-  const handleSignOut = async () => {
-    setAccountMenuOpen(false);
-    setAuthOpen(false);
-    const result = await signOut({ redirect: false, callbackUrl: "/" });
-    if (result?.url) {
-      router.push(result.url);
-    }
-  };
+  const navLinks = [
+    {
+      name: "COLLECTIONS",
+      href: "/collection",
+      hasMegaMenu: true,
+    },
+
+    {
+      name: "STORIES",
+      href: "/stories",
+      hasMegaMenu: false,
+    },
+
+    {
+      name: "ABOUT",
+      href: "/about",
+      hasMegaMenu: false,
+    },
+  ];
+
+  const shellClass =
+    "w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-10 xl:px-14";
 
   return (
     <>
-      <style>{`
-        /* ── Navbar base ── */
-        .znav {
-          position: fixed;
-          top: 0; left: 0; right: 0;
-          z-index: 80;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 0 clamp(16px, 4vw, 48px);
-          height: 68px;
-          transition: background 0.4s ease, backdrop-filter 0.4s ease, box-shadow 0.4s ease;
-        }
-        .znav.scrolled {
-          background: rgba(3, 8, 19, 0.88);
-          backdrop-filter: blur(18px);
-          box-shadow: 0 1px 0 rgba(200,169,110,0.12);
-        }
-
-        /* ── Logo ── */
-        .znav-logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
-        .znav-logo-mark {
-          width: 40px;
-          height: 40px;
-          border-radius: 999px;
-          border: 1px solid rgba(200,169,110,0.35);
-          background: rgba(10,18,36,0.85);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          overflow: hidden;
-          flex-shrink: 0;
-        }
-        .znav-logo-img {
-          width: 36px;
-          height: 36px;
-          object-fit: contain;
-          transition: transform 0.75s cubic-bezier(0.22,1,0.36,1);
-        }
-        .znav-logo:hover .znav-logo-img {
-          transform: rotate(360deg);
-        }
-        .znav-logo-text {
-          font-family: 'Playfair Display', serif;
-          font-size: 1.25rem;
-          font-weight: 300;
-          letter-spacing: 0.08em;
-          color: #f7f2e8;
-          line-height: 1;
-        }
-        .znav-logo-sub {
-          display: block;
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 8px;
-          letter-spacing: 0.38em;
-          text-transform: uppercase;
-          color: rgba(200,169,110,0.65);
-          margin-top: 3px;
-        }
-
-        /* ── Nav links ── */
-        .znav-link {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 11px;
-          letter-spacing: 0.28em;
-          text-transform: uppercase;
-          text-decoration: none;
-          color: rgba(247,242,232,0.75);
-          position: relative;
-          padding-bottom: 2px;
-          transition: color 0.3s;
-        }
-        .znav-link:hover, .znav-link.active { color: #c8a96e; }
-        .znav-link::after {
-          content: '';
-          position: absolute;
-          bottom: -1px; left: 0;
-          height: 0.5px;
-          width: 0;
-          background: #c8a96e;
-          transition: width 0.35s cubic-bezier(0.22,1,0.36,1);
-        }
-        .znav-link:hover::after, .znav-link.active::after { width: 100%; }
-        .znav-collection-wrap {
-          position: relative;
-          padding-bottom: 18px;
-          margin-bottom: -18px;
-        }
-        .znav-collection-dropdown {
-          position: absolute;
-          top: calc(100% + 6px);
-          left: 50%;
-          transform: translateX(-50%) translateY(10px) scale(0.98);
-          width: min(900px, 82vw);
-          border: 1px solid rgba(200,169,110,0.34);
-          background: linear-gradient(155deg, rgba(9,14,26,0.98), rgba(6,10,19,0.98));
-          border-radius: 16px;
-          box-shadow: 0 34px 65px rgba(0,0,0,0.56);
-          backdrop-filter: blur(14px);
-          display: grid;
-          grid-template-columns: 1.15fr 1fr;
-          gap: 18px;
-          padding: 16px;
-          opacity: 0;
-          pointer-events: none;
-          transition: opacity 0.28s ease, transform 0.28s cubic-bezier(0.22,1,0.36,1);
-        }
-        .znav-collection-dropdown.open {
-          opacity: 1;
-          transform: translateX(-50%) translateY(0) scale(1);
-          pointer-events: auto;
-        }
-        .znav-collection-list {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 8px;
-          align-content: start;
-        }
-        .znav-collection-item {
-          display: block;
-          border: 1px solid transparent;
-          border-radius: 10px;
-          padding: 9px 10px;
-          text-decoration: none;
-          color: rgba(247,242,232,0.82);
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 11px;
-          letter-spacing: 0.18em;
-          text-transform: uppercase;
-          transition: border-color 0.25s ease, color 0.25s ease, background 0.25s ease, transform 0.25s ease;
-        }
-        .znav-collection-item:hover,
-        .znav-collection-item.active {
-          border-color: rgba(200,169,110,0.45);
-          color: #c8a96e;
-          background: rgba(200,169,110,0.08);
-          transform: translateX(2px);
-        }
-        .znav-collection-preview {
-          position: relative;
-          overflow: hidden;
-          border-radius: 12px;
-          border: 1px solid rgba(200,169,110,0.34);
-          min-height: 270px;
-          background: #0a1222;
-        }
-        .znav-collection-preview::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(180deg, rgba(8,13,24,0.08) 0%, rgba(8,13,24,0.62) 74%, rgba(8,13,24,0.86) 100%);
-          pointer-events: none;
-        }
-        .znav-collection-preview img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          transition: transform 0.65s cubic-bezier(0.22,1,0.36,1);
-        }
-        .znav-collection-dropdown:hover .znav-collection-preview img {
-          transform: scale(1.05);
-        }
-        .znav-collection-preview-label {
-          position: absolute;
-          left: 16px;
-          bottom: 16px;
-          z-index: 2;
-          color: #f7f2e8;
-          font-family: 'Playfair Display', serif;
-          font-size: 22px;
-          letter-spacing: 0.02em;
-        }
-        .znav-collection-preview-sub {
-          display: block;
-          margin-top: 5px;
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 10px;
-          letter-spacing: 0.22em;
-          text-transform: uppercase;
-          color: rgba(200,169,110,0.8);
-        }
-
-        /* ── Icon button ── */
-        .znav-icon {
-          position: relative;
-          display: flex; align-items: center; justify-content: center;
-          width: 36px; height: 36px;
-          border-radius: 50%;
-          border: 0.5px solid rgba(255,255,255,0.1);
-          color: rgba(247,242,232,0.7);
-          background: transparent;
-          cursor: pointer;
-          transition: border-color 0.3s, color 0.3s, background 0.3s;
-        }
-        .znav-icon:hover {
-          border-color: rgba(200,169,110,0.5);
-          color: #c8a96e;
-          background: rgba(200,169,110,0.06);
-        }
-        .znav-account-wrap {
-          position: relative;
-          display: flex;
-          align-items: center;
-        }
-        .znav-account-menu {
-          position: absolute;
-          top: calc(100% + 12px);
-          right: 0;
-          min-width: 228px;
-          border: 1px solid rgba(200,169,110,0.35);
-          background: linear-gradient(165deg, rgba(11,19,35,0.98), rgba(8,14,26,0.98));
-          box-shadow: 0 28px 52px rgba(0,0,0,0.5);
-          backdrop-filter: blur(16px);
-          padding: 12px;
-          border-radius: 12px;
-          opacity: 0;
-          transform: translateY(8px) scale(0.98);
-          pointer-events: none;
-          transition: opacity 0.28s ease, transform 0.28s cubic-bezier(0.22,1,0.36,1);
-        }
-        .znav-account-menu.open {
-          opacity: 1;
-          transform: translateY(0) scale(1);
-          pointer-events: auto;
-        }
-        .znav-account-menu-head {
-          padding: 2px 2px 10px;
-          border-bottom: 1px solid rgba(200,169,110,0.16);
-          margin-bottom: 8px;
-        }
-        .znav-account-menu-name {
-          font-family: 'Playfair Display', serif;
-          font-size: 15px;
-          color: #f7f2e8;
-          line-height: 1.2;
-        }
-        .znav-account-menu-role {
-          margin-top: 4px;
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 10px;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
-          color: rgba(200,169,110,0.72);
-        }
-        .znav-account-menu-item {
-          width: 100%;
-          display: block;
-          text-align: left;
-          text-decoration: none;
-          border: 1px solid transparent;
-          border-radius: 9px;
-          color: rgba(247,242,232,0.86);
-          padding: 10px 12px;
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 12px;
-          letter-spacing: 0.22em;
-          text-transform: uppercase;
-          background: transparent;
-          cursor: pointer;
-          transition: border-color 0.24s ease, color 0.24s ease, background 0.24s ease;
-        }
-        .znav-account-menu-item:hover {
-          border-color: rgba(200,169,110,0.42);
-          color: #c8a96e;
-          background: rgba(200,169,110,0.08);
-        }
-        .znav-account-menu-item.logout {
-          margin-top: 4px;
-          color: rgba(255, 197, 179, 0.95);
-        }
-        .znav-account-menu-item.logout:hover {
-          border-color: rgba(255, 159, 122, 0.45);
-          color: #ffae8f;
-          background: rgba(255, 117, 78, 0.08);
-        }
-
-        /* ── CTA button ── */
-        .znav-cta {
-          padding: 9px 20px;
-          border: 0.5px solid rgba(200,169,110,0.55);
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 10px;
-          letter-spacing: 0.3em;
-          text-transform: uppercase;
-          color: #c8a96e;
-          text-decoration: none;
-          transition: background 0.3s, color 0.3s;
-          white-space: nowrap;
-        }
-        .znav-cta:hover {
-          background: #c8a96e;
-          color: #030813;
-        }
-
-        /* ── Hamburger ── */
-        .znav-ham {
-          display: flex; align-items: center; justify-content: center;
-          width: 36px; height: 36px;
-          border-radius: 50%;
-          border: 0.5px solid rgba(200,169,110,0.5);
-          color: #c8a96e;
-          background: transparent;
-          cursor: pointer;
-          z-index: 90;
-        }
-
-        /* ── Mobile menu ── */
-        .znav-mobile {
-          position: fixed;
-          top: 68px; left: 0; right: 0;
-          background: rgba(3,8,19,0.97);
-          backdrop-filter: blur(20px);
-          border-top: 0.5px solid rgba(200,169,110,0.12);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 0;
-          padding: 0;
-          z-index: 79;
-          overflow: hidden;
-        }
-        .znav-mobile-link {
-          width: 100%;
-          text-align: center;
-          padding: 16px 24px;
-          border-bottom: 0.5px solid rgba(200,169,110,0.07);
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 12px;
-          letter-spacing: 0.32em;
-          text-transform: uppercase;
-          text-decoration: none;
-          color: rgba(200,169,110,0.5);
-          transition: color 0.25s, background 0.25s;
-        }
-        .znav-mobile-link:hover, .znav-mobile-link.active {
-          color: #c8a96e;
-          background: rgba(200,169,110,0.04);
-        }
-        .znav-mobile-cta {
-          margin: 20px auto 28px;
-          display: inline-block;
-          padding: 12px 32px;
-          border: 0.5px solid rgba(200,169,110,0.5);
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 11px;
-          letter-spacing: 0.3em;
-          text-transform: uppercase;
-          color: #c8a96e;
-          text-decoration: none;
-          transition: background 0.3s, color 0.3s;
-        }
-        .znav-mobile-cta:hover { background: #c8a96e; color: #030813; }
-
-        /* Auth modal */
-        .auth-backdrop {
-          position: fixed; inset: 0; z-index: 88;
-          background: rgba(2, 6, 15, 0.55);
-          backdrop-filter: blur(9px);
-          opacity: 0; pointer-events: none;
-          transition: opacity 0.3s ease;
-        }
-        .auth-backdrop.open { opacity: 1; pointer-events: auto; }
-        .auth-modal-wrap {
-          position: fixed; inset: 0; z-index: 89;
-          display: grid; place-items: center;
-          padding: 20px;
-          opacity: 0; pointer-events: none;
-          transition: opacity 0.3s ease;
-        }
-        .auth-modal-wrap.open { opacity: 1; pointer-events: auto; }
-        .auth-modal {
-          width: min(100%, 480px);
-          max-height: calc(100vh - 40px);
-          overflow-y: auto;
-          border: 1px solid rgba(200,169,110,0.3);
-          background: linear-gradient(160deg, rgba(9,15,30,0.98), rgba(7,12,24,0.98));
-          box-shadow: 0 24px 70px rgba(0,0,0,0.58);
-          transform: translateY(8px) scale(0.985);
-          transition: transform 0.32s cubic-bezier(0.22,1,0.36,1);
-        }
-        .auth-modal-wrap.open .auth-modal { transform: translateY(0) scale(1); }
-        .auth-head { display:flex; align-items:center; justify-content:space-between; padding:18px 20px; border-bottom:1px solid rgba(200,169,110,0.14); }
-        .auth-title { font-family:'Playfair Display',serif; font-size:30px; color:#f7f2e8; font-weight:400; line-height:1; }
-        .auth-tabs { display:grid; grid-template-columns:1fr 1fr; margin:14px 20px 0; border:1px solid rgba(200,169,110,0.2); background:rgba(200,169,110,0.03); }
-        .auth-tab { border:0; background:transparent; color:rgba(247,242,232,0.65); font-family:'Cormorant Garamond',serif; letter-spacing:0.18em; text-transform:uppercase; font-size:11px; padding:11px 8px; cursor:pointer; transition:all 0.25s ease; }
-        .auth-tab.active { background:rgba(200,169,110,0.16); color:#c8a96e; }
-        .auth-body { padding:18px 20px 20px; }
-        .auth-google { width:100%; border:1px solid #dadce0; background:#fff; color:#3c4043; padding:11px 14px; display:flex; align-items:center; justify-content:center; gap:10px; font-size:13px; font-weight:500; letter-spacing:0.01em; cursor:pointer; transition:all 0.2s ease; }
-        .auth-google:hover { background:#f8f9fa; border-color:#d2d5da; }
-        .auth-sep { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; margin:14px 0; color:rgba(247,242,232,0.45); font-size:10px; letter-spacing:0.2em; text-transform:uppercase; }
-        .auth-sep::before, .auth-sep::after { content:''; height:1px; background:rgba(200,169,110,0.14); }
-        .auth-grid { display:grid; gap:12px; }
-        .auth-grid.two { grid-template-columns:1fr 1fr; }
-        .auth-field label { display:block; margin-bottom:6px; font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:rgba(200,169,110,0.82); }
-        .auth-input { width:100%; border:1px solid rgba(200,169,110,0.24); background:rgba(7,13,26,0.86); color:#f7f2e8; padding:11px 12px; font-size:14px; outline:none; transition:border-color 0.2s, box-shadow 0.2s; }
-        .auth-input:focus { border-color:rgba(200,169,110,0.65); box-shadow:0 0 0 2px rgba(200,169,110,0.14); }
-        .auth-row { margin-top:8px; display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:11px; color:rgba(247,242,232,0.62); }
-        .auth-check { display:inline-flex; align-items:center; gap:8px; cursor:pointer; }
-        .auth-link { color:#c8a96e; text-decoration:none; }
-        .auth-link:hover { text-decoration:underline; }
-        .auth-submit { margin-top:14px; width:100%; border:1px solid rgba(200,169,110,0.58); background:#c8a96e; color:#030813; padding:12px 14px; font-size:11px; letter-spacing:0.24em; text-transform:uppercase; cursor:pointer; transition:background 0.25s ease, transform 0.2s ease; }
-        .auth-submit:hover { background:#e0bd7d; transform:translateY(-1px); }
-        .auth-foot { margin-top:12px; text-align:center; font-size:12px; color:rgba(247,242,232,0.64); }
-
-        /* ════════════════════════════════════════
-           CART DRAWER
-        ════════════════════════════════════════ */
-        .cart-backdrop {
-          position: fixed; inset: 0;
-          z-index: 90;
-          background: rgba(0,0,0,0);
-          backdrop-filter: blur(0px);
-          pointer-events: none;
-          transition: background 0.4s ease, backdrop-filter 0.4s ease;
-        }
-        .cart-backdrop.open {
-          background: rgba(0,0,0,0.55);
-          backdrop-filter: blur(6px);
-          pointer-events: auto;
-        }
-
-        .cart-drawer {
-          position: fixed;
-          top: 0; right: 0;
-          z-index: 95;
-          height: 100dvh;
-          width: min(100vw, 480px);
-          display: flex;
-          flex-direction: column;
-          background: linear-gradient(180deg, #111a2c 0%, #0c1424 100%);
-          border-left: 1px solid rgba(200,169,110,0.28);
-          box-shadow: -24px 0 72px rgba(0,0,0,0.6);
-          transform: translateX(100%);
-          transition: transform 0.45s cubic-bezier(0.22,1,0.36,1);
-          overflow: hidden;
-        }
-        .cart-drawer.open {
-          transform: translateX(0);
-        }
-
-        /* Drawer ambient glow */
-        .cart-drawer::before {
-          content: '';
-          position: absolute;
-          top: -60px; right: -60px;
-          width: 280px; height: 280px;
-          border-radius: 50%;
-          background: radial-gradient(circle, rgba(200,169,110,0.06) 0%, transparent 70%);
-          pointer-events: none;
-        }
-
-        /* ── Drawer header ── */
-        .cart-header {
-          flex-shrink: 0;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 20px clamp(20px, 5vw, 32px) 20px;
-          border-bottom: 1px solid rgba(200,169,110,0.24);
-          background: rgba(18,28,48,0.9);
-        }
-        .cart-header-left { display: flex; flex-direction: column; gap: 4px; }
-        .cart-eyebrow {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 9px;
-          letter-spacing: 0.44em;
-          text-transform: uppercase;
-          color: #c8a96e;
-          margin: 0;
-        }
-        .cart-title {
-          font-family: 'Playfair Display', serif;
-          font-size: clamp(1.6rem, 4vw, 2.1rem);
-          font-weight: 300;
-          color: #f8f4ec;
-          margin: 0;
-          letter-spacing: -0.01em;
-          line-height: 1;
-        }
-        .cart-close {
-          flex-shrink: 0;
-          display: flex; align-items: center; justify-content: center;
-          width: 40px; height: 40px;
-          border: 1px solid rgba(200,169,110,0.5);
-          color: rgba(247,242,232,0.82);
-          background: transparent;
-          cursor: pointer;
-          transition: border-color 0.3s, color 0.3s, background 0.3s;
-          border-radius: 1px;
-        }
-        .cart-close:hover {
-          border-color: rgba(200,169,110,0.7);
-          color: #c8a96e;
-          background: rgba(200,169,110,0.07);
-        }
-
-        /* ── Drawer body ── */
-        .cart-body {
-          flex: 1;
-          overflow-y: auto;
-          padding: 24px clamp(20px, 5vw, 32px);
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-          scrollbar-width: thin;
-          scrollbar-color: rgba(200,169,110,0.15) transparent;
-        }
-
-        /* ── Empty state ── */
-        .cart-empty {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          flex: 1;
-          min-height: 280px;
-          gap: 0;
-        }
-        .cart-empty-icon {
-          width: 56px; height: 56px;
-          border: 1px solid rgba(200,169,110,0.35);
-          border-radius: 50%;
-          display: flex; align-items: center; justify-content: center;
-          margin-bottom: 20px;
-          color: rgba(200,169,110,0.78);
-        }
-        .cart-empty-title {
-          font-family: 'Playfair Display', serif;
-          font-size: 1.4rem;
-          font-weight: 300;
-          color: #e8d4a8;
-          margin: 0 0 8px;
-          text-align: center;
-        }
-        .cart-empty-sub {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 0.95rem;
-          color: rgba(247,242,232,0.72);
-          margin: 0 0 28px;
-          text-align: center;
-          line-height: 1.6;
-        }
-        .cart-browse-btn {
-          display: inline-block;
-          padding: 11px 28px;
-          border: 0.5px solid rgba(200,169,110,0.45);
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 10px;
-          letter-spacing: 0.3em;
-          text-transform: uppercase;
-          color: #c8a96e;
-          text-decoration: none;
-          transition: background 0.3s, color 0.3s;
-        }
-        .cart-browse-btn:hover { background: #c8a96e; color: #030813; }
-
-        /* ── Info notice ── */
-        .cart-notice {
-          padding: 14px 16px;
-          border: 1px solid rgba(200,169,110,0.26);
-          background: rgba(200,169,110,0.09);
-          border-radius: 1px;
-        }
-        .cart-notice-label {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 9px;
-          letter-spacing: 0.26em;
-          text-transform: uppercase;
-          color: rgba(200,169,110,0.92);
-          margin: 0 0 6px;
-        }
-        .cart-notice-text {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 0.9rem;
-          color: rgba(247,242,232,0.86);
-          margin: 0;
-          line-height: 1.55;
-        }
-
-        /* ── Cart item ── */
-        .cart-item {
-          display: grid;
-          grid-template-columns: 64px 1fr auto;
-          gap: 14px;
-          align-items: start;
-          padding-bottom: 16px;
-          border-bottom: 1px solid rgba(200,169,110,0.2);
-        }
-        .cart-item-img {
-          width: 64px; height: 80px;
-          background: rgba(200,169,110,0.12);
-          border: 1px solid rgba(200,169,110,0.32);
-          border-radius: 1px;
-          display: flex; align-items: center; justify-content: center;
-          flex-shrink: 0;
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 8px;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
-          color: rgba(247,242,232,0.68);
-        }
-        .cart-item-name {
-          font-family: 'Playfair Display', serif;
-          font-size: 0.95rem;
-          font-weight: 300;
-          color: #f8f4ec;
-          margin: 0 0 4px;
-          line-height: 1.3;
-        }
-        .cart-item-sub {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 9px;
-          letter-spacing: 0.22em;
-          text-transform: uppercase;
-          color: rgba(247,242,232,0.72);
-          margin: 0 0 10px;
-        }
-        .cart-item-qty {
-          display: flex; align-items: center; gap: 10px;
-        }
-        .cart-qty-btn {
-          width: 24px; height: 24px;
-          border: 1px solid rgba(200,169,110,0.52);
-          color: rgba(247,242,232,0.9);
-          background: transparent;
-          cursor: pointer;
-          display: flex; align-items: center; justify-content: center;
-          font-size: 14px;
-          line-height: 1;
-          transition: border-color 0.2s, color 0.2s;
-        }
-        .cart-qty-btn:hover { border-color: #c8a96e; color: #030813; background: #c8a96e; }
-        .cart-qty-num {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 0.9rem;
-          color: #f8f4ec;
-          min-width: 16px;
-          text-align: center;
-        }
-        .cart-item-price {
-          font-family: 'Playfair Display', serif;
-          font-size: 1rem;
-          font-weight: 300;
-          color: #c8a96e;
-          white-space: nowrap;
-        }
-        .cart-item-remove {
-          display: block;
-          margin-top: 6px;
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 8px;
-          letter-spacing: 0.24em;
-          text-transform: uppercase;
-          color: rgba(247,242,232,0.62);
-          background: transparent;
-          border: none;
-          cursor: pointer;
-          padding: 0;
-          transition: color 0.2s;
-          text-align: right;
-        }
-        .cart-item-remove:hover { color: #c8a96e; }
-
-        /* ── Drawer footer ── */
-        .cart-footer {
-          flex-shrink: 0;
-          border-top: 1px solid rgba(200,169,110,0.24);
-          background: rgba(17,26,44,0.96);
-          padding: 20px clamp(20px, 5vw, 32px) clamp(20px, 5vw, 32px);
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-        }
-
-        /* Subtotal row */
-        .cart-subtotal {
-          display: flex;
-          align-items: baseline;
-          justify-content: space-between;
-        }
-        .cart-subtotal-label {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 10px;
-          letter-spacing: 0.32em;
-          text-transform: uppercase;
-          color: rgba(247,242,232,0.84);
-        }
-        .cart-subtotal-value {
-          font-family: 'Playfair Display', serif;
-          font-size: 1.8rem;
-          font-weight: 300;
-          color: #e8d4a8;
-          letter-spacing: -0.01em;
-        }
-
-        /* Shipping note */
-        .cart-shipping-note {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 9px;
-          letter-spacing: 0.22em;
-          text-transform: uppercase;
-          color: rgba(247,242,232,0.72);
-          text-align: center;
-          margin: 0;
-        }
-
-        /* Checkout button */
-        .cart-checkout-btn {
-          width: 100%;
-          padding: 15px 24px;
-          background: #c8a96e;
-          border: none;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 12px;
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 11px;
-          font-weight: 600;
-          letter-spacing: 0.32em;
-          text-transform: uppercase;
-          color: #030813;
-          border-radius: 1px;
-          transition: background 0.3s ease;
-        }
-        .cart-checkout-btn:hover { background: #d8b97e; }
-        .cart-checkout-btn:disabled {
-          background: rgba(200,169,110,0.45);
-          color: rgba(3,8,19,0.55);
-          cursor: not-allowed;
-        }
-
-        /* Continue shopping */
-        .cart-continue {
-          display: block;
-          text-align: center;
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 9px;
-          letter-spacing: 0.28em;
-          text-transform: uppercase;
-          color: rgba(247,242,232,0.78);
-          text-decoration: none;
-          transition: color 0.3s;
-          cursor: pointer;
-          background: transparent;
-          border: none;
-          width: 100%;
-        }
-        .cart-continue:hover { color: #c8a96e; }
-
-        /* Divider */
-        .cart-divider {
-          height: 0.5px;
-          background: rgba(200,169,110,0.08);
-          width: 100%;
-        }
-
-        /* ── Responsive tweaks ── */
-        @media (max-width: 400px) {
-          .cart-drawer { width: 100vw; border-left: none; }
-          .cart-item { grid-template-columns: 56px 1fr auto; gap: 10px; }
-          .cart-item-img { width: 56px; height: 70px; }
-        }
-      `}</style>
-
-      {/* ════════════════ NAVBAR ════════════════ */}
-      <nav className={`znav ${scrolled ? "scrolled" : ""}`}>
-        {/* LEFT: Logo */}
-        <Link href="/" className="znav-logo">
-          <span className="znav-logo-mark" aria-hidden="true">
-            <img src="/logo_zenmen.png" alt="" className="znav-logo-img" />
-          </span>
-          <div className="znav-logo-text-wrap">
-            <span className="znav-logo-text">ZENmen</span>
-            <span className="znav-logo-sub">Bespoke Tailoring</span>
-          </div>
-        </Link>
-
-        {/* CENTER: Desktop nav */}
-        <ul
-          style={{
-            display: "none",
-            listStyle: "none",
-            margin: 0,
-            padding: 0,
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-            gap: "36px",
-          }}
-          className="md-flex"
-        >
-          {links.map((l) => (
-            <li key={l.href}>
-              {l.href === "/collection" ? (
-                <div
-                  className="znav-collection-wrap"
-                  onMouseEnter={() => setCollectionMenuOpen(true)}
-                  onMouseLeave={() => setCollectionMenuOpen(false)}
-                >
-                  <Link
-                    href={l.href}
-                    className={`znav-link${pathname === l.href ? " active" : ""}`}
-                  >
-                    {l.label}
-                  </Link>
-
-                  <div
-                    className={`znav-collection-dropdown${collectionMenuOpen ? " open" : ""}`}
-                  >
-                    <div className="znav-collection-list">
-                      {collectionMenuItems.map((item) => (
-                        <Link
-                          key={item.label}
-                          href={item.href}
-                          prefetch={false}
-                          className={`znav-collection-item${activeCollectionItem.label === item.label ? " active" : ""}`}
-                          onMouseEnter={() => setActiveCollectionItem(item)}
-                          onClick={() => setCollectionMenuOpen(false)}
-                        >
-                          {item.label}
-                        </Link>
-                      ))}
-                    </div>
-                    <div className="znav-collection-preview">
-                      <img
-                        src={activeCollectionItem.image}
-                        alt={activeCollectionItem.label}
-                      />
-                      <div className="znav-collection-preview-label">
-                        {activeCollectionItem.label}
-                        <span className="znav-collection-preview-sub">
-                          Curated by ZENmen
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <Link
-                  href={l.href}
-                  className={`znav-link${pathname === l.href ? " active" : ""}`}
-                >
-                  {l.label}
-                </Link>
-              )}
-            </li>
-          ))}
-        </ul>
-
-        {/* RIGHT: Actions */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            flexShrink: 0,
-          }}
-        >
-          {/* Instagram */}
-          <a
-            href="https://www.instagram.com/_zenmen/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden sm:flex items-center justify-center w-9 h-9 rounded-full border border-white/10 hover:border-transparent transition-all duration-300 group relative overflow-hidden"
-          >
-            {/* Gradient Background on Hover */}
-            <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-300 bg-gradient-to-tr from-[#feda75] via-[#d62976] to-[#4f5bd5]" />
-
-            {/* Icon */}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              className="w-4 h-4 text-white z-10 transition group-hover:scale-110"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-            >
-              <rect x="3" y="3" width="18" height="18" rx="5" />
-              <circle cx="12" cy="12" r="4" />
-              <circle cx="17.5" cy="6.5" r="1" />
-            </svg>
-
-            {/* Tooltip */}
-            <span className="absolute -bottom-6 text-[9px] tracking-[2px] text-[#C8A96E] opacity-0 group-hover:opacity-100 transition">
-              Instagram
-            </span>
-          </a>
-
-          {/* User */}
-          <div className="znav-account-wrap" ref={accountMenuRef}>
-            <button
-              className="znav-icon"
-              aria-label="Account"
-              onClick={() => {
-                if (status !== "authenticated") {
-                  setAuthOpen(true);
-                  return;
-                }
-                setAccountMenuOpen((prev) => !prev);
-              }}
-            >
-              <User size={16} />
-            </button>
-            <div
-              className={`znav-account-menu${accountMenuOpen ? " open" : ""}`}
-            >
-              <div className="znav-account-menu-head">
-                <p className="znav-account-menu-name">
-                  {session?.user?.name || session?.user?.email || "Welcome"}
-                </p>
-                <p className="znav-account-menu-role">
-                  {isAdmin ? "Administrator" : "Member"}
-                </p>
-              </div>
-
-              {isAdmin ? (
-                <>
-                  <Link
-                    href="/admin"
-                    className="znav-account-menu-item"
-                    onClick={() => setAccountMenuOpen(false)}
-                  >
-                    Admin Dashboard
-                  </Link>
-                  <button
-                    type="button"
-                    className="znav-account-menu-item logout"
-                    onClick={handleSignOut}
-                  >
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    href="/profile"
-                    className="znav-account-menu-item"
-                    onClick={() => setAccountMenuOpen(false)}
-                  >
-                    Profile
-                  </Link>
-                  <Link
-                    href="/wishlist"
-                    className="znav-account-menu-item"
-                    onClick={() => setAccountMenuOpen(false)}
-                  >
-                    Wishlist
-                  </Link>
-                  <button
-                    type="button"
-                    className="znav-account-menu-item logout"
-                    onClick={handleSignOut}
-                  >
-                    Logout
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Cart */}
-          <button
-            className="znav-icon"
-            onClick={() => setCartOpen(true)}
-            aria-label="Cart"
-          >
-            <ShoppingCartIcon size={16} />
-            {cartItems.length > 0 && (
-              <span
-                style={{
-                  position: "absolute",
-                  top: 6,
-                  right: 6,
-                  width: 6,
-                  height: 6,
-                  borderRadius: "50%",
-                  background: "#c8a96e",
-                }}
-              />
-            )}
-          </button>
-
-          {/* Book CTA */}
-          <Link
-            href="/contact"
-            className="znav-cta md-block"
-            style={{ display: "none" }}
-          >
-            Book Appointment
-          </Link>
-
-          {/* Hamburger */}
-          <button
-            onClick={() => setOpen(!open)}
-            className="znav-ham md-hidden"
-            aria-label="Menu"
-          >
-            {open ? <X size={17} /> : <Menu size={17} />}
-          </button>
-        </div>
-      </nav>
-
-      {/* ════════════════ MOBILE MENU ════════════════ */}
-      <div
-        className="znav-mobile md-hidden"
-        style={{
-          maxHeight: open ? "480px" : "0px",
-          transition: "max-height 0.4s cubic-bezier(0.22,1,0.36,1)",
-        }}
+      <motion.nav
+        className={`fixed top-0 left-0 right-0 z-50 will-change-transform transition-[background-color,box-shadow,height] duration-300 ${
+          scrolled ? "bg-white/95 shadow-sm" : "bg-white"
+        }`}
+        initial={false}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.2, ease: "linear" }}
       >
-        {links.map((l) => (
-          <Link
-            key={l.href}
-            href={l.href}
-            onClick={() => setOpen(false)}
-            className={`znav-mobile-link${pathname === l.href ? " active" : ""}`}
+        <div className={shellClass}>
+          <div
+            className={`flex items-center justify-between gap-2 sm:gap-3 transition-all duration-300 ${
+              scrolled ? "h-[80px]" : "h-[96px] lg:h-[110px]"
+            }`}
           >
-            {l.label}
-          </Link>
-        ))}
-        <Link
-          href="/contact"
-          onClick={() => setOpen(false)}
-          className="znav-mobile-cta"
-        >
-          Book Appointment
-        </Link>
-      </div>
-
-      {/* ════════════════ CART BACKDROP ════════════════ */}
-      <div
-        className={`auth-backdrop${authOpen ? " open" : ""}`}
-        onClick={() => setAuthOpen(false)}
-        aria-hidden
-      />
-      <div className={`auth-modal-wrap${authOpen ? " open" : ""}`}>
-        <div
-          className="auth-modal"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Account access"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="auth-head">
-            <h3 className="auth-title">
-              {authMode === "login" ? "Welcome Back" : "Create Account"}
-            </h3>
-            <button
-              onClick={() => setAuthOpen(false)}
-              className="cart-close"
-              aria-label="Close account modal"
-            >
-              <X size={17} />
-            </button>
-          </div>
-          <div className="auth-tabs">
-            <button
-              className={`auth-tab${authMode === "login" ? " active" : ""}`}
-              onClick={() => setAuthMode("login")}
-            >
-              Login
-            </button>
-            <button
-              className={`auth-tab${authMode === "signup" ? " active" : ""}`}
-              onClick={() => setAuthMode("signup")}
-            >
-              Sign Up
-            </button>
-          </div>
-          <div className="auth-body">
-            {status === "authenticated" ? (
-              <div style={{ textAlign: "center", marginBottom: "10px" }}>
-                <p
-                  style={{
-                    color: "#f7f2e8",
-                    fontSize: "14px",
-                    marginBottom: "6px",
-                  }}
-                >
-                  Signed in as {session?.user?.name || session?.user?.email}
-                </p>
-                <button
-                  className="auth-submit"
-                  type="button"
-                  onClick={handleSignOut}
-                >
-                  Sign Out
-                </button>
-              </div>
-            ) : (
-              <button
-                className="auth-google"
-                type="button"
-                onClick={handleGoogleSignIn}
-              >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path
-                    fill="#EA4335"
-                    d="M12 10.2v3.9h5.5c-.2 1.2-1.4 3.6-5.5 3.6-3.3 0-6-2.7-6-6s2.7-6 6-6c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3 14.6 2 12 2 6.5 2 2 6.5 2 12s4.5 10 10 10c5.8 0 9.6-4.1 9.6-9.8 0-.7-.1-1.3-.2-2H12z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M2 12c0 1.8.5 3.5 1.4 5l3.3-2.5c-.2-.7-.4-1.6-.4-2.5s.1-1.7.4-2.5L3.4 7C2.5 8.5 2 10.2 2 12z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M12 22c2.7 0 4.9-.9 6.5-2.4l-3.1-2.4c-.9.6-2 .9-3.4.9-2.6 0-4.9-1.8-5.7-4.2L3 16.4C4.7 19.7 8.1 22 12 22z"
-                  />
-                  <path
-                    fill="#4285F4"
-                    d="M21.6 12.2c0-.7-.1-1.3-.2-2H12v3.9h5.5c-.2 1.1-.8 2.1-1.7 2.8l3.1 2.4c1.8-1.7 2.7-4.1 2.7-7.1z"
-                  />
-                </svg>
-                Sign in with Google
-              </button>
-            )}
-            <div className="auth-sep">or continue with email</div>
-            <form className="auth-grid" onSubmit={handleCredentialsAuth}>
-              {authMode === "signup" && (
-                <div className="auth-grid two">
-                  <div className="auth-field">
-                    <label>First Name</label>
-                    <input
-                      className="auth-input"
-                      type="text"
-                      placeholder="John"
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                      disabled={authLoading}
-                    />
-                  </div>
-                  <div className="auth-field">
-                    <label>Last Name</label>
-                    <input
-                      className="auth-input"
-                      type="text"
-                      placeholder="Doe"
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      disabled={authLoading}
-                    />
-                  </div>
-                </div>
-              )}
-              <div className="auth-field">
-                <label>Email</label>
-                <input
-                  className="auth-input"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={authLoading}
-                />
-              </div>
-              {authMode === "signup" && (
-                <div className="auth-field">
-                  <label>Phone Number</label>
-                  <input
-                    className="auth-input"
-                    type="tel"
-                    placeholder="(+91) 98754-78901"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    disabled={authLoading}
-                  />
-                </div>
-              )}
-              <div className="auth-field">
-                <label>Password</label>
-                <input
-                  className="auth-input"
-                  type="password"
-                  placeholder="********"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={authLoading}
-                />
-              </div>
-              {authMode === "signup" && (
-                <div className="auth-field">
-                  <label>Confirm Password</label>
-                  <input
-                    className="auth-input"
-                    type="password"
-                    placeholder="********"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    disabled={authLoading}
-                  />
-                </div>
-              )}
-              <div className="auth-row">
-                <label className="auth-check">
-                  <input
-                    type="checkbox"
-                    checked={agreeTerms}
-                    onChange={(e) => setAgreeTerms(e.target.checked)}
-                    disabled={authLoading}
-                  />
-                  <span>
-                    {authMode === "login"
-                      ? "Remember me"
-                      : "I agree to Terms & Privacy"}
-                  </span>
-                </label>
-                {authMode === "login" && (
-                  <a href="#" className="auth-link">
-                    Forgot password?
-                  </a>
-                )}
-              </div>
-              <button
-                className="auth-submit"
-                type="submit"
-                disabled={authLoading}
-              >
-                {authMode === "login"
-                  ? authLoading
-                    ? "Signing In..."
-                    : "Sign In Securely"
-                  : authLoading
-                    ? "Creating Account..."
-                    : "Create Premium Account"}
-              </button>
-            </form>
-            <p className="auth-foot">
-              {authMode === "login"
-                ? "New to ZENmen?"
-                : "Already have an account?"}{" "}
-              <button
-                type="button"
-                className="auth-link"
-                style={{
-                  background: "transparent",
-                  border: 0,
-                  cursor: "pointer",
-                }}
-                onClick={() =>
-                  setAuthMode((m) => {
-                    const next = m === "login" ? "signup" : "login";
-                    setFirstName("");
-                    setLastName("");
-                    setEmail("");
-                    setPhone("");
-                    setPassword("");
-                    setConfirmPassword("");
-                    setAgreeTerms(false);
-                    return next;
-                  })
-                }
-              >
-                {authMode === "login" ? "Create one" : "Sign in"}
-              </button>
-            </p>
-          </div>
-        </div>
-      </div>
-      <div
-        className={`cart-backdrop${cartOpen ? " open" : ""}`}
-        onClick={() => setCartOpen(false)}
-        aria-hidden
-      />
-
-      {/* ════════════════ CART DRAWER ════════════════ */}
-      <aside
-        role="dialog"
-        aria-modal="true"
-        aria-label="Shopping cart"
-        className={`cart-drawer${cartOpen ? " open" : ""}`}
-      >
-        {/* ── Header ── */}
-        <div className="cart-header">
-          <div className="cart-header-left">
-            <p className="cart-eyebrow">Shopping Bag</p>
-            <h3 className="cart-title">Your Cart</h3>
-          </div>
-          <button
-            onClick={() => setCartOpen(false)}
-            className="cart-close"
-            aria-label="Close cart"
-          >
-            <X size={17} />
-          </button>
-        </div>
-
-        {/* ── Body ── */}
-        <div className="cart-body">
-          {cartItems.length === 0 ? (
-            /* Empty state */
-            <div className="cart-empty">
-              <div className="cart-empty-icon">
-                <ShoppingCartIcon size={22} />
-              </div>
-              <p className="cart-empty-title">Your cart is empty</p>
-              <p className="cart-empty-sub">
-                Discover our bespoke collection
-                <br />
-                and add pieces you love.
-              </p>
-              <Link
-                href="/collection"
-                onClick={() => setCartOpen(false)}
-                className="cart-browse-btn"
-              >
-                Browse Collection
-              </Link>
-            </div>
-          ) : (
-            /* Items */
-            <>
-              <div className="cart-notice">
-                <p className="cart-notice-label">Bespoke Order</p>
-                <p className="cart-notice-text">
-                  Each piece is custom made. Final pricing confirmed after
-                  consultation.
-                </p>
-              </div>
-
-              {cartItems.map((item) => (
+            {/* Left Navigation - Desktop */}
+            <div className="hidden lg:flex items-center gap-12">
+              {navLinks.map((link) => (
                 <div
-                  key={`${item._id}-${item.selectedColor ?? ""}-${item.selectedSize ?? ""}`}
-                  className="cart-item"
+                  key={link.name}
+                  className="relative"
+                  onMouseEnter={() =>
+                    link.hasMegaMenu && setIsMegaMenuOpen(true)
+                  }
+                  onMouseLeave={() =>
+                    link.hasMegaMenu && setIsMegaMenuOpen(false)
+                  }
                 >
-                  <div className="cart-item-img">
-                    {item.image?.url ? (
-                      <img
-                        src={item.image.url}
-                        alt={item.image.alt ?? item.title}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
-                      />
-                    ) : (
-                      "IMG"
-                    )}
-                  </div>
-                  <div>
-                    <p className="cart-item-name">{item.title}</p>
-                    <p className="cart-item-sub">
-                      {[item.selectedColor, item.selectedSize]
-                        .filter(Boolean)
-                        .join(" • ") || "Custom piece"}
-                    </p>
-                    <div className="cart-item-qty">
-                      <button
-                        className="cart-qty-btn"
-                        onClick={() => {
-                          if (item.qty <= 1) {
-                            dispatch(
-                              removeItem({
-                                _id: item._id,
-                                selectedColor: item.selectedColor,
-                                selectedSize: item.selectedSize,
-                              }),
-                            );
-                          } else {
-                            dispatch(
-                              updateQty({
-                                _id: item._id,
-                                selectedColor: item.selectedColor,
-                                selectedSize: item.selectedSize,
-                                qty: item.qty - 1,
-                              }),
-                            );
-                          }
-                        }}
-                        aria-label="Decrease quantity"
-                      >
-                        −
-                      </button>
-                      <span className="cart-qty-num">{item.qty}</span>
-                      <button
-                        className="cart-qty-btn"
-                        onClick={() =>
-                          dispatch(
-                            updateQty({
-                              _id: item._id,
-                              selectedColor: item.selectedColor,
-                              selectedSize: item.selectedSize,
-                              qty: item.qty + 1,
-                            }),
-                          )
-                        }
-                        aria-label="Increase quantity"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "flex-end",
-                    }}
+                  <Link
+                    href={link.href}
+                    className="text-[11px] tracking-[0.2em] text-[#0f172a] hover:text-[#7da8c7] transition-colors duration-300 font-[300] uppercase no-underline"
                   >
-                    <span className="cart-item-price">
-                      ₹{(item.price * item.qty).toLocaleString("en-IN")}
-                    </span>
-                    <button
-                      className="cart-item-remove"
-                      onClick={() =>
-                        dispatch(
-                          removeItem({
-                            _id: item._id,
-                            selectedColor: item.selectedColor,
-                            selectedSize: item.selectedSize,
-                          }),
-                        )
-                      }
-                    >
-                      Remove
-                    </button>
-                  </div>
+                    {link.name}
+                  </Link>
                 </div>
               ))}
-            </>
-          )}
-        </div>
+            </div>
 
-        {/* ── Footer ── */}
-        <div className="cart-footer">
-          {/* Gold rule */}
-          <div
-            style={{
-              height: "0.5px",
-              background:
-                "linear-gradient(to right, transparent, rgba(200,169,110,0.3), transparent)",
-            }}
-          />
+            {/* Center Logo — compact on small screens, centered on mobile */}
+            <Link
+              href="/"
+              className="flex min-w-0 flex-1 lg:flex-none lg:justify-start"
+            >
+              <div className="flex min-w-0 items-center gap-1.5 sm:gap-2 lg:gap-3 group select-none">
+                <div className="h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9 lg:h-11 lg:w-11 shrink-0 rounded-full overflow-hidden border border-[#1b2232] transition-transform duration-700 group-hover:rotate-[360deg]">
+                  <img
+                    src="/logo_zenmen.png"
+                    alt="ZENmen logo"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <div className="flex min-w-0 flex-col">
+                  <p className="m-0 whitespace-nowrap text-[17px] sm:text-[22px] lg:text-[36px] leading-[0.92] text-[#0f172a]">
+                    ZENmen
+                  </p>
+                  <p className="m-0 whitespace-nowrap text-[6px] sm:text-[7px] lg:text-[9px] tracking-[0.18em] sm:tracking-[0.24em] lg:tracking-[0.36em] text-[#7da8c7] uppercase mt-0.5 lg:mt-1">
+                    Bespoke Tailoring
+                  </p>
+                </div>
+              </div>
+            </Link>
 
-          {/* Subtotal */}
-          <div className="cart-subtotal">
-            <span className="cart-subtotal-label">Subtotal</span>
-            <span className="cart-subtotal-value">
-              ₹{subtotal.toLocaleString("en-IN")}
-            </span>
+            {/* Right Actions - Desktop */}
+            <div className="hidden lg:flex items-center gap-8">
+              <button
+                type="button"
+                aria-haspopup="dialog"
+                aria-expanded={isSearchOpen}
+                onClick={toggleSearch}
+                className="bg-transparent border-0 text-[#0f172a] hover:text-[#7da8c7] transition-all duration-300 p-2 rounded-full hover:bg-[#f8fafc] cursor-pointer"
+                aria-label={isSearchOpen ? "Close search" : "Open search"}
+              >
+                <Search className="w-5 h-5" strokeWidth={1.5} />
+              </button>
+              <CurrencySwitcher mode="dropdown" />
+              <button
+                type="button"
+                aria-haspopup="dialog"
+                aria-expanded={isUserAuthOpen}
+                onClick={() => {
+                  setIsSearchOpen(false);
+                  dispatch(setCartOpen(false));
+                  setIsUserAuthOpen(true);
+                }}
+                className="bg-transparent border-0 text-[#0f172a] hover:text-[#7da8c7] transition-all duration-300 p-2 rounded-full hover:bg-[#f8fafc] cursor-pointer"
+              >
+                <User className="w-5 h-5" strokeWidth={1.5} />
+              </button>
+              <button
+                type="button"
+                aria-haspopup="dialog"
+                aria-expanded={cartOpen}
+                onClick={toggleCart}
+                className="bg-transparent border-0 text-[#0f172a] hover:text-[#7da8c7] transition-all duration-300 p-2 rounded-full hover:bg-[#f8fafc] relative cursor-pointer"
+                aria-label={`Shopping bag, ${cartCount} items`}
+              >
+                <ShoppingBag className="w-5 h-5" strokeWidth={1.5} />
+                {cartCount > 0 ? (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[1rem] h-4 px-0.5 bg-[#7da8c7] text-white text-[9px] leading-4 rounded-full flex items-center justify-center tabular-nums">
+                    {cartCount > 99 ? "99+" : cartCount}
+                  </span>
+                ) : null}
+              </button>
+              <button className="bg-transparent px-6 py-2.5 border border-[#e2e8f0] text-[#0f172a] text-[11px] tracking-[0.15em] uppercase hover:bg-[#7da8c7] hover:text-white hover:border-[#7da8c7] transition-all duration-300 rounded-sm cursor-pointer">
+                Book Appointment
+              </button>
+            </div>
+
+            {/* Mobile / small tablet: search, currency, account, bag, menu */}
+            <div className="flex lg:hidden items-center gap-1 shrink-0 sm:gap-2 md:gap-2.5">
+              <button
+                type="button"
+                aria-haspopup="dialog"
+                aria-expanded={isSearchOpen}
+                onClick={toggleSearch}
+                className="bg-transparent border-0 text-[#0f172a] hover:text-[#7da8c7] transition-colors duration-300 p-1.5 sm:p-2 rounded-full hover:bg-[#f8fafc] cursor-pointer shrink-0"
+                aria-label={isSearchOpen ? "Close search" : "Open search"}
+              >
+                <Search
+                  className="w-[1.125rem] h-[1.125rem] sm:w-5 sm:h-5"
+                  strokeWidth={1.5}
+                />
+              </button>
+              <div className="shrink-0 [&_button]:p-1.5 sm:[&_button]:p-2 [&_svg]:h-[1.125rem] [&_svg]:w-[1.125rem] sm:[&_svg]:h-5 sm:[&_svg]:w-5">
+                <CurrencySwitcher mode="dropdown" />
+              </div>
+              <button
+                type="button"
+                aria-haspopup="dialog"
+                aria-expanded={isUserAuthOpen}
+                onClick={() => {
+                  setIsSearchOpen(false);
+                  dispatch(setCartOpen(false));
+                  setIsUserAuthOpen(true);
+                }}
+                className="bg-transparent border-0 text-[#0f172a] hover:text-[#7da8c7] transition-colors duration-300 p-1.5 sm:p-2 rounded-full hover:bg-[#f8fafc] cursor-pointer shrink-0"
+              >
+                <User
+                  className="w-[1.125rem] h-[1.125rem] sm:w-5 sm:h-5"
+                  strokeWidth={1.5}
+                />
+              </button>
+              <button
+                type="button"
+                aria-haspopup="dialog"
+                aria-expanded={cartOpen}
+                onClick={toggleCart}
+                className="bg-transparent border-0 text-[#0f172a] hover:text-[#7da8c7] transition-colors duration-300 p-1.5 sm:p-2 rounded-full hover:bg-[#f8fafc] relative cursor-pointer shrink-0"
+                aria-label={`Shopping bag, ${cartCount} items`}
+              >
+                <ShoppingBag
+                  className="w-[1.125rem] h-[1.125rem] sm:w-5 sm:h-5"
+                  strokeWidth={1.5}
+                />
+                {cartCount > 0 ? (
+                  <span className="absolute top-0 right-0 min-w-[0.875rem] h-3.5 px-0.5 bg-[#7da8c7] text-white text-[8px] leading-[14px] rounded-full flex items-center justify-center tabular-nums">
+                    {cartCount > 99 ? "99+" : cartCount}
+                  </span>
+                ) : null}
+              </button>
+              <button
+                type="button"
+                className="bg-transparent border-0 text-[#0f172a] p-1.5 sm:p-2 cursor-pointer shrink-0"
+                aria-expanded={isMobileMenuOpen}
+                aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              >
+                {isMobileMenuOpen ? (
+                  <X className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={1.5} />
+                ) : (
+                  <Menu className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={1.5} />
+                )}
+              </button>
+            </div>
           </div>
-
-          {/* Checkout */}
-          <button
-            type="button"
-            className="cart-checkout-btn"
-            disabled={cartItems.length === 0}
-          >
-            <span>Secure Checkout</span>
-            <svg width="14" height="8" viewBox="0 0 14 8" fill="none">
-              <path
-                d="M0 4h11M8 1.5l3 2.5-3 2.5"
-                stroke="currentColor"
-                strokeWidth="0.9"
-              />
-            </svg>
-          </button>
-
-          {/* Shipping */}
-          <p className="cart-shipping-note">
-            Complimentary shipping on orders above ₹5,000
-          </p>
-
-          {/* Continue shopping */}
-          <button className="cart-continue" onClick={() => setCartOpen(false)}>
-            Continue Shopping
-          </button>
         </div>
-      </aside>
 
-      {/* ── Responsive display helpers ── */}
-      <style>{`
-        @media (min-width: 768px) {
-          .md-flex  { display: flex !important; }
-          .md-block { display: block !important; }
-          .md-hidden { display: none !important; }
-          .sm-flex  { display: flex !important; }
-        }
-        @media (max-width: 767px) {
-          .md-flex  { display: none !important; }
-          .md-block { display: none !important; }
-          .sm-flex  { display: none !important; }
-        }
-      `}</style>
+        {/* Mega Menu */}
+        <div
+          onMouseEnter={() => setIsMegaMenuOpen(true)}
+          onMouseLeave={() => setIsMegaMenuOpen(false)}
+        >
+          <MegaMenu shellClass={shellClass} isOpen={isMegaMenuOpen} />
+        </div>
+
+        {/* Thin bottom border */}
+        <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#e2e8f0] to-transparent" />
+      </motion.nav>
+
+      {/* Mobile Menu */}
+      <MobileMenu
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+        onOpenAuth={() => {
+          setIsSearchOpen(false);
+          setIsUserAuthOpen(true);
+        }}
+      />
+
+      <SearchOverlay
+        open={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+      />
+
+      <UserAuthPanel
+        open={isUserAuthOpen}
+        onClose={() => setIsUserAuthOpen(false)}
+      />
+
+      <CartDrawer />
+      <div className="h-[96px] lg:h-[110px]" />
     </>
   );
-}
+};
+
+export default Navbar;

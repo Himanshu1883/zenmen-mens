@@ -4,204 +4,78 @@ import { processSteps } from "@/app/data/process";
 
 export default function Process() {
   return (
-    <section id="process" className="process-clean">
-      <div className="section-label">How It Works</div>
+    <section
+      id="process"
+      className="relative border-t border-[#e2e8f0] bg-[#f8fafc] py-16 md:py-24"
+      aria-labelledby="process-heading"
+    >
+      <div
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_55%_45%_at_20%_0%,rgba(125,168,199,0.09),transparent_50%)]"
+        aria-hidden
+      />
 
-      <h2 className="section-title">
-        The ZENmen <em>Experience</em>
-      </h2>
+      <div className="relative z-10 mx-auto max-w-[1280px] px-5 sm:px-8 lg:px-10">
+        <div className="max-w-2xl">
+          <div className="flex items-center gap-3">
+            <span className="h-px w-8 bg-gradient-to-r from-transparent to-[#7da8c7]" />
+            <p className="font-[family-name:var(--font-montserrat)] text-[10px] font-semibold uppercase tracking-[0.32em] text-[#7da8c7]">
+              How it works
+            </p>
+          </div>
+          <h2
+            id="process-heading"
+            className="mt-4 font-[family-name:var(--font-playfair)] text-[2.1rem] font-medium leading-[1.1] tracking-tight text-[#0f172a] sm:text-4xl md:text-[2.85rem]"
+          >
+            The ZENmen <em className="not-italic text-[#7da8c7]">experience</em>
+          </h2>
+          <p className="mt-4 font-[family-name:var(--font-cormorant)] text-[1.05rem] italic leading-relaxed text-[#64748b] sm:text-lg">
+            Four deliberate steps. Zero noise — from first conversation to final
+            delivery.
+          </p>
+        </div>
 
-      <p className="process-intro">
-        Four deliberate steps. Zero noise.
-      </p>
+        {/* Horizontal track: scroll on small screens, grid on lg */}
+        <div className="relative mt-12 md:mt-16">
+          {/* Connector line — behind step badges, desktop only */}
+          <div
+            className="pointer-events-none absolute left-[6%] right-[6%] top-[27px] z-0 hidden h-[2px] rounded-full bg-gradient-to-r from-[#e2e8f0] via-[#7da8c7]/35 to-[#e2e8f0] lg:block"
+            aria-hidden
+          />
 
-      <div className="process-list">
-        {processSteps.map((step, index) => (
-          <article key={step.id} className="process-item">
-            <div className="process-marker">
-              <span>{step.num}</span>
-            </div>
+          <div
+            className="relative z-10 flex max-md:gap-4 max-md:overflow-x-auto max-md:overflow-y-visible max-md:pb-2 max-md:pt-1 max-md:[-ms-overflow-style:none] max-md:[scrollbar-width:none] max-md:snap-x max-md:snap-mandatory max-md:scroll-pl-1 max-md:[&::-webkit-scrollbar]:hidden md:grid md:grid-cols-2 md:gap-6 md:overflow-visible md:pb-0 md:pt-0 lg:grid-cols-4 lg:gap-0"
+            style={{ WebkitOverflowScrolling: "touch" }}
+          >
+            {processSteps.map((step, index) => (
+              <article
+                key={step.id}
+                className="flex max-md:w-[min(92vw,340px)] max-md:shrink-0 max-md:snap-start flex-col rounded-md border border-[#e2e8f0] bg-white p-6 shadow-[0_1px_0_rgba(15,23,42,0.04)] transition-[border-color,box-shadow,transform,background-color] duration-300 max-md:hover:-translate-y-0.5 max-md:hover:border-[#7da8c7]/40 max-md:hover:shadow-[0_16px_40px_-20px_rgba(125,168,199,0.2)] md:min-w-0 md:hover:border-[#7da8c7]/35 md:hover:shadow-[0_12px_32px_-18px_rgba(125,168,199,0.15)] lg:rounded-none lg:border-0 lg:border-r lg:border-[#e2e8f0] lg:bg-transparent lg:p-8 lg:shadow-none lg:last:border-r-0 lg:hover:bg-[#fafafa]/90 lg:hover:shadow-none"
+              >
+                <div className="relative z-10 mx-auto flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-2 border-[#7da8c7] bg-[#f8fafc] font-[family-name:var(--font-playfair)] text-lg font-medium text-[#0f172a] md:mx-0 lg:bg-white">
+                  {step.num}
+                </div>
 
-            <div className="process-content">
-              <span className="process-step-index">Step {index + 1}</span>
-              <h3 className="process-step-title">{step.title}</h3>
-              <p className="process-step-desc">{step.description}</p>
-            </div>
-          </article>
-        ))}
+                <span className="mt-4 block text-center font-[family-name:var(--font-montserrat)] text-[9px] font-semibold uppercase tracking-[0.26em] text-[#7da8c7] md:text-left">
+                  Step {index + 1}
+                </span>
+
+                <h3 className="mt-2 text-center font-[family-name:var(--font-playfair)] text-xl font-medium leading-snug text-[#0f172a] sm:text-2xl md:text-left">
+                  {step.title}
+                </h3>
+
+                <p className="mt-3 text-center font-[family-name:var(--font-montserrat)] text-[13px] font-light leading-[1.75] text-[#475569] md:text-left">
+                  {step.description}
+                </p>
+              </article>
+            ))}
+          </div>
+        </div>
+
+        {/* Mobile / tablet hint */}
+        <p className="mt-3 text-center font-[family-name:var(--font-montserrat)] text-[10px] font-medium uppercase tracking-[0.2em] text-[#94a3b8] max-md:block md:hidden">
+          Swipe for all steps
+        </p>
       </div>
-
-      <style jsx>{`
-        .process-clean {
-          background: var(--black);
-          position: relative;
-        }
-
-        .process-clean::before {
-          content: "";
-          position: absolute;
-          left: 24px;
-          right: 24px;
-          top: 0;
-          height: 1px;
-          background: linear-gradient(
-            90deg,
-            transparent 0%,
-            rgba(200, 169, 110, 0.25) 50%,
-            transparent 100%
-          );
-          pointer-events: none;
-        }
-
-        .section-label,
-        .section-title,
-        .process-intro,
-        .process-list {
-          position: relative;
-          z-index: 1;
-        }
-
-        .process-intro {
-          max-width: 520px;
-          font-size: clamp(12px, 1.7vw, 14px);
-          line-height: 1.8;
-          color: var(--text-light);
-          margin-bottom: 40px;
-          letter-spacing: 0.6px;
-        }
-
-        .process-list {
-          display: flex;
-          flex-direction: column;
-          gap: 14px;
-          position: relative;
-        }
-
-        .process-list::before {
-          content: "";
-          position: absolute;
-          left: 27px;
-          top: 12px;
-          bottom: 12px;
-          width: 1px;
-          background: linear-gradient(
-            180deg,
-            rgba(200, 169, 110, 0.5) 0%,
-            rgba(200, 169, 110, 0.12) 100%
-          );
-        }
-
-        .process-item {
-          display: grid;
-          grid-template-columns: 56px 1fr;
-          gap: 18px;
-          align-items: start;
-        }
-
-        .process-marker {
-          width: 56px;
-          height: 56px;
-          border: 1px solid rgba(232, 213, 168, 0.4);
-          background: #111;
-          border-radius: 14px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          position: relative;
-          z-index: 1;
-        }
-
-        .process-marker span {
-          font-family: "Cormorant Garamond", serif;
-          font-size: 25px;
-          font-weight: 500;
-          color: var(--gold-light);
-        }
-
-        .process-content {
-          padding: 14px 18px 16px;
-          border: 1px solid rgba(232, 213, 168, 0.18);
-          border-radius: 14px;
-          background: rgba(255, 255, 255, 0.01);
-          transition: border-color 0.25s ease, background-color 0.25s ease,
-            transform 0.25s ease;
-        }
-
-        .process-item:hover .process-content {
-          border-color: rgba(232, 213, 168, 0.38);
-          background: rgba(255, 255, 255, 0.03);
-          transform: translateX(3px);
-        }
-
-        .process-step-index {
-          font-size: 9px;
-          letter-spacing: 2.4px;
-          text-transform: uppercase;
-          color: var(--gold);
-          display: block;
-          margin-bottom: 10px;
-        }
-
-        .process-step-title {
-          font-family: "Cormorant Garamond", serif;
-          font-size: clamp(22px, 2.5vw, 28px);
-          line-height: 1.1;
-          font-weight: 400;
-          color: var(--white);
-          margin-bottom: 9px;
-        }
-
-        .process-step-desc {
-          font-size: clamp(12px, 1.4vw, 13.5px);
-          line-height: 1.8;
-          color: var(--text-light);
-        }
-
-        @media (max-width: 1024px) {
-          .process-item {
-            grid-template-columns: 52px 1fr;
-            gap: 14px;
-          }
-
-          .process-marker {
-            width: 52px;
-            height: 52px;
-          }
-        }
-
-        @media (max-width: 680px) {
-          .process-intro {
-            margin-bottom: 24px;
-          }
-
-          .process-list::before {
-            left: 23px;
-          }
-
-          .process-item {
-            grid-template-columns: 44px 1fr;
-            gap: 12px;
-          }
-
-          .process-marker {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-          }
-
-          .process-marker span {
-            font-size: 20px;
-          }
-
-          .process-content {
-            padding: 12px 14px 14px;
-          }
-
-          .process-step-title {
-            font-size: 24px;
-          }
-        }
-      `}</style>
     </section>
   );
 }

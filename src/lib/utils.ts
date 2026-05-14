@@ -1,13 +1,15 @@
 // src/lib/utils.ts
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { formatInrAsCurrency } from "./currency";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/** INR display (e.g. SSR or non-Redux). For client UI that follows the navbar currency, use `useDisplayPrice`. */
 export function formatPrice(n: number): string {
-  return `₹${n.toLocaleString("en-IN")}`;
+  return formatInrAsCurrency(n, "INR");
 }
 
 export function slugify(str: string): string {

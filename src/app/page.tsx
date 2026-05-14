@@ -16,10 +16,10 @@ export default function Home() {
       <Services />
       <Products />
       <Reels />
-      <FounderSection />
+      {/* <FounderSection /> */}
       <Process />
       <Testimonials />
-      <CtaBanner />
+      {/* <CtaBanner /> */}
       <Contact />
     </>
   );

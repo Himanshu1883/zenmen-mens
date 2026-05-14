@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import AiChatWidget from "@/app/components/chat/AiChatWidget";
 import Footer from "@/app/components/layout/Footer";
 
 export default function RootLayoutClient() {
@@ -11,5 +12,10 @@ export default function RootLayoutClient() {
     return null;
   }
 
-  return <Footer />;
+  return (
+    <>
+      <Footer />
+      <AiChatWidget />
+    </>
+  );
 }

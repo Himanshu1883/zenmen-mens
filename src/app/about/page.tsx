@@ -107,7 +107,7 @@ function useVisible(threshold = 0.15) {
   return { ref, vis };
 }
 
-// ── Animated counter ──────────────────────────────────────────────────────────
+// ── Animated stat ─────────────────────────────────────────────────────────────
 function AnimatedStat({
   value,
   label,
@@ -133,7 +133,7 @@ function AnimatedStat({
           fontFamily: "'Cormorant Garamond', serif",
           fontSize: "clamp(42px,6vw,72px)",
           fontWeight: 300,
-          color: "#c8a96e",
+          color: "#7da8c7",
           lineHeight: 1,
           marginBottom: "8px",
         }}
@@ -145,9 +145,9 @@ function AnimatedStat({
           fontSize: "9px",
           letterSpacing: "4px",
           textTransform: "uppercase",
-          color: "rgba(247,242,232,0.45)",
-          fontFamily: "'Montserrat', sans-serif",
-          fontWeight: 500,
+          color: "#475569",
+          fontFamily: "'Jost', sans-serif",
+          fontWeight: 600,
         }}
       >
         {label}
@@ -158,7 +158,6 @@ function AnimatedStat({
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function AboutPage() {
-  // Section visibility hooks
   const hero = useVisible(0.05);
   const manifesto = useVisible(0.15);
   const stats = useVisible(0.2);
@@ -168,24 +167,14 @@ export default function AboutPage() {
   const testi = useVisible(0.15);
   const cta = useVisible(0.2);
 
-  // Parallax scroll for hero
   const [scrollY, setScrollY] = useState(0);
   useEffect(() => {
-    const handler = () => setScrollY(window.scrollY);
-    window.addEventListener("scroll", handler, { passive: true });
-    return () => window.removeEventListener("scroll", handler);
+    const h = () => setScrollY(window.scrollY);
+    window.addEventListener("scroll", h, { passive: true });
+    return () => window.removeEventListener("scroll", h);
   }, []);
 
-  // Active timeline item
   const [activeMilestone, setActiveMilestone] = useState(0);
-
-  // Cursor glow
-  const [cursor, setCursor] = useState({ x: 0, y: 0 });
-  useEffect(() => {
-    const h = (e: MouseEvent) => setCursor({ x: e.clientX, y: e.clientY });
-    window.addEventListener("mousemove", h);
-    return () => window.removeEventListener("mousemove", h);
-  }, []);
 
   const fade = (
     vis: boolean,
@@ -201,41 +190,35 @@ export default function AboutPage() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Montserrat:wght@200;300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@200;300;400;500;600&display=swap');
 
         :root {
-          --ink:    #030813;
-          --ink2:   #07101f;
-          --gold:   #c8a96e;
-          --gold2:  #e8d4a8;
-          --cream:  #f7f2e8;
-          --muted:  rgba(247,242,232,0.45);
-          --border: rgba(200,169,110,0.18);
+          --bg:      #f8fafc;
+          --bg2:     #f1f5f9;
+          --accent:  #7da8c7;
+          --accent2: #5a8faf;
+          --ink:     #0f172a;
+          --ink2:    #334155;
+          --muted:   #64748b;
+          --border:  #e2e8f0;
+          --border2: #cbd5e1;
+          --hover-bg:#e8f0f7;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         .about-page {
-          background: var(--ink);
-          color: var(--cream);
-          font-family: 'Montserrat', sans-serif;
+          background: var(--bg);
+          color: black;
+          font-family: 'Jost', sans-serif;
           overflow-x: hidden;
         }
 
-        /* ── NOISE TEXTURE ── */
+        /* ── NOISE ── */
         .noise {
-          pointer-events: none; position: fixed; inset: 0; z-index: 0; opacity: .025;
+          pointer-events: none; position: fixed; inset: 0; z-index: 0; opacity: .018;
           background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
           background-size: 200px;
-        }
-
-        /* ── CURSOR GLOW ── */
-        .cursor-glow {
-          pointer-events: none; position: fixed; z-index: 1;
-          width: 600px; height: 600px; border-radius: 50%;
-          background: radial-gradient(circle, rgba(200,169,110,0.07) 0%, transparent 70%);
-          transform: translate(-50%, -50%);
-          transition: left 0.12s ease, top 0.12s ease;
         }
 
         /* ── HERO ── */
@@ -244,29 +227,28 @@ export default function AboutPage() {
           display: flex; flex-direction: column; justify-content: flex-end;
           overflow: hidden;
         }
-        .hero-bg {
-          position: absolute; inset: 0; z-index: 0;
-        }
+        .hero-bg { position: absolute; inset: 0; z-index: 0; }
         .hero-img {
           width: 100%; height: 100%; object-fit: cover;
           object-position: center 40%;
-          filter: brightness(0.45) contrast(1.1);
+          filter: brightness(0.58) contrast(1.05);
         }
         .hero-overlay {
           position: absolute; inset: 0;
           background: linear-gradient(
             to top,
-            rgba(3,8,19,1) 0%,
-            rgba(3,8,19,0.6) 40%,
-            rgba(3,8,19,0.15) 75%,
+            rgba(15, 23, 42, 0.94) 0%,
+            rgba(15, 23, 42, 0.72) 28%,
+            rgba(15, 23, 42, 0.35) 52%,
+            rgba(15, 23, 42, 0.08) 78%,
             transparent 100%
           );
         }
         .hero-grid-lines {
-          position: absolute; inset: 0; z-index: 1; opacity: 0.04;
+          position: absolute; inset: 0; z-index: 1; opacity: 0.03;
           background-image:
-            linear-gradient(rgba(200,169,110,1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(200,169,110,1) 1px, transparent 1px);
+            linear-gradient(rgba(125,168,199,1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(125,168,199,1) 1px, transparent 1px);
           background-size: 80px 80px;
         }
         .hero-content {
@@ -276,48 +258,44 @@ export default function AboutPage() {
         }
         .hero-eyebrow {
           font-size: 9px; letter-spacing: 5px; text-transform: uppercase;
-          color: var(--gold); font-weight: 500; margin-bottom: 20px;
+          color: var(--accent); font-weight: 500; margin-bottom: 20px;
           display: flex; align-items: center; gap: 12px;
         }
-        .hero-eyebrow::before {
-          content: ''; width: 40px; height: 1px; background: var(--gold); opacity: 0.6;
-        }
+        .hero-eyebrow::before { content: ''; width: 40px; height: 1px; background: var(--accent); opacity: 0.7; }
         .hero-title {
           font-family: 'Cormorant Garamond', serif;
           font-size: clamp(52px,9vw,120px);
           font-weight: 300; line-height: 0.92;
-          color: var(--cream); margin-bottom: 28px;
+          color: #ffffff; margin-bottom: 28px;
           letter-spacing: -1px;
+          text-shadow: 0 2px 24px rgba(15,23,42,0.35);
         }
-        .hero-title em { font-style: italic; color: var(--gold); }
+        .hero-title em { font-style: italic; color: var(--accent); }
         .hero-subtitle {
           font-family: 'Cormorant Garamond', serif;
           font-size: clamp(16px,2vw,22px); font-weight: 300; font-style: italic;
-          color: rgba(247,242,232,0.65); line-height: 1.7; max-width: 520px;
+          color: rgba(248,250,252,0.92); line-height: 1.7; max-width: 520px;
         }
         .hero-scroll {
           position: absolute; bottom: 40px; right: clamp(24px,6vw,80px); z-index: 3;
           display: flex; flex-direction: column; align-items: center; gap: 10px;
           font-size: 8px; letter-spacing: 3px; text-transform: uppercase;
-          color: rgba(200,169,110,0.4); writing-mode: vertical-rl;
+          color: rgba(248,250,252,0.75); writing-mode: vertical-rl;
         }
         .hero-scroll-line {
           width: 1px; height: 60px;
-          background: linear-gradient(to bottom, transparent, rgba(200,169,110,0.5));
+          background: linear-gradient(to bottom, transparent, rgba(248,250,252,0.55));
           animation: scrollPulse 2s ease-in-out infinite;
         }
-        @keyframes scrollPulse {
-          0%, 100% { opacity: 0.3; }
-          50%       { opacity: 1; }
-        }
+        @keyframes scrollPulse { 0%,100% { opacity:0.3; } 50% { opacity:1; } }
         .hero-year-badge {
           position: absolute; top: clamp(90px,12vw,140px); right: clamp(24px,6vw,80px); z-index: 3;
-          border: 1px solid var(--border);
-          background: rgba(3,8,19,0.6); backdrop-filter: blur(12px);
+          border: 1px solid rgba(255,255,255,0.18);
+          background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(12px);
           padding: 16px 20px; text-align: center;
         }
-        .hero-year-num { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 300; color: var(--gold); line-height: 1; }
-        .hero-year-lbl { font-size: 7px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+        .hero-year-num { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 300; color: #7da8c7; line-height: 1; }
+        .hero-year-lbl { font-size: 7px; letter-spacing: 3px; text-transform: uppercase; color: rgba(248,250,252,0.82); margin-top: 4px; }
 
         /* ── SECTION COMMON ── */
         .section { position: relative; z-index: 2; }
@@ -325,23 +303,23 @@ export default function AboutPage() {
         /* ── MANIFESTO ── */
         .manifesto-section {
           padding: clamp(80px,12vw,140px) clamp(24px,8vw,120px);
-          background: var(--ink);
+          background: var(--bg);
         }
         .manifesto-line {
           display: block;
           font-family: 'Cormorant Garamond', serif;
           font-size: clamp(28px,4.5vw,64px);
-          font-weight: 300; line-height: 1.1; color: var(--cream);
+          font-weight: 300; line-height: 1.1; color: black;
           border-bottom: 1px solid var(--border);
           padding: 20px 0;
-          transition: color 0.4s, padding-left 0.4s;
+          transition: color 0.4s, padding-left 0.4s, background 0.3s;
           cursor: default;
         }
-        .manifesto-line em { font-style: italic; color: var(--gold); }
-        .manifesto-line:hover { color: var(--gold2); padding-left: 16px; }
+        .manifesto-line em { font-style: italic; color: var(--accent); }
+        .manifesto-line:hover { color: black; padding-left: 16px; background: var(--hover-bg); }
         .manifesto-label {
           font-size: 9px; letter-spacing: 4px; text-transform: uppercase;
-          color: var(--gold); font-weight: 500; margin-bottom: 40px;
+          color: var(--accent); font-weight: 500; margin-bottom: 40px;
           display: flex; align-items: center; gap: 12px;
         }
         .manifesto-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
@@ -349,65 +327,55 @@ export default function AboutPage() {
         /* ── STATS ── */
         .stats-section {
           padding: clamp(60px,8vw,100px) clamp(24px,8vw,120px);
-          background: var(--ink2);
+          background: var(--bg2);
           border-top: 1px solid var(--border);
           border-bottom: 1px solid var(--border);
         }
-        .stats-grid {
-          display: grid; grid-template-columns: repeat(4,1fr);
-          gap: 2px;
-        }
-        .stats-divider {
-          width: 1px; background: var(--border);
-          align-self: stretch; margin: 0 auto;
-        }
+        .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 2px; }
 
         /* ── TIMELINE ── */
         .timeline-section {
           padding: clamp(80px,12vw,140px) clamp(24px,8vw,120px);
-          background: var(--ink);
+          background: var(--bg);
         }
         .timeline-grid {
           display: grid;
-          grid-template-columns: minmax(300px, 420px) minmax(0, 1fr);
-          gap: clamp(24px, 3vw, 56px);
+          grid-template-columns: minmax(300px,420px) minmax(0,1fr);
+          gap: clamp(24px,3vw,56px);
           align-items: start;
           margin-top: 56px;
         }
         .timeline-list {
           position: relative;
-          border: 1px solid rgba(200,169,110,0.16);
-          background: rgba(7,16,31,0.35);
+          border: 1px solid var(--border);
+          background: var(--bg2);
           padding: 8px 0;
         }
         .timeline-item {
           position: relative;
           padding: 22px 20px 22px 44px;
           cursor: pointer;
-          border-bottom: 1px solid rgba(200,169,110,0.1);
-          transition: background-color 0.3s, border-color 0.3s;
+          border-bottom: 1px solid var(--border);
+          transition: background-color 0.3s;
         }
         .timeline-item:last-child { border-bottom: none; }
-        .timeline-item.active {
-          background: linear-gradient(90deg, rgba(200,169,110,0.1), transparent 78%);
-          border-bottom-color: rgba(200,169,110,0.2);
-        }
-        .timeline-item:hover .tl-year { color: var(--gold); }
+        .timeline-item.active { background: var(--hover-bg); }
+        .timeline-item:hover .tl-year { color: var(--accent); }
         .tl-year {
           font-family: 'Cormorant Garamond', serif;
           font-size: clamp(32px,4vw,52px); font-weight: 300;
-          color: rgba(200,169,110,0.25); line-height: 1;
+          color: #64748b; line-height: 1;
           margin-bottom: 8px; transition: color 0.3s;
         }
-        .tl-year.active { color: var(--gold); }
+        .tl-year.active { color: var(--accent); }
         .tl-title {
           font-family: 'Cormorant Garamond', serif;
           font-size: clamp(16px,2vw,22px); font-weight: 400;
-          color: var(--cream); margin-bottom: 6px;
+          color: black; margin-bottom: 6px;
         }
         .tl-desc {
-          font-size: 12px; color: var(--muted);
-          line-height: 1.8; max-width: 360px;
+          font-size: 13px; color: var(--ink2);
+          line-height: 1.75; max-width: 360px;
           max-height: 0; overflow: hidden;
           transition: max-height 0.5s ease, opacity 0.4s ease;
           opacity: 0;
@@ -416,260 +384,196 @@ export default function AboutPage() {
         .tl-dot {
           position: absolute; left: 18px; top: 30px;
           width: 12px; height: 12px; border-radius: 50%;
-          border: 2px solid var(--border); background: var(--ink);
+          border: 2px solid var(--border2); background: var(--bg);
           transition: all 0.3s;
         }
-        .tl-dot.active { border-color: var(--gold); background: var(--gold); box-shadow: 0 0 16px rgba(200,169,110,0.5); }
+        .tl-dot.active { border-color: var(--accent); background: var(--accent); box-shadow: 0 0 16px rgba(125,168,199,0.4); }
         .tl-right-content {
-          position: sticky;
-          top: 110px;
+          position: sticky; top: 110px;
           padding: clamp(24px,3vw,40px);
           border: 1px solid var(--border);
-          background: var(--ink2);
-          box-shadow: 0 24px 48px rgba(0,0,0,0.3);
+          background: var(--bg2);
+          box-shadow: 0 8px 32px rgba(125,168,199,0.08);
           min-height: 320px;
         }
 
         /* ── FOUNDER ── */
         .founder-section {
           padding: clamp(80px,12vw,140px) clamp(24px,8vw,120px);
-          background: var(--ink2);
+          background: var(--bg2);
           border-top: 1px solid var(--border);
         }
-        .founder-grid {
-          display: grid; grid-template-columns: 1fr 1fr;
-          gap: clamp(40px,6vw,80px); align-items: center;
-        }
-        .founder-img-wrap {
-          position: relative; aspect-ratio: 3/4; overflow: hidden;
-        }
+        .founder-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(40px,6vw,80px); align-items: center; }
+        .founder-img-wrap { position: relative; aspect-ratio: 3/4; overflow: hidden; }
         .founder-img {
-          width: 100%; height: 100%; object-fit: cover;
-          object-position: center 60%;
-          filter: brightness(0.85) contrast(1.05);
+          width: 100%; height: 100%; object-fit: cover; object-position: center 60%;
+          filter: brightness(0.9) contrast(1.02);
           transition: transform 8s ease;
         }
         .founder-img-wrap:hover .founder-img { transform: scale(1.04); }
-        .founder-img-frame {
-          position: absolute; inset: 16px;
-          border: 1px solid rgba(200,169,110,0.25);
-          pointer-events: none;
-        }
+        .founder-img-frame { position: absolute; inset: 16px; border: 1px solid rgba(125,168,199,0.3); pointer-events: none; }
         .founder-img-badge {
           position: absolute; bottom: -1px; right: -1px;
-          background: var(--gold); color: var(--ink);
+          background: var(--accent); color: #ffffff;
           padding: 16px 20px;
           font-size: 9px; letter-spacing: 3px; text-transform: uppercase; font-weight: 700;
         }
         .founder-quote-mark {
           font-family: 'Cormorant Garamond', serif;
           font-size: 120px; font-weight: 300;
-          color: rgba(200,169,110,0.12); line-height: 0.7;
+          color: rgba(125,168,199,0.15); line-height: 0.7;
           margin-bottom: -20px; display: block;
         }
         .founder-quote {
           font-family: 'Cormorant Garamond', serif;
           font-size: clamp(18px,2.5vw,28px); font-weight: 300; font-style: italic;
-          color: var(--cream); line-height: 1.6; margin-bottom: 28px;
+          color: black; line-height: 1.6; margin-bottom: 28px;
         }
-        .founder-name {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 20px; font-weight: 400; color: var(--gold);
-          margin-bottom: 4px;
-        }
-        .founder-role {
-          font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
-          color: var(--muted);
-        }
-        .founder-philosophy {
-          margin-top: 40px; padding-top: 32px;
-          border-top: 1px solid var(--border);
-        }
+        .founder-name { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; color: var(--accent); margin-bottom: 4px; }
+        .founder-role { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: #475569; }
+        .founder-philosophy { margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--border); }
         .philosophy-item {
           display: flex; gap: 16px; padding: 14px 0;
-          border-bottom: 1px solid rgba(200,169,110,0.08);
-          font-size: 12px; color: rgba(247,242,232,0.6);
-          line-height: 1.7;
+          border-bottom: 1px solid var(--border);
+          font-size: 13px; color: var(--ink2); line-height: 1.75;
         }
-        .philosophy-num {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 18px; color: var(--gold); opacity: 0.4;
-          flex-shrink: 0; width: 24px;
-        }
+        .philosophy-num { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: var(--accent); opacity: 0.6; flex-shrink: 0; width: 24px; }
 
         /* ── VALUES ── */
         .values-section {
           padding: clamp(80px,12vw,140px) clamp(24px,8vw,120px);
-          background: var(--ink);
+          background: var(--bg);
         }
-        .values-grid {
-          display: grid; grid-template-columns: 1fr 1fr;
-          gap: 2px; margin-top: 60px;
-        }
+        .values-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: 60px; }
         .value-card {
-          background: var(--ink2); padding: clamp(28px,4vw,48px);
+          background: var(--bg2); padding: clamp(28px,4vw,48px);
           border: 1px solid var(--border);
           position: relative; overflow: hidden;
-          transition: border-color 0.4s;
+          transition: border-color 0.4s, box-shadow 0.4s;
         }
         .value-card::before {
           content: ''; position: absolute; inset: 0;
-          background: linear-gradient(135deg, rgba(200,169,110,0.05) 0%, transparent 60%);
+          background: linear-gradient(135deg, rgba(125,168,199,0.06) 0%, transparent 60%);
           opacity: 0; transition: opacity 0.4s;
         }
-        .value-card:hover { border-color: rgba(200,169,110,0.4); }
+        .value-card:hover { border-color: rgba(125,168,199,0.5); box-shadow: 0 8px 32px rgba(125,168,199,0.1); }
         .value-card:hover::before { opacity: 1; }
         .value-num {
           font-family: 'Cormorant Garamond', serif;
           font-size: 64px; font-weight: 300;
-          color: rgba(200,169,110,0.08); line-height: 1;
+          color: rgba(125,168,199,0.1); line-height: 1;
           position: absolute; top: 16px; right: 24px;
         }
-        .value-title {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: clamp(18px,2.5vw,26px); font-weight: 400;
-          color: var(--cream); margin-bottom: 14px; line-height: 1.2;
-        }
-        .value-desc {
-          font-size: 12px; color: var(--muted); line-height: 1.9;
-        }
+        .value-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(18px,2.5vw,26px); font-weight: 400; color: black; margin-bottom: 14px; line-height: 1.2; }
+        .value-desc { font-size: 13px; color: var(--ink2); line-height: 1.85; }
         .value-line {
-          width: 32px; height: 1px; background: var(--gold); opacity: 0.5;
-          margin-bottom: 16px;
-          transition: width 0.4s;
+          width: 32px; height: 1px; background: var(--accent); opacity: 0.5;
+          margin-bottom: 16px; transition: width 0.4s;
         }
         .value-card:hover .value-line { width: 64px; opacity: 1; }
 
         /* ── TESTIMONIALS ── */
         .testi-section {
           padding: clamp(80px,12vw,140px) clamp(24px,8vw,120px);
-          background: var(--ink2);
+          background: var(--bg2);
           border-top: 1px solid var(--border);
         }
-        .testi-grid {
-          display: grid; grid-template-columns: repeat(3,1fr);
-          gap: 2px; margin-top: 60px;
-        }
+        .testi-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 2px; margin-top: 60px; }
         .testi-card {
-          background: var(--ink); padding: clamp(24px,3vw,40px);
+          background: var(--bg); padding: clamp(24px,3vw,40px);
           border: 1px solid var(--border);
-          position: relative; transition: border-color 0.4s, transform 0.4s;
+          position: relative; transition: border-color 0.4s, transform 0.4s, box-shadow 0.4s;
         }
-        .testi-card:hover { border-color: rgba(200,169,110,0.4); transform: translateY(-4px); }
-        .testi-mark {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 64px; font-weight: 300; color: var(--gold); opacity: 0.3;
-          line-height: 0.7; display: block; margin-bottom: -8px;
-        }
-        .testi-text {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: clamp(15px,1.6vw,18px); font-weight: 300; font-style: italic;
-          color: rgba(247,242,232,0.8); line-height: 1.7;
-          margin-bottom: 24px;
-        }
+        .testi-card:hover { border-color: rgba(125,168,199,0.45); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(125,168,199,0.1); }
+        .testi-mark { font-family: 'Cormorant Garamond', serif; font-size: 64px; font-weight: 300; color: var(--accent); opacity: 0.25; line-height: 0.7; display: block; margin-bottom: -8px; }
+        .testi-text { font-family: 'Cormorant Garamond', serif; font-size: clamp(15px,1.6vw,18px); font-weight: 400; font-style: italic; color: black; line-height: 1.75; margin-bottom: 24px; }
         .testi-initials {
           width: 36px; height: 36px; border-radius: 50%;
-          background: rgba(200,169,110,0.15); border: 1px solid var(--border);
+          background: rgba(125,168,199,0.12); border: 1px solid var(--border2);
           display: flex; align-items: center; justify-content: center;
-          font-size: 11px; letter-spacing: 1px; color: var(--gold);
+          font-size: 11px; letter-spacing: 1px; color: var(--accent);
           font-weight: 500; margin-bottom: 10px;
         }
-        .testi-author { font-size: 12px; color: var(--cream); font-weight: 400; }
-        .testi-role   { font-size: 10px; color: var(--muted); letter-spacing: 1px; }
+        .testi-author { font-size: 12px; color: black; font-weight: 400; }
+        .testi-role   { font-size: 10px; color: #475569; letter-spacing: 1px; }
 
         /* ── CTA ── */
         .cta-section {
           padding: clamp(80px,12vw,140px) clamp(24px,8vw,120px);
-          background: var(--ink); text-align: center;
+          background: var(--bg); text-align: center;
           position: relative; overflow: hidden;
         }
         .cta-glow {
           position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
           width: 800px; height: 400px; border-radius: 50%;
-          background: radial-gradient(ellipse, rgba(200,169,110,0.08) 0%, transparent 70%);
+          background: radial-gradient(ellipse, rgba(125,168,199,0.1) 0%, transparent 70%);
           pointer-events: none;
         }
         .cta-title {
           font-family: 'Cormorant Garamond', serif;
           font-size: clamp(40px,7vw,88px); font-weight: 300;
-          color: var(--cream); line-height: 1; margin-bottom: 24px;
+          color: black; line-height: 1; margin-bottom: 24px;
           position: relative; z-index: 1;
         }
-        .cta-title em { font-style: italic; color: var(--gold); }
-        .cta-sub {
-          font-size: 12px; color: var(--muted); max-width: 480px;
-          margin: 0 auto 48px; line-height: 1.9; position: relative; z-index: 1;
-        }
-        .cta-buttons {
-          display: flex; align-items: center; justify-content: center;
-          gap: 16px; flex-wrap: wrap; position: relative; z-index: 1;
-        }
+        .cta-title em { font-style: italic; color: var(--accent); }
+        .cta-sub { font-size: 13px; color: var(--ink2); max-width: 520px; margin: 0 auto 48px; line-height: 1.85; position: relative; z-index: 1; }
+        .cta-buttons { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; position: relative; z-index: 1; }
         .cta-btn-primary {
           display: inline-flex; align-items: center; gap: 10px;
-          background: var(--gold); color: var(--ink);
+          background: var(--accent); color: #ffffff;
           font-size: 9px; letter-spacing: 3.5px; text-transform: uppercase; font-weight: 700;
           padding: 16px 36px; border: none; cursor: pointer; text-decoration: none;
           transition: background 0.3s, transform 0.3s;
         }
-        .cta-btn-primary:hover { background: var(--gold2); transform: translateY(-2px); }
+        .cta-btn-primary:hover { background: var(--accent2); transform: translateY(-2px); }
         .cta-btn-ghost {
           display: inline-flex; align-items: center; gap: 10px;
-          border: 1px solid rgba(200,169,110,0.4); color: var(--gold);
+          border: 1px solid var(--border2); color: var(--accent);
           font-size: 9px; letter-spacing: 3px; text-transform: uppercase; font-weight: 500;
           padding: 15px 32px; text-decoration: none;
           transition: all 0.3s;
         }
-        .cta-btn-ghost:hover { border-color: var(--gold); background: rgba(200,169,110,0.08); }
+        .cta-btn-ghost:hover { border-color: var(--accent); background: var(--hover-bg); }
 
-        /* Section headers */
+        /* ── SECTION HEADERS ── */
         .section-eyebrow {
           font-size: 9px; letter-spacing: 5px; text-transform: uppercase;
-          color: var(--gold); font-weight: 500; margin-bottom: 16px;
+          color: var(--accent); font-weight: 500; margin-bottom: 16px;
           display: flex; align-items: center; gap: 12px;
         }
-        .section-eyebrow::before { content: ''; width: 32px; height: 1px; background: var(--gold); opacity: 0.5; }
-        .section-title {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: clamp(36px,5.5vw,64px); font-weight: 300;
-          color: var(--cream); line-height: 1.05;
-        }
-        .section-title em { font-style: italic; color: var(--gold); }
+        .section-eyebrow::before { content: ''; width: 32px; height: 1px; background: var(--accent); opacity: 0.5; }
+        .section-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(36px,5.5vw,64px); font-weight: 300; color: black; line-height: 1.05; }
+        .section-title em { font-style: italic; color: var(--accent); }
 
-        /* Horizontal gold rule */
-        .gold-rule {
+        /* ── DIVIDER ── */
+        .slate-rule {
           width: 100%; height: 1px;
-          background: linear-gradient(to right, transparent, rgba(200,169,110,0.3) 30%, rgba(200,169,110,0.3) 70%, transparent);
+          background: linear-gradient(to right, transparent, rgba(125,168,199,0.25) 30%, rgba(125,168,199,0.25) 70%, transparent);
         }
 
         /* ── MOBILE ── */
         @media (max-width: 900px) {
-          .stats-grid        { grid-template-columns: repeat(2,1fr); gap: 32px; }
-          .timeline-grid     { grid-template-columns: 1fr; gap: 18px; margin-top: 38px; }
-          .timeline-list     { background: transparent; }
-          .tl-right-content  { position: static; min-height: 0; }
-          .timeline-item     { padding: 18px 16px 18px 36px; }
-          .tl-dot            { left: 12px; top: 26px; }
-          .founder-grid      { grid-template-columns: 1fr; }
-          .founder-img-wrap  { aspect-ratio: 4/3; max-width: 480px; }
-          .values-grid       { grid-template-columns: 1fr; }
-          .testi-grid        { grid-template-columns: 1fr; }
+          .stats-grid       { grid-template-columns: repeat(2,1fr); gap: 32px; }
+          .timeline-grid    { grid-template-columns: 1fr; gap: 18px; margin-top: 38px; }
+          .tl-right-content { position: static; min-height: 0; }
+          .timeline-item    { padding: 18px 16px 18px 36px; }
+          .tl-dot           { left: 12px; top: 26px; }
+          .founder-grid     { grid-template-columns: 1fr; }
+          .founder-img-wrap { aspect-ratio: 4/3; max-width: 480px; }
+          .values-grid      { grid-template-columns: 1fr; }
+          .testi-grid       { grid-template-columns: 1fr; }
         }
         @media (max-width: 600px) {
-          .stats-grid        { grid-template-columns: 1fr 1fr; gap: 24px; }
-          .hero-year-badge   { display: none; }
-          .manifesto-line    { font-size: clamp(22px,6vw,36px); }
+          .stats-grid      { grid-template-columns: 1fr 1fr; gap: 24px; }
+          .hero-year-badge { display: none; }
+          .manifesto-line  { font-size: clamp(22px,6vw,36px); }
         }
       `}</style>
 
-      {/* Cursor glow */}
-      <div className="cursor-glow" style={{ left: cursor.x, top: cursor.y }} />
-      {/* Noise */}
       <div className="noise" />
 
       <div className="about-page">
-        {/* ══════════════════════════════════════════
-            HERO
-        ══════════════════════════════════════════ */}
+        {/* ══════ HERO ══════ */}
         <section className="hero-section section" ref={hero.ref}>
           <div className="hero-bg">
             <img
@@ -682,13 +586,11 @@ export default function AboutPage() {
             <div className="hero-grid-lines" />
           </div>
 
-          {/* Year badge */}
           <div className="hero-year-badge" style={fade(hero.vis, 0.5)}>
             <div className="hero-year-num">2021</div>
             <div className="hero-year-lbl">Est. New Delhi</div>
           </div>
 
-          {/* Main content */}
           <div className="hero-content">
             <div className="hero-eyebrow" style={fade(hero.vis, 0)}>
               About ZENmen
@@ -706,16 +608,13 @@ export default function AboutPage() {
             </p>
           </div>
 
-          {/* Scroll cue */}
           <div className="hero-scroll">
             <div className="hero-scroll-line" />
             Scroll
           </div>
         </section>
 
-        {/* ══════════════════════════════════════════
-            MANIFESTO
-        ══════════════════════════════════════════ */}
+        {/* ══════ MANIFESTO ══════ */}
         <section className="manifesto-section section" ref={manifesto.ref}>
           <div className="manifesto-label" style={fade(manifesto.vis, 0)}>
             Our Manifesto
@@ -723,16 +622,21 @@ export default function AboutPage() {
           <div>
             {[
               <>
-                Tailored for the <em>Modern Man.</em>
+                <>Tailored for the </>
+                <em>Modern Man.</em>
               </>,
               <>
-                Rooted in <em>Craft.</em> Refined in Detail.
+                <>Rooted in </>
+                <em>Craft.</em>
+                <> Refined in Detail.</>
               </>,
               <>
-                Where Tradition Meets <em>Couture.</em>
+                <>Where Tradition Meets </>
+                <em>Couture.</em>
               </>,
               <>
-                Every Stitch, a <em>Statement.</em>
+                <>Every Stitch, a </>
+                <em>Statement.</em>
               </>,
             ].map((line, i) => (
               <span
@@ -746,9 +650,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* ══════════════════════════════════════════
-            STATS
-        ══════════════════════════════════════════ */}
+        {/* ══════ STATS ══════ */}
         <section className="stats-section section" ref={stats.ref}>
           <div className="stats-grid">
             {STATS.map((s, i) => (
@@ -763,11 +665,9 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <div className="gold-rule" />
+        <div className="slate-rule" />
 
-        {/* ══════════════════════════════════════════
-            TIMELINE
-        ══════════════════════════════════════════ */}
+        {/* ══════ TIMELINE ══════ */}
         <section className="timeline-section section" ref={timeline.ref}>
           <div style={fade(timeline.vis, 0)}>
             <div className="section-eyebrow">Our Journey</div>
@@ -777,7 +677,6 @@ export default function AboutPage() {
           </div>
 
           <div className="timeline-grid">
-            {/* Left — items */}
             <div className="timeline-list">
               {MILESTONES.map((m, i) => (
                 <div
@@ -806,14 +705,14 @@ export default function AboutPage() {
                 </div>
               ))}
             </div>
-            {/* Right — sticky detail */}
+
             <div className="tl-right-content" style={fade(timeline.vis, 0.3)}>
               <div
                 style={{
                   fontSize: "9px",
                   letterSpacing: "4px",
                   textTransform: "uppercase",
-                  color: "var(--gold)",
+                  color: "#7da8c7",
                   marginBottom: "16px",
                 }}
               >
@@ -824,7 +723,7 @@ export default function AboutPage() {
                   fontFamily: "'Cormorant Garamond', serif",
                   fontSize: "clamp(24px,3vw,36px)",
                   fontWeight: 300,
-                  color: "var(--cream)",
+                  color: "#0f172a",
                   lineHeight: 1.2,
                   marginBottom: "20px",
                 }}
@@ -835,17 +734,13 @@ export default function AboutPage() {
                 style={{
                   width: "40px",
                   height: "1px",
-                  background: "var(--gold)",
+                  background: "#7da8c7",
                   opacity: 0.5,
                   marginBottom: "20px",
                 }}
               />
               <p
-                style={{
-                  fontSize: "13px",
-                  color: "var(--muted)",
-                  lineHeight: 1.9,
-                }}
+                style={{ fontSize: "14px", color: "#334155", lineHeight: 1.85 }}
               >
                 {MILESTONES[activeMilestone].desc}
               </p>
@@ -853,8 +748,8 @@ export default function AboutPage() {
                 style={{
                   marginTop: "40px",
                   padding: "20px",
-                  background: "rgba(200,169,110,0.04)",
-                  border: "1px solid var(--border)",
+                  background: "rgba(125,168,199,0.05)",
+                  border: "1px solid #e2e8f0",
                 }}
               >
                 <div
@@ -862,7 +757,7 @@ export default function AboutPage() {
                     fontSize: "9px",
                     letterSpacing: "3px",
                     textTransform: "uppercase",
-                    color: "var(--gold)",
+                    color: "#7da8c7",
                     marginBottom: "8px",
                   }}
                 >
@@ -872,7 +767,7 @@ export default function AboutPage() {
                   style={{
                     width: "100%",
                     height: "1px",
-                    background: "var(--border)",
+                    background: "#e2e8f0",
                     position: "relative",
                   }}
                 >
@@ -882,7 +777,7 @@ export default function AboutPage() {
                       top: 0,
                       left: 0,
                       height: "100%",
-                      background: "var(--gold)",
+                      background: "#7da8c7",
                       width: `${((activeMilestone + 1) / MILESTONES.length) * 100}%`,
                       transition: "width 0.6s ease",
                     }}
@@ -893,14 +788,11 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <div className="gold-rule" />
+        <div className="slate-rule" />
 
-        {/* ══════════════════════════════════════════
-            FOUNDER
-        ══════════════════════════════════════════ */}
+        {/* ══════ FOUNDER ══════ */}
         <section className="founder-section section" ref={founder.ref}>
           <div className="founder-grid">
-            {/* Image */}
             <div style={fade(founder.vis, 0)}>
               <div className="founder-img-wrap">
                 <img
@@ -913,7 +805,6 @@ export default function AboutPage() {
               </div>
             </div>
 
-            {/* Text */}
             <div style={fade(founder.vis, 0.2)}>
               <div className="section-eyebrow">The Maker</div>
               <h2 className="section-title" style={{ marginBottom: "32px" }}>
@@ -921,7 +812,6 @@ export default function AboutPage() {
                 <br />
                 the <em>Founder</em>
               </h2>
-
               <span className="founder-quote-mark">&quot;</span>
               <p className="founder-quote">
                 I started ZENmen because I believed every man deserves to feel
@@ -933,7 +823,7 @@ export default function AboutPage() {
                 style={{
                   width: "40px",
                   height: "1px",
-                  background: "var(--gold)",
+                  background: "#7da8c7",
                   opacity: 0.5,
                   margin: "24px 0 20px",
                 }}
@@ -959,11 +849,9 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <div className="gold-rule" />
+        <div className="slate-rule" />
 
-        {/* ══════════════════════════════════════════
-            VALUES
-        ══════════════════════════════════════════ */}
+        {/* ══════ VALUES ══════ */}
         <section className="values-section section" ref={values.ref}>
           <div style={fade(values.vis, 0)}>
             <div className="section-eyebrow">Our Principles</div>
@@ -971,7 +859,6 @@ export default function AboutPage() {
               What We <em>Stand For</em>
             </h2>
           </div>
-
           <div className="values-grid">
             {VALUES.map((v, i) => (
               <div
@@ -988,11 +875,9 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <div className="gold-rule" />
+        <div className="slate-rule" />
 
-        {/* ══════════════════════════════════════════
-            TESTIMONIALS
-        ══════════════════════════════════════════ */}
+        {/* ══════ TESTIMONIALS ══════ */}
         <section className="testi-section section" ref={testi.ref}>
           <div style={fade(testi.vis, 0)}>
             <div className="section-eyebrow">Client Voices</div>
@@ -1000,7 +885,6 @@ export default function AboutPage() {
               Words from <em>Gentlemen</em>
             </h2>
           </div>
-
           <div className="testi-grid">
             {TESTIMONIALS.map((t, i) => (
               <div
@@ -1018,9 +902,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* ══════════════════════════════════════════
-            CTA
-        ══════════════════════════════════════════ */}
+        {/* ══════ CTA ══════ */}
         <section className="cta-section section" ref={cta.ref}>
           <div className="cta-glow" />
 
@@ -1054,7 +936,6 @@ export default function AboutPage() {
             </Link>
           </div>
 
-          {/* Bottom stamp */}
           <div
             style={{
               marginTop: "80px",
@@ -1062,16 +943,12 @@ export default function AboutPage() {
               alignItems: "center",
               justifyContent: "center",
               gap: "24px",
-              opacity: 0.25,
+              opacity: 0.72,
               ...fade(cta.vis, 0.4),
             }}
           >
             <div
-              style={{
-                width: "60px",
-                height: "1px",
-                background: "var(--gold)",
-              }}
+              style={{ width: "60px", height: "1px", background: "#94a3b8" }}
             />
             <span
               style={{
@@ -1079,17 +956,13 @@ export default function AboutPage() {
                 fontSize: "11px",
                 letterSpacing: "6px",
                 textTransform: "uppercase",
-                color: "var(--gold)",
+                color: "#475569",
               }}
             >
               ZENmen · Est. 2021 · New Delhi
             </span>
             <div
-              style={{
-                width: "60px",
-                height: "1px",
-                background: "var(--gold)",
-              }}
+              style={{ width: "60px", height: "1px", background: "#94a3b8" }}
             />
           </div>
         </section>

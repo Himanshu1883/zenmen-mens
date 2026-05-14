@@ -1,5 +1,6 @@
 "use client";
 
+import { useDisplayPrice } from "@/hooks/useDisplayPrice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { addItem } from "@/store/slices/cartSlice";
 import { fetchProducts } from "@/store/slices/productSlice";
@@ -39,13 +40,6 @@ type Product = {
 
 const categories = ["all", "Ethnic", "Western"];
 
-const formatPrice = (n: number) =>
-  new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(n);
-
 function IconChevronRight() {
   return (
     <svg
@@ -63,6 +57,7 @@ function IconChevronRight() {
 
 export default function Products() {
   const dispatch = useAppDispatch();
+  const { format: displayPrice } = useDisplayPrice();
   const { products, loading, loaded, error } = useAppSelector(
     (state) => state.products,
   ) as {
@@ -124,8 +119,8 @@ export default function Products() {
         <div className="grain-overlay" />
         <div className="products-inner">
           <div className="flex justify-center items-center min-h-[400px]">
-            <div className="text-[#C9A96E] text-lg tracking-wider animate-pulse">
-              CURATING COLLECTION...
+            <div className="text-[#7da8c7] text-sm font-[family-name:var(--font-montserrat)] uppercase tracking-[0.28em] animate-pulse">
+              Curating collection…
             </div>
           </div>
         </div>
@@ -139,12 +134,12 @@ export default function Products() {
         <div className="grain-overlay" />
         <div className="products-inner">
           <div className="flex flex-col justify-center items-center min-h-[400px] gap-5">
-            <div className="text-[#C9A96E] text-sm tracking-[0.2em] uppercase">
+            <div className="text-[#64748b] text-sm tracking-[0.2em] uppercase font-[family-name:var(--font-montserrat)]">
               Unable to load collection
             </div>
             <button
               onClick={() => dispatch(fetchProducts())}
-              className="px-6 py-2 border border-[#C9A96E] text-[#C9A96E] text-[11px] uppercase tracking-[0.2em] hover:bg-[rgba(201,169,110,0.14)] transition-colors"
+              className="px-6 py-2.5 border border-[#7da8c7] text-[#0f172a] text-[11px] uppercase tracking-[0.2em] bg-white hover:bg-[#7da8c7] hover:text-white hover:border-[#7da8c7] transition-colors rounded-sm"
             >
               Retry
             </button>
@@ -157,134 +152,144 @@ export default function Products() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap');
-
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         .products-root {
-          font-family: 'Montserrat', sans-serif;
-          background: #0f1628;
-          min-height: 100vh;
-          color: #e8dcc7;
+          font-family: var(--font-montserrat), system-ui, sans-serif;
+          position: relative;
+          background: #f8fafc;
+          min-height: auto;
+          color: #0f172a;
           overflow-x: hidden;
         }
 
         .grain-overlay {
-          position: fixed; inset: 0; pointer-events: none; z-index: 0;
-          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-          opacity: 0.16;
+          position: absolute; inset: 0; pointer-events: none; z-index: 0;
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
+          background-size: 180px;
+          opacity: 0.035;
         }
 
         .products-inner {
           position: relative; z-index: 1;
           max-width: 1360px; margin: 0 auto;
-          padding: 80px 40px 120px;
+          padding: clamp(56px, 8vw, 96px) clamp(20px, 4vw, 40px) clamp(72px, 10vw, 120px);
         }
 
         .section-eyebrow {
-          font-family: 'Montserrat', sans-serif;
-          font-size: 11px; font-weight: 500;
-          letter-spacing: 0.35em; text-transform: uppercase;
-          color: #C9A96E; margin-bottom: 24px;
-          display: flex; align-items: center; gap: 16px;
+          font-family: var(--font-montserrat), sans-serif;
+          font-size: 10px; font-weight: 600;
+          letter-spacing: 0.32em; text-transform: uppercase;
+          color: #7da8c7; margin-bottom: 20px;
+          display: flex; align-items: center; gap: 14px;
         }
         .section-eyebrow::before {
-          content: ''; display: block; width: 40px; height: 1px; background: #C9A96E; opacity: 0.6;
+          content: ''; display: block; width: 36px; height: 1px;
+          background: linear-gradient(90deg, #7da8c7, rgba(125,168,199,0.2));
         }
 
         .section-title {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: clamp(52px, 7vw, 96px);
-          font-weight: 300; line-height: 1.0;
-          color: #efe2cc; letter-spacing: -0.01em;
-          margin-bottom: 12px;
+          font-family: var(--font-playfair), Georgia, serif;
+          font-size: clamp(40px, 5.5vw, 72px);
+          font-weight: 500; line-height: 1.05;
+          color: #0f172a; letter-spacing: -0.02em;
+          margin-bottom: 8px;
         }
         .section-title em {
-          font-style: italic; color: #C9A96E;
+          font-style: italic; color: #7da8c7;
         }
 
         .section-sub {
           font-size: 15px; font-weight: 300;
-          color: #b8a58a; max-width: 480px;
-          line-height: 1.8; margin-bottom: 64px;
-          letter-spacing: 0.02em;
+          font-family: var(--font-cormorant), Georgia, serif;
+          font-style: italic;
+          color: #64748b; max-width: 520px;
+          line-height: 1.75; margin-bottom: 48px;
         }
 
         .products-filter-bar {
-          display: flex; gap: 4px;
-          margin-bottom: 56px;
-          border-bottom: 1px solid #c9a96e2f;
+          display: flex; flex-wrap: wrap; gap: 0;
+          margin-bottom: 40px;
+          border-bottom: 1px solid #e2e8f0;
           padding-bottom: 0;
         }
         .products-filter-btn {
-          font-family: 'Montserrat', sans-serif;
-          font-size: 12px; font-weight: 500;
-          letter-spacing: 0.2em; text-transform: uppercase;
-          padding: 14px 28px 16px; border: none; cursor: pointer;
-          background: transparent; color: #a58f72;
+          font-family: var(--font-montserrat), sans-serif;
+          font-size: 11px; font-weight: 500;
+          letter-spacing: 0.18em; text-transform: uppercase;
+          padding: 14px 22px 16px; border: none; cursor: pointer;
+          background: transparent; color: #64748b;
           border-bottom: 2px solid transparent;
-          margin-bottom: -1px; transition: all 0.3s ease;
+          margin-bottom: -1px; transition: color 0.25s ease, border-color 0.25s ease;
           display: flex; align-items: center; gap: 8px;
         }
-        .products-filter-btn:hover { color: #d9c1a0; }
+        .products-filter-btn:hover { color: #0f172a; }
         .products-filter-btn.active {
-          color: #C9A96E;
-          border-bottom-color: #C9A96E;
+          color: #0f172a;
+          border-bottom-color: #7da8c7;
         }
         .products-filter-count {
-          font-size: 10px; padding: 2px 7px;
-          border-radius: 20px; border: 1px solid currentColor;
-          opacity: 0.7;
+          font-size: 9px; padding: 2px 8px;
+          border-radius: 999px; border: 1px solid #e2e8f0;
+          color: #94a3b8; background: #fff;
+        }
+        .products-filter-btn.active .products-filter-count {
+          border-color: rgba(125,168,199,0.45);
+          color: #7da8c7;
         }
 
         .products-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-          gap: 24px;
+          grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+          gap: clamp(18px, 2.5vw, 28px);
         }
 
         @keyframes cardIn {
-          from { opacity: 0; transform: translateY(24px); }
+          from { opacity: 0; transform: translateY(16px); }
           to   { opacity: 1; transform: translateY(0); }
         }
 
         .product-card {
-          background: #171411;
-          border: 1px solid #c9a96e33;
-          border-radius: 2px;
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 4px;
           overflow: hidden;
-          transition: border-color 0.4s ease, transform 0.4s ease;
+          transition: border-color 0.3s ease, box-shadow 0.35s ease, transform 0.35s ease;
           animation: cardIn 0.5s both;
           position: relative;
           text-decoration: none;
           display: block;
+          box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
         }
         .product-card:hover {
-          border-color: rgba(201, 169, 110, 0.55);
-          transform: translateY(-4px);
+          border-color: rgba(125, 168, 199, 0.45);
+          box-shadow: 0 20px 48px -24px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(125, 168, 199, 0.12);
+          transform: translateY(-3px);
         }
 
         .badge {
-          position: absolute; top: 20px; left: 10px; z-index: 10;
-          font-family: 'Montserrat', sans-serif;
-          font-size: 9px; font-weight: 600;
-          letter-spacing: 0.25em; text-transform: uppercase;
-          padding: 5px 12px; border: 1px solid;
-          border-radius: 0;
-          background: rgba(27, 23, 19, 0.9);
-          backdrop-filter: blur(4px);
+          position: absolute; top: 16px; left: 16px; z-index: 10;
+          font-family: var(--font-montserrat), sans-serif;
+          font-size: 8px; font-weight: 600;
+          letter-spacing: 0.22em; text-transform: uppercase;
+          padding: 6px 12px;
+          border-radius: 2px;
+          background: rgba(255, 255, 255, 0.95);
+          border: 1px solid rgba(125, 168, 199, 0.4);
+          color: #0f172a;
+          backdrop-filter: blur(8px);
         }
 
         .card-img {
-          position: relative; height: 340px; overflow: hidden;
-          background: #0f1628;
+          position: relative; aspect-ratio: 3 / 4; max-height: 420px; overflow: hidden;
+          background: #f1f5f9;
         }
         .card-img img {
-          width: 100%; height: 100%; object-fit: cover;
+          width: 100%; height: 100%; object-fit: cover; object-position: center;
           transition: transform 0.6s ease;
         }
         .product-card:hover .card-img img {
-          transform: scale(1.05);
+          transform: scale(1.04);
         }
         .card-img-hover-track {
           position: absolute;
@@ -297,6 +302,7 @@ export default function Products() {
           width: 100%;
           height: 100%;
           object-fit: cover;
+          object-position: center;
           transition: transform 0.6s ease;
         }
         .card-img-primary {
@@ -327,57 +333,68 @@ export default function Products() {
         .product-card.auto-preview .card-img-secondary {
           animation: autoSlideSecondary 6.5s ease-in-out infinite;
         }
+
+        .card-silhouette {
+          background: linear-gradient(160deg, #f1f5f9 0%, #e2e8f0 100%);
+          color: #94a3b8;
+        }
+
         .card-overlay {
           position: absolute; inset: 0;
           display: flex; align-items: flex-end; justify-content: center;
-          padding-bottom: 28px;
-          background: linear-gradient(0deg, rgba(8, 7, 6, 0.65) 0%, transparent 55%);
-          opacity: 0; transition: opacity 0.35s ease;
+          padding-bottom: 24px;
+          background: linear-gradient(to top, rgba(15, 23, 42, 0.55) 0%, transparent 52%);
+          opacity: 0; transition: opacity 0.3s ease;
         }
         .product-card:hover .card-overlay { opacity: 1; }
 
         .quick-view-btn {
-          font-family: 'Montserrat', sans-serif;
-          font-size: 10px; font-weight: 500;
-          letter-spacing: 0.25em; text-transform: uppercase;
-          padding: 10px 24px; border: 1px solid #C9A96E;
-          background: rgba(16, 13, 10, 0.92); cursor: pointer;
-          border-radius: 0;
-          transition: background 0.2s ease;
-          color: #C9A96E;
+          font-family: var(--font-montserrat), sans-serif;
+          font-size: 9px; font-weight: 600;
+          letter-spacing: 0.22em; text-transform: uppercase;
+          padding: 11px 22px;
+          border: 1px solid rgba(255,255,255,0.85);
+          background: #ffffff;
+          cursor: pointer;
+          border-radius: 2px;
+          transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+          color: #0f172a;
         }
-        .quick-view-btn:hover { background: rgba(29, 23, 17, 0.98); }
+        .quick-view-btn:hover {
+          background: #7da8c7;
+          color: #ffffff;
+          border-color: #7da8c7;
+        }
 
         .card-body {
-          padding: 28px 28px 24px;
-          border-top: 1px solid #c9a96e2b;
+          padding: 22px 22px 20px;
+          border-top: 1px solid #f1f5f9;
         }
 
         .card-cat {
-          font-size: 10px; font-weight: 500;
-          letter-spacing: 0.3em; text-transform: uppercase;
-          margin-bottom: 10px;
-          color: #C9A96E;
+          font-size: 9px; font-weight: 600;
+          letter-spacing: 0.24em; text-transform: uppercase;
+          margin-bottom: 8px;
+          color: #7da8c7;
         }
 
         .card-name {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 26px; font-weight: 400;
-          color: #f0e3cf; line-height: 1.2;
-          margin-bottom: 8px;
+          font-family: var(--font-playfair), Georgia, serif;
+          font-size: 1.35rem; font-weight: 500;
+          color: #0f172a; line-height: 1.25;
+          margin-bottom: 6px;
         }
 
         .card-sub {
-          font-size: 11px; font-weight: 400;
-          letter-spacing: 0.12em; color: #ad9a7e;
-          // margin-bottom: 14px;
+          font-size: 10px; font-weight: 500;
+          letter-spacing: 0.14em; color: #94a3b8;
           text-transform: uppercase;
         }
 
         .card-desc {
           font-size: 13px; font-weight: 300;
-          line-height: 1.65; color: #a18d70;
-          margin-bottom: 20px;
+          line-height: 1.65; color: #64748b;
+          margin-bottom: 16px;
           display: -webkit-box;
           -webkit-line-clamp: 2;
           -webkit-box-orient: vertical;
@@ -388,27 +405,29 @@ export default function Products() {
           display: flex;
           flex-direction: column;
           align-items: flex-start;
-          gap: 14px;
-          border-top: 1px solid #c9a96e22; padding-top: 10px;
+          gap: 12px;
+          border-top: 1px solid #f1f5f9;
+          padding-top: 14px;
+          margin-top: 4px;
         }
         .card-price-wrap {
           width: 100%;
           text-align: left;
         }
         .card-footer .add-btn {
-          align-self: center;
+          align-self: stretch;
         }
 
         .card-price {
-          // font-family: 'Cormorant Garamond', serif;
-          font-size: 24px; font-weight: 400;
-          color: #f0e2ca;
+          font-family: var(--font-playfair), Georgia, serif;
+          font-size: 1.5rem; font-weight: 500;
+          color: #0f172a;
           letter-spacing: 0.02em;
         }
 
         .card-price-compare {
-          font-size: 14px;
-          color: #9f927d;
+          font-size: 13px;
+          color: #94a3b8;
           text-decoration: line-through;
           margin-left: 8px;
         }
@@ -420,24 +439,24 @@ export default function Products() {
           display: inline-flex;
           align-items: center;
           gap: 8px;
-          font-family: 'Montserrat', sans-serif;
-          font-size: 10px; font-weight: 500;
-          letter-spacing: 0.22em; text-transform: uppercase;
-          padding: 8px 16px;
-          border: 1px solid #C9A96E66;
+          font-family: var(--font-montserrat), sans-serif;
+          font-size: 9px; font-weight: 600;
+          letter-spacing: 0.2em; text-transform: uppercase;
+          padding: 10px 18px;
+          border: 1px solid rgba(15, 23, 42, 0.12);
           cursor: pointer;
-          border-radius: 0;
-          transition: color 0.35s ease, border-color 0.35s ease, transform 0.25s ease;
-          background: transparent;
-          color: #C9A96E;
-          min-width: 132px;
-          justify-content: space-between;
+          border-radius: 2px;
+          transition: color 0.3s ease, border-color 0.3s ease, transform 0.25s ease;
+          background: #f8fafc;
+          color: #0f172a;
+          width: 100%;
+          justify-content: center;
         }
         .add-btn::before {
           content: '';
           position: absolute;
           inset: 0;
-          background: linear-gradient(90deg, #C9A96E 0%, #d8b57a 60%, #e8cc97 100%);
+          background: linear-gradient(90deg, #7da8c7 0%, #9abdd4 100%);
           transform: translateX(-105%);
           transition: transform 0.45s cubic-bezier(.22,.61,.36,1);
           z-index: -1;
@@ -456,14 +475,14 @@ export default function Products() {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          font-size: 13px;
+          font-size: 14px;
           font-weight: 400;
           line-height: 1;
           transition: transform 0.35s ease;
         }
         .add-btn:hover {
-          color: #120f0b;
-          border-color: #e5c58c;
+          color: #ffffff;
+          border-color: #7da8c7;
           transform: translateY(-1px);
         }
         .add-btn:hover::before {
@@ -474,18 +493,19 @@ export default function Products() {
         }
 
         .products-count {
-          font-size: 12px; letter-spacing: 0.15em;
-          color: #ab9578; text-transform: uppercase;
-          margin-bottom: 24px;
+          font-size: 11px; letter-spacing: 0.14em;
+          color: #94a3b8; text-transform: uppercase;
+          margin-bottom: 20px;
+          font-weight: 500;
         }
         .products-count span {
-          color: #C9A96E;
+          color: #7da8c7;
         }
 
         .divider {
-          width: 60px; height: 1px;
-          background: linear-gradient(90deg, #C9A96E, transparent);
-          margin-bottom: 48px;
+          width: 48px; height: 1px;
+          background: linear-gradient(90deg, #7da8c7, rgba(125,168,199,0.15));
+          margin-bottom: 28px;
         }
 
         .view-collection-btn {
@@ -493,39 +513,41 @@ export default function Products() {
           align-items: center;
           justify-content: space-between;
           width: 100%;
-          margin-top: 64px;
-          padding: 20px 32px;
-          background: rgba(201, 169, 110, 0.08);
-          border: 1px solid rgba(201, 169, 110, 0.32);
+          margin-top: 48px;
+          padding: 18px 28px;
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 4px;
           text-decoration: none;
-          transition: all 0.3s ease;
+          transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
         }
         .view-collection-btn:hover {
-          background: rgba(201, 169, 110, 0.16);
-          border-color: rgba(201, 169, 110, 0.5);
+          background: #f8fafc;
+          border-color: #7da8c7;
+          box-shadow: 0 12px 36px -20px rgba(125, 168, 199, 0.35);
         }
         .view-collection-text {
-          font-family: 'Montserrat', sans-serif;
-          font-size: 13px;
-          font-weight: 500;
-          letter-spacing: 0.25em;
+          font-family: var(--font-montserrat), sans-serif;
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.22em;
           text-transform: uppercase;
-          color: #C9A96E;
+          color: #0f172a;
         }
         .view-collection-icon {
-          color: #C9A96E;
+          color: #7da8c7;
           transition: transform 0.3s ease;
         }
         .view-collection-btn:hover .view-collection-icon {
-          transform: translateX(8px);
+          transform: translateX(6px);
         }
 
         @media (max-width: 640px) {
-          .products-inner { padding: 48px 20px 80px; }
+          .products-inner { padding: 48px 18px 72px; }
           .products-grid { grid-template-columns: 1fr; }
-          .products-filter-btn { padding: 12px 16px 14px; font-size: 10px; }
+          .products-filter-btn { padding: 12px 14px 14px; font-size: 10px; }
           .view-collection-btn { padding: 16px 20px; }
-          .view-collection-text { font-size: 11px; }
+          .view-collection-text { font-size: 10px; }
         }
       `}</style>
 
@@ -600,10 +622,7 @@ export default function Products() {
                   style={{ animationDelay: `${index * 80}ms` }}
                 >
                   {product.badge && (
-                    <div
-                      className="badge"
-                      style={{ color: "#C9A96E", borderColor: "#C9A96E55" }}
-                    >
+                    <div className="badge">
                       {product.badge}
                     </div>
                   )}
@@ -637,6 +656,7 @@ export default function Products() {
                     )}
                     <div className="card-overlay">
                       <button
+                        type="button"
                         className="quick-view-btn"
                         onClick={(e) => {
                           e.preventDefault();
@@ -667,17 +687,18 @@ export default function Products() {
                     <div className="card-footer">
                       <div className="card-price-wrap">
                         <span className="card-price">
-                          {formatPrice(
+                          {displayPrice(
                             hasDiscount ? discountedPrice : product.price,
                           )}
                         </span>
                         {hasDiscount && (
                           <span className="card-price-compare">
-                            {formatPrice(product.price)}
+                            {displayPrice(product.price)}
                           </span>
                         )}
                       </div>
                       <button
+                        type="button"
                         className="add-btn"
                         onClick={(e) => {
                           e.preventDefault();
@@ -733,12 +754,12 @@ export default function Products() {
 
           {displayProducts.length === 0 && (
             <div className="text-center py-16">
-              <p className="text-[#b7a58b] text-lg">
+              <p className="text-[#64748b] text-base font-[family-name:var(--font-cormorant)] italic">
                 No products found in this category.
               </p>
               <button
                 onClick={() => setActiveCategory("all")}
-                className="mt-6 px-8 py-3 border border-[#C9A96E] text-[#C9A96E] text-sm uppercase tracking-wider hover:bg-[rgba(201,169,110,0.15)] transition-all"
+                className="mt-6 rounded-sm border border-[#7da8c7] bg-white px-8 py-3 text-sm uppercase tracking-wider text-[#0f172a] transition-all hover:bg-[#7da8c7] hover:text-white"
               >
                 View All Products
               </button>

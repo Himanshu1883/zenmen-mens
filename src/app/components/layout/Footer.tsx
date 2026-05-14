@@ -12,19 +12,19 @@ export default function Footer() {
 
         /* ── CSS Variables ── */
         :root {
-          --gold: #C8A96E;
-          --gold-dim: rgba(200,169,110,0.45);
-          --gold-faint: rgba(200,169,110,0.12);
-          --ivory: #f7f2e8;
-          --ivory-dim: rgba(247,242,232,0.55);
-          --ink: #090e1a;
-          --ink-mid: rgba(9,14,26,0.85);
-          --border: rgba(200,169,110,0.18);
+          --gold: #7da8c7;
+          --gold-dim: rgba(125,168,199,0.55);
+          --gold-faint: rgba(125,168,199,0.14);
+          --ivory: #050b16;
+          --ivory-dim: black;
+          --ink: #eef3f9;
+          --ink-mid: #e7eef7;
+          --border: #c7d5e6;
         }
 
         /* ── Footer Shell ── */
         .zf {
-          background: #070c18;
+          background: #eef3f9;
           color: var(--ivory);
           font-family: 'Jost', sans-serif;
           font-weight: 300;
@@ -41,7 +41,7 @@ export default function Footer() {
           background-size: 180px 180px;
           pointer-events: none;
           z-index: 0;
-          opacity: 0.5;
+          opacity: 0.28;
         }
 
         /* Radial gold glow top-left */
@@ -52,7 +52,7 @@ export default function Footer() {
           left: -120px;
           width: 480px;
           height: 480px;
-          background: radial-gradient(circle, rgba(200,169,110,0.07) 0%, transparent 70%);
+          background: radial-gradient(circle, rgba(125,168,199,0.2) 0%, transparent 70%);
           pointer-events: none;
           z-index: 0;
         }
@@ -97,7 +97,7 @@ export default function Footer() {
           height: 44px;
           border-radius: 50%;
           border: 1px solid var(--gold-dim);
-          background: rgba(10,18,36,0.9);
+          background: #f8fbff;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -106,8 +106,8 @@ export default function Footer() {
         }
 
         .zf-logo-img {
-          width: 38px;
-          height: 38px;
+          width: 44px;
+          height: 44px;
           object-fit: contain;
           transition: transform 0.85s cubic-bezier(0.22,1,0.36,1);
         }
@@ -118,7 +118,7 @@ export default function Footer() {
           font-size: 1.3rem;
           font-weight: 300;
           letter-spacing: 0.1em;
-          color: var(--ivory);
+          color: #050b16;
           line-height: 1;
         }
 
@@ -128,7 +128,7 @@ export default function Footer() {
           font-size: 8px;
           letter-spacing: 0.4em;
           text-transform: uppercase;
-          color: var(--gold-dim);
+          color: #5f8fb2;
           margin-top: 4px;
         }
 
@@ -230,7 +230,7 @@ export default function Footer() {
 
         /* ── Newsletter stripe ── */
         .zf-newsletter {
-          background: rgba(200,169,110,0.04);
+          background: #e6eef8;
           border-top: 1px solid var(--border);
           border-bottom: 1px solid var(--border);
           padding: 36px 80px;
@@ -250,7 +250,7 @@ export default function Footer() {
           font-size: 1rem;
           font-weight: 400;
           letter-spacing: 0.04em;
-          color: var(--ivory);
+          color: #050b16;
           margin: 0 0 4px;
         }
         .zf-newsletter-text p {
@@ -270,10 +270,10 @@ export default function Footer() {
 
         .zf-newsletter-form input {
           flex: 1;
-          background: rgba(255,255,255,0.05);
+          background: #f7fbff;
           border: 1px solid var(--border);
           border-right: none;
-          color: var(--ivory);
+          color: #050b16;
           font-family: 'Jost', sans-serif;
           font-size: 0.78rem;
           letter-spacing: 0.06em;
@@ -281,16 +281,16 @@ export default function Footer() {
           outline: none;
           transition: background 0.25s ease, border-color 0.25s ease;
         }
-        .zf-newsletter-form input::placeholder { color: rgba(247,242,232,0.3); }
+        .zf-newsletter-form input::placeholder { color: #73879f; }
         .zf-newsletter-form input:focus {
-          background: rgba(200,169,110,0.06);
+          background: #eaf3fb;
           border-color: var(--gold-dim);
         }
 
         .zf-newsletter-form button {
           background: var(--gold);
           border: 1px solid var(--gold);
-          color: #070c18;
+          color: #ffffff;
           font-family: 'Cormorant Garamond', serif;
           font-size: 0.7rem;
           letter-spacing: 0.28em;
@@ -301,8 +301,9 @@ export default function Footer() {
           white-space: nowrap;
         }
         .zf-newsletter-form button:hover {
-          background: transparent;
-          color: var(--gold);
+          background: #0f172a;
+          border-color: #0f172a;
+          color: #ffffff;
         }
 
         /* ── Bottom Bar ── */
@@ -321,7 +322,7 @@ export default function Footer() {
 
         .zf-copy {
           font-size: 0.72rem;
-          color: rgba(247,242,232,0.3);
+          color: #1f2d40;
           letter-spacing: 0.06em;
         }
 
@@ -336,7 +337,7 @@ export default function Footer() {
         }
         .zf-legal li a {
           font-size: 0.68rem;
-          color: rgba(247,242,232,0.3);
+          color: #1f2d40;
           text-decoration: none;
           letter-spacing: 0.08em;
           text-transform: uppercase;
@@ -427,11 +428,11 @@ export default function Footer() {
           letter-spacing: 0.22em;
           text-transform: uppercase;
           color: transparent;
-          -webkit-text-stroke: 1px rgba(200,169,110,0.22);
+          -webkit-text-stroke: 1px rgba(125,168,199,0.35);
           background: linear-gradient(180deg,
-            rgba(200,169,110,0.18) 0%,
-            rgba(200,169,110,0.08) 60%,
-            rgba(200,169,110,0.03) 100%
+            rgba(125,168,199,0.25) 0%,
+            rgba(125,168,199,0.12) 60%,
+            rgba(125,168,199,0.06) 100%
           );
           -webkit-background-clip: text;
           background-clip: text;
@@ -468,6 +469,8 @@ export default function Footer() {
         @media (max-width: 640px) {
           .zf-banner-link { right: 16px; font-size: 0.62rem; letter-spacing: 0.2em; }
         }
+
+        .zf p, .zf h4, .zf h5, .zf ul { margin: 0; padding: 0; }
       `}</style>
 
       <footer className="zf">

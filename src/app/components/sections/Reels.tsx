@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 const reels = [
@@ -79,124 +79,134 @@ export default function Reels() {
   };
 
   return (
-    <section className="relative w-full bg-[#030813] py-20 md:py-28">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_65%_50%_at_75%_-5%,rgba(200,169,110,0.1),transparent_65%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_40%_30%_at_5%_105%,rgba(200,169,110,0.05),transparent_60%)]" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#c8a96e30] to-transparent" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#c8a96e30] to-transparent" />
+    <section
+      className="relative w-full overflow-hidden bg-[#f8fafc] py-16 md:py-24"
+      aria-labelledby="reels-heading"
+    >
+      <div
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_55%_at_80%_-10%,rgba(125,168,199,0.14),transparent_60%)]"
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_0%_100%,rgba(125,168,199,0.08),transparent_55%)]"
+        aria-hidden
+      />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#7da8c7]/35 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#e2e8f0] to-transparent" />
 
-      <div className="relative z-10 px-6 sm:px-10 lg:px-16">
-        <div className="flex items-center gap-4">
-          <span className="h-px w-8 bg-gradient-to-r from-transparent to-[#c8a96e88]" />
-          <p className="font-['Cormorant_Garamond'] text-[10px] font-light uppercase tracking-[0.42em] text-[#c8a96e]">
-            Instagram Reels
-          </p>
-        </div>
-
-        <div className="mt-4 flex items-end justify-between">
-          <h2 className="font-['Playfair_Display'] text-[2.5rem] font-light leading-[1.08] text-[#f7f2e8] md:text-5xl lg:text-[3.4rem]">
-            Behind{" "}
-            <span
-              className="italic"
-              style={{ color: "transparent", WebkitTextStroke: "1px #c8a96e" }}
+      <div className="relative z-10 mx-auto max-w-[1600px] px-5 sm:px-8 lg:px-12">
+        <div className="flex flex-wrap items-end justify-between gap-6">
+          <div>
+            <div className="flex items-center gap-3">
+              <span className="h-px w-8 bg-gradient-to-r from-transparent to-[#7da8c7]" />
+              <p className="font-[family-name:var(--font-montserrat)] text-[10px] font-semibold uppercase tracking-[0.32em] text-[#7da8c7]">
+                Instagram Reels
+              </p>
+            </div>
+            <h2
+              id="reels-heading"
+              className="mt-4 font-[family-name:var(--font-playfair)] text-[2.15rem] font-medium leading-[1.1] tracking-tight text-[#0f172a] md:text-5xl lg:text-[3.15rem]"
             >
-              The
-            </span>{" "}
-            Craft
-          </h2>
-          <p className="hidden font-['Cormorant_Garamond'] text-[10px] uppercase tracking-[0.3em] text-[#c8a96e33] md:block">
-            {String(reels.length).padStart(2, "0")} Episodes
-          </p>
+              Behind{" "}
+              <em className="not-italic text-[#7da8c7]">the</em> craft
+            </h2>
+            <p className="mt-3 max-w-md font-[family-name:var(--font-cormorant)] text-base italic leading-relaxed text-[#64748b]">
+              Short films from the atelier — fittings, fabrics, and the people
+              who make every piece.
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            <p className="hidden font-[family-name:var(--font-montserrat)] text-[10px] font-semibold uppercase tracking-[0.28em] text-[#94a3b8] sm:block">
+              {String(reels.length).padStart(2, "0")} films
+            </p>
+            <a
+              href="https://www.instagram.com/_zenmen/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-sm border border-[#e2e8f0] bg-white px-4 py-2.5 font-[family-name:var(--font-montserrat)] text-[9px] font-semibold uppercase tracking-[0.22em] text-[#0f172a] shadow-sm transition-colors hover:border-[#7da8c7] hover:text-[#7da8c7]"
+            >
+              @_zenmen
+              <ExternalLink className="h-3.5 w-3.5 text-[#7da8c7]" aria-hidden />
+            </a>
+          </div>
         </div>
       </div>
 
-      <div className="relative mt-10">
+      <div className="relative z-10 mt-10">
         <button
           type="button"
           onClick={() => slideTrack("left")}
-          className="absolute left-2 top-1/2 z-30 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-[#c8a96e66] bg-black/65 text-[#f8f4ec] backdrop-blur sm:hidden"
-          aria-label="Slide reels left"
+          className="absolute left-2 top-1/2 z-30 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-[#e2e8f0] bg-white/95 text-[#0f172a] shadow-md backdrop-blur-sm transition-colors hover:border-[#7da8c7] hover:text-[#7da8c7] sm:hidden"
+          aria-label="Scroll reels left"
         >
-          <ChevronLeft size={20} />
+          <ChevronLeft className="h-5 w-5" strokeWidth={1.5} />
         </button>
         <button
           type="button"
           onClick={() => slideTrack("right")}
-          className="absolute right-2 top-1/2 z-30 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-[#c8a96e66] bg-black/65 text-[#f8f4ec] backdrop-blur sm:hidden"
-          aria-label="Slide reels right"
+          className="absolute right-2 top-1/2 z-30 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-[#e2e8f0] bg-white/95 text-[#0f172a] shadow-md backdrop-blur-sm transition-colors hover:border-[#7da8c7] hover:text-[#7da8c7] sm:hidden"
+          aria-label="Scroll reels right"
         >
-          <ChevronRight size={20} />
+          <ChevronRight className="h-5 w-5" strokeWidth={1.5} />
         </button>
 
         <div
-          className="pointer-events-none absolute left-0 top-0 z-20 h-full w-8"
-          style={{
-            background: "linear-gradient(to right, #030813, transparent)",
-          }}
+          className="pointer-events-none absolute left-0 top-0 z-20 h-full w-10 bg-gradient-to-r from-[#f8fafc] to-transparent sm:w-14"
+          aria-hidden
         />
         <div
-          className="pointer-events-none absolute right-0 top-0 z-20 h-full w-20 md:w-28"
-          style={{
-            background:
-              "linear-gradient(to left, #030813 30%, rgba(3,8,19,0.6) 65%, transparent 100%)",
-          }}
+          className="pointer-events-none absolute right-0 top-0 z-20 h-full w-16 bg-gradient-to-l from-[#f8fafc] via-[#f8fafc]/80 to-transparent sm:w-24 md:w-32"
+          aria-hidden
         />
 
         <div
           ref={trackRef}
-          className="w-full overflow-x-auto overflow-y-visible pb-8"
+          className="reels-scroll w-full overflow-x-auto overflow-y-visible pb-6"
           style={{
             scrollbarWidth: "none",
             WebkitOverflowScrolling: "touch",
             scrollSnapType: "x proximity",
           }}
         >
-          <div className="flex w-max gap-4 px-6 pr-28 sm:gap-5 sm:px-10 md:pr-36 lg:px-16">
+          <div className="flex w-max gap-4 px-5 pr-20 sm:gap-5 sm:px-8 md:pr-28 lg:px-12">
             {reels.map((reel, index) => (
               <a
                 key={reel.id}
                 href={reel.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="relative block flex-shrink-0"
+                className="group relative block w-[72vw] max-w-[300px] flex-shrink-0 scroll-m-4 sm:w-[280px] md:w-[300px]"
                 style={{ scrollSnapAlign: "start" }}
               >
-                <article
-                  className="relative overflow-hidden"
-                  style={{
-                    borderRadius: "2px",
-                    boxShadow:
-                      "0 20px 56px rgba(0,0,0,0.5), 0 0 0 0.5px rgba(200,169,110,0.15)",
-                  }}
-                >
-                  <video
-                    ref={(node) => {
-                      videoRefs.current[index] = node;
-                    }}
-                    src={reel.src}
-                    className="block h-[70vh] min-h-[420px] w-[72vw] max-w-[340px] object-cover md:w-[300px]"
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    preload="metadata"
-                    controls
-                  />
+                <article className="overflow-hidden rounded-md border border-[#e2e8f0] bg-white shadow-[0_12px_40px_-20px_rgba(15,23,42,0.12)] transition-[box-shadow,border-color,transform] duration-300 hover:-translate-y-1 hover:border-[#7da8c7]/45 hover:shadow-[0_24px_56px_-28px_rgba(125,168,199,0.35)]">
+                  <div className="relative aspect-[9/16] min-h-[min(70vh,560px)] max-h-[72vh] bg-[#f1f5f9]">
+                    <video
+                      ref={(node) => {
+                        videoRefs.current[index] = node;
+                      }}
+                      src={reel.src}
+                      className="absolute inset-0 h-full w-full object-cover"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      preload="metadata"
+                      controls
+                    />
+                    <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-black/25 to-transparent opacity-80" />
+                  </div>
 
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/55 to-transparent" />
-                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-black/95 via-black/55 to-transparent" />
-
-                  <div className="absolute inset-x-0 bottom-0 z-10 px-4 pb-4">
-                    <p className="mb-2 font-['Cormorant_Garamond'] text-[9px] uppercase tracking-[0.36em] text-[#c8a96e66]">
+                  <div className="border-t border-[#f1f5f9] bg-[#fafafa] px-4 py-3.5">
+                    <p className="mb-1.5 font-[family-name:var(--font-montserrat)] text-[9px] font-semibold uppercase tracking-[0.28em] text-[#94a3b8]">
                       {String(index + 1).padStart(2, "0")}
-                      <span className="mx-1.5 opacity-50">/</span>
+                      <span className="mx-1.5 text-[#cbd5e1]">/</span>
                       {String(reels.length).padStart(2, "0")}
                     </p>
-                    <div className="flex items-end justify-between gap-3">
-                      <p className="truncate font-['Playfair_Display'] text-[1.1rem] font-light leading-snug text-[#f8f4ec]">
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="min-w-0 flex-1 truncate font-[family-name:var(--font-playfair)] text-[1.05rem] font-medium leading-snug text-[#0f172a] group-hover:text-[#7da8c7]">
                         {reel.title}
                       </p>
-                      <span className="flex-shrink-0 border border-[rgba(200,169,110,0.32)] bg-[rgba(200,169,110,0.04)] px-[9px] py-[4px] font-['Cormorant_Garamond'] text-[8px] uppercase tracking-[0.26em] text-[#c8a96eaa]">
+                      <span className="flex-shrink-0 rounded-sm border border-[#dbe4ef] bg-white px-2 py-1 font-[family-name:var(--font-montserrat)] text-[7px] font-bold uppercase tracking-[0.24em] text-[#7da8c7]">
                         Reel
                       </span>
                     </div>
@@ -208,7 +218,9 @@ export default function Reels() {
         </div>
       </div>
 
-      <style>{`.overflow-x-auto::-webkit-scrollbar{display:none;}`}</style>
+      <style>{`
+        .reels-scroll::-webkit-scrollbar { display: none; }
+      `}</style>
     </section>
   );
 }
