@@ -7,8 +7,8 @@ import {
 } from "@/lib/currency";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setCurrency } from "@/store/slices/currencySlice";
-import { IndianRupee } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import CurrencyIcon from "./CurrencyIcon";
 
 type CurrencySwitcherProps = {
   /** Icon + dropdown (navbar) */
@@ -85,7 +85,7 @@ export default function CurrencySwitcher({
         onClick={() => setOpen((v) => !v)}
         className="bg-transparent border-0 text-[#0f172a] hover:text-[#7da8c7] transition-all duration-300 p-2 rounded-full hover:bg-[#f8fafc] cursor-pointer"
       >
-        <IndianRupee className="w-5 h-5" strokeWidth={1.5} />
+        <CurrencyIcon code={active} className="w-5 h-5" strokeWidth={1.5} />
       </button>
       {open && (
         <div

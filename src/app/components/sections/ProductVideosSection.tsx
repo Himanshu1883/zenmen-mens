@@ -8,6 +8,7 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
+import { useSwipeSlider } from "@/hooks/useSwipeSlider";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -102,8 +103,20 @@ const ProductVideosSection = () => {
     syncVideoPlayback();
   }, [syncVideoPlayback]);
 
-  const handleNext = () => setCurrentIndex((p) => Math.min(p + 1, maxIndex));
-  const handlePrev = () => setCurrentIndex((p) => Math.max(p - 1, 0));
+  const handleNext = useCallback(
+    () => setCurrentIndex((p) => Math.min(p + 1, maxIndex)),
+    [maxIndex],
+  );
+  const handlePrev = useCallback(
+    () => setCurrentIndex((p) => Math.max(p - 1, 0)),
+    [],
+  );
+
+  const swipeHandlers = useSwipeSlider({
+    onNext: handleNext,
+    onPrev: handlePrev,
+    enabled: maxIndex > 0,
+  });
 
   const toggleMute = (id: number) => {
     const video = videoRefs.current[id];
@@ -196,7 +209,7 @@ const ProductVideosSection = () => {
         </div> */}
 
         {/* ── Slider ── */}
-        <div className="overflow-hidden">
+        <div className="overflow-hidden touch-pan-y" {...swipeHandlers}>
           <motion.div
             animate={{
               x: `-${currentIndex * (100 / visibleCount)}%`,

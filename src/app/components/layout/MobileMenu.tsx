@@ -1,5 +1,9 @@
+"use client";
+
+import { useAppSelector } from "@/store/hooks";
 import { AnimatePresence, motion } from "framer-motion";
-import { IndianRupee, Search, ShoppingBag, User, X } from "lucide-react";
+import { Search, ShoppingBag, User, X } from "lucide-react";
+import CurrencyIcon from "./CurrencyIcon";
 import CurrencySwitcher from "./CurrencySwitcher";
 
 interface MobileMenuProps {
@@ -9,6 +13,8 @@ interface MobileMenuProps {
 }
 
 const MobileMenu = ({ isOpen, onClose, onOpenAuth }: MobileMenuProps) => {
+  const activeCurrency = useAppSelector((s) => s.currency.code);
+
   const navLinks = [
     "Collections",
 
@@ -120,7 +126,8 @@ const MobileMenu = ({ isOpen, onClose, onOpenAuth }: MobileMenuProps) => {
                 </button>
                 <div className="border-t border-[#e2e8f0] pt-4 -mx-2">
                   <div className="flex items-center gap-3 px-4 pb-1">
-                    <IndianRupee
+                    <CurrencyIcon
+                      code={activeCurrency}
                       className="w-5 h-5 shrink-0 text-[#0f172a]"
                       strokeWidth={1.5}
                     />

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useRef, useEffect } from 'react';
+import { useSwipeSlider } from '@/hooks/useSwipeSlider';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 const ProductSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -80,17 +81,21 @@ const ProductSlider = () => {
     },
   ];
 
-  const handleNext = () => {
-    if (currentSlide < products.length - itemsPerView) {
-      setCurrentSlide((prev) => prev + 1);
-    }
-  };
+  const maxSlide = products.length - itemsPerView;
 
-  const handlePrev = () => {
-    if (currentSlide > 0) {
-      setCurrentSlide((prev) => prev - 1);
-    }
-  };
+  const handleNext = useCallback(() => {
+    setCurrentSlide((prev) => (prev < maxSlide ? prev + 1 : prev));
+  }, [maxSlide]);
+
+  const handlePrev = useCallback(() => {
+    setCurrentSlide((prev) => (prev > 0 ? prev - 1 : prev));
+  }, []);
+
+  const swipeHandlers = useSwipeSlider({
+    onNext: handleNext,
+    onPrev: handlePrev,
+    enabled: maxSlide > 0,
+  });
 
   const slidePercentage = 100 / itemsPerView;
 
@@ -148,7 +153,11 @@ const ProductSlider = () => {
         </div>
 
         {/* Slider Container */}
-        <div className="relative overflow-hidden" ref={sliderRef}>
+        <motion.div
+          className="relative overflow-hidden touch-pan-y"
+          ref={sliderRef}
+          {...swipeHandlers}
+        >
           <motion.div
             animate={{
               x: `-${currentSlide * slidePercentage}%`,
@@ -207,7 +216,7 @@ const ProductSlider = () => {
               </motion.div>
             ))}
           </motion.div>
-        </div>
+        </motion.div>
 
         {/* Mobile Navigation */}
         <div className="flex md:hidden items-center justify-center gap-4 mt-8">
