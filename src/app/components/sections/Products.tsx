@@ -281,7 +281,7 @@ export default function Products() {
         }
 
         .card-img {
-          position: relative; aspect-ratio: 3 / 4; max-height: 420px; overflow: hidden;
+          position: relative; aspect-ratio: 3 / 4; overflow: hidden;
           background: #f1f5f9;
         }
         .card-img img {
@@ -622,9 +622,7 @@ export default function Products() {
                   style={{ animationDelay: `${index * 80}ms` }}
                 >
                   {product.badge && (
-                    <div className="badge">
-                      {product.badge}
-                    </div>
+                    <div className="badge">{product.badge}</div>
                   )}
 
                   <div className="card-img">
@@ -675,11 +673,11 @@ export default function Products() {
                       {product.subCategory || "Ready to Wear"}
                     </div>
                     <h3 className="card-name">{product.title}</h3>
-                    <p className="card-sub">
+                    {/* <p className="card-sub">
                       {product.tagline ||
                         product.colors?.[0] ||
                         "Premium Quality"}
-                    </p>
+                    </p> */}
                     {/* <p className="card-desc">
                       {product.description?.slice(0, 100)}...
                     </p> */}
