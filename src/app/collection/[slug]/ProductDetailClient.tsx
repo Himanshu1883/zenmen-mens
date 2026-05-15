@@ -87,6 +87,20 @@ function IconWhatsApp() {
   );
 }
 
+/** Official WhatsApp green mark for light buttons */
+function IconWhatsAppGreen({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      fill="#25D366"
+      aria-hidden
+    >
+      <path d="M20.52 3.48A11.85 11.85 0 0 0 12.06 0C5.5 0 .16 5.34.16 11.9c0 2.1.55 4.16 1.6 5.98L0 24l6.3-1.65a11.86 11.86 0 0 0 5.76 1.47h.01c6.56 0 11.9-5.34 11.9-11.9 0-3.18-1.24-6.17-3.45-8.44Zm-8.46 18.33h-.01a9.9 9.9 0 0 1-5.04-1.38l-.36-.21-3.74.98 1-3.64-.24-.37a9.9 9.9 0 0 1-1.53-5.29c0-5.46 4.44-9.9 9.91-9.9 2.64 0 5.12 1.03 6.98 2.89a9.82 9.82 0 0 1 2.92 7.01c0 5.46-4.44 9.9-9.9 9.9Zm5.43-7.42c-.3-.15-1.78-.88-2.06-.98-.27-.1-.47-.15-.67.15-.2.3-.77.98-.95 1.18-.17.2-.35.23-.65.08-.3-.15-1.27-.47-2.42-1.49-.89-.79-1.5-1.76-1.68-2.06-.17-.3-.02-.46.13-.6.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.38-.03-.53-.08-.15-.67-1.62-.92-2.23-.24-.58-.48-.5-.67-.51l-.57-.01c-.2 0-.52.08-.8.38-.27.3-1.05 1.03-1.05 2.5 0 1.48 1.08 2.9 1.23 3.1.15.2 2.12 3.24 5.14 4.54.72.31 1.29.49 1.73.63.73.23 1.4.2 1.92.12.59-.09 1.78-.73 2.03-1.43.25-.7.25-1.3.17-1.43-.08-.13-.28-.2-.58-.35Z" />
+    </svg>
+  );
+}
+
 function IconChevron() {
   return (
     <svg
@@ -166,7 +180,7 @@ function AccordionItem({
         onClick={onToggle}
         className="group flex w-full items-center justify-between bg-transparent py-4 text-left"
       >
-        <span className="font-['Jost'] text-[.7rem] uppercase tracking-[.2em] text-[#475569] transition-colors group-hover:text-[#7da8c7]">
+        <span className="font-['Jost'] text-[.7rem] uppercase tracking-[.2em] text-black transition-colors group-hover:text-[#7da8c7]">
           {item.label}
         </span>
         <span
@@ -182,7 +196,7 @@ function AccordionItem({
           paddingBottom: isOpen ? "1rem" : "0",
         }}
       >
-        <p className="text-[.82rem] leading-[1.85] text-[#64748b]">
+        <p className="text-[.82rem] leading-[1.85] text-black">
           {item.content}
         </p>
       </div>
@@ -487,6 +501,11 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     [product.colors, selectedColor],
   );
 
+  const canAddToCart = useMemo(
+    () => isColorAvailable || selectedColor === product.colors?.[0],
+    [isColorAvailable, selectedColor, product.colors],
+  );
+
   const rating = product.rating ?? 4.6;
   const reviewCount = product.numReviews ?? 42;
   const stars = Array.from({ length: 5 }, (_, i) => i < Math.floor(rating));
@@ -527,6 +546,14 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     );
   };
 
+  const handleWhatsAppBestPrice = () => {
+    const msg = `Hi ZENmen — I'd like your best price on "${product.title}" (${selectedColor}, size ${selectedSize}). Thank you.`;
+    window.open(
+      `https://wa.me/919650753273?text=${encodeURIComponent(msg)}`,
+      "_blank",
+    );
+  };
+
   function handleAddToCart() {
     dispatch(
       addItem({
@@ -550,7 +577,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     "/new.jpg";
 
   return (
-    <main className="relative min-h-screen overflow-x-hidden bg-[#f8fafc] font-['Jost'] font-light text-[#0f172a]">
+    <main className="relative min-h-screen overflow-x-hidden bg-[#f8fafc] pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))] font-['Jost'] font-light text-[#0f172a] md:pb-0">
       {/* Noise texture */}
       <div
         className="pointer-events-none fixed inset-0 z-0 opacity-[.03]"
@@ -561,7 +588,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       />
 
       {/* Breadcrumb */}
-      <div className="relative z-10 mx-auto flex items-center gap-2 px-8 pb-0 pt-10 text-[.65rem] uppercase tracking-[.22em] text-[#64748b] lg:px-16">
+      <div className="relative z-10 mx-auto flex items-center gap-2 px-8 pb-0 pt-10 text-[.65rem] uppercase tracking-[.22em] text-black lg:px-16">
         <Link
           href="/"
           className="text-black no-underline transition-colors hover:text-[#7da8c7]"
@@ -661,7 +688,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             <h1 className="mb-3 font-['Cormorant_Garamond'] text-[3.5rem] font-light leading-[.95] text-[#0f172a]">
               {product.title}
             </h1>
-            <p className="text-[.82rem] leading-[1.8] text-[#475569]">
+            <p className="text-[.82rem] leading-[1.8] text-black">
               {product.tagline ??
                 "Crafted for timeless style and everyday confidence."}
             </p>
@@ -673,7 +700,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   <StarIcon key={i} filled={filled} />
                 ))}
               </div>
-              <span className="text-[.7rem] tracking-[.1em] text-[#64748b]">
+              <span className="text-[.7rem] tracking-[.1em] text-black">
                 {rating} · {reviewCount} reviews
               </span>
             </div>
@@ -697,7 +724,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
             {/* Color picker */}
             <div className="mb-5">
-              <p className="mb-3 flex items-center justify-between text-[.62rem] uppercase tracking-[.22em] text-[#64748b]">
+              <p className="mb-3 flex items-center justify-between text-[.62rem] uppercase tracking-[.22em] text-black">
                 Color
                 <span
                   className={`normal-case tracking-normal ${
@@ -742,7 +769,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 ))}
               </div>
 
-              <p className="mt-2 text-[.65rem] text-[#64748b]">
+              <p className="mt-2 text-[.65rem] text-black">
                 {!isColorAvailable && selectedColor !== product.colors?.[0]
                   ? "✨ This color is available on custom order. Contact us for details."
                   : product.colors?.includes(selectedColor)
@@ -752,7 +779,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             </div>
 
             {/* Size picker */}
-            <p className="mb-3 flex items-center justify-between text-[.62rem] uppercase tracking-[.22em] text-[#64748b]">
+            <p className="mb-3 flex items-center justify-between text-[.62rem] uppercase tracking-[.22em] text-black">
               Size
               <span className="normal-case tracking-normal text-[#94a3b8]">
                 {selectedSize}
@@ -766,7 +793,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   className={`h-11 min-w-[48px] cursor-pointer rounded-[3px] border px-3 font-['Jost'] text-[.78rem] tracking-[.08em] transition-all ${
                     selectedSize === s
                       ? "border-[#7da8c7] bg-[#f0f6fb] text-[#0f172a]"
-                      : "border-[#e2e8f0] bg-transparent text-[#475569] hover:border-[#7da8c7] hover:text-[#0f172a]"
+                      : "border-[#e2e8f0] bg-transparent text-black hover:border-[#7da8c7] hover:text-[#0f172a]"
                   }`}
                 >
                   {s}
@@ -774,8 +801,8 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               ))}
             </div>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col gap-3">
+            {/* CTA row — desktop / tablet; mobile uses fixed bar below */}
+            <div className="hidden flex-col gap-3 md:flex">
               {isColorAvailable || selectedColor === product.colors?.[0] ? (
                 <button
                   onClick={handleAddToCart}
@@ -819,7 +846,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               className="mt-3 flex w-full items-center justify-center gap-2 border-0 bg-transparent opacity-60 transition-opacity hover:opacity-100"
             >
               <IconHeart filled={wishlisted} />
-              <span className="font-['Jost'] text-[.65rem] uppercase tracking-[.2em] text-[#64748b]">
+              <span className="font-['Jost'] text-[.65rem] uppercase tracking-[.2em] text-black">
                 {wishlisted ? "Saved to Wishlist" : "Add to Wishlist"}
               </span>
             </button>
@@ -848,7 +875,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                         className={`flex-1 border-0 bg-transparent py-4 font-['Jost'] text-[.65rem] uppercase tracking-[.2em] transition-all ${
                           activeTab === tab
                             ? "-mb-px border-b-[1.5px] border-[#7da8c7] bg-[#f0f6fb] text-[#7da8c7]"
-                            : "text-[#64748b] hover:text-[#0f172a]"
+                            : "text-black hover:text-[#0f172a]"
                         }`}
                       >
                         {tab === "desc"
@@ -865,7 +892,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
                 <div className="p-8">
                   {activeTab === "desc" && (
-                    <p className="text-[.88rem] leading-[1.9] text-[#475569]">
+                    <p className="text-[.88rem] leading-[1.9] text-black">
                       {product.description}
                     </p>
                   )}
@@ -874,7 +901,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                       {(product.details ?? []).map((d, i) => (
                         <li
                           key={i}
-                          className="flex items-start gap-2.5 text-[.82rem] text-[#475569]"
+                          className="flex items-start gap-2.5 text-[.82rem] text-black"
                         >
                           <span className="mt-[7px] h-1 w-1 flex-shrink-0 rounded-full bg-[#7da8c7]" />
                           {d}
@@ -886,10 +913,10 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                     <div className="grid grid-cols-2">
                       {specs.map((s) => (
                         <div key={s.label} className="contents">
-                          <span className="border-b border-[#e2e8f0] py-3 text-[.72rem] uppercase tracking-[.15em] text-[#64748b]">
+                          <span className="border-b border-[#e2e8f0] py-3 text-[.72rem] uppercase tracking-[.15em] text-black">
                             {s.label}
                           </span>
-                          <span className="border-b border-[#e2e8f0] py-3 text-right text-[.82rem] text-[#475569]">
+                          <span className="border-b border-[#e2e8f0] py-3 text-right text-[.82rem] text-black">
                             {s.value}
                           </span>
                         </div>
@@ -897,7 +924,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                     </div>
                   )}
                   {activeTab === "care" && (
-                    <p className="text-[.88rem] leading-[1.9] text-[#475569]">
+                    <p className="text-[.88rem] leading-[1.9] text-black">
                       {product.care ??
                         "Dry clean only. Steam preferred. Store on a shaped hanger away from direct sunlight."}
                     </p>
@@ -937,10 +964,10 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   <p className="mb-0.5 font-['Cormorant_Garamond'] text-[1.5rem] font-light text-[#0f172a]">
                     {item.title}
                   </p>
-                  <p className="text-[.6rem] uppercase tracking-[.18em] text-[#64748b]">
+                  <p className="text-[.6rem] uppercase tracking-[.18em] text-black">
                     {item.category} · {item.colors?.[0] ?? "-"}
                   </p>
-                  <p className="mt-2 text-[1.25rem] text-[#475569]">
+                  <p className="mt-2 text-[1.25rem] text-black">
                     {displayPrice(item.price)}
                   </p>
                 </div>
@@ -997,6 +1024,31 @@ export default function ProductDetailClient({ product }: { product: Product }) {
           </div>
         </section>
       )}
+
+      {/* Mobile: dual CTAs — global MobileBottomNav is hidden on /collection/[slug] */}
+      <div
+        className="fixed inset-x-0 bottom-0 z-[100] border-t border-[#e2e8f0] bg-[#f8fafc]/95 px-3 pt-2.5 pb-[calc(0.65rem+env(safe-area-inset-bottom,0px))] backdrop-blur-md md:hidden"
+        role="region"
+        aria-label="Product actions"
+      >
+        <div className="mx-auto grid max-w-lg grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={handleWhatsAppBestPrice}
+            className="flex h-[52px] min-h-[52px] items-center justify-center gap-2 rounded-sm border border-[#0f172a] bg-white px-1.5 font-['Jost'] text-[8.5px] font-semibold uppercase leading-[1.15] tracking-[0.12em] text-[#0f172a] shadow-[0_1px_0_rgba(255,255,255,1)_inset,0_4px_14px_-6px_rgba(15,23,42,0.14)] transition-opacity active:opacity-90 [-webkit-tap-highlight-color:transparent]"
+          >
+            <IconWhatsAppGreen className="h-[17px] w-[17px] shrink-0" />
+            <span className="max-[360px]:text-[8px]">Chat for best price</span>
+          </button>
+          <button
+            type="button"
+            onClick={canAddToCart ? handleAddToCart : handleWhatsAppInquiry}
+            className="flex h-[52px] min-h-[52px] items-center justify-center rounded-sm border border-black bg-[#0f172a] px-1.5 font-['Jost'] text-[9.5px] font-bold uppercase tracking-[0.16em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.16),inset_1px_0_0_rgba(255,255,255,0.06),0_8px_22px_-8px_rgba(0,0,0,0.42)] transition-opacity active:opacity-90 [-webkit-tap-highlight-color:transparent]"
+          >
+            {addedToCart ? "Added" : canAddToCart ? "Add to cart" : "Book now"}
+          </button>
+        </div>
+      </div>
     </main>
   );
 }

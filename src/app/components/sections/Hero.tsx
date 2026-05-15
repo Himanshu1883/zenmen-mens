@@ -1,10 +1,10 @@
 // src/app/components/sections/Hero.tsx
 "use client";
 
-import { fetchProducts } from "@/store/slices/productSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { fetchProducts } from "@/store/slices/productSlice";
 import Link from "next/link";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 // -- HERO SLIDES -------------------------------------------------------------
 const heroSlides = [
@@ -813,129 +813,6 @@ export default function Hero() {
       {/* ══════════════════════════════════════
           SECTION 3 — PREMIUM COLLECTION COLLAGE
       ══════════════════════════════════════ */}
-      <section id="collection" className="collage-section">
-        {/* Header row: title + arrows */}
-        <div className="collage-header">
-          <div>
-            <h2 className="collage-title">
-              The <em>Collection</em>
-            </h2>
-            <p className="collage-subtitle" style={{ marginTop: "6px" }}>
-              Explore Every Category
-            </p>
-          </div>
-          {/* Arrows always visible — clickable */}
-          <div className="collage-arrows">
-            <button
-              className="collage-arrow-btn"
-              onClick={() => slideCollage("left")}
-              disabled={!canSlideCollage}
-              aria-label="Previous collection set"
-            >
-              &#8592;
-            </button>
-            <button
-              className="collage-arrow-btn"
-              onClick={() => slideCollage("right")}
-              disabled={!canSlideCollage}
-              aria-label="Next collection set"
-            >
-              &#8594;
-            </button>
-          </div>
-        </div>
-
-        {/* Sliding viewport */}
-        <div className="collage-viewport">
-          {/* Exiting track */}
-          {prevCollageStart !== null && (
-            <div
-              className={`collage-grid-track ${collageDir === "right" ? "exit-to-left" : "exit-to-right"}`}
-            >
-              {collagePrevVisible.map((item, i) => (
-                <div className="collage-cell" key={`prev-${i}`}>
-                  <img src={item.img} alt={item.label} />
-                  <div className="collage-cell-overlay">
-                    <div className="collage-cell-label">{item.label}</div>
-                    <div className="collage-cell-desc">{item.desc}</div>
-                  </div>
-                  {item.tag && (
-                    <div className="collage-cell-tag">{item.tag}</div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Entering track */}
-          <div
-            className={`collage-grid-track ${
-              prevCollageStart !== null
-                ? collageDir === "right"
-                  ? "enter-from-right"
-                  : "enter-from-left"
-                : ""
-            }`}
-            key={`${collageStart}-${collageSource.length}`}
-          >
-            {collageVisible.map((item, i) => (
-              <Link
-                key={i}
-                href={item.slug ? `/collection/${item.slug}` : "/collection"}
-                className="collage-cell"
-              >
-                <img src={item.img} alt={item.label} />
-                <div className="collage-cell-overlay">
-                  <div className="collage-cell-label">{item.label}</div>
-                  <div className="collage-cell-desc">{item.desc}</div>
-                </div>
-                {item.tag && <div className="collage-cell-tag">{item.tag}</div>}
-                {/* Hover CTA overlay */}
-                <div className="collage-hover-cta">
-                  <span className="collage-hover-cta-pill">
-                    View Collection
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* Dot indicators */}
-        {canSlideCollage && (
-          <div className="collage-dots">
-            {Array.from({
-              length: Math.ceil(collageSource.length / VISIBLE),
-            }).map((_, i) => (
-              <div
-                key={i}
-                className={`collage-dot ${Math.floor(collageStart / VISIBLE) === i ? "active" : ""}`}
-                onClick={() => {
-                  if (collageTransRef.current) return;
-                  const target = i * VISIBLE;
-                  const dir = target > collageStart ? "right" : "left";
-                  collageTransRef.current = true;
-                  setCollageDir(dir);
-                  setPrevCollageStart(collageStart);
-                  setCollageStart(target);
-                  setTimeout(() => {
-                    setPrevCollageStart(null);
-                    collageTransRef.current = false;
-                  }, 650);
-                }}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* View Full Collection CTA */}
-        <div className="collage-view-btn-wrap">
-          <Link href="/collection" className="collage-view-btn">
-            View Full Collection
-            <span className="collage-view-btn-arrow">→</span>
-          </Link>
-        </div>
-      </section>
     </>
   );
 }

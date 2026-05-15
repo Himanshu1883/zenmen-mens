@@ -21,8 +21,9 @@ const WA_LINK =
     "Hi ZENmen, I'd like to book an appointment for bespoke tailoring.",
   );
 
-/** Above WhatsApp: `bottom-18` (4.5rem) + `h-14` (3.5rem) + gap */
-const CHAT_BOTTOM = "calc(4.5rem + 3.5rem + 0.75rem)";
+/** Desktop: above global WhatsApp FAB. Mobile: above bottom nav (FAB hidden). */
+const CHAT_BOTTOM_CLASS =
+  "bottom-[calc(5.25rem+env(safe-area-inset-bottom,0px))] md:bottom-[calc(4.5rem+3.5rem+0.75rem)]";
 
 export default function AiChatWidget() {
   const pathname = usePathname();
@@ -61,6 +62,12 @@ export default function AiChatWidget() {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages, open, loading]);
+
+  useEffect(() => {
+    const onOpenRequest = () => setOpen(true);
+    window.addEventListener("zenmen:open-chat", onOpenRequest);
+    return () => window.removeEventListener("zenmen:open-chat", onOpenRequest);
+  }, []);
 
   const send = useCallback(async () => {
     const text = input.trim();
@@ -123,17 +130,20 @@ export default function AiChatWidget() {
 
   return (
     <div
-      className="pointer-events-none fixed right-6 z-[91]"
-      style={{ bottom: CHAT_BOTTOM }}
+      className={cn(
+        "pointer-events-none fixed z-[91]",
+        CHAT_BOTTOM_CLASS,
+        "left-4 right-4 md:left-auto md:right-6",
+      )}
     >
-      <div className="pointer-events-auto flex flex-col items-end gap-2">
+      <div className="pointer-events-auto flex max-md:w-full flex-col items-stretch gap-2 md:items-end">
         {open && (
           <div
             id={panelId}
             role="dialog"
             aria-modal="true"
             aria-label="ZENmen chat"
-            className="mb-2 flex max-h-[min(520px,calc(100vh-12rem))] w-[min(calc(100vw-3rem),380px)] flex-col overflow-hidden rounded-sm border border-[#1b2232]/12 bg-[#fafaf9] shadow-[0_20px_50px_-12px_rgba(15,23,42,0.25)]"
+            className="mb-2 flex max-h-[min(520px,calc(100vh-12rem))] w-full max-w-[min(calc(100vw-3rem),380px)] max-md:max-w-none flex-col overflow-hidden rounded-sm border border-[#1b2232]/12 bg-[#fafaf9] shadow-[0_20px_50px_-12px_rgba(15,23,42,0.25)]"
           >
             <div className="flex items-center justify-between gap-3 border-b border-[#1b2232]/10 bg-gradient-to-r from-[#0f172a] to-[#1e293b] px-4 py-3 text-white">
               <div>
@@ -242,7 +252,7 @@ export default function AiChatWidget() {
           aria-expanded={open}
           aria-controls={open ? panelId : undefined}
           onClick={() => setOpen((v) => !v)}
-          className="flex h-14 w-14 items-center justify-center rounded-full border border-[#1b2232]/15 bg-gradient-to-br from-[#0f172a] to-[#1e293b] text-white shadow-[0_14px_30px_-12px_rgba(15,23,42,0.45)] transition-transform duration-200 hover:scale-105 active:scale-95 cursor-pointer"
+          className="hidden h-14 w-14 cursor-pointer items-center justify-center rounded-full border border-[#1b2232]/15 bg-gradient-to-br from-[#0f172a] to-[#1e293b] text-white shadow-[0_14px_30px_-12px_rgba(15,23,42,0.45)] transition-transform duration-200 hover:scale-105 active:scale-95 md:flex"
         >
           {open ? (
             <X className="h-6 w-6" strokeWidth={1.5} />

@@ -157,3 +157,9 @@
     border: 0;
   }
 }
+
+/* @media (min-width: 1280px) {
+  html {
+    zoom: 0.9;
+  }
+} */

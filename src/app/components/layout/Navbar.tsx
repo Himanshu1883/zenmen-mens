@@ -187,9 +187,12 @@ const Navbar = () => {
                   </span>
                 ) : null}
               </button>
-              <button className="bg-transparent px-6 py-2.5 border border-[#e2e8f0] text-[#0f172a] text-[11px] tracking-[0.15em] uppercase hover:bg-[#7da8c7] hover:text-white hover:border-[#7da8c7] transition-all duration-300 rounded-sm cursor-pointer">
+              <Link
+                href="/appointment"
+                className="inline-flex items-center justify-center bg-transparent px-6 py-2.5 border border-[#e2e8f0] text-[#0f172a] text-[11px] tracking-[0.15em] uppercase no-underline hover:bg-[#7da8c7] hover:text-white hover:border-[#7da8c7] transition-all duration-300 rounded-sm cursor-pointer"
+              >
                 Book Appointment
-              </button>
+              </Link>
             </div>
 
             {/* Mobile / small tablet: search, currency, account, bag, menu */}
