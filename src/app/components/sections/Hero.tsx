@@ -21,13 +21,13 @@ const heroSlides = [
     overlayDir: "left",
   },
   {
-    img: "zenmen_kurta.png",
-    tag: "The Sherwani Edit · 2025",
+    img: "banner_kurta.png",
+    tag: "The Kurta Edit · 2025",
     title: ["Royal Heritage,", "Modern", "Soul"],
     titleItalic: 1,
     subtitle:
-      "Hand-embroidered sherwanis crafted for the discerning groom. Tradition reimagined.",
-    cta: "Explore Sherwanis",
+      "Hand-embroidered kurta's crafted for the discerning groom. Tradition reimagined.",
+    cta: "Explore Kurta's",
     ctaSecondary: "Book a Fitting",
     textAlign: "right",
     overlayDir: "right",
