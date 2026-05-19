@@ -146,7 +146,29 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
         <X className="h-5 w-5" strokeWidth={1.5} />
       </button>
 
-      <div className="relative mx-auto w-full max-w-3xl px-4 pb-20 pt-20 sm:px-6 sm:pt-24 lg:max-w-4xl lg:px-8">
+      <Link
+        href="/"
+        onClick={onClose}
+        className="pointer-events-auto absolute left-1/2 top-4 z-10 flex -translate-x-1/2 items-center gap-2 select-none no-underline sm:top-6 sm:gap-2.5"
+      >
+        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[#1b2232] sm:h-11 sm:w-11">
+          <img
+            src="/logo_zenmen.png"
+            alt="ZENmen logo"
+            className="h-full w-full object-cover"
+          />
+        </div>
+        <div className="flex flex-col">
+          <p className="m-0 whitespace-nowrap text-[22px] leading-[0.92] text-[#0f172a] sm:text-[26px]">
+            ZENmen
+          </p>
+          <p className="m-0 mt-0.5 whitespace-nowrap text-[8px] uppercase tracking-[0.2em] text-[#7da8c7] sm:text-[9px] sm:tracking-[0.28em]">
+            Bespoke Tailoring
+          </p>
+        </div>
+      </Link>
+
+      <div className="relative mx-auto w-full max-w-3xl px-4 pb-20 pt-[5.5rem] sm:px-6 sm:pt-28 lg:max-w-4xl lg:px-8">
         <p id={titleId} className="sr-only">
           Search products and categories
         </p>

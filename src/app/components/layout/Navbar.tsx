@@ -127,8 +127,8 @@ const Navbar = () => {
               href="/"
               className="flex min-w-0 flex-1 lg:flex-none lg:justify-start"
             >
-              <div className="flex min-w-0 items-center gap-1.5 sm:gap-2 lg:gap-3 group select-none">
-                <div className="h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9 lg:h-11 lg:w-11 shrink-0 rounded-full overflow-hidden border border-[#1b2232] transition-transform duration-700 group-hover:rotate-[360deg]">
+              <div className="flex min-w-0 items-center gap-2 sm:gap-2.5 lg:gap-3 group select-none">
+                <div className="h-10 w-10 sm:h-10 sm:w-10 md:h-10 md:w-10 lg:h-11 lg:w-11 shrink-0 rounded-full overflow-hidden border border-[#1b2232] transition-transform duration-700 group-hover:rotate-[360deg]">
                   <img
                     src="/logo_zenmen.png"
                     alt="ZENmen logo"
@@ -136,10 +136,10 @@ const Navbar = () => {
                   />
                 </div>
                 <div className="flex min-w-0 flex-col">
-                  <p className="m-0 whitespace-nowrap text-[17px] sm:text-[22px] lg:text-[36px] leading-[0.92] text-[#0f172a]">
+                  <p className="m-0 whitespace-nowrap text-[22px] sm:text-[24px] lg:text-[36px] leading-[0.92] text-[#0f172a]">
                     ZENmen
                   </p>
-                  <p className="m-0 whitespace-nowrap text-[6px] sm:text-[7px] lg:text-[9px] tracking-[0.18em] sm:tracking-[0.24em] lg:tracking-[0.36em] text-[#7da8c7] uppercase mt-0.5 lg:mt-1">
+                  <p className="m-0 whitespace-nowrap text-[8px] sm:text-[8px] lg:text-[9px] tracking-[0.2em] sm:tracking-[0.24em] lg:tracking-[0.36em] text-[#7da8c7] uppercase mt-0.5 lg:mt-1">
                     Bespoke Tailoring
                   </p>
                 </div>
