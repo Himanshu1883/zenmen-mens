@@ -84,9 +84,9 @@ const MobileMenu = ({ isOpen, onClose, onOpenAuth }: MobileMenuProps) => {
                   </div>
                   <div className="flex flex-col">
                     <p className="m-0 text-[28px] leading-[0.92] text-[#0f172a]">
-                      ZENmen
+                      ZENMEN
                     </p>
-                    <p className="m-0 text-[8px] tracking-[0.32em] text-[#6b7280] uppercase mt-1">
+                    <p className="m-0 text-[8px] tracking-[0.32em] text-[#7da8c7] uppercase mt-1">
                       Bespoke Tailoring
                     </p>
                   </div>

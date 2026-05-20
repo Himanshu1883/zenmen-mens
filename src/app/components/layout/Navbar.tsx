@@ -137,7 +137,7 @@ const Navbar = () => {
                 </div>
                 <div className="flex min-w-0 flex-col">
                   <p className="m-0 whitespace-nowrap text-[22px] sm:text-[24px] lg:text-[36px] leading-[0.92] text-[#0f172a]">
-                    ZENmen
+                    ZENMEN
                   </p>
                   <p className="m-0 whitespace-nowrap text-[8px] sm:text-[8px] lg:text-[9px] tracking-[0.2em] sm:tracking-[0.24em] lg:tracking-[0.36em] text-[#7da8c7] uppercase mt-0.5 lg:mt-1">
                     Bespoke Tailoring
