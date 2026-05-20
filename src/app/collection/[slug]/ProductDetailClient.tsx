@@ -204,7 +204,32 @@ function AccordionItem({
   );
 }
 
-// ─── Image Zoom (desktop hover + mobile tap) ──────────────────────────────────
+// ─── Image Zoom (desktop hover · mobile pinch + circular loupe) ───────────────
+
+const DESKTOP_ZOOM_SCALE = 2;
+const MOBILE_MIN_SCALE = 1;
+const MOBILE_MAX_SCALE = 4;
+const LENS_MAGNIFY = 2.75;
+const LENS_SIZE_PX = 128;
+
+function touchDistance(touches: React.TouchList | TouchList) {
+  if (touches.length < 2) return 0;
+  const dx = touches[0].clientX - touches[1].clientX;
+  const dy = touches[0].clientY - touches[1].clientY;
+  return Math.hypot(dx, dy);
+}
+
+function touchCenter(
+  touches: React.TouchList | TouchList,
+  rect: DOMRect,
+) {
+  const cx = (touches[0].clientX + touches[1].clientX) / 2;
+  const cy = (touches[0].clientY + touches[1].clientY) / 2;
+  return {
+    x: Math.min(100, Math.max(0, ((cx - rect.left) / rect.width) * 100)),
+    y: Math.min(100, Math.max(0, ((cy - rect.top) / rect.height) * 100)),
+  };
+}
 
 function ZoomableImage({
   src,
@@ -216,139 +241,273 @@ function ZoomableImage({
   className?: string;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [zoomed, setZoomed] = useState(false);
-  const [origin, setOrigin] = useState({ x: 50, y: 50 });
   const rafRef = useRef<number | null>(null);
-  const [tapZoomMode, setTapZoomMode] = useState(false);
-  const touchStart = useRef<{ x: number; y: number; t: number } | null>(null);
-  const touchMoved = useRef(false);
+  const pinchRef = useRef<{
+    startDist: number;
+    startScale: number;
+    startPan: { x: number; y: number };
+    startOrigin: { x: number; y: number };
+  } | null>(null);
+  const panRef = useRef<{
+    startX: number;
+    startY: number;
+    startPan: { x: number; y: number };
+  } | null>(null);
 
-  const ZOOM_SCALE = 2;
-  const TAP_MAX_MOVE_PX = 12;
-  const TAP_MAX_MS = 350;
+  const [isMobile, setIsMobile] = useState(false);
+  const [desktopZoomed, setDesktopZoomed] = useState(false);
+  const [desktopOrigin, setDesktopOrigin] = useState({ x: 50, y: 50 });
+
+  const [pinchScale, setPinchScale] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [origin, setOrigin] = useState({ x: 50, y: 50 });
+  const [lensPos, setLensPos] = useState({ x: 50, y: 50 });
+  const [showLens, setShowLens] = useState(false);
+  const [isPinching, setIsPinching] = useState(false);
+  const [containerSize, setContainerSize] = useState({ w: 0, h: 0 });
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 767px)");
-    const update = () => setTapZoomMode(mq.matches);
+    const update = () => setIsMobile(mq.matches);
     update();
     mq.addEventListener("change", update);
     return () => mq.removeEventListener("change", update);
   }, []);
 
-  useEffect(() => {
-    setZoomed(false);
+  const resetMobileZoom = useCallback(() => {
+    setPinchScale(1);
+    setPan({ x: 0, y: 0 });
     setOrigin({ x: 50, y: 50 });
-  }, [src, tapZoomMode]);
+    setLensPos({ x: 50, y: 50 });
+    setShowLens(false);
+    setIsPinching(false);
+    pinchRef.current = null;
+    panRef.current = null;
+  }, []);
+
+  useEffect(() => {
+    resetMobileZoom();
+    setDesktopZoomed(false);
+    setDesktopOrigin({ x: 50, y: 50 });
+  }, [src, isMobile, resetMobileZoom]);
 
   useEffect(() => {
     const el = containerRef.current;
-    if (!el || !tapZoomMode) return;
+    if (!el) return;
 
-    const preventScrollWhilePanning = (e: TouchEvent) => {
-      if (zoomed && e.touches.length === 1) e.preventDefault();
+    const ro = new ResizeObserver((entries) => {
+      const { width, height } = entries[0]?.contentRect ?? { width: 0, height: 0 };
+      setContainerSize({ w: width, h: height });
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || !isMobile) return;
+
+    const blockScroll = (e: TouchEvent) => {
+      if (e.touches.length >= 2 || pinchScale > 1.02 || isPinching) {
+        e.preventDefault();
+      }
     };
 
-    el.addEventListener("touchmove", preventScrollWhilePanning, {
-      passive: false,
-    });
-    return () =>
-      el.removeEventListener("touchmove", preventScrollWhilePanning);
-  }, [zoomed, tapZoomMode]);
+    el.addEventListener("touchmove", blockScroll, { passive: false });
+    return () => el.removeEventListener("touchmove", blockScroll);
+  }, [isMobile, pinchScale, isPinching]);
 
   const getRelativePos = useCallback((clientX: number, clientY: number) => {
     const el = containerRef.current;
     if (!el) return { x: 50, y: 50 };
     const rect = el.getBoundingClientRect();
-    const x = Math.min(
-      100,
-      Math.max(0, ((clientX - rect.left) / rect.width) * 100),
-    );
-    const y = Math.min(
-      100,
-      Math.max(0, ((clientY - rect.top) / rect.height) * 100),
-    );
-    return { x, y };
+    return {
+      x: Math.min(100, Math.max(0, ((clientX - rect.left) / rect.width) * 100)),
+      y: Math.min(100, Math.max(0, ((clientY - rect.top) / rect.height) * 100)),
+    };
   }, []);
 
-  // ── Desktop: zoom on hover, track cursor for pan ──────────────────────────
+  const clampPan = useCallback(
+    (nextPan: { x: number; y: number }, scale: number) => {
+      const el = containerRef.current;
+      if (!el) return nextPan;
+      const rect = el.getBoundingClientRect();
+      const maxX = ((scale - 1) * rect.width) / 2;
+      const maxY = ((scale - 1) * rect.height) / 2;
+      return {
+        x: Math.min(maxX, Math.max(-maxX, nextPan.x)),
+        y: Math.min(maxY, Math.max(-maxY, nextPan.y)),
+      };
+    },
+    [],
+  );
+
+  // ── Desktop: hover zoom ───────────────────────────────────────────────────
 
   const handleMouseEnter = () => {
-    if (tapZoomMode) return;
-    setZoomed(true);
+    if (isMobile) return;
+    setDesktopZoomed(true);
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (tapZoomMode || !zoomed) return;
+    if (isMobile || !desktopZoomed) return;
     const { clientX, clientY } = e;
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     rafRef.current = requestAnimationFrame(() => {
-      setOrigin(getRelativePos(clientX, clientY));
+      setDesktopOrigin(getRelativePos(clientX, clientY));
       rafRef.current = null;
     });
   };
 
   const handleMouseLeave = () => {
-    if (tapZoomMode) return;
-    setZoomed(false);
-    setOrigin({ x: 50, y: 50 });
+    if (isMobile) return;
+    setDesktopZoomed(false);
+    setDesktopOrigin({ x: 50, y: 50 });
   };
 
-  // ── Mobile: tap to toggle zoom; drag to pan when zoomed ───────────────────
+  // ── Mobile: pinch zoom + circular loupe + pan ─────────────────────────────
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (!tapZoomMode || e.touches.length !== 1) return;
-    touchStart.current = {
-      x: e.touches[0].clientX,
-      y: e.touches[0].clientY,
-      t: Date.now(),
-    };
-    touchMoved.current = false;
-  };
+    if (!isMobile) return;
+    const el = containerRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!tapZoomMode || e.touches.length !== 1) return;
-
-    if (touchStart.current && !zoomed) {
-      const dx = e.touches[0].clientX - touchStart.current.x;
-      const dy = e.touches[0].clientY - touchStart.current.y;
-      if (Math.hypot(dx, dy) > TAP_MAX_MOVE_PX) touchMoved.current = true;
+    if (e.touches.length === 2) {
+      const dist = touchDistance(e.touches);
+      const center = touchCenter(e.touches, rect);
+      pinchRef.current = {
+        startDist: dist,
+        startScale: pinchScale,
+        startPan: { ...pan },
+        startOrigin: { ...origin },
+      };
+      setIsPinching(true);
+      setShowLens(true);
+      setLensPos(center);
+      setOrigin(center);
+      panRef.current = null;
       return;
     }
 
-    if (!zoomed) return;
-    e.preventDefault();
-    const touch = e.touches[0];
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    rafRef.current = requestAnimationFrame(() => {
-      setOrigin(getRelativePos(touch.clientX, touch.clientY));
-      rafRef.current = null;
-    });
+    if (e.touches.length === 1 && pinchScale > 1.02) {
+      const pos = getRelativePos(e.touches[0].clientX, e.touches[0].clientY);
+      panRef.current = {
+        startX: e.touches[0].clientX,
+        startY: e.touches[0].clientY,
+        startPan: { ...pan },
+      };
+      setShowLens(true);
+      setLensPos(pos);
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isMobile) return;
+    const el = containerRef.current;
+    if (!el) return;
+
+    if (e.touches.length === 2 && pinchRef.current) {
+      e.preventDefault();
+      const rect = el.getBoundingClientRect();
+      const dist = touchDistance(e.touches);
+      const center = touchCenter(e.touches, rect);
+      const ratio = dist / pinchRef.current.startDist;
+      const nextScale = Math.min(
+        MOBILE_MAX_SCALE,
+        Math.max(MOBILE_MIN_SCALE, pinchRef.current.startScale * ratio),
+      );
+
+      setPinchScale(nextScale);
+      setOrigin(center);
+      setLensPos(center);
+      setShowLens(true);
+      setIsPinching(true);
+
+      if (nextScale > 1.02) {
+        setPan(
+          clampPan(
+            {
+              x: pinchRef.current.startPan.x,
+              y: pinchRef.current.startPan.y,
+            },
+            nextScale,
+          ),
+        );
+      }
+      return;
+    }
+
+    if (e.touches.length === 1) {
+      const pos = getRelativePos(e.touches[0].clientX, e.touches[0].clientY);
+      setLensPos(pos);
+
+      if (pinchScale > 1.02 && panRef.current) {
+        e.preventDefault();
+        const dx = e.touches[0].clientX - panRef.current.startX;
+        const dy = e.touches[0].clientY - panRef.current.startY;
+        setPan(
+          clampPan(
+            {
+              x: panRef.current.startPan.x + dx,
+              y: panRef.current.startPan.y + dy,
+            },
+            pinchScale,
+          ),
+        );
+        setShowLens(true);
+      } else if (pinchScale > 1.02) {
+        setShowLens(true);
+      }
+    }
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    if (!tapZoomMode || !touchStart.current) return;
+    if (!isMobile) return;
 
-    const touch = e.changedTouches[0];
-    const dx = touch.clientX - touchStart.current.x;
-    const dy = touch.clientY - touchStart.current.y;
-    const elapsed = Date.now() - touchStart.current.t;
-    touchStart.current = null;
+    if (e.touches.length < 2) {
+      setIsPinching(false);
+      pinchRef.current = null;
+    }
 
-    const isTap =
-      !touchMoved.current &&
-      Math.hypot(dx, dy) < TAP_MAX_MOVE_PX &&
-      elapsed < TAP_MAX_MS;
+    if (e.touches.length === 0) {
+      panRef.current = null;
+      if (pinchScale <= 1.05) {
+        resetMobileZoom();
+      } else {
+        setShowLens(false);
+        setIsPinching(false);
+      }
+      return;
+    }
 
-    if (!isTap) return;
-
-    if (zoomed) {
-      setZoomed(false);
-      setOrigin({ x: 50, y: 50 });
-    } else {
-      setOrigin(getRelativePos(touch.clientX, touch.clientY));
-      setZoomed(true);
+    if (e.touches.length === 1 && pinchScale > 1.02) {
+      const pos = getRelativePos(e.touches[0].clientX, e.touches[0].clientY);
+      setLensPos(pos);
+      panRef.current = {
+        startX: e.touches[0].clientX,
+        startY: e.touches[0].clientY,
+        startPan: { ...pan },
+      };
     }
   };
+
+  const handleDoubleClick = () => {
+    if (!isMobile) return;
+    resetMobileZoom();
+  };
+
+  const mobileZoomed = pinchScale > 1.02;
+  const lensW = containerSize.w * LENS_MAGNIFY;
+  const lensH = containerSize.h * LENS_MAGNIFY;
+  const lensImgLeft =
+    containerSize.w > 0
+      ? -(lensPos.x / 100) * lensW + LENS_SIZE_PX / 2
+      : 0;
+  const lensImgTop =
+    containerSize.h > 0
+      ? -(lensPos.y / 100) * lensH + LENS_SIZE_PX / 2
+      : 0;
 
   return (
     <div
@@ -360,15 +519,16 @@ function ZoomableImage({
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      onDoubleClick={handleDoubleClick}
       style={{
-        cursor: tapZoomMode
-          ? zoomed
+        cursor: isMobile
+          ? mobileZoomed
             ? "grab"
             : "zoom-in"
-          : zoomed
+          : desktopZoomed
             ? "zoom-out"
             : "zoom-in",
-        touchAction: tapZoomMode && zoomed ? "none" : "pan-y",
+        touchAction: isMobile ? "none" : undefined,
       }}
     >
       <img
@@ -379,27 +539,76 @@ function ZoomableImage({
         decoding="async"
         draggable={false}
         className="block h-full w-full select-none object-cover object-[center_15%]"
-        style={{
-          transform: zoomed ? `scale(${ZOOM_SCALE})` : "scale(1)",
-          transformOrigin: `${origin.x}% ${origin.y}%`,
-          transition: zoomed ? "transform 0.12s ease-out" : "transform 0.2s ease",
-          willChange: "transform",
-        }}
+        style={
+          isMobile
+            ? {
+                transform: `translate(${pan.x}px, ${pan.y}px) scale(${pinchScale})`,
+                transformOrigin: `${origin.x}% ${origin.y}%`,
+                transition: isPinching ? "none" : "transform 0.15s ease-out",
+                willChange: "transform",
+              }
+            : {
+                transform: desktopZoomed
+                  ? `scale(${DESKTOP_ZOOM_SCALE})`
+                  : "scale(1)",
+                transformOrigin: `${desktopOrigin.x}% ${desktopOrigin.y}%`,
+                transition: desktopZoomed
+                  ? "transform 0.12s ease-out"
+                  : "transform 0.2s ease",
+                willChange: "transform",
+              }
+        }
       />
 
-      {/* Zoom hint badge — only when not zoomed */}
-      {!zoomed && (
+      {/* Mobile: circular magnifier (pinch / explore) */}
+      {isMobile && showLens && containerSize.w > 0 && (
+        <div
+          className="pointer-events-none absolute z-30 rounded-full border-[2.5px] border-white/90 bg-[#0f172a] shadow-[0_8px_32px_rgba(15,23,42,0.45)] ring-2 ring-[#7da8c7]/40"
+          style={{
+            width: LENS_SIZE_PX,
+            height: LENS_SIZE_PX,
+            left: `${lensPos.x}%`,
+            top: `${lensPos.y}%`,
+            transform: "translate(-50%, -50%)",
+          }}
+          aria-hidden
+        >
+          <div className="absolute inset-0 overflow-hidden rounded-full">
+            <img
+              src={src}
+              alt=""
+              draggable={false}
+              className="absolute max-w-none select-none object-cover object-[center_15%]"
+              style={{
+                width: lensW,
+                height: lensH,
+                left: lensImgLeft,
+                top: lensImgTop,
+              }}
+            />
+          </div>
+          <div className="absolute inset-0 rounded-full shadow-[inset_0_0_12px_rgba(15,23,42,0.25)]" />
+        </div>
+      )}
+
+      {!isMobile && !desktopZoomed && (
         <div className="pointer-events-none absolute bottom-4 right-4 flex items-center gap-1.5 rounded-sm border border-white/15 bg-[#0f172a]/70 px-2.5 py-1.5 text-[9px] tracking-[0.15em] uppercase text-[#e2e8f0] backdrop-blur-sm">
           <IconZoomIn />
           <span className="hidden sm:inline">Zoom</span>
         </div>
       )}
 
-      {/* Close hint when zoomed on mobile */}
-      {zoomed && (
-        <div className="pointer-events-none absolute right-4 top-4 flex items-center gap-1.5 rounded-sm border border-white/15 bg-[#0f172a]/70 px-2.5 py-1.5 text-[9px] tracking-[0.15em] uppercase text-[#e2e8f0] backdrop-blur-sm sm:hidden">
+      {isMobile && !mobileZoomed && !showLens && (
+        <div className="pointer-events-none absolute bottom-4 right-4 flex items-center gap-1.5 rounded-sm border border-white/15 bg-[#0f172a]/70 px-2.5 py-1.5 text-[9px] tracking-[0.15em] uppercase text-[#e2e8f0] backdrop-blur-sm">
+          <IconZoomIn />
+          Pinch to zoom
+        </div>
+      )}
+
+      {isMobile && mobileZoomed && !isPinching && (
+        <div className="pointer-events-none absolute right-4 top-4 flex items-center gap-1.5 rounded-sm border border-white/15 bg-[#0f172a]/70 px-2.5 py-1.5 text-[9px] tracking-[0.15em] uppercase text-[#e2e8f0] backdrop-blur-sm">
           <IconClose />
-          Tap to exit
+          Double-tap to reset
         </div>
       )}
     </div>
@@ -609,9 +818,12 @@ export default function ProductDetailClient({ product }: { product: Product }) {
           {/* Zoom instruction hint */}
           <p className="mt-3 text-center text-[10px] tracking-[0.1em] uppercase text-[#94a3b8]">
             <span className="hidden md:inline">Hover</span>
-            <span className="md:hidden">Tap</span> image to zoom
+            <span className="md:hidden">Pinch</span> image to zoom
             <span className="hidden md:inline"> · move cursor to explore</span>
-            <span className="md:hidden"> · drag to explore · tap again to exit</span>
+            <span className="md:hidden">
+              {" "}
+              · circular loupe while pinching · drag to pan · double-tap to reset
+            </span>
           </p>
         </div>
 

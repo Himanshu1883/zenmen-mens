@@ -8,6 +8,7 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
+import { useDisplayPrice } from "@/hooks/useDisplayPrice";
 import { useSwipeSlider } from "@/hooks/useSwipeSlider";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -19,7 +20,7 @@ const PRODUCT_VIDEO_SLIDES = [
     videoSrc: "/product_video_1.mp4",
     productName: "Royal Purple Jodhpuri Suit",
     category: "Three Piece Collection",
-    priceLabel: "₹58,000",
+    priceInr: 58000,
     description: "Handcrafted excellence in navy blue",
     slug: "royal-purple-jodhpuri-suit",
   },
@@ -28,7 +29,7 @@ const PRODUCT_VIDEO_SLIDES = [
     videoSrc: "/product_video_3.mp4",
     productName: "Classic Black Peak Lapel Tuxedo",
     category: "Wedding Collection",
-    priceLabel: "₹42,000",
+    priceInr: 42000,
     description: "Contemporary fusion elegance",
     slug: "classic-black-peak-lapel-tuxedo",
   },
@@ -37,7 +38,7 @@ const PRODUCT_VIDEO_SLIDES = [
     videoSrc: "/product_video_2.mp4",
     productName: "Midnight Black Bandh gala",
     category: "Bandhgala Collection",
-    priceLabel: "₹72,000",
+    priceInr: 72000,
     description: "Timeless sophistication",
     slug: "midnight-black-bandh-gala",
   },
@@ -46,7 +47,7 @@ const PRODUCT_VIDEO_SLIDES = [
     videoSrc: "/product_video_4.mp4",
     productName: "White Fringe Detail Statement Blazer",
     category: "Western Wear",
-    priceLabel: "₹65,000",
+    priceInr: 65000,
     description: "Royal elegance redefined",
     slug: "white-fringe-detail-statement-blazer",
   },
@@ -65,6 +66,7 @@ function getVisibleCount() {
 const slides: VideoSlide[] = [...PRODUCT_VIDEO_SLIDES];
 
 const ProductVideosSection = () => {
+  const { format: formatPrice } = useDisplayPrice();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMuted, setIsMuted] = useState<Record<number, boolean>>({});
   const [visibleCount, setVisibleCount] = useState(1);
@@ -328,7 +330,7 @@ const ProductVideosSection = () => {
                               fontWeight: 600,
                             }}
                           >
-                            {video.priceLabel}
+                            {formatPrice(video.priceInr)}
                           </span>
 
                           <span className="inline-flex items-center gap-1.5 bg-white text-[#0f172a] text-[9px] tracking-[0.18em] uppercase font-semibold px-3 py-2 hover:bg-[#7da8c7] hover:text-white transition-colors duration-200 shrink-0">

@@ -5,7 +5,7 @@ import { MapPin, ArrowRight } from 'lucide-react';
 
 /** Single atelier — same copy on every card; images vary for the grid layout only */
 const ZENMEN_ATELIER = {
-  name: "ZENmen Bespoke",
+  name: "ZENMEN Bespoke",
   location: "Lajpat Nagar II, New Delhi",
   address: "E-39, Lajpat Nagar II, New Delhi – 110024",
   mapsUrl:

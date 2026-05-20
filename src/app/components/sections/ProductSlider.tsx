@@ -1,11 +1,13 @@
 "use client";
 
+import { useDisplayPrice } from '@/hooks/useDisplayPrice';
 import { useSwipeSlider } from '@/hooks/useSwipeSlider';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 const ProductSlider = () => {
+  const { format: formatPrice } = useDisplayPrice();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [itemsPerView, setItemsPerView] = useState(5);
   const sliderRef = useRef<HTMLDivElement>(null);
@@ -36,47 +38,48 @@ const ProductSlider = () => {
     return () => window.removeEventListener('resize', updateItemsPerView);
   }, [itemsPerView]);
 
+  /** Base amounts in INR — displayed with `useDisplayPrice` */
   const products = [
     {
       name: 'Embellished Designer Blazer',
       category: 'Indo Western',
-      price: '₹38,500',
+      priceInr: 38500,
       image: '/WhatsApp_Image_2026-05-03_at_4.30.36_PM.jpeg',
     },
     {
       name: 'Luxury Three Piece Tuxedo',
       category: 'Formal Collection',
-      price: '₹65,000',
+      priceInr: 65000,
       image: '/WhatsApp_Image_2026-05-03_at_4.30.33_PM.jpeg',
     },
     {
       name: 'Premium Double Breasted Suit',
       category: 'Designer Suits',
-      price: '₹58,000',
+      priceInr: 58000,
       image: '/WhatsApp_Image_2026-05-03_at_4.30.31_PM.jpeg',
     },
     {
       name: 'Contemporary Safari Shirt',
       category: 'Casual Luxury',
-      price: '₹12,500',
+      priceInr: 12500,
       image: '/WhatsApp_Image_2026-04-28_at_9.56.51_PM.jpeg',
     },
     {
       name: 'Embroidered Black Kurta',
       category: 'Wedding Special',
-      price: '₹28,500',
+      priceInr: 28500,
       image: '/WhatsApp_Image_2026-04-28_at_9.56.47_PM.jpeg',
     },
     {
       name: 'Royal Mauve Sherwani',
       category: 'Bridal Collection',
-      price: '₹45,000',
+      priceInr: 45000,
       image: '/WhatsApp_Image_2026-04-28_at_9.56.46_PM.jpeg',
     },
     {
       name: 'White Luxury Tuxedo',
       category: 'Evening Wear',
-      price: '₹72,000',
+      priceInr: 72000,
       image: '/WhatsApp_Image_2026-04-28_at_9.56.39_PM.jpeg',
     },
   ];
@@ -210,7 +213,7 @@ const ProductSlider = () => {
                       fontWeight: 600,
                     }}
                   >
-                    {product.price}
+                    {formatPrice(product.priceInr)}
                   </p>
                 </div>
               </motion.div>

@@ -486,13 +486,13 @@ export default function Footer() {
                 <img src="/logo_zenmen.png" alt="" className="zf-logo-img" />
               </span>
               <div>
-                <span className="zf-logo-name">ZENmen</span>
+                <span className="zf-logo-name">ZENMEN</span>
                 <span className="zf-logo-tagline">Bespoke Tailoring</span>
               </div>
             </Link>
 
             <p className="zf-brand-desc">
-              For over fifteen years, ZENmen has dressed Delhi's most discerning
+              For over fifteen years, ZENMEN has dressed Delhi's most discerning
               gentlemen. Every garment is a promise of precision, quality, and
               timeless style.
             </p>

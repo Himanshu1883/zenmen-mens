@@ -3,6 +3,7 @@
 import { useAppSelector } from "@/store/hooks";
 import { AnimatePresence, motion } from "framer-motion";
 import { Search, ShoppingBag, User, X } from "lucide-react";
+import Link from "next/link";
 import CurrencyIcon from "./CurrencyIcon";
 import CurrencySwitcher from "./CurrencySwitcher";
 
@@ -12,48 +13,40 @@ interface MobileMenuProps {
   onOpenAuth?: () => void;
 }
 
+const collectionItems = [
+  { name: "Kurta-Pajama", q: "kurta" },
+  { name: "Pants/Trousers", q: "pants" },
+  { name: "Shirt", q: "shirt" },
+  { name: "Suit", q: "suit" },
+  { name: "Designer Suits", q: "designer suit" },
+  { name: "Double Breasted Suit", q: "double breasted" },
+  { name: "Three Piece Suit", q: "three piece" },
+  { name: "Five Piece Suit", q: "five piece" },
+  { name: "Two Piece Suit", q: "two piece" },
+  { name: "Indo-Western", q: "indo-western" },
+  { name: "Designer Shirt", q: "designer shirt" },
+  { name: "Buttons", q: "button" },
+  { name: "Tie", q: "tie" },
+  { name: "Broches", q: "brooch" },
+] as const;
+
+const linkClass =
+  "block no-underline py-4 px-4 text-[13px] tracking-[0.15em] text-[#0f172a] hover:bg-[#f8fafc] hover:text-[#7da8c7] transition-all duration-300 uppercase rounded-sm";
+
 const MobileMenu = ({ isOpen, onClose, onOpenAuth }: MobileMenuProps) => {
   const activeCurrency = useAppSelector((s) => s.currency.code);
 
-  const navLinks = [
-    "Collections",
-
-    "Kurta-Pajama",
-
-    "Pants/Trousers",
-
-    "Shirt",
-
-    "Suit",
-
-    "Designer Suits",
-
-    "Double Breasted Suit",
-
-    "Three Piece Suit",
-
-    "Five Piece Suit",
-
-    "Two Piece Suit",
-
-    "Indo-Western",
-
-    "Designer Shirt",
-
-    "Buttons",
-
-    "Tie",
-
-    "Broches",
-
-    "About",
-  ];
+  let animIndex = 0;
+  const stagger = () => {
+    const delay = animIndex * 0.05;
+    animIndex += 1;
+    return delay;
+  };
 
   return (
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -63,7 +56,6 @@ const MobileMenu = ({ isOpen, onClose, onOpenAuth }: MobileMenuProps) => {
             onClick={onClose}
           />
 
-          {/* Mobile Menu Panel */}
           <motion.div
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
@@ -72,7 +64,6 @@ const MobileMenu = ({ isOpen, onClose, onOpenAuth }: MobileMenuProps) => {
             className="fixed top-0 right-0 bottom-0 w-full max-w-sm bg-white z-50 lg:hidden overflow-y-auto"
           >
             <div className="p-8">
-              {/* Header */}
               <div className="flex items-center justify-between mb-12">
                 <div className="flex items-center gap-3 select-none">
                   <div className="h-10 w-10 rounded-full overflow-hidden border border-[#1b2232]">
@@ -92,35 +83,69 @@ const MobileMenu = ({ isOpen, onClose, onOpenAuth }: MobileMenuProps) => {
                   </div>
                 </div>
                 <button
+                  type="button"
                   onClick={onClose}
                   className="bg-transparent border-0 text-[#0f172a] p-2 hover:bg-[#f8fafc] rounded-full transition-colors cursor-pointer"
+                  aria-label="Close menu"
                 >
                   <X className="w-6 h-6" strokeWidth={1.5} />
                 </button>
               </div>
 
-              {/* Navigation Links */}
               <nav className="mb-12">
                 <div className="space-y-1">
-                  {navLinks.map((link, index) => (
-                    <motion.a
-                      key={link}
-                      href="#"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="block no-underline py-4 px-4 text-[13px] tracking-[0.15em] text-[#0f172a] hover:bg-[#f8fafc] hover:text-[#7da8c7] transition-all duration-300 uppercase rounded-sm"
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: stagger() }}
+                  >
+                    <Link
+                      href="/collection"
+                      className={linkClass}
                       onClick={onClose}
                     >
-                      {link}
-                    </motion.a>
+                      Collections
+                    </Link>
+                  </motion.div>
+
+                  {collectionItems.map((item) => (
+                    <motion.div
+                      key={item.name}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: stagger() }}
+                    >
+                      <Link
+                        href={`/collection?q=${encodeURIComponent(item.q)}`}
+                        className={`${linkClass} pl-8 text-[12px]`}
+                        onClick={onClose}
+                      >
+                        {item.name}
+                      </Link>
+                    </motion.div>
                   ))}
+
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: stagger() }}
+                  >
+                    <Link
+                      href="/about"
+                      className={linkClass}
+                      onClick={onClose}
+                    >
+                      About
+                    </Link>
+                  </motion.div>
                 </div>
               </nav>
 
-              {/* Utility Actions */}
               <div className="space-y-4 mb-12">
-                <button className="w-full bg-transparent border-0 flex items-center gap-4 py-4 px-4 text-[13px] tracking-[0.1em] text-[#0f172a] hover:bg-[#f8fafc] transition-colors rounded-sm uppercase cursor-pointer">
+                <button
+                  type="button"
+                  className="w-full bg-transparent border-0 flex items-center gap-4 py-4 px-4 text-[13px] tracking-[0.1em] text-[#0f172a] hover:bg-[#f8fafc] transition-colors rounded-sm uppercase cursor-pointer"
+                >
                   <Search className="w-5 h-5" strokeWidth={1.5} />
                   Search
                 </button>
@@ -148,18 +173,23 @@ const MobileMenu = ({ isOpen, onClose, onOpenAuth }: MobileMenuProps) => {
                   <User className="w-5 h-5" strokeWidth={1.5} />
                   Account
                 </button>
-                <button className="w-full bg-transparent border-0 flex items-center gap-4 py-4 px-4 text-[13px] tracking-[0.1em] text-[#0f172a] hover:bg-[#f8fafc] transition-colors rounded-sm uppercase cursor-pointer">
+                <button
+                  type="button"
+                  className="w-full bg-transparent border-0 flex items-center gap-4 py-4 px-4 text-[13px] tracking-[0.1em] text-[#0f172a] hover:bg-[#f8fafc] transition-colors rounded-sm uppercase cursor-pointer"
+                >
                   <ShoppingBag className="w-5 h-5" strokeWidth={1.5} />
                   Cart
                 </button>
               </div>
 
-              {/* CTA Button */}
-              <button className="w-full bg-[#0f172a] border-0 px-6 py-4 text-white text-[11px] tracking-[0.15em] uppercase hover:bg-[#7da8c7] transition-colors duration-300 rounded-sm cursor-pointer">
+              <Link
+                href="/appointment"
+                onClick={onClose}
+                className="block w-full text-center bg-[#0f172a] border-0 px-6 py-4 text-white text-[11px] tracking-[0.15em] uppercase no-underline hover:bg-[#7da8c7] transition-colors duration-300 rounded-sm"
+              >
                 Book Appointment
-              </button>
+              </Link>
 
-              {/* Footer */}
               <div className="mt-12 pt-8 border-t border-[#e2e8f0]">
                 <p className="text-[10px] tracking-[0.2em] text-[#6b7280] uppercase text-center">
                   Bespoke Tailoring Since 2020
