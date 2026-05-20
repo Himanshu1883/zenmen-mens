@@ -67,9 +67,26 @@ export const authOptions: NextAuthOptions = {
       return true;
     },
     async jwt({ token, user }) {
+      const email = (user?.email ?? token.email) as string | undefined;
+
+      if (email) {
+        await connectDB();
+        const dbUser = await User.findOne({
+          email: email.trim().toLowerCase(),
+        })
+          .select("_id role")
+          .lean();
+
+        if (dbUser) {
+          token.id = String(dbUser._id);
+          token.role = dbUser.role ?? "user";
+          return token;
+        }
+      }
+
       if (user) {
         token.role = (user as typeof user & { role?: string }).role;
-        token.id = (user as typeof user & { id?: string }).id;
+        token.id = (user as { id?: string }).id;
       }
 
       return token;
@@ -77,11 +94,8 @@ export const authOptions: NextAuthOptions = {
 
     async session({ session, token }) {
       if (session.user) {
-        (
-          session.user as typeof session.user & {
-            role?: string;
-          }
-        ).role = (token.role as string) ?? "user";
+        session.user.id = token.id as string | undefined;
+        session.user.role = (token.role as string) ?? "user";
       }
 
       return session;

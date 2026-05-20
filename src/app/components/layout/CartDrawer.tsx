@@ -281,11 +281,11 @@ export default function CartDrawer() {
                 Continue shopping
               </Link>
               <Link
-                href="/contact"
+                href="/checkout"
                 onClick={close}
                 className="flex flex-1 items-center justify-center border-0 bg-[#0f172a] py-3.5 text-center font-[family-name:var(--font-montserrat)] text-[10px] font-medium tracking-[0.2em] text-white uppercase no-underline transition-colors hover:bg-[#7da8c7]"
               >
-                Enquire & book
+                Checkout
               </Link>
             </div>
           </footer>

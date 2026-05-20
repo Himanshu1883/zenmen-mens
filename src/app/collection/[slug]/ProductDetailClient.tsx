@@ -2,9 +2,10 @@
 
 import { useDisplayPrice } from "@/hooks/useDisplayPrice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { addItem } from "@/store/slices/cartSlice";
+import { addItem, setCartOpen } from "@/store/slices/cartSlice";
 import type { Product } from "@/types/product";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -754,6 +755,7 @@ function ZoomableImage({
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function ProductDetailClient({ product }: { product: Product }) {
+  const router = useRouter();
   const dispatch = useAppDispatch();
   const { format: displayPrice } = useDisplayPrice();
   const allProducts = useAppSelector((s) => s.products.products);
@@ -834,21 +836,29 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     );
   };
 
+  function buildCartLine() {
+    return {
+      _id: product._id,
+      title: product.title,
+      slug: product.slug,
+      price: product.price,
+      image: product.images?.[0] ?? { url: "" },
+      selectedColor: selectedColor || undefined,
+      selectedSize: selectedSize || undefined,
+      qty: 1,
+    };
+  }
+
   function handleAddToCart() {
-    dispatch(
-      addItem({
-        _id: product._id,
-        title: product.title,
-        slug: product.slug,
-        price: product.price,
-        image: product.images?.[0] ?? { url: "" },
-        selectedColor: selectedColor || undefined,
-        selectedSize: selectedSize || undefined,
-        qty: 1,
-      }),
-    );
+    dispatch(addItem(buildCartLine()));
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
+  }
+
+  function handleBuyNow() {
+    dispatch(addItem(buildCartLine()));
+    dispatch(setCartOpen(false));
+    router.push("/checkout");
   }
 
   const currentImageSrc =
@@ -1110,7 +1120,11 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               )}
 
               {isColorAvailable || selectedColor === product.colors?.[0] ? (
-                <button className="h-[52px] rounded-[3px] border border-[#d6e1ec] bg-transparent font-['Jost'] text-[.72rem] uppercase tracking-[.25em] text-[#0f172a] transition-all hover:border-[#7da8c7] hover:bg-[#f0f6fb]">
+                <button
+                  type="button"
+                  onClick={handleBuyNow}
+                  className="h-[52px] rounded-[3px] border border-[#d6e1ec] bg-transparent font-['Jost'] text-[.72rem] uppercase tracking-[.25em] text-[#0f172a] transition-all hover:border-[#7da8c7] hover:bg-[#f0f6fb]"
+                >
                   Buy Now · Express Checkout
                 </button>
               ) : (

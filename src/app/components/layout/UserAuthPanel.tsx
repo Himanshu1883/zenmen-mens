@@ -11,6 +11,7 @@ import {
   X,
 } from "lucide-react";
 import { signIn, signOut, useSession } from "next-auth/react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   memo,
@@ -39,6 +40,128 @@ type SessionUser = {
 
 const PANEL_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 const EXIT_MS = 160;
+
+const AUTH_GALLERY_IMAGES: { src: string; alt: string }[] = [
+  { src: "/store_1.jpeg", alt: "ZENmen atelier" },
+  { src: "/store_2.jpeg", alt: "Bespoke suiting" },
+  { src: "/zenmen_white_2.jpeg", alt: "Formal wear" },
+  { src: "/WhatsApp_Image_2026-04-28_at_9.56.51_PM.jpeg", alt: "Groomwear" },
+  { src: "/store_3.jpeg", alt: "Tailoring" },
+  { src: "/banner_kurta.png", alt: "Kurta collection" },
+  { src: "/store_4.jpeg", alt: "Atelier detail" },
+  { src: "/WhatsApp_Image_2026-05-03_at_4.30.36_PM.jpeg", alt: "Menswear" },
+  { src: "/hero_mobile_formal_deck.png", alt: "Deck style" },
+  { src: "/store_5.jpeg", alt: "ZENmen store" },
+  { src: "/WhatsApp_Image_2026-04-28_at_9.56.47_PM.jpeg", alt: "Collection" },
+  { src: "/ChatGPT_Image_May_20__2026__12_08_02_PM.png", alt: "Editorial" },
+];
+
+// Split images into 3 columns
+const COL_1 = AUTH_GALLERY_IMAGES.slice(0, 4);
+const COL_2 = AUTH_GALLERY_IMAGES.slice(4, 8);
+const COL_3 = AUTH_GALLERY_IMAGES.slice(8, 12);
+
+// Each column duplicated for seamless loop
+function VerticalMarqueeColumn({
+  images,
+  direction,
+  speed = 30,
+}: {
+  images: { src: string; alt: string }[];
+  direction: "down" | "up";
+  speed?: number;
+}) {
+  const doubled = [...images, ...images];
+
+  return (
+    <div className="relative flex-1 overflow-hidden">
+      <div
+        className="flex flex-col gap-[10px]"
+        style={{
+          animation: `marquee-${direction} ${speed}s linear infinite`,
+          willChange: "transform",
+        }}
+      >
+        {doubled.map((img, i) => (
+          <div
+            key={`${img.src}-${i}`}
+            className="relative w-full flex-shrink-0 overflow-hidden bg-[#1e293b]"
+            style={{ height: "140px" }}
+          >
+            <Image
+              src={img.src}
+              alt={img.alt}
+              fill
+              sizes="15vw"
+              className="object-cover object-center"
+              priority={i < 4}
+            />
+          </div>
+        ))}
+      </div>
+
+      <style jsx>{`
+        @keyframes marquee-down {
+          0% {
+            transform: translateY(0);
+          }
+          100% {
+            transform: translateY(-50%);
+          }
+        }
+        @keyframes marquee-up {
+          0% {
+            transform: translateY(-50%);
+          }
+          100% {
+            transform: translateY(0);
+          }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+const AuthMasonryGallery = memo(function AuthMasonryGallery({
+  compact = false,
+}: {
+  compact?: boolean;
+}) {
+  if (compact) {
+    // Mobile: horizontal strip with vertical marquee in 3 mini columns
+    return (
+      <div
+        className="relative shrink-0 overflow-hidden bg-[#0f172a] md:hidden"
+        style={{ height: "min(44vw, 200px)", width: "100%" }}
+        aria-hidden
+      >
+        <div className="flex h-full w-full gap-[10px] p-[5px]">
+          <VerticalMarqueeColumn images={COL_1} direction="down" speed={18} />
+          <VerticalMarqueeColumn images={COL_2} direction="up" speed={22} />
+          <VerticalMarqueeColumn images={COL_3} direction="down" speed={20} />
+        </div>
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#0f172a]/40 via-transparent to-[#0f172a]/40" />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="relative hidden shrink-0 overflow-hidden bg-white md:flex md:w-[44%] lg:w-[46%]"
+      style={{ alignSelf: "stretch" }}
+      aria-hidden
+    >
+      <div className="flex h-full w-full gap-[10px] p-[5px]">
+        <VerticalMarqueeColumn images={COL_1} direction="down" speed={25} />
+        <VerticalMarqueeColumn images={COL_2} direction="up" speed={30} />
+        <VerticalMarqueeColumn images={COL_3} direction="down" speed={22} />
+      </div>
+      {/* Left-to-right fade into white panel */}
+      {/* <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-r from-transparent to-[#0f172a]/20" /> */}
+      {/* <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#0f172a]/30 via-transparent to-[#0f172a]/30" /> */}
+    </div>
+  );
+});
 
 export default function UserAuthPanel({ open, onClose }: UserAuthPanelProps) {
   const { data: session, status } = useSession();
@@ -222,10 +345,7 @@ export default function UserAuthPanel({ open, onClose }: UserAuthPanelProps) {
   if (!layerMounted) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-[100] isolate"
-      aria-hidden={!layerVisible}
-    >
+    <div className="fixed inset-0 z-[100] isolate" aria-hidden={!layerVisible}>
       <button
         type="button"
         aria-label="Close account panel"
@@ -240,301 +360,308 @@ export default function UserAuthPanel({ open, onClose }: UserAuthPanelProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="pointer-events-auto absolute left-1/2 top-[max(7.5rem,10vh)] w-[min(94vw,430px)] overflow-hidden rounded-[2px] border border-[#1b2232]/12 bg-[#fafaf9] shadow-[0_16px_48px_-12px_rgba(15,23,42,0.22)]"
+        className="pointer-events-auto absolute left-1/2 top-1/2 flex max-h-[min(92vh,720px)] w-[min(94vw,920px)] flex-col overflow-hidden rounded-[2px] border border-[#1b2232]/12 bg-white shadow-[0_20px_60px_-16px_rgba(15,23,42,0.28)] md:max-h-[min(88vh,640px)] md:min-h-[min(520px,88vh)] md:flex-row"
         style={{
           opacity: layerVisible ? 1 : 0,
           transform: layerVisible
-            ? "translate3d(-50%, 0, 0)"
-            : "translate3d(-50%, 10px, 0)",
+            ? "translate3d(-50%, -50%, 0)"
+            : "translate3d(-50%, calc(-50% + 12px), 0)",
           transitionProperty: "opacity, transform",
           transitionDuration: panelDuration,
           transitionTimingFunction: PANEL_EASE,
         }}
       >
-        <div
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_90%_55%_at_100%_0%,rgba(125,168,199,0.11),transparent_55%),radial-gradient(ellipse_70%_50%_at_0%_100%,rgba(27,34,50,0.04),transparent_50%)]"
-          aria-hidden
-        />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#b8956c]/50 to-transparent" />
+        {/* Gallery panels */}
+        <AuthMasonryGallery compact />
+        <AuthMasonryGallery />
 
-        <div className="relative flex items-start justify-between gap-4 border-b border-[#1b2232]/8 bg-gradient-to-b from-white/90 to-transparent px-7 pb-5 pt-6">
-          <div className="min-w-0 pr-2">
-            <p
-              id={titleId}
-              className="m-0 font-[family-name:var(--font-montserrat)] text-[10px] font-medium tracking-[0.28em] text-[#7da8c7]"
-            >
-              {isLoggedIn ? "Member lounge" : "Private access"}
-            </p>
-            <p className="m-0 mt-2 font-[family-name:var(--font-playfair)] text-[1.65rem] font-normal leading-[1.15] tracking-[-0.02em] text-[#0f172a]">
-              {isLoggedIn ? sessionUser?.name ?? "Member" : "Welcome back"}
-            </p>
-            {!isLoggedIn && (
-              <p className="m-0 mt-2 max-w-[280px] font-[family-name:var(--font-montserrat)] text-[12px] font-light leading-relaxed tracking-wide text-[#64748b]">
-                Sign in to continue your bespoke journey with ZENmen.
-              </p>
-            )}
-          </div>
+        {/* Right: auth content */}
+        <div className="relative flex min-h-0 min-w-0 flex-1 flex-col bg-white">
           <button
             type="button"
             onClick={handleClose}
-            className="shrink-0 rounded-full border border-transparent bg-white/90 p-2.5 text-[#64748b] shadow-sm transition-colors duration-150 hover:border-[#1b2232]/10 hover:bg-white hover:text-[#0f172a] cursor-pointer"
+            aria-label="Close"
+            className="absolute right-4 top-4 z-10 cursor-pointer rounded-full p-2 text-[#64748b] transition-colors hover:bg-[#f1f5f9] hover:text-[#0f172a]"
           >
-            <X className="h-4 w-4" strokeWidth={1.5} />
+            <X className="h-5 w-5" strokeWidth={1.5} />
           </button>
-        </div>
 
-        <div className="relative px-7 pb-8 pt-6">
-          {status === "loading" ? (
-            <div className="flex flex-col items-center justify-center gap-3 py-14">
-              <Loader2
-                className="h-9 w-9 animate-spin text-[#7da8c7]"
-                strokeWidth={1.25}
-              />
-              <p className="m-0 font-[family-name:var(--font-montserrat)] text-[10px] tracking-[0.22em] text-[#94a3b8] uppercase">
-                Loading session
+          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-6 pb-6 pt-12 sm:px-8 sm:pt-14">
+            <div className="mb-6 text-center md:mb-8">
+              <p
+                id={titleId}
+                className="m-0 font-[family-name:var(--font-montserrat)] text-[10px] font-medium tracking-[0.28em] text-[#7da8c7] uppercase"
+              >
+                {isLoggedIn ? "Member lounge" : "Private access"}
               </p>
+              <h2 className="m-0 mt-3 font-[family-name:var(--font-playfair)] text-[clamp(1.75rem,4vw,2.25rem)] font-normal leading-[1.12] tracking-[-0.02em] text-[#0f172a]">
+                {isLoggedIn ? (sessionUser?.name ?? "Member") : "Welcome back"}
+              </h2>
+              {!isLoggedIn && (
+                <p className="mx-auto m-0 mt-3 max-w-[320px] font-[family-name:var(--font-montserrat)] text-[13px] font-light leading-relaxed text-[#64748b]">
+                  Sign in to continue your bespoke journey with ZENmen.
+                </p>
+              )}
             </div>
-          ) : isLoggedIn ? (
-            <div className="space-y-6">
-              <div className="flex items-center gap-4 rounded-[2px] border border-[#1b2232]/8 bg-white/80 p-4 shadow-sm">
-                <div className="relative shrink-0">
-                  <div className="relative h-[4.5rem] w-[4.5rem] overflow-hidden rounded-full border-2 border-white bg-[#f1f5f9] shadow-sm ring-1 ring-[#1b2232]/5">
+
+            {status === "loading" ? (
+              <div className="flex flex-1 flex-col items-center justify-center gap-3 py-10">
+                <Loader2
+                  className="h-9 w-9 animate-spin text-[#7da8c7]"
+                  strokeWidth={1.25}
+                />
+                <p className="m-0 font-[family-name:var(--font-montserrat)] text-[10px] tracking-[0.22em] text-[#94a3b8] uppercase">
+                  Loading session
+                </p>
+              </div>
+            ) : isLoggedIn ? (
+              <div className="mx-auto w-full max-w-[360px] space-y-5">
+                <div className="flex items-center gap-4 rounded-[2px] border border-[#1b2232]/8 bg-[#fafbfc] p-4">
+                  <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border-2 border-white bg-[#f1f5f9] shadow-sm ring-1 ring-[#1b2232]/5">
                     {sessionUser?.image ? (
-                      // eslint-disable-next-line @next/next/no-img-element -- OAuth avatars are external URLs not in next/image config
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={sessionUser.image}
                         alt=""
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#f8fafc] to-[#e2e8f0] text-[#7da8c7]">
-                        <UserRound className="h-8 w-8" strokeWidth={1} />
+                      <div className="flex h-full w-full items-center justify-center text-[#7da8c7]">
+                        <UserRound className="h-7 w-7" strokeWidth={1} />
                       </div>
                     )}
                   </div>
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="m-0 truncate font-[family-name:var(--font-montserrat)] text-[13px] font-medium tracking-wide text-[#0f172a]">
-                    {sessionUser?.email}
-                  </p>
-                  <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-[#1b2232]/8 bg-[#f8fafc] px-2.5 py-0.5">
-                    <Sparkles
-                      className="h-3 w-3 text-[#7da8c7]"
-                      strokeWidth={1.5}
-                    />
-                    <span className="font-[family-name:var(--font-montserrat)] text-[9px] font-medium tracking-[0.2em] text-[#64748b] uppercase">
-                      {isAdmin ? "Administrator" : role}
-                    </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="m-0 truncate font-[family-name:var(--font-montserrat)] text-[13px] font-medium text-[#0f172a]">
+                      {sessionUser?.email}
+                    </p>
+                    <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-[#1b2232]/8 bg-white px-2.5 py-0.5">
+                      <Sparkles
+                        className="h-3 w-3 text-[#7da8c7]"
+                        strokeWidth={1.5}
+                      />
+                      <span className="font-[family-name:var(--font-montserrat)] text-[9px] font-medium tracking-[0.2em] text-[#64748b] uppercase">
+                        {isAdmin ? "Administrator" : role}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <nav className="flex flex-col gap-2">
-                {isAdmin && (
+                <nav className="flex flex-col gap-2">
+                  {isAdmin && (
+                    <Link
+                      href="/admin"
+                      onClick={handleClose}
+                      className="group flex items-center justify-between gap-3 border border-[#1b2232]/10 bg-[#0f172a] px-4 py-3.5 text-white no-underline transition-[transform,box-shadow] duration-150 hover:-translate-y-px hover:shadow-lg"
+                    >
+                      <span className="flex items-center gap-3">
+                        <span className="flex h-9 w-9 items-center justify-center rounded-[2px] bg-white/10">
+                          <LayoutDashboard
+                            className="h-4 w-4 text-[#7da8c7]"
+                            strokeWidth={1.5}
+                          />
+                        </span>
+                        <span className="text-left">
+                          <span className="block font-[family-name:var(--font-montserrat)] text-[11px] font-medium tracking-[0.18em] uppercase">
+                            Admin dashboard
+                          </span>
+                          <span className="mt-0.5 block font-[family-name:var(--font-montserrat)] text-[11px] font-light text-white/65">
+                            Orders, products & settings
+                          </span>
+                        </span>
+                      </span>
+                      <ChevronRight
+                        className="h-4 w-4 shrink-0 text-white/50 group-hover:translate-x-0.5"
+                        strokeWidth={1.5}
+                      />
+                    </Link>
+                  )}
+
                   <Link
-                    href="/admin"
+                    href="/profile"
                     onClick={handleClose}
-                    className="group flex items-center justify-between gap-3 border border-[#1b2232]/10 bg-gradient-to-r from-[#0f172a] to-[#151d2e] px-4 py-3.5 text-white no-underline shadow-md transition-[transform,box-shadow] duration-150 ease-out hover:-translate-y-px hover:shadow-lg"
+                    className="group flex items-center justify-between gap-3 border border-[#1b2232]/10 bg-white px-4 py-3.5 text-[#0f172a] no-underline shadow-sm transition-[transform,box-shadow] duration-150 hover:-translate-y-px hover:border-[#7da8c7]/35 hover:shadow-md"
                   >
                     <span className="flex items-center gap-3">
-                      <span className="flex h-9 w-9 items-center justify-center rounded-[2px] bg-white/10">
-                        <LayoutDashboard
+                      <span className="flex h-9 w-9 items-center justify-center rounded-[2px] bg-[#f8fafc]">
+                        <UserRound
                           className="h-4 w-4 text-[#7da8c7]"
                           strokeWidth={1.5}
                         />
                       </span>
-                      <span className="text-left">
-                        <span className="block font-[family-name:var(--font-montserrat)] text-[11px] font-medium tracking-[0.18em] uppercase">
-                          Admin dashboard
-                        </span>
-                        <span className="mt-0.5 block font-[family-name:var(--font-montserrat)] text-[11px] font-light tracking-wide text-white/65">
-                          Orders, products & settings
-                        </span>
+                      <span className="font-[family-name:var(--font-montserrat)] text-[11px] font-medium tracking-[0.2em] uppercase">
+                        Your profile
                       </span>
                     </span>
                     <ChevronRight
-                      className="h-4 w-4 shrink-0 text-white/50 transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-white/80"
+                      className="h-4 w-4 shrink-0 text-[#cbd5e1] group-hover:translate-x-0.5 group-hover:text-[#7da8c7]"
                       strokeWidth={1.5}
                     />
                   </Link>
-                )}
 
-                <Link
-                  href="/profile"
-                  onClick={handleClose}
-                  className="group flex items-center justify-between gap-3 border border-[#1b2232]/10 bg-white px-4 py-3.5 text-[#0f172a] no-underline shadow-sm transition-[transform,box-shadow,border-color] duration-150 ease-out hover:-translate-y-px hover:border-[#7da8c7]/35 hover:shadow-md"
-                >
-                  <span className="flex items-center gap-3">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-[2px] bg-[#f8fafc]">
-                      <UserRound
-                        className="h-4 w-4 text-[#7da8c7]"
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={async () => {
+                      setBusy(true);
+                      try {
+                        await signOut({ callbackUrl: "/" });
+                        handleClose();
+                      } finally {
+                        setBusy(false);
+                      }
+                    }}
+                    className="flex w-full cursor-pointer items-center justify-center gap-2.5 border border-[#1b2232]/12 bg-transparent py-3.5 font-[family-name:var(--font-montserrat)] text-[11px] font-medium tracking-[0.2em] text-[#475569] uppercase transition-colors hover:border-[#b45309]/25 hover:bg-[#fff7ed]/80 hover:text-[#9a3412] disabled:opacity-50"
+                  >
+                    {busy ? (
+                      <Loader2
+                        className="h-4 w-4 animate-spin"
                         strokeWidth={1.5}
                       />
-                    </span>
-                    <span className="font-[family-name:var(--font-montserrat)] text-[11px] font-medium tracking-[0.2em] uppercase">
-                      Your profile
-                    </span>
-                  </span>
-                  <ChevronRight
-                    className="h-4 w-4 shrink-0 text-[#cbd5e1] transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-[#7da8c7]"
-                    strokeWidth={1.5}
-                  />
-                </Link>
-
+                    ) : (
+                      <LogOut className="h-4 w-4" strokeWidth={1.5} />
+                    )}
+                    Sign out
+                  </button>
+                </nav>
+              </div>
+            ) : (
+              <div className="mx-auto w-full max-w-[360px] space-y-5">
                 <button
                   type="button"
                   disabled={busy}
-                  onClick={async () => {
-                    setBusy(true);
-                    try {
-                      await signOut({ callbackUrl: "/" });
-                      handleClose();
-                    } finally {
-                      setBusy(false);
-                    }
-                  }}
-                  className="flex w-full items-center justify-center gap-2.5 border border-[#1b2232]/12 bg-transparent py-3.5 font-[family-name:var(--font-montserrat)] text-[11px] font-medium tracking-[0.2em] text-[#475569] uppercase transition-colors duration-150 hover:border-[#b45309]/25 hover:bg-[#fff7ed]/80 hover:text-[#9a3412] disabled:opacity-50 cursor-pointer"
+                  onClick={handleGoogle}
+                  className="flex w-full cursor-pointer items-center justify-center gap-3 border border-[#1b2232]/12 bg-white py-3.5 font-[family-name:var(--font-montserrat)] text-[12px] font-medium tracking-[0.1em] text-[#0f172a] shadow-sm transition-[transform,box-shadow] duration-150 hover:-translate-y-px hover:shadow-md disabled:opacity-50"
                 >
-                  {busy ? (
-                    <Loader2
-                      className="h-4 w-4 animate-spin"
-                      strokeWidth={1.5}
+                  <GoogleMark />
+                  Continue with Google
+                </button>
+
+                <div className="flex items-center gap-4">
+                  <span className="h-px flex-1 bg-[#e2e8f0]" />
+                  <span className="shrink-0 font-[family-name:var(--font-montserrat)] text-[9px] font-medium tracking-[0.28em] text-[#94a3b8] uppercase">
+                    or with email
+                  </span>
+                  <span className="h-px flex-1 bg-[#e2e8f0]" />
+                </div>
+
+                <div className="flex border border-[#e2e8f0] p-1">
+                  <button
+                    type="button"
+                    onClick={() => setMode("login")}
+                    className={`flex-1 cursor-pointer border-0 py-2.5 font-[family-name:var(--font-montserrat)] text-[10px] font-medium tracking-[0.2em] uppercase transition-colors ${
+                      mode === "login"
+                        ? "bg-[#0f172a] text-white"
+                        : "bg-transparent text-[#64748b] hover:text-[#0f172a]"
+                    }`}
+                  >
+                    Login
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMode("signup")}
+                    className={`flex-1 cursor-pointer border-0 py-2.5 font-[family-name:var(--font-montserrat)] text-[10px] font-medium tracking-[0.2em] uppercase transition-colors ${
+                      mode === "signup"
+                        ? "bg-[#0f172a] text-white"
+                        : "bg-transparent text-[#64748b] hover:text-[#0f172a]"
+                    }`}
+                  >
+                    Sign up
+                  </button>
+                </div>
+
+                {mode === "login" ? (
+                  <form onSubmit={handleLogin} className="space-y-5">
+                    <Field
+                      label="Email"
+                      type="email"
+                      autoComplete="email"
+                      value={loginEmail}
+                      onChange={setLoginEmail}
                     />
-                  ) : (
-                    <LogOut className="h-4 w-4" strokeWidth={1.5} />
-                  )}
-                  Sign out
-                </button>
-              </nav>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              <button
-                type="button"
-                disabled={busy}
-                onClick={handleGoogle}
-                className="flex w-full items-center justify-center gap-3 rounded-[2px] border border-[#1b2232]/10 bg-white py-4 font-[family-name:var(--font-montserrat)] text-[12px] font-medium tracking-[0.12em] text-[#0f172a] shadow-sm transition-[transform,box-shadow] duration-150 ease-out hover:-translate-y-px hover:shadow-md disabled:opacity-50 cursor-pointer"
-              >
-                <GoogleMark />
-                Continue with Google
-              </button>
+                    <Field
+                      label="Password"
+                      type="password"
+                      autoComplete="current-password"
+                      value={loginPassword}
+                      onChange={setLoginPassword}
+                    />
+                    <button
+                      type="submit"
+                      disabled={busy}
+                      className="flex w-full cursor-pointer items-center justify-center gap-2 border-0 bg-[#0f172a] py-4 font-[family-name:var(--font-montserrat)] text-[11px] font-medium tracking-[0.22em] text-white uppercase transition-[transform,opacity] duration-150 hover:bg-[#1e293b] disabled:opacity-50"
+                    >
+                      {busy ? (
+                        <Loader2
+                          className="h-4 w-4 animate-spin"
+                          strokeWidth={1.5}
+                        />
+                      ) : null}
+                      Sign in
+                    </button>
+                  </form>
+                ) : (
+                  <form onSubmit={handleSignup} className="space-y-5">
+                    <Field
+                      label="Full name"
+                      type="text"
+                      autoComplete="name"
+                      value={signupName}
+                      onChange={setSignupName}
+                    />
+                    <Field
+                      label="Email"
+                      type="email"
+                      autoComplete="email"
+                      value={signupEmail}
+                      onChange={setSignupEmail}
+                    />
+                    <Field
+                      label="Password"
+                      type="password"
+                      autoComplete="new-password"
+                      value={signupPassword}
+                      onChange={setSignupPassword}
+                    />
+                    <Field
+                      label="Confirm password"
+                      type="password"
+                      autoComplete="new-password"
+                      value={signupConfirm}
+                      onChange={setSignupConfirm}
+                    />
+                    <button
+                      type="submit"
+                      disabled={busy}
+                      className="flex w-full cursor-pointer items-center justify-center gap-2 border-0 bg-[#0f172a] py-4 font-[family-name:var(--font-montserrat)] text-[11px] font-medium tracking-[0.22em] text-white uppercase transition-[transform,opacity] duration-150 hover:bg-[#1e293b] disabled:opacity-50"
+                    >
+                      {busy ? (
+                        <Loader2
+                          className="h-4 w-4 animate-spin"
+                          strokeWidth={1.5}
+                        />
+                      ) : null}
+                      Create account
+                    </button>
+                  </form>
+                )}
 
-              <div className="flex items-center gap-4">
-                <span className="h-px flex-1 bg-gradient-to-r from-transparent to-[#1b2232]/12" />
-                <span className="shrink-0 font-[family-name:var(--font-montserrat)] text-[9px] font-medium tracking-[0.28em] text-[#94a3b8] uppercase">
-                  or with email
-                </span>
-                <span className="h-px flex-1 bg-gradient-to-l from-transparent to-[#1b2232]/12" />
-              </div>
-
-              <div className="flex rounded-full border border-[#1b2232]/10 bg-[#f1f5f9]/80 p-1">
                 <button
                   type="button"
-                  onClick={() => setMode("login")}
-                  className={`relative flex-1 rounded-full border-0 py-2.5 font-[family-name:var(--font-montserrat)] text-[10px] font-medium tracking-[0.2em] uppercase transition-[background-color,color,box-shadow] duration-150 ease-out cursor-pointer ${
-                    mode === "login"
-                      ? "bg-[#0f172a] text-white shadow-sm"
-                      : "bg-transparent text-[#64748b] hover:text-[#0f172a]"
-                  }`}
+                  onClick={handleClose}
+                  className="w-full cursor-pointer border-0 bg-transparent py-1 font-[family-name:var(--font-montserrat)] text-[12px] font-light text-[#64748b] underline-offset-2 hover:text-[#0f172a] hover:underline"
                 >
-                  Login
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMode("signup")}
-                  className={`relative flex-1 rounded-full border-0 py-2.5 font-[family-name:var(--font-montserrat)] text-[10px] font-medium tracking-[0.2em] uppercase transition-[background-color,color,box-shadow] duration-150 ease-out cursor-pointer ${
-                    mode === "signup"
-                      ? "bg-[#0f172a] text-white shadow-sm"
-                      : "bg-transparent text-[#64748b] hover:text-[#0f172a]"
-                  }`}
-                >
-                  Sign up
+                  No thanks
                 </button>
               </div>
+            )}
+          </div>
 
-              {mode === "login" ? (
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <Field
-                    label="Email"
-                    type="email"
-                    autoComplete="email"
-                    value={loginEmail}
-                    onChange={setLoginEmail}
-                  />
-                  <Field
-                    label="Password"
-                    type="password"
-                    autoComplete="current-password"
-                    value={loginPassword}
-                    onChange={setLoginPassword}
-                  />
-                  <button
-                    type="submit"
-                    disabled={busy}
-                    className="mt-1 flex w-full items-center justify-center gap-2 rounded-[2px] border-0 bg-gradient-to-r from-[#0f172a] to-[#1e293b] py-4 font-[family-name:var(--font-montserrat)] text-[11px] font-medium tracking-[0.22em] text-white uppercase shadow-md transition-[transform,box-shadow] duration-150 ease-out hover:-translate-y-px hover:shadow-lg disabled:translate-y-0 disabled:opacity-50 cursor-pointer"
-                  >
-                    {busy ? (
-                      <Loader2
-                        className="h-4 w-4 animate-spin"
-                        strokeWidth={1.5}
-                      />
-                    ) : null}
-                    Guest login
-                  </button>
-                </form>
-              ) : (
-                <form onSubmit={handleSignup} className="space-y-4">
-                  <Field
-                    label="Full name"
-                    type="text"
-                    autoComplete="name"
-                    value={signupName}
-                    onChange={setSignupName}
-                  />
-                  <Field
-                    label="Email"
-                    type="email"
-                    autoComplete="email"
-                    value={signupEmail}
-                    onChange={setSignupEmail}
-                  />
-                  <Field
-                    label="Password"
-                    type="password"
-                    autoComplete="new-password"
-                    value={signupPassword}
-                    onChange={setSignupPassword}
-                  />
-                  <Field
-                    label="Confirm password"
-                    type="password"
-                    autoComplete="new-password"
-                    value={signupConfirm}
-                    onChange={setSignupConfirm}
-                  />
-                  <button
-                    type="submit"
-                    disabled={busy}
-                    className="mt-1 flex w-full items-center justify-center gap-2 rounded-[2px] border-0 bg-gradient-to-r from-[#0f172a] to-[#1e293b] py-4 font-[family-name:var(--font-montserrat)] text-[11px] font-medium tracking-[0.22em] text-white uppercase shadow-md transition-[transform,box-shadow] duration-150 ease-out hover:-translate-y-px hover:shadow-lg disabled:translate-y-0 disabled:opacity-50 cursor-pointer"
-                  >
-                    {busy ? (
-                      <Loader2
-                        className="h-4 w-4 animate-spin"
-                        strokeWidth={1.5}
-                      />
-                    ) : null}
-                    Create account
-                  </button>
-                </form>
-              )}
-            </div>
-          )}
-        </div>
-
-        <div className="relative border-t border-[#1b2232]/6 bg-[#f8fafc]/80 px-7 py-3">
-          <p className="m-0 text-center font-[family-name:var(--font-montserrat)] text-[9px] font-light tracking-[0.24em] text-[#94a3b8] uppercase">
-            ZENmen · Bespoke tailoring
-          </p>
+          <div className="shrink-0 border-t border-[#f1f5f9] bg-[#fafbfc] px-6 py-3">
+            <p className="m-0 text-center font-[family-name:var(--font-montserrat)] text-[9px] font-light tracking-[0.24em] text-[#94a3b8] uppercase">
+              ZENmen · Bespoke tailoring
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -556,15 +683,14 @@ const Field = memo(function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-2 block font-[family-name:var(--font-montserrat)] text-[9px] font-medium tracking-[0.22em] text-[#64748b] uppercase">
-        {label}
-      </span>
+      <span className="sr-only">{label}</span>
       <input
         type={type}
         autoComplete={autoComplete}
+        placeholder={`${label}${type === "email" ? " *" : ""}`}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-[2px] border border-[#1b2232]/10 bg-white px-3.5 py-3 font-[family-name:var(--font-montserrat)] text-sm font-light tracking-wide text-[#0f172a] shadow-[inset_0_1px_2px_rgba(15,23,42,0.04)] outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-[#cbd5e1] focus:border-[#7da8c7]/60 focus:shadow-[0_0_0_3px_rgba(125,168,199,0.18)]"
+        className="w-full border-0 border-b border-[#cbd5e1] bg-transparent px-0 py-2.5 font-[family-name:var(--font-montserrat)] text-sm font-light tracking-wide text-[#0f172a] outline-none transition-[border-color] duration-150 placeholder:text-[#94a3b8] focus:border-[#0f172a]"
       />
     </label>
   );

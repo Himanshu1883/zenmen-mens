@@ -110,7 +110,7 @@ export default async function ProfilePage() {
           <Link href="/collection" className="profile-btn">
             View Collection
           </Link>
-          <Link href="/contact" className="profile-btn ghost">
+          <Link href="/appointment" className="profile-btn ghost">
             Book Appointment
           </Link>
         </div>
@@ -160,18 +160,17 @@ const styles = `
     min-height: 100dvh;
     padding: 110px 18px 48px;
     background:
-      radial-gradient(circle at 85% 0%, rgba(200,169,110,0.18), transparent 45%),
-      linear-gradient(180deg, #0d1422 0%, #121b2d 100%);
-    color: #e8edf6;
+      radial-gradient(circle at 88% 0%, rgba(125,168,199,0.14), transparent 42%),
+      linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    color: #0f172a;
   }
 
   .profile-shell {
     max-width: 1040px;
     margin: 0 auto;
-    border: 1px solid rgba(200,169,110,0.32);
-    background: rgba(19,29,47,0.9);
-    backdrop-filter: blur(8px);
-    box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.06);
     padding: clamp(22px, 4vw, 46px);
   }
 
@@ -182,7 +181,7 @@ const styles = `
     font-size: 11px;
     letter-spacing: 0.26em;
     text-transform: uppercase;
-    color: #c8a96e;
+    color: #7da8c7;
     font-family: "Cormorant Garamond", serif;
     font-weight: 600;
   }
@@ -191,14 +190,14 @@ const styles = `
     margin: 0;
     font-family: "Playfair Display", serif;
     font-size: clamp(34px, 5vw, 54px);
-    font-weight: 400;
-    color: #f0f4fb;
+    font-weight: 600;
+    color: #0f172a;
     line-height: 1.05;
   }
 
   .profile-sub {
     margin: 12px 0 0;
-    color: rgba(232,237,246,0.75);
+    color: #64748b;
     font-size: 15px;
     line-height: 1.7;
     max-width: 560px;
@@ -211,8 +210,8 @@ const styles = `
   }
 
   .profile-card {
-    border: 1px solid rgba(200,169,110,0.26);
-    background: rgba(14,22,36,0.74);
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
     padding: 18px;
   }
 
@@ -220,8 +219,8 @@ const styles = `
     margin: 0 0 14px;
     font-family: "Playfair Display", serif;
     font-size: 24px;
-    font-weight: 400;
-    color: #f0f4fb;
+    font-weight: 600;
+    color: #0f172a;
   }
 
   .profile-list {
@@ -235,7 +234,7 @@ const styles = `
     align-items: center;
     justify-content: space-between;
     gap: 14px;
-    border-top: 1px solid rgba(200,169,110,0.16);
+    border-top: 1px solid #e2e8f0;
     padding-top: 10px;
   }
 
@@ -245,7 +244,7 @@ const styles = `
   }
 
   .profile-row dt {
-    color: rgba(232,237,246,0.66);
+    color: #94a3b8;
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.12em;
@@ -254,7 +253,7 @@ const styles = `
 
   .profile-row dd {
     margin: 0;
-    color: #f0f4fb;
+    color: #0f172a;
     font-size: 14px;
     font-weight: 600;
     text-align: right;
@@ -264,10 +263,10 @@ const styles = `
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(200,169,110,0.5);
-    background: rgba(200,169,110,0.12);
+    border: 1px solid rgba(125, 168, 199, 0.45);
+    background: rgba(125, 168, 199, 0.12);
     padding: 4px 10px;
-    color: #f5e5c4;
+    color: #0f172a;
     font-size: 11px !important;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -285,25 +284,39 @@ const styles = `
     align-items: center;
     justify-content: center;
     text-decoration: none;
-    border: 1px solid #c8a96e;
-    background: #c8a96e;
-    color: #10192c;
+    border: 1px solid #7da8c7;
+    background: #7da8c7;
+    color: #0f172a;
     padding: 10px 16px;
     font-size: 12px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
     font-weight: 700;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+
+  .profile-btn:hover {
+    background: #0f172a;
+    border-color: #0f172a;
+    color: #f8fafc;
   }
 
   .profile-btn.ghost {
     background: transparent;
-    color: #e7cf9f;
+    color: #0f172a;
+    border-color: #e2e8f0;
+  }
+
+  .profile-btn.ghost:hover {
+    background: #f8fafc;
+    border-color: #7da8c7;
+    color: #0f172a;
   }
 
   .profile-story {
     margin-top: 30px;
-    border: 1px solid rgba(200,169,110,0.22);
-    background: rgba(13,21,34,0.72);
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
     padding: clamp(16px, 3vw, 28px);
   }
 
@@ -311,13 +324,13 @@ const styles = `
     margin: 0;
     font-family: "Playfair Display", serif;
     font-size: clamp(24px, 3vw, 34px);
-    color: #f0f4fb;
-    font-weight: 400;
+    color: #0f172a;
+    font-weight: 600;
   }
 
   .story-copy {
     margin: 10px 0 0;
-    color: rgba(232,237,246,0.74);
+    color: #64748b;
     line-height: 1.8;
     font-size: 14px;
     max-width: 740px;
@@ -331,8 +344,8 @@ const styles = `
   }
 
   .story-card {
-    border: 1px solid rgba(200,169,110,0.2);
-    background: rgba(8,14,25,0.7);
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
     padding: 14px;
   }
 
@@ -340,20 +353,20 @@ const styles = `
     margin: 0 0 8px;
     font-family: "Cormorant Garamond", serif;
     font-size: 22px;
-    color: #c8a96e;
+    color: #7da8c7;
   }
 
   .story-card h4 {
     margin: 0 0 8px;
     font-family: "Playfair Display", serif;
     font-size: 18px;
-    color: #f0f4fb;
-    font-weight: 400;
+    color: #0f172a;
+    font-weight: 600;
   }
 
   .story-card p {
     margin: 0;
-    color: rgba(232,237,246,0.72);
+    color: #64748b;
     line-height: 1.7;
     font-size: 13px;
   }

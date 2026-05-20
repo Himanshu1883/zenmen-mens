@@ -169,9 +169,9 @@ export default function ContactPage() {
     const isFocused = focusedField === field;
     return {
       width: "100%",
-      background: "rgba(8,12,28,0.8)",
-      border: `1px solid ${hasError ? "rgba(224,82,82,0.6)" : isFocused ? "rgba(200,169,110,0.7)" : "rgba(200,169,110,0.2)"}`,
-      color: "#f5f0e8",
+      background: "#ffffff",
+      border: `1px solid ${hasError ? "rgba(224,82,82,0.55)" : isFocused ? "#7da8c7" : "#e2e8f0"}`,
+      color: "#0f172a",
       fontFamily: "'Jost', sans-serif",
       fontSize: 13,
       fontWeight: 300,
@@ -179,8 +179,8 @@ export default function ContactPage() {
       padding: "14px 16px",
       outline: "none",
       transition: "border-color 0.25s, box-shadow 0.25s",
-      boxShadow: isFocused ? "0 0 0 3px rgba(200,169,110,0.08)" : "none",
-      borderRadius: 0,
+      boxShadow: isFocused ? "0 0 0 3px rgba(125,168,199,0.2)" : "none",
+      borderRadius: 2,
       appearance: "none" as const,
       WebkitAppearance: "none" as const,
     };
@@ -307,71 +307,62 @@ export default function ContactPage() {
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
 
-        /* Grain overlay */
-        .cg { pointer-events: none; position: fixed; inset: 0; z-index: 999; opacity: .025;
-          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-          background-size: 256px; }
-
-        /* Scrollbar */
         ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: #050A18; }
-        ::-webkit-scrollbar-thumb { background: rgba(200,169,110,.3); border-radius: 2px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: rgba(125,168,199,.45); border-radius: 2px; }
 
-        /* Gold rule */
-        .cgr { height: 1px; width: 100%; background: linear-gradient(to right, transparent, rgba(200,169,110,.22) 40%, rgba(200,169,110,.22) 60%, transparent); }
+        .cgr { height: 1px; width: 100%; background: linear-gradient(to right, transparent, #e2e8f0 40%, #e2e8f0 60%, transparent); }
 
-        /* Channel cards */
         .ch-card {
-          border: .5px solid rgba(200,169,110,.18);
-          background: rgba(200,169,110,.02);
+          border: 1px solid #e2e8f0;
+          background: #ffffff;
           padding: 28px 24px;
           display: flex; flex-direction: column; gap: 14px;
-          transition: all .4s; position: relative; overflow: hidden; cursor: default;
+          transition: all .35s; position: relative; overflow: hidden; cursor: default;
           text-decoration: none;
+          box-shadow: 0 1px 3px rgba(15,23,42,.04);
         }
         .ch-card::before {
           content: ''; position: absolute; inset: 0;
-          background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(200,169,110,.08), transparent 70%);
-          opacity: 0; transition: opacity .4s;
+          background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(125,168,199,.12), transparent 70%);
+          opacity: 0; transition: opacity .35s;
         }
-        .ch-card:hover { border-color: rgba(200,169,110,.45); transform: translateY(-4px); }
+        .ch-card:hover { border-color: #7da8c7; transform: translateY(-4px); box-shadow: 0 8px 24px rgba(15,23,42,.08); }
         .ch-card:hover::before { opacity: 1; }
-        .ch-icon { color: #c8a96e; flex-shrink: 0; }
+        .ch-icon { color: #7da8c7; flex-shrink: 0; }
         .ch-cta {
           font-family: 'Jost', sans-serif; font-size: 10px; letter-spacing: .25em;
-          text-transform: uppercase; color: rgba(200,169,110,.55); margin-top: auto;
+          text-transform: uppercase; color: #64748b; margin-top: auto;
           transition: color .3s; display: inline-flex; align-items: center; gap: 6px;
         }
-        .ch-card:hover .ch-cta { color: #c8a96e; }
+        .ch-card:hover .ch-cta { color: #7da8c7; }
 
-        /* Detail cards */
         .dc {
-          border: .5px solid rgba(200,169,110,.14);
-          background: rgba(5,10,24,.6);
+          border: 1px solid #e2e8f0;
+          background: #f8fafc;
           padding: 18px 16px;
+          border-radius: 2px;
         }
 
-        /* Form inputs — placeholder color */
-        .c-input::placeholder, .c-textarea::placeholder { color: rgba(245,240,232,.3); }
+        .c-input::placeholder, .c-textarea::placeholder { color: #94a3b8; }
         .c-select { appearance: none; -webkit-appearance: none; cursor: pointer; }
-        .c-select option { background: #0a0e1a; color: #f5f0e8; }
+        .c-select option { background: #ffffff; color: #0f172a; }
         .c-textarea { resize: vertical; min-height: 120px; }
 
-        /* Submit button */
         .c-submit {
           width: 100%;
-          background: #c8a96e; color: #050A18;
+          background: #0f172a; color: #ffffff;
           border: none; cursor: pointer;
           font-family: 'Jost', sans-serif; font-size: 10px; font-weight: 500;
           letter-spacing: .35em; text-transform: uppercase;
           padding: 16px 20px;
           transition: background .25s, transform .2s;
           display: flex; align-items: center; justify-content: center; gap: 10px;
+          border-radius: 2px;
         }
-        .c-submit:hover:not(:disabled) { background: #e2c06a; transform: translateY(-1px); }
+        .c-submit:hover:not(:disabled) { background: #7da8c7; color: #0f172a; transform: translateY(-1px); }
         .c-submit:disabled { opacity: .65; cursor: not-allowed; }
 
-        /* WA button */
         .wa-btn {
           display: inline-flex; align-items: center; gap: 10px;
           background: #25D366; color: #fff;
@@ -379,22 +370,22 @@ export default function ContactPage() {
           letter-spacing: .3em; text-transform: uppercase;
           padding: 14px 28px; text-decoration: none;
           transition: background .25s;
+          border-radius: 2px;
         }
         .wa-btn:hover { background: #1fb559; }
 
-        /* Map iframe container */
-        .map-wrap { position: relative; width: 100%; height: 420px; overflow: hidden; border: .5px solid rgba(200,169,110,.2); }
-        .map-wrap iframe { width: 100%; height: 100%; border: none; filter: invert(92%) hue-rotate(180deg) saturate(0.8) brightness(0.88); }
+        .map-wrap { position: relative; width: 100%; height: 420px; overflow: hidden; border: 1px solid #e2e8f0; border-radius: 4px; background: #f8fafc; }
+        .map-wrap iframe { width: 100%; height: 100%; border: none; }
         .map-overlay-badge {
           position: absolute; top: 16px; left: 16px; z-index: 10;
-          background: rgba(5,10,24,.95); border: .5px solid rgba(200,169,110,.3);
+          background: rgba(255,255,255,.95); border: 1px solid #e2e8f0;
           padding: 12px 16px; backdrop-filter: blur(10px);
+          box-shadow: 0 4px 12px rgba(15,23,42,.08);
+          border-radius: 2px;
         }
 
-        /* Error text */
         .err { font-family: 'Jost', sans-serif; font-size: 10px; color: rgba(224,82,82,.9); letter-spacing: .03em; margin-top: 4px; display: block; }
 
-        /* Responsive */
         @media (max-width: 1024px) {
           .c-two-col { grid-template-columns: 1fr !important; }
         }
@@ -411,9 +402,6 @@ export default function ContactPage() {
         }
       `}</style>
 
-      {/* Grain */}
-      <div className="cg" aria-hidden />
-
       {/* ═══════════════════════════════════════════
           01 — BANNER
       ═══════════════════════════════════════════ */}
@@ -421,7 +409,7 @@ export default function ContactPage() {
         style={{
           position: "relative",
           minHeight: "80vh",
-          background: "#050A18",
+          background: "#fafbfc",
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
@@ -438,8 +426,8 @@ export default function ContactPage() {
               height: "100%",
               objectFit: "cover",
               objectPosition: "center 25%",
-              opacity: 0.6,
-              filter: "saturate(0.5) contrast(1.0)",
+              opacity: 0.35,
+              filter: "saturate(0.9) contrast(1.02)",
             }}
           />
           {/* Rich gradient — lighter at top so text is clearly readable */}
@@ -448,7 +436,7 @@ export default function ContactPage() {
               position: "absolute",
               inset: 0,
               background:
-                "linear-gradient(to bottom, rgba(5,10,24,0.55) 0%, rgba(5,10,24,0.4) 30%, rgba(5,10,24,0.75) 70%, #050A18 100%)",
+                "linear-gradient(to bottom, rgba(248,250,252,0.55) 0%, rgba(248,250,252,0.4) 30%, rgba(248,250,252,0.75) 70%, #fafbfc 100%)",
             }}
           />
           {/* Gold glow top-left */}
@@ -457,7 +445,7 @@ export default function ContactPage() {
               position: "absolute",
               inset: 0,
               background:
-                "radial-gradient(ellipse 60% 50% at 10% 0%, rgba(200,169,110,0.12), transparent 55%)",
+                "radial-gradient(ellipse 60% 50% at 10% 0%, rgba(125,168,199,0.12), transparent 55%)",
             }}
           />
           {/* Gold glow bottom-right */}
@@ -466,7 +454,7 @@ export default function ContactPage() {
               position: "absolute",
               inset: 0,
               background:
-                "radial-gradient(ellipse 50% 40% at 90% 100%, rgba(200,169,110,0.08), transparent 55%)",
+                "radial-gradient(ellipse 50% 40% at 90% 100%, rgba(125,168,199,0.08), transparent 55%)",
             }}
           />
         </div>
@@ -482,7 +470,7 @@ export default function ContactPage() {
             fontSize: 8,
             letterSpacing: "0.42em",
             textTransform: "uppercase",
-            color: "rgba(200,169,110,0.4)",
+            color: "rgba(125,168,199,0.4)",
             whiteSpace: "nowrap",
             zIndex: 10,
           }}
@@ -501,7 +489,7 @@ export default function ContactPage() {
             fontSize: "clamp(6rem,18vw,15rem)",
             fontWeight: 700,
             color: "transparent",
-            WebkitTextStroke: "0.5px rgba(200,169,110,0.05)",
+            WebkitTextStroke: "0.5px rgba(125,168,199,0.05)",
             lineHeight: 1,
             userSelect: "none",
             zIndex: 1,
@@ -530,7 +518,7 @@ export default function ContactPage() {
                 fontSize: 10,
                 letterSpacing: "0.45em",
                 textTransform: "uppercase",
-                color: "#c8a96e",
+                color: "#7da8c7",
                 marginBottom: 24,
               }}
             >
@@ -546,14 +534,14 @@ export default function ContactPage() {
               fontWeight: 300,
               lineHeight: 0.93,
               letterSpacing: "-0.02em",
-              color: "#f5f0e8",
+              color: "#0f172a",
               marginBottom: 32,
               ...fade(bannerVisible, 0.1),
             }}
           >
             Begin Your
             <br />
-            <span style={{ fontStyle: "italic", color: "#c8a96e" }}>
+            <span style={{ fontStyle: "italic", color: "#7da8c7" }}>
               Bespoke
             </span>
             <br />
@@ -575,7 +563,7 @@ export default function ContactPage() {
                 fontSize: "clamp(1rem,1.4vw,1.15rem)",
                 fontStyle: "italic",
                 fontWeight: 300,
-                color: "rgba(245,240,232,0.75)",
+                color: "rgba(100,116,139,0.75)",
                 lineHeight: 1.8,
                 maxWidth: 480,
                 margin: 0,
@@ -594,7 +582,7 @@ export default function ContactPage() {
               display: "flex",
               flexWrap: "wrap",
               gap: 0,
-              borderTop: ".5px solid rgba(200,169,110,0.15)",
+              borderTop: ".5px solid rgba(125,168,199,0.15)",
               paddingTop: 28,
               ...fade(bannerVisible, 0.42),
             }}
@@ -611,7 +599,7 @@ export default function ContactPage() {
                   padding: "0 32px 0 0",
                   marginRight: 32,
                   borderRight:
-                    i < 3 ? ".5px solid rgba(200,169,110,0.12)" : "none",
+                    i < 3 ? ".5px solid rgba(125,168,199,0.12)" : "none",
                   marginBottom: 16,
                 }}
               >
@@ -621,7 +609,7 @@ export default function ContactPage() {
                     fontSize: 9,
                     letterSpacing: "0.32em",
                     textTransform: "uppercase",
-                    color: "rgba(200,169,110,0.55)",
+                    color: "rgba(125,168,199,0.55)",
                     marginBottom: 5,
                   }}
                 >
@@ -632,7 +620,7 @@ export default function ContactPage() {
                     fontFamily: "'Cormorant Garamond', serif",
                     fontSize: "1rem",
                     fontWeight: 400,
-                    color: "#f5f0e8",
+                    color: "#0f172a",
                     letterSpacing: "0.02em",
                   }}
                 >
@@ -649,7 +637,7 @@ export default function ContactPage() {
       ═══════════════════════════════════════════ */}
       <div
         style={{
-          background: "#c8a96e",
+          background: "#7da8c7",
           overflow: "hidden",
           padding: "12px 0",
           whiteSpace: "nowrap",
@@ -677,7 +665,7 @@ export default function ContactPage() {
                 fontWeight: 500,
                 letterSpacing: "0.35em",
                 textTransform: "uppercase",
-                color: "#050A18",
+                color: "#ffffff",
               }}
             >
               {w}
@@ -689,7 +677,7 @@ export default function ContactPage() {
       {/* ═══════════════════════════════════════════
           02 — INFO + FORM
       ═══════════════════════════════════════════ */}
-      <section style={{ background: "#050A18", padding: "100px 0" }}>
+      <section style={{ background: "#fafbfc", padding: "100px 0" }}>
         <div
           className="c-two-col"
           style={{
@@ -717,7 +705,7 @@ export default function ContactPage() {
                   width: 32,
                   height: 1,
                   background:
-                    "linear-gradient(to right, rgba(200,169,110,.6), transparent)",
+                    "linear-gradient(to right, rgba(125,168,199,.6), transparent)",
                 }}
               />
               <p
@@ -726,7 +714,7 @@ export default function ContactPage() {
                   fontSize: 10,
                   letterSpacing: "0.42em",
                   textTransform: "uppercase",
-                  color: "#c8a96e",
+                  color: "#7da8c7",
                 }}
               >
                 Atelier Details
@@ -738,13 +726,13 @@ export default function ContactPage() {
                 fontFamily: "'Playfair Display', serif",
                 fontSize: "clamp(1.9rem,3.5vw,2.8rem)",
                 fontWeight: 300,
-                color: "#f5f0e8",
+                color: "#0f172a",
                 lineHeight: 1.08,
                 marginBottom: 18,
               }}
             >
               Visit Our{" "}
-              <span style={{ fontStyle: "italic", color: "#c8a96e" }}>
+              <span style={{ fontStyle: "italic", color: "#7da8c7" }}>
                 Atelier
               </span>
             </h2>
@@ -755,7 +743,7 @@ export default function ContactPage() {
                 fontSize: "1.05rem",
                 fontWeight: 300,
                 lineHeight: 1.9,
-                color: "rgba(220,215,205,0.85)",
+                color: "rgba(100,116,139,0.85)",
                 marginBottom: 36,
               }}
             >
@@ -782,7 +770,7 @@ export default function ContactPage() {
                       fontSize: 9,
                       letterSpacing: "0.28em",
                       textTransform: "uppercase",
-                      color: "rgba(200,169,110,0.7)",
+                      color: "rgba(125,168,199,0.7)",
                       marginBottom: 7,
                     }}
                   >
@@ -793,7 +781,7 @@ export default function ContactPage() {
                       fontFamily: "'Cormorant Garamond', serif",
                       fontSize: "1.05rem",
                       fontWeight: 400,
-                      color: "#f5f0e8",
+                      color: "#0f172a",
                       lineHeight: 1.35,
                     }}
                   >
@@ -840,8 +828,8 @@ export default function ContactPage() {
                     fontSize: 9,
                     letterSpacing: "0.22em",
                     textTransform: "uppercase",
-                    color: "rgba(200,169,110,.6)",
-                    border: ".5px solid rgba(200,169,110,.18)",
+                    color: "rgba(125,168,199,.6)",
+                    border: ".5px solid rgba(125,168,199,.18)",
                     padding: "5px 12px",
                   }}
                 >
@@ -858,14 +846,15 @@ export default function ContactPage() {
           >
             <div
               style={{
-                background: "rgba(8,12,28,0.7)",
-                border: ".5px solid rgba(200,169,110,.22)",
+                background: "#ffffff",
+                border: "1px solid #e2e8f0",
                 padding: "clamp(24px,4vw,40px)",
                 position: "relative",
                 overflow: "hidden",
+                boxShadow: "0 4px 24px rgba(15,23,42,0.06)",
+                borderRadius: 4,
               }}
             >
-              {/* Form header glow */}
               <div
                 style={{
                   position: "absolute",
@@ -874,8 +863,8 @@ export default function ContactPage() {
                   right: 0,
                   height: 2,
                   background:
-                    "linear-gradient(to right, transparent, #c8a96e 40%, #c8a96e 60%, transparent)",
-                  opacity: 0.6,
+                    "linear-gradient(to right, transparent, #7da8c7 40%, #7da8c7 60%, transparent)",
+                  opacity: 0.85,
                 }}
               />
 
@@ -886,7 +875,7 @@ export default function ContactPage() {
                     fontSize: 10,
                     letterSpacing: "0.42em",
                     textTransform: "uppercase",
-                    color: "#c8a96e",
+                    color: "#7da8c7",
                     marginBottom: 10,
                   }}
                 >
@@ -897,12 +886,12 @@ export default function ContactPage() {
                     fontFamily: "'Playfair Display', serif",
                     fontSize: "clamp(1.6rem,3vw,2.1rem)",
                     fontWeight: 300,
-                    color: "#f5f0e8",
+                    color: "#0f172a",
                     lineHeight: 1.1,
                   }}
                 >
                   Tell Us About{" "}
-                  <span style={{ fontStyle: "italic", color: "#c8a96e" }}>
+                  <span style={{ fontStyle: "italic", color: "#7da8c7" }}>
                     Your Vision
                   </span>
                 </h3>
@@ -911,7 +900,7 @@ export default function ContactPage() {
                     fontFamily: "'Cormorant Garamond', serif",
                     fontSize: ".95rem",
                     fontStyle: "italic",
-                    color: "rgba(220,215,205,.6)",
+                    color: "rgba(100,116,139,.6)",
                     marginTop: 8,
                     lineHeight: 1.6,
                   }}
@@ -947,7 +936,7 @@ export default function ContactPage() {
                     style={{
                       fontFamily: "'Cormorant Garamond', serif",
                       fontSize: ".95rem",
-                      color: "rgba(220,215,205,.7)",
+                      color: "rgba(100,116,139,.7)",
                       fontStyle: "italic",
                     }}
                   >
@@ -993,7 +982,7 @@ export default function ContactPage() {
                       fontSize: 9,
                       letterSpacing: "0.3em",
                       textTransform: "uppercase",
-                      color: "rgba(200,169,110,.6)",
+                      color: "rgba(125,168,199,.6)",
                       display: "block",
                       marginBottom: 7,
                     }}
@@ -1031,7 +1020,7 @@ export default function ContactPage() {
                         fontSize: 9,
                         letterSpacing: "0.3em",
                         textTransform: "uppercase",
-                        color: "rgba(200,169,110,.6)",
+                        color: "rgba(125,168,199,.6)",
                         display: "block",
                         marginBottom: 7,
                       }}
@@ -1060,7 +1049,7 @@ export default function ContactPage() {
                         fontSize: 9,
                         letterSpacing: "0.3em",
                         textTransform: "uppercase",
-                        color: "rgba(200,169,110,.6)",
+                        color: "rgba(125,168,199,.6)",
                         display: "block",
                         marginBottom: 7,
                       }}
@@ -1092,7 +1081,7 @@ export default function ContactPage() {
                       fontSize: 9,
                       letterSpacing: "0.3em",
                       textTransform: "uppercase",
-                      color: "rgba(200,169,110,.6)",
+                      color: "rgba(125,168,199,.6)",
                       display: "block",
                       marginBottom: 7,
                     }}
@@ -1110,12 +1099,12 @@ export default function ContactPage() {
                         ...inputStyle("occasion"),
                         paddingRight: 40,
                         color: formData.occasion
-                          ? "#f5f0e8"
-                          : "rgba(245,240,232,.3)",
+                          ? "#0f172a"
+                          : "#94a3b8",
                       }}
                     >
                       {OCCASIONS.map((o) => (
-                        <option key={o} value={o} style={{ color: "#f5f0e8" }}>
+                        <option key={o} value={o} style={{ color: "#0f172a" }}>
                           {o || "Select occasion (optional)"}
                         </option>
                       ))}
@@ -1128,7 +1117,7 @@ export default function ContactPage() {
                         top: "50%",
                         transform: "translateY(-50%)",
                         pointerEvents: "none",
-                        color: "rgba(200,169,110,.5)",
+                        color: "rgba(125,168,199,.5)",
                       }}
                     >
                       <svg
@@ -1153,7 +1142,7 @@ export default function ContactPage() {
                       fontSize: 9,
                       letterSpacing: "0.3em",
                       textTransform: "uppercase",
-                      color: "rgba(200,169,110,.6)",
+                      color: "rgba(125,168,199,.6)",
                       display: "block",
                       marginBottom: 7,
                     }}
@@ -1210,7 +1199,7 @@ export default function ContactPage() {
                     fontFamily: "'Cormorant Garamond', serif",
                     fontSize: ".85rem",
                     fontStyle: "italic",
-                    color: "rgba(200,169,110,.4)",
+                    color: "rgba(125,168,199,.4)",
                     textAlign: "center",
                     lineHeight: 1.6,
                   }}
@@ -1231,7 +1220,7 @@ export default function ContactPage() {
       ═══════════════════════════════════════════ */}
       <section
         ref={channelsSectionRef}
-        style={{ background: "#030813", padding: "80px 0" }}
+        style={{ background: "#f8fafc", padding: "80px 0" }}
       >
         <div
           style={{
@@ -1247,7 +1236,7 @@ export default function ContactPage() {
                 fontSize: 10,
                 letterSpacing: "0.42em",
                 textTransform: "uppercase",
-                color: "#c8a96e",
+                color: "#7da8c7",
                 marginBottom: 14,
               }}
             >
@@ -1258,12 +1247,12 @@ export default function ContactPage() {
                 fontFamily: "'Playfair Display', serif",
                 fontSize: "clamp(1.8rem,3vw,2.6rem)",
                 fontWeight: 300,
-                color: "#f5f0e8",
+                color: "#0f172a",
                 lineHeight: 1.1,
               }}
             >
               Every Way to{" "}
-              <span style={{ fontStyle: "italic", color: "#c8a96e" }}>
+              <span style={{ fontStyle: "italic", color: "#7da8c7" }}>
                 Connect
               </span>
             </h2>
@@ -1293,7 +1282,7 @@ export default function ContactPage() {
                       fontSize: 9,
                       letterSpacing: "0.3em",
                       textTransform: "uppercase",
-                      color: "rgba(200,169,110,.55)",
+                      color: "rgba(125,168,199,.55)",
                       marginBottom: 6,
                     }}
                   >
@@ -1304,7 +1293,7 @@ export default function ContactPage() {
                       fontFamily: "'Playfair Display', serif",
                       fontSize: "1.1rem",
                       fontWeight: 300,
-                      color: "#f5f0e8",
+                      color: "#0f172a",
                       lineHeight: 1.3,
                     }}
                   >
@@ -1314,7 +1303,7 @@ export default function ContactPage() {
                     style={{
                       fontFamily: "'Cormorant Garamond', serif",
                       fontSize: ".9rem",
-                      color: "rgba(220,215,205,.55)",
+                      color: "rgba(100,116,139,.55)",
                       marginTop: 4,
                       fontStyle: "italic",
                     }}
@@ -1336,7 +1325,7 @@ export default function ContactPage() {
       ═══════════════════════════════════════════ */}
       <section
         ref={mapSectionRef}
-        style={{ background: "#050A18", padding: "80px 0 0" }}
+        style={{ background: "#fafbfc", padding: "80px 0 0" }}
       >
         <div
           style={{
@@ -1363,7 +1352,7 @@ export default function ContactPage() {
                   fontSize: 10,
                   letterSpacing: "0.42em",
                   textTransform: "uppercase",
-                  color: "#c8a96e",
+                  color: "#7da8c7",
                   marginBottom: 12,
                 }}
               >
@@ -1374,12 +1363,12 @@ export default function ContactPage() {
                   fontFamily: "'Playfair Display', serif",
                   fontSize: "clamp(1.8rem,3vw,2.6rem)",
                   fontWeight: 300,
-                  color: "#f5f0e8",
+                  color: "#0f172a",
                   lineHeight: 1.1,
                 }}
               >
                 Our{" "}
-                <span style={{ fontStyle: "italic", color: "#c8a96e" }}>
+                <span style={{ fontStyle: "italic", color: "#7da8c7" }}>
                   Atelier
                 </span>
               </h2>
@@ -1396,21 +1385,21 @@ export default function ContactPage() {
                 fontSize: 10,
                 letterSpacing: "0.35em",
                 textTransform: "uppercase",
-                color: "#c8a96e",
-                border: ".5px solid rgba(200,169,110,.35)",
+                color: "#0f172a",
+                border: "1px solid #e2e8f0",
                 padding: "12px 24px",
                 textDecoration: "none",
                 transition: "all .3s",
                 background: "transparent",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = "#c8a96e";
-                (e.currentTarget as HTMLElement).style.color = "#050A18";
+                (e.currentTarget as HTMLElement).style.background = "#0f172a";
+                (e.currentTarget as HTMLElement).style.color = "#ffffff";
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.background =
                   "transparent";
-                (e.currentTarget as HTMLElement).style.color = "#c8a96e";
+                (e.currentTarget as HTMLElement).style.color = "#0f172a";
               }}
             >
               Get Directions →
@@ -1435,7 +1424,7 @@ export default function ContactPage() {
                     fontSize: 9,
                     letterSpacing: "0.3em",
                     textTransform: "uppercase",
-                    color: "rgba(200,169,110,.7)",
+                    color: "rgba(125,168,199,.7)",
                     marginBottom: 5,
                   }}
                 >
@@ -1446,7 +1435,7 @@ export default function ContactPage() {
                     fontFamily: "'Playfair Display', serif",
                     fontSize: "1.05rem",
                     fontWeight: 300,
-                    color: "#f5f0e8",
+                    color: "#0f172a",
                     lineHeight: 1.4,
                   }}
                 >
@@ -1457,7 +1446,7 @@ export default function ContactPage() {
                     fontFamily: "'Cormorant Garamond', serif",
                     fontSize: ".9rem",
                     fontStyle: "italic",
-                    color: "rgba(220,215,205,.6)",
+                    color: "rgba(100,116,139,.6)",
                     marginTop: 2,
                   }}
                 >
@@ -1474,7 +1463,7 @@ export default function ContactPage() {
               flexWrap: "wrap",
               gap: 0,
               padding: "28px 0",
-              borderTop: ".5px solid rgba(200,169,110,.12)",
+              borderTop: "1px solid #e2e8f0",
               marginTop: 0,
               ...fade(mapVisible, 0.2),
             }}
@@ -1497,7 +1486,7 @@ export default function ContactPage() {
                   paddingRight: 32,
                   marginRight: 32,
                   borderRight:
-                    i < 3 ? ".5px solid rgba(200,169,110,.1)" : "none",
+                    i < 3 ? ".5px solid rgba(125,168,199,.1)" : "none",
                   marginBottom: 12,
                 }}
               >
@@ -1507,7 +1496,7 @@ export default function ContactPage() {
                     fontFamily: "'Jost', sans-serif",
                     fontSize: 11,
                     letterSpacing: "0.08em",
-                    color: "rgba(220,215,205,.65)",
+                    color: "rgba(100,116,139,.65)",
                   }}
                 >
                   {item.label}
@@ -1523,9 +1512,9 @@ export default function ContactPage() {
       ═══════════════════════════════════════════ */}
       <section
         style={{
-          background: "#030813",
+          background: "#f8fafc",
           padding: "80px clamp(24px,6vw,80px)",
-          borderTop: ".5px solid rgba(200,169,110,.12)",
+          borderTop: "1px solid #e2e8f0",
           textAlign: "center",
         }}
       >
@@ -1536,7 +1525,7 @@ export default function ContactPage() {
               fontSize: 10,
               letterSpacing: "0.42em",
               textTransform: "uppercase",
-              color: "#c8a96e",
+              color: "#7da8c7",
               marginBottom: 18,
             }}
           >
@@ -1548,13 +1537,13 @@ export default function ContactPage() {
               fontSize: "clamp(2rem,4.5vw,3.2rem)",
               fontWeight: 300,
               lineHeight: 1.05,
-              color: "#f5f0e8",
+              color: "#0f172a",
               marginBottom: 18,
             }}
           >
             Your Garment Awaits.
             <br />
-            <span style={{ fontStyle: "italic", color: "#c8a96e" }}>
+            <span style={{ fontStyle: "italic", color: "#7da8c7" }}>
               Let's Begin.
             </span>
           </h2>
@@ -1564,7 +1553,7 @@ export default function ContactPage() {
               fontSize: "1.05rem",
               fontStyle: "italic",
               fontWeight: 300,
-              color: "rgba(220,215,205,.65)",
+              color: "rgba(100,116,139,.65)",
               lineHeight: 1.8,
               marginBottom: 40,
             }}
@@ -1607,20 +1596,20 @@ export default function ContactPage() {
                 fontWeight: 500,
                 letterSpacing: "0.35em",
                 textTransform: "uppercase",
-                color: "#c8a96e",
-                border: ".5px solid rgba(200,169,110,.4)",
+                color: "#0f172a",
+                border: "1px solid #e2e8f0",
                 padding: "14px 28px",
                 textDecoration: "none",
                 transition: "all .3s",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = "#c8a96e";
-                (e.currentTarget as HTMLElement).style.color = "#050A18";
+                (e.currentTarget as HTMLElement).style.background = "#0f172a";
+                (e.currentTarget as HTMLElement).style.color = "#ffffff";
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.background =
                   "transparent";
-                (e.currentTarget as HTMLElement).style.color = "#c8a96e";
+                (e.currentTarget as HTMLElement).style.color = "#0f172a";
               }}
             >
               Call +91 96507 53273

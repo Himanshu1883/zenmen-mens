@@ -11,9 +11,26 @@ const fadeUp = {
   visible: { opacity: 1, y: 0 },
 };
 
+const INFO_ITEMS = [
+  {
+    icon: Clock,
+    title: "Store Hours",
+    lines: ["Mon - Sat: 10 AM - 8 PM", "Sunday: 11 AM - 6 PM"],
+  },
+  {
+    icon: MapPin,
+    title: "Visit Us",
+    lines: ["E-39, Lajpat Nagar II", "New Delhi – 110024"],
+  },
+  {
+    icon: Phone,
+    title: "Contact",
+    lines: ["+91 96507 53273", "appointments@zenmen.com"],
+  },
+] as const;
+
 const BookAppointmentSection = () => {
   const pathname = usePathname();
-  /** Remount motion blocks when returning via browser back (bfcache) or route change */
   const [motionKey, setMotionKey] = useState(0);
 
   useEffect(() => {
@@ -22,142 +39,118 @@ const BookAppointmentSection = () => {
 
   useEffect(() => {
     const onPageShow = (event: PageTransitionEvent) => {
-      if (event.persisted) {
-        setMotionKey((k) => k + 1);
-      }
+      if (event.persisted) setMotionKey((k) => k + 1);
     };
     window.addEventListener("pageshow", onPageShow);
     return () => window.removeEventListener("pageshow", onPageShow);
   }, []);
 
   return (
-    <section className="relative overflow-hidden py-32">
+    <section
+      id="contact"
+      className="bg-[#fafbfc] px-6 py-20 md:px-8 md:py-28 lg:px-16 lg:py-32"
+    >
       <motion.div
-        key={`contact-bg-${motionKey}`}
-        className="absolute inset-0"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.4 }}
-      >
-        <img
-          src="/store_1.jpeg"
-          alt="ZENmen Store"
-          className="h-full w-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/70" />
-      </motion.div>
-
-      <motion.div
-        key={`contact-content-${motionKey}`}
-        className="relative z-10 mx-auto max-w-5xl px-6 text-center md:px-8"
+        key={`contact-${motionKey}`}
+        className="mx-auto max-w-[1200px]"
         initial="hidden"
         animate="visible"
         variants={{
           hidden: {},
           visible: {
-            transition: { staggerChildren: 0.12, delayChildren: 0.05 },
+            transition: { staggerChildren: 0.1, delayChildren: 0.05 },
           },
         }}
       >
-        <motion.div variants={fadeUp} transition={{ duration: 0.55, ease: "easeOut" }}>
-          <p className="mb-6 text-[11px] uppercase tracking-[0.3em] text-[#7da8c7]">
+        <motion.div
+          variants={fadeUp}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="mb-10 text-center md:mb-14"
+        >
+          <p className="mb-4 text-[11px] uppercase tracking-[0.3em] text-[#7da8c7]">
             Visit Our Atelier
           </p>
           <h2
-            className="mb-6 text-white"
+            className="text-[#0f172a]"
             style={{
               fontFamily: "Playfair Display, serif",
-              fontSize: "clamp(40px, 6vw, 72px)",
+              fontSize: "clamp(32px, 5vw, 56px)",
               fontWeight: 600,
-              lineHeight: 1.2,
-              textShadow: "0 4px 20px rgba(0,0,0,0.5)",
+              lineHeight: 1.15,
             }}
           >
             Schedule An Appointment
           </h2>
-          <p className="mx-auto mb-12 max-w-2xl text-[15px] leading-relaxed text-white/90">
+          <p className="mx-auto mt-4 max-w-2xl text-[15px] leading-relaxed text-[#64748b]">
             Experience personalized styling and bespoke tailoring with our expert
             consultants. Book your exclusive appointment for a premium shopping
             experience.
           </p>
         </motion.div>
 
-        <motion.div
-          variants={fadeUp}
-          transition={{ duration: 0.55, ease: "easeOut" }}
-          className="mb-16"
-        >
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Link
-              href="/appointment"
-              className="inline-flex items-center gap-3 rounded-sm bg-white px-12 py-5 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#0f172a] no-underline shadow-2xl transition-all duration-300 hover:border-[#7da8c7] hover:bg-[#7da8c7] hover:text-white"
-            >
-              <Calendar className="h-5 w-5" strokeWidth={1.5} />
-              <span>Book Now</span>
-              <ArrowRight className="h-4 w-4" strokeWidth={2} />
-            </Link>
+        <div className="grid grid-cols-1 items-stretch gap-8 lg:grid-cols-2 lg:gap-10">
+          <motion.div
+            variants={fadeUp}
+            transition={{ duration: 0.55, ease: "easeOut" }}
+            className="relative min-h-[280px] overflow-hidden rounded-sm border border-[#e2e8f0] bg-white shadow-sm sm:min-h-[360px] lg:min-h-full"
+          >
+            <img
+              src="/store_1.jpeg"
+              alt="ZENmen atelier"
+              className="h-full w-full object-cover object-center"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a]/25 via-transparent to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 border-t border-white/20 bg-white/90 px-5 py-4 backdrop-blur-sm">
+              <p className="text-[10px] uppercase tracking-[0.22em] text-[#7da8c7]">
+                ZENmen · Lajpat Nagar
+              </p>
+              <p className="mt-1 text-[13px] font-medium text-[#0f172a]">
+                E-39, Lajpat Nagar II, New Delhi
+              </p>
+            </div>
           </motion.div>
-        </motion.div>
 
-        <motion.div
-          variants={fadeUp}
-          transition={{ duration: 0.55, ease: "easeOut" }}
-          className="mx-auto grid max-w-4xl grid-cols-1 gap-8 md:grid-cols-3 md:gap-12"
-        >
-          <div className="flex flex-col items-center">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-white/10 backdrop-blur-md">
-              <Clock className="h-5 w-5 text-white" strokeWidth={1.5} />
+          <motion.div
+            variants={fadeUp}
+            transition={{ duration: 0.55, ease: "easeOut" }}
+            className="flex flex-col justify-center rounded-sm border border-[#e2e8f0] bg-white p-8 shadow-sm md:p-10"
+          >
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Link
+                href="/appointment"
+                className="mb-10 inline-flex w-full items-center justify-center gap-3 rounded-sm bg-[#0f172a] px-8 py-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-white no-underline transition-colors duration-300 hover:bg-[#7da8c7] hover:text-[#0f172a] sm:w-auto"
+              >
+                <Calendar className="h-5 w-5" strokeWidth={1.5} />
+                <span>Book Now</span>
+                <ArrowRight className="h-4 w-4" strokeWidth={2} />
+              </Link>
+            </motion.div>
+
+            <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-6">
+              {INFO_ITEMS.map(({ icon: Icon, title, lines }) => (
+                <div key={title} className="text-center sm:text-left">
+                  <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full border border-[#e2e8f0] bg-[#f8fafc] sm:mx-0">
+                    <Icon className="h-5 w-5 text-[#7da8c7]" strokeWidth={1.5} />
+                  </div>
+                  <h3 className="mb-2 text-[12px] font-semibold uppercase tracking-[0.15em] text-[#0f172a]">
+                    {title}
+                  </h3>
+                  <p className="text-[12px] leading-relaxed text-[#64748b]">
+                    {lines[0]}
+                    <br />
+                    {lines[1]}
+                  </p>
+                </div>
+              ))}
             </div>
-            <h3 className="mb-2 text-[13px] font-medium uppercase tracking-[0.15em] text-white">
-              Store Hours
-            </h3>
-            <p className="text-[12px] leading-relaxed text-white/80">
-              Mon - Sat: 10 AM - 8 PM
-              <br />
-              Sunday: 11 AM - 6 PM
-            </p>
-          </div>
 
-          <div className="flex flex-col items-center">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-white/10 backdrop-blur-md">
-              <MapPin className="h-5 w-5 text-white" strokeWidth={1.5} />
-            </div>
-            <h3 className="mb-2 text-[13px] font-medium uppercase tracking-[0.15em] text-white">
-              Visit Us
-            </h3>
-            <p className="text-[12px] leading-relaxed text-white/80">
-              E-39, Lajpat Nagar II
-              <br />
-              New Delhi – 110024
+            <p className="mt-10 border-t border-[#e2e8f0] pt-8 text-center text-[11px] leading-relaxed tracking-wide text-[#94a3b8] sm:text-left">
+              Walk-ins are welcome based on availability. For guaranteed service and
+              personalized attention, we recommend scheduling an appointment in
+              advance.
             </p>
-          </div>
-
-          <div className="flex flex-col items-center">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-white/10 backdrop-blur-md">
-              <Phone className="h-5 w-5 text-white" strokeWidth={1.5} />
-            </div>
-            <h3 className="mb-2 text-[13px] font-medium uppercase tracking-[0.15em] text-white">
-              Contact
-            </h3>
-            <p className="text-[12px] leading-relaxed text-white/80">
-              +91 96507 53273
-              <br />
-              appointments@zenmen.com
-            </p>
-          </div>
-        </motion.div>
-
-        <motion.div
-          variants={fadeUp}
-          transition={{ duration: 0.55, ease: "easeOut" }}
-          className="mt-12 border-t border-white/20 pt-12"
-        >
-          <p className="mx-auto max-w-3xl text-[11px] leading-relaxed tracking-wide text-white/70">
-            Walk-ins are welcome based on availability. For guaranteed service and
-            personalized attention, we recommend scheduling an appointment in
-            advance.
-          </p>
-        </motion.div>
+          </motion.div>
+        </div>
       </motion.div>
     </section>
   );
