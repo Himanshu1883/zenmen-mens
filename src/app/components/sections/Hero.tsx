@@ -1,4 +1,3 @@
-// src/app/components/sections/Hero.tsx
 "use client";
 
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -9,115 +8,101 @@ import { useEffect, useMemo, useRef, useState } from "react";
 // -- HERO SLIDES -------------------------------------------------------------
 const heroSlides = [
   {
-    img: "/zenmen_founder_hero.jpeg",
-    tag: "Premium Tailoring · SS 2025",
-    title: ["Crafted for the", "Modern", "Gentleman"],
+    img: "/ChatGPT_Image_May_20__2026__12_08_02_PM.png",
+    tag: "Bespoke Suiting · SS 2025",
+    title: ["Command", "Every", "Room"],
     titleItalic: 1,
-    subtitle:
-      "Every stitch tells a story. Bespoke suits, shirts and sherwanis that redefine how you feel.",
+    subtitle: "Five silhouettes. One uncompromising standard. Bespoke suits built for the modern gentleman.",
     cta: "Begin Your Journey",
-    ctaSecondary: "View Collection",
-    textAlign: "left",
-    overlayDir: "left",
-  },
-  {
-    img: "banner_kurta.png",
-    tag: "The Kurta Edit · 2025",
-    title: ["Royal Heritage,", "Modern", "Soul"],
-    titleItalic: 1,
-    subtitle:
-      "Hand-embroidered kurta's crafted for the discerning groom. Tradition reimagined.",
-    cta: "Explore Kurta's",
-    ctaSecondary: "Book a Fitting",
-    textAlign: "right",
-    overlayDir: "right",
-  },
-  {
-    img: "/zenmen_suit.png",
-    tag: "Bespoke Suiting · AW 2025",
-    title: ["Power Dressing,", "Perfected", "By Hand"],
-    titleItalic: 1,
-    subtitle:
-      "From boardroom to ballroom — our bespoke suits command every room you enter.",
-    cta: "Book a Fitting",
     ctaSecondary: "View Collection",
     textAlign: "center",
     overlayDir: "center",
   },
   {
-    img: "https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?w=1800&q=90",
-    tag: "Occasion Wear · Limited",
-    title: ["Dressed for", "Extraordinary", "Moments"],
+    img: "/banner_kurta.png",
+    tag: "The Kurta Edit · Heritage 2025",
+    title: ["Royal Heritage,", "Modern", "Soul"],
     titleItalic: 1,
-    subtitle:
-      "Statement coats and occasion wear for men who refuse to blend in.",
-    cta: "View Collection",
-    ctaSecondary: "Book Appointment",
+    subtitle: "Hand-embroidered kurtas crafted for the discerning groom. Tradition reimagined.",
+    cta: "Explore Kurtas",
+    ctaSecondary: "Book a Fitting",
     textAlign: "left",
     overlayDir: "left",
   },
   {
-    img: "https://images.unsplash.com/photo-1490578474895-699cd4e2cf59?w=1800&q=90",
-    tag: "Signature Eveningwear · 2025",
-    title: ["Refined", "Evening", "Elegance"],
-    titleItalic: 1,
-    subtitle:
-      "Velvet tuxedos and black-tie tailoring designed for unforgettable entrances.",
-    cta: "Shop Eveningwear",
+    img: "/banner_white.png",
+    tag: "Signature Collection · Limited",
+    title: ["Elevate", "Every", "Moment"],
+    titleItalic: 2,
+    subtitle: "Impeccably tailored tuxedos and suits crafted for unforgettable entrances. Timeless style, modern sophistication.",
+    cta: "Shop Now",
     ctaSecondary: "View Lookbook",
-    textAlign: "right",
-    overlayDir: "right",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=1800&q=90",
-    tag: "Winter Edit · Premium Wool",
-    title: ["Tailored Layers", "For", "The Season"],
-    titleItalic: 1,
-    subtitle:
-      "Premium wool overcoats and textures curated for polished winter style.",
-    cta: "View Winter Edit",
-    ctaSecondary: "Explore All",
     textAlign: "center",
     overlayDir: "center",
   },
 ];
 
+/** Third hero slide (`banner_white`) is omitted below 768px — see `heroSlidesActive`. */
+const HERO_EXCLUDE_MOBILE_IMG = "/banner_white.png";
+
+/** Full-bleed dual banners: visible only ≤768px, directly under main hero */
+const mobileDualBanners = [
+  {
+    src: "/hero_mobile_formal_boat.png",
+    alt: "White double-breasted tuxedo at sea",
+    href: "/collection?q=suit",
+    tag: "Evening · Maritime",
+    titleStrong: "Yacht",
+    titleItalic: "formal",
+    align: "left" as const,
+  },
+  {
+    src: "/hero_mobile_formal_deck.png",
+    alt: "White shawl-collar tuxedo, formal evening",
+    href: "/collection?q=tuxedo",
+    tag: "Deck · Limited",
+    titleStrong: "White",
+    titleItalic: "evening",
+    align: "right" as const,
+  },
+] as const;
+
 // -- STATIC FALLBACK COLLAGE -------------------------------------------------
 const collageItemsFallback = [
   {
-    img: "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=600&q=85",
-    label: "Overcoats",
-    desc: "Structured silhouettes, Italian wool",
-    tag: "Featured",
-    slug: "overcoats",
+    img: "/ChatGPT_Image_May_20__2026__12_08_02_PM.png",
+    label: "Bespoke Suits",
+    desc: "Full canvas construction",
+    tag: "Bestseller",
+    slug: "suits",
   },
   {
     img: "/zenmen_shirt.jpeg",
     label: "Dress Shirts",
-    desc: "Egyptian cotton, 200-thread count",
+    desc: "Egyptian cotton, luxury crafted",
     tag: null,
     slug: "shirts",
   },
   {
-    img: "zenmen_blackcoat.jpeg",
-    label: "Bespoke Suits",
-    desc: "Full canvas construction",
-    tag: null,
-    slug: "suits",
-  },
-  {
-    img: "/zenmen_kurta.png",
+    img: "/banner_kurta.png",
     label: "Kurtas",
     desc: "Hand-embroidered, heritage craft",
-    tag: "Bestseller",
+    tag: "Featured",
     slug: "kurtas",
   },
   {
-    img: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&q=85",
-    label: "Accessories",
-    desc: "Pocket squares, cufflinks & ties",
+    img: "/zenmen_shirt_black.jpeg",
+    label: "Dark Edition",
+    desc: "Contrast stitch, bold silhouettes",
     tag: null,
-    slug: "accessories",
+    slug: "dark-edit",
+  },
+  {
+    img: "/banner_white.png",
+    label: "Eveningwear",
+    desc: "Tailored to perfection",
+    tag: "Limited",
+    slug: "eveningwear",
   },
 ];
 
@@ -125,7 +110,6 @@ export default function Hero() {
   const dispatch = useAppDispatch();
   const { products, loading, loaded } = useAppSelector((s) => s.products);
 
-  // ── Hero slide state ──────────────────────────────────────────────────────
   const [current, setCurrent] = useState(0);
   const [prev, setPrev] = useState<number | null>(null);
   const [animKey, setAnimKey] = useState(0);
@@ -133,18 +117,34 @@ export default function Hero() {
   const currentRef = useRef(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // ── Collage state ─────────────────────────────────────────────────────────
   const [collageStart, setCollageStart] = useState(0);
   const [prevCollageStart, setPrevCollageStart] = useState<number | null>(null);
   const [collageDir, setCollageDir] = useState<"left" | "right">("right");
   const collageTransRef = useRef(false);
   const collageTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const [isMobileHero, setIsMobileHero] = useState(false);
+
   useEffect(() => {
     if (!loading && !loaded) dispatch(fetchProducts());
   }, [dispatch, loading, loaded]);
 
-  // ── Hero slide logic ──────────────────────────────────────────────────────
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    const apply = () => setIsMobileHero(mq.matches);
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
+
+  const heroSlidesActive = useMemo(
+    () =>
+      isMobileHero
+        ? heroSlides.filter((s) => s.img !== HERO_EXCLUDE_MOBILE_IMG)
+        : heroSlides,
+    [isMobileHero],
+  );
+
   const goTo = (idx: number) => {
     if (transitioningRef.current || idx === currentRef.current) return;
     setPrev(currentRef.current);
@@ -152,26 +152,37 @@ export default function Hero() {
     setAnimKey((k) => k + 1);
     currentRef.current = idx;
     transitioningRef.current = true;
-    setTimeout(() => {
-      setPrev(null);
-      transitioningRef.current = false;
-    }, 900);
+    setTimeout(() => { setPrev(null); transitioningRef.current = false; }, 900);
   };
-  const heroNext = () => goTo((currentRef.current + 1) % heroSlides.length);
+  const heroNext = () =>
+    goTo((currentRef.current + 1) % heroSlidesActive.length);
   const heroPrev = () =>
-    goTo((currentRef.current - 1 + heroSlides.length) % heroSlides.length);
+    goTo(
+      (currentRef.current - 1 + heroSlidesActive.length) %
+        heroSlidesActive.length,
+    );
 
   useEffect(() => {
+    const n = heroSlidesActive.length;
+    if (n < 1) return;
+    if (currentRef.current >= n) {
+      currentRef.current = 0;
+      setCurrent(0);
+    }
+  }, [heroSlidesActive.length]);
+
+  useEffect(() => {
+    const n = heroSlidesActive.length;
+    if (n < 1) return;
     timerRef.current = setInterval(
-      () => goTo((currentRef.current + 1) % heroSlides.length),
+      () => goTo((currentRef.current + 1) % n),
       6000,
     );
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, []);
+  }, [heroSlidesActive.length]);
 
-  // ── Collage source from Redux products ────────────────────────────────────
   const collageSource = useMemo(() => {
     const fromStore = (products ?? [])
       .filter((p) => p?.title && p?.images?.[0]?.url)
@@ -185,634 +196,752 @@ export default function Hero() {
     return fromStore.length > 0 ? fromStore : collageItemsFallback;
   }, [products]);
 
-  const VISIBLE = 5; // cards shown at once
-
+  const VISIBLE = 5;
   const collageVisible = useMemo(() => {
     if (collageSource.length <= VISIBLE) return collageSource;
-    return Array.from(
-      { length: VISIBLE },
-      (_, i) => collageSource[(collageStart + i) % collageSource.length],
-    );
+    return Array.from({ length: VISIBLE }, (_, i) => collageSource[(collageStart + i) % collageSource.length]);
   }, [collageSource, collageStart]);
 
   const collagePrevVisible = useMemo(() => {
     if (prevCollageStart === null || collageSource.length <= VISIBLE) return [];
-    return Array.from(
-      { length: VISIBLE },
-      (_, i) => collageSource[(prevCollageStart + i) % collageSource.length],
-    );
+    return Array.from({ length: VISIBLE }, (_, i) => collageSource[(prevCollageStart + i) % collageSource.length]);
   }, [collageSource, prevCollageStart]);
 
   const canSlideCollage = collageSource.length > VISIBLE;
-
   const slideCollage = (dir: "left" | "right") => {
     if (!canSlideCollage || collageTransRef.current) return;
     collageTransRef.current = true;
     setCollageDir(dir);
     setPrevCollageStart(collageStart);
     setCollageStart((prev) =>
-      dir === "right"
-        ? (prev + VISIBLE) % collageSource.length
-        : (prev - VISIBLE + collageSource.length) % collageSource.length,
+      dir === "right" ? (prev + VISIBLE) % collageSource.length : (prev - VISIBLE + collageSource.length) % collageSource.length
     );
-    setTimeout(() => {
-      setPrevCollageStart(null);
-      collageTransRef.current = false;
-    }, 650);
+    setTimeout(() => { setPrevCollageStart(null); collageTransRef.current = false; }, 650);
   };
 
-  // Auto-slide collage every 4.2s (stops after 3 cycles)
   const collageAutoCount = useRef(0);
   useEffect(() => {
     if (!canSlideCollage) return;
     collageAutoCount.current = 0;
     collageTimerRef.current = setInterval(() => {
-      if (collageAutoCount.current >= 3) {
-        clearInterval(collageTimerRef.current!);
-        return;
-      }
+      if (collageAutoCount.current >= 3) { clearInterval(collageTimerRef.current!); return; }
       collageAutoCount.current += 1;
       slideCollage("right");
     }, 4200);
-    return () => {
-      if (collageTimerRef.current) clearInterval(collageTimerRef.current);
-    };
+    return () => { if (collageTimerRef.current) clearInterval(collageTimerRef.current); };
   }, [canSlideCollage, collageSource.length]);
 
-  // ── Slide helpers ─────────────────────────────────────────────────────────
-  const slide = heroSlides[current];
-  const overlayGradient = {
-    left: "linear-gradient(to right, rgba(15,23,42,0.5) 0%, rgba(15,23,42,0.18) 48%, transparent 100%)",
-    right:
-      "linear-gradient(to left, rgba(15,23,42,0.5) 0%, rgba(15,23,42,0.18) 48%, transparent 100%)",
-    center:
-      "linear-gradient(to top, rgba(15,23,42,0.58) 0%, rgba(15,23,42,0.12) 42%, transparent 72%)",
-  }[slide.overlayDir];
+  const slide =
+    heroSlidesActive[current] ?? heroSlidesActive[0] ?? heroSlides[0];
+  const overlayGradient = slide
+    ? {
+        left: "linear-gradient(105deg, rgba(5,8,15,0.78) 0%, rgba(5,8,15,0.35) 50%, transparent 100%)",
+        right:
+          "linear-gradient(255deg, rgba(5,8,15,0.78) 0%, rgba(5,8,15,0.35) 50%, transparent 100%)",
+        center:
+          "linear-gradient(to top, rgba(5,8,15,0.82) 0%, rgba(5,8,15,0.28) 45%, transparent 72%)",
+      }[slide.overlayDir]
+    : "transparent";
 
   return (
     <>
       <style>{`
-        *, *::before, *::after { box-sizing: border-box; }
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600;1,700&family=Tenor+Sans&family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         /* ══════════════════════════════════════
-           HERO — light ZENmen theme
+           TOKENS
         ══════════════════════════════════════ */
-        .fw-hero {
-          width: 100%; height: 100vh; min-height: 580px;
-          position: relative; overflow: hidden;
-          background: #f1f5f9;
-          font-family: var(--font-montserrat), system-ui, sans-serif;
+        :root {
+          --zen-ink: #0f172a;
+          --zen-surface: #f8fafc;
+          --zen-accent: #7da8c7;
+          --zen-accent-soft: #a3c4d9;
+          --zen-muted: #94a3b8;
+          --zen-deep: #0b1220;
+          /* semantic aliases (brand theme) */
+          --ink: var(--zen-ink);
+          --ivory: var(--zen-surface);
+          --fog: #e2e8f0;
+          --gold: var(--zen-accent);
+          --gold-light: var(--zen-accent-soft);
+          --slate: var(--zen-muted);
+          --ff-display: 'Cormorant Garamond', Georgia, serif;
+          --ff-sans: 'Tenor Sans', system-ui, sans-serif;
+          --ff-ui: 'Montserrat', system-ui, sans-serif;
         }
-        .fw-slide-img {
-          position: absolute; inset: 0; width: 100%; height: 100%;
-          object-fit: cover; object-position: center;
-          transition: opacity 0.9s ease; transform: scale(1.06);
-        }
-        .fw-slide-img.active  { opacity: 1; z-index: 1; animation: kenBurns 7s ease forwards; }
-        .fw-slide-img.exiting { opacity: 0; z-index: 0; }
-        .fw-slide-img.hidden  { opacity: 0; z-index: 0; }
-        @keyframes kenBurns { from { transform: scale(1.06); } to { transform: scale(1.0); } }
 
-        .fw-overlay {
+        /* ══════════════════════════════════════
+           HERO
+        ══════════════════════════════════════ */
+        .zn-hero {
+          width: 100%; height: 100vh; min-height: 600px;
+          position: relative; overflow: hidden;
+          background: var(--zen-ink);
+        }
+
+        .zn-slide-img {
+          position: absolute; inset: 0;
+          width: 100%; height: 100%;
+          object-fit: cover; object-position: center center;
+          transition: opacity 1.1s cubic-bezier(.4,0,.2,1);
+        }
+        .zn-slide-img.active  { opacity: 1; z-index: 1; animation: zoomSlow 8s ease forwards; }
+        .zn-slide-img.exiting { opacity: 0; z-index: 0; }
+        .zn-slide-img.hidden  { opacity: 0; z-index: 0; }
+        @keyframes zoomSlow { from { transform: scale(1.07); } to { transform: scale(1.0); } }
+
+        .zn-overlay {
           position: absolute; inset: 0; z-index: 2;
           display: flex; flex-direction: column; justify-content: flex-end;
-          padding-bottom: 90px; transition: background 0.9s ease;
-        }
-        .fw-text { display: flex; flex-direction: column; padding: 0 24px; }
-
-        .fw-topbar {
-          position: absolute; top: 0; left: 0; right: 0; z-index: 5;
-          display: flex; align-items: center; justify-content: space-between;
-          padding: 28px 32px;
-          background: linear-gradient(to bottom, rgba(15,23,42,0.35) 0%, transparent 100%);
+          padding-bottom: 100px;
         }
 
-        .fw-tag {
-          font-size: 9px; letter-spacing: 4px; color: #7da8c7;
-          text-transform: uppercase; font-weight: 600; margin-bottom: 14px;
-          opacity: 0; animation: fadeUp 0.6s 0.05s forwards;
-        }
-        .fw-title {
-          font-family: var(--font-playfair), Georgia, serif; font-weight: 700; color: #f8fafc;
-          line-height: 1.0; margin-bottom: 18px;
-          opacity: 0; animation: fadeUp 0.7s 0.15s forwards;
-        }
-        .fw-title-line       { display: block; font-size: clamp(36px, 6.5vw, 96px); }
-        .fw-title-line.italic { font-style: italic; color: #7da8c7; }
+        .zn-text { display: flex; flex-direction: column; }
 
-        .fw-subtitle {
-          font-family: var(--font-cormorant), Georgia, serif;
-          font-size: clamp(13px, 1.3vw, 18px); font-weight: 300; font-style: italic;
-          color: rgba(248,250,252,0.88); line-height: 1.6; margin-bottom: 28px;
-          max-width: 480px;
-          opacity: 0; animation: fadeUp 0.7s 0.28s forwards;
+        .zn-tag {
+          font-family: var(--ff-ui); font-size: 9px; letter-spacing: 5px;
+          color: var(--zen-accent); text-transform: uppercase; font-weight: 600;
+          margin-bottom: 16px;
+          opacity: 0; animation: riseIn 0.7s 0.1s forwards;
         }
-        .fw-cta-row {
-          display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
-          opacity: 0; animation: fadeUp 0.7s 0.4s forwards;
-        }
-        .fw-btn-primary {
-          background: #7da8c7; color: #ffffff; font-family: var(--font-montserrat), sans-serif;
-          font-size: 9px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
-          padding: 13px 28px; border: none; cursor: pointer; text-decoration: none;
-          display: inline-block; transition: background 0.25s, transform 0.2s;
-        }
-        .fw-btn-primary:hover { background: #5f92b5; transform: translateY(-1px); }
-        .fw-btn-outline {
-          font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase;
-          color: rgba(248,250,252,0.92); text-decoration: none; font-weight: 500;
-          border: 1px solid rgba(255,255,255,0.35); padding: 12px 22px;
-          background: rgba(15,23,42,0.2);
-          transition: all 0.25s; display: inline-block;
-        }
-        .fw-btn-outline:hover { color: #fff; border-color: #7da8c7; background: rgba(125,168,199,0.25); }
 
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(20px); }
+        .zn-title {
+          font-family: var(--ff-display); font-weight: 700; color: var(--zen-surface);
+          line-height: 0.95; margin-bottom: 22px;
+          opacity: 0; animation: riseIn 0.8s 0.22s forwards;
+        }
+        .zn-title-line       { display: block; font-size: clamp(48px, 8.5vw, 120px); letter-spacing: -0.01em; }
+        .zn-title-line.ital  { font-style: italic; color: var(--zen-accent-soft); font-weight: 300; }
+
+        .zn-sub {
+          font-family: var(--ff-display); font-size: clamp(14px, 1.4vw, 19px);
+          font-weight: 300; font-style: italic; color: color-mix(in srgb, var(--zen-surface) 82%, transparent);
+          line-height: 1.65; margin-bottom: 34px; max-width: 520px;
+          opacity: 0; animation: riseIn 0.8s 0.36s forwards;
+        }
+
+        .zn-btns {
+          display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+          opacity: 0; animation: riseIn 0.8s 0.5s forwards;
+        }
+        .zn-btn-fill {
+          background: var(--zen-accent); color: var(--zen-ink);
+          font-family: var(--ff-ui); font-size: 9px; font-weight: 700;
+          letter-spacing: 3.5px; text-transform: uppercase;
+          padding: 14px 32px; border: none; cursor: pointer;
+          text-decoration: none; display: inline-block;
+          transition: background 0.25s, transform 0.2s;
+          clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+        }
+        .zn-btn-fill:hover { background: var(--zen-accent-soft); transform: translateY(-2px); }
+        .zn-btn-ghost {
+          font-family: var(--ff-ui); font-size: 9px; letter-spacing: 3px;
+          text-transform: uppercase; color: color-mix(in srgb, var(--zen-surface) 90%, transparent);
+          text-decoration: none; font-weight: 500;
+          border: 1px solid color-mix(in srgb, var(--zen-accent) 55%, transparent); padding: 13px 24px;
+          background: color-mix(in srgb, var(--zen-ink) 35%, transparent); transition: all 0.25s; display: inline-block;
+        }
+        .zn-btn-ghost:hover { color: var(--zen-surface); border-color: var(--zen-accent); background: color-mix(in srgb, var(--zen-accent) 22%, transparent); }
+
+        @keyframes riseIn {
+          from { opacity: 0; transform: translateY(24px); }
           to   { opacity: 1; transform: translateY(0); }
         }
 
-        .fw-progress { position: absolute; bottom: 0; left: 0; right: 0; z-index: 5; height: 2px; background: rgba(255,255,255,0.15); }
-        .fw-progress-bar { height: 100%; background: #7da8c7; animation: progress 6s linear infinite; }
-        @keyframes progress { from { width: 0%; } to { width: 100%; } }
-
-        .fw-counter {
-          position: absolute; bottom: 32px; right: 32px; z-index: 5;
-          font-size: 9px; letter-spacing: 3px; color: rgba(248,250,252,0.55); font-weight: 500;
+        /* nav controls */
+        .zn-topbar {
+          position: absolute; top: 0; left: 0; right: 0; z-index: 6;
+          height: 80px;
+          background: linear-gradient(to bottom, rgba(5,8,15,0.4) 0%, transparent 100%);
         }
-        .fw-arrow {
-          position: absolute; top: 50%; z-index: 5; transform: translateY(-50%);
-          width: 44px; height: 44px; border: 1px solid rgba(255,255,255,0.25);
-          background: rgba(15,23,42,0.45); color: #f8fafc; cursor: pointer; font-size: 16px;
-          display: flex; align-items: center; justify-content: center;
-          transition: background 0.25s, border-color 0.25s, color 0.2s; backdrop-filter: blur(8px);
-        }
-        .fw-arrow:hover { background: rgba(125,168,199,0.35); border-color: #7da8c7; color: #fff; }
-        .fw-arrow.left  { left: 20px; }
-        .fw-arrow.right { right: 20px; }
 
-        .fw-dots { position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%); z-index: 5; display: flex; align-items: center; gap: 10px; }
-        .fw-dot  { width: 20px; height: 2px; background: rgba(255,255,255,0.28); cursor: pointer; transition: background 0.3s, width 0.3s; }
-        .fw-dot.active { background: #7da8c7; width: 40px; }
-
-        .fw-scroll-cue {
-          position: absolute; bottom: 32px; left: 32px; z-index: 5;
-          display: flex; align-items: center; gap: 10px;
-          font-size: 8px; letter-spacing: 3px; text-transform: uppercase;
-          color: rgba(248,250,252,0.45); font-weight: 500;
+        .zn-arrow {
+          position: absolute; top: 50%; z-index: 6; transform: translateY(-50%);
+          width: 48px; height: 48px;
+          border: 1px solid color-mix(in srgb, var(--zen-accent) 35%, transparent);
+          background: color-mix(in srgb, var(--zen-ink) 50%, transparent); color: var(--zen-surface); cursor: pointer;
+          font-size: 18px; display: flex; align-items: center; justify-content: center;
+          transition: all 0.25s; backdrop-filter: blur(10px);
         }
-        .fw-scroll-line { width: 28px; height: 1px; background: rgba(125,168,199,0.55); }
-        .fw-vert-text {
-          position: absolute; right: 16px; top: 50%; z-index: 5;
+        .zn-arrow:hover { background: color-mix(in srgb, var(--zen-accent) 28%, transparent); border-color: var(--zen-accent); }
+        .zn-arrow.l { left: 24px; }
+        .zn-arrow.r { right: 24px; }
+
+        .zn-dots { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 6; display: flex; gap: 12px; align-items: center; }
+        .zn-dot  { width: 22px; height: 2px; background: color-mix(in srgb, var(--zen-surface) 28%, transparent); cursor: pointer; transition: all 0.35s; }
+        .zn-dot.on { background: var(--zen-accent); width: 44px; }
+
+        .zn-counter {
+          position: absolute; bottom: 38px; right: 32px; z-index: 6;
+          font-family: var(--ff-ui); font-size: 9px; letter-spacing: 3px;
+          color: color-mix(in srgb, var(--zen-surface) 42%, transparent); font-weight: 400;
+        }
+        .zn-scroll {
+          position: absolute; bottom: 36px; left: 32px; z-index: 6;
+          display: flex; align-items: center; gap: 12px;
+          font-family: var(--ff-ui); font-size: 8px; letter-spacing: 4px;
+          text-transform: uppercase; color: color-mix(in srgb, var(--zen-surface) 40%, transparent);
+        }
+        .zn-scroll-ln { width: 32px; height: 1px; background: color-mix(in srgb, var(--zen-accent) 55%, transparent); }
+
+        .zn-progress { position: absolute; bottom: 0; left: 0; right: 0; z-index: 6; height: 2px; background: color-mix(in srgb, var(--zen-surface) 12%, transparent); }
+        .zn-bar { height: 100%; background: var(--zen-accent); animation: prog 6s linear infinite; }
+        @keyframes prog { from { width:0%; } to { width:100%; } }
+
+        /* vertical accent */
+        .zn-vert {
+          position: absolute; right: 20px; top: 50%; z-index: 6;
           transform: translateY(-50%) rotate(90deg);
-          font-size: 8px; letter-spacing: 4px; text-transform: uppercase;
-          color: rgba(248,250,252,0.4); white-space: nowrap; pointer-events: none;
+          font-family: var(--ff-ui); font-size: 8px; letter-spacing: 5px;
+          text-transform: uppercase; color: color-mix(in srgb, var(--zen-surface) 32%, transparent);
+          white-space: nowrap; pointer-events: none;
         }
 
         /* ══════════════════════════════════════
-           ACCENT HAIRLINE
+           DIVIDER
         ══════════════════════════════════════ */
-        .gold-divider {
+        .zn-divider {
           width: 100%; height: 1px;
-          background: linear-gradient(to right, transparent, rgba(125,168,199,0.55) 28%, rgba(125,168,199,0.55) 72%, transparent);
-          opacity: 0.85;
+          background: linear-gradient(to right, transparent, var(--zen-accent) 30%, var(--zen-accent) 70%, transparent);
+          opacity: 0.35;
         }
 
-        /* ══════════════════════════════════════
-           EDITORIAL BANNERS — light
-        ══════════════════════════════════════ */
-        .banners-section { width: 100%; background: #f8fafc; font-family: var(--font-montserrat), system-ui, sans-serif; }
-
-        .banner-full { position: relative; width: 100%; min-height: clamp(420px, 72vh, 820px); height: 72vh; max-height: 900px; overflow: hidden; }
-        .banner-full img { width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 8s ease; }
-        .banner-full:hover img { transform: scale(1.03); }
-        .banner-full-overlay {
-          position: absolute; inset: 0; display: flex; flex-direction: column;
-          justify-content: flex-end; align-items: flex-start;
-          padding: clamp(28px, 5vw, 56px) clamp(20px, 6vw, 60px);
-          background: linear-gradient(to top, rgba(15,23,42,0.82) 0%, rgba(15,23,42,0.2) 50%, transparent 78%);
+        /* Mobile only: two portrait banners, one row, edge-to-edge */
+        .zn-mobile-dual-banner {
+          display: none;
         }
-        .banner-full-tag   { font-size: 9px; letter-spacing: 4px; color: #7da8c7; text-transform: uppercase; font-weight: 600; margin-bottom: 10px; }
-        .banner-full-title { font-family: var(--font-playfair), Georgia, serif; font-size: clamp(30px, 5.2vw, 56px); font-weight: 700; color: #f8fafc; line-height: 1.05; margin-bottom: 14px; }
-        .banner-full-title em { font-style: italic; color: #7da8c7; }
-        .banner-full-sub   { font-family: var(--font-cormorant), Georgia, serif; font-size: clamp(14px, 1.5vw, 17px); font-weight: 300; font-style: italic; color: rgba(248,250,252,0.78); margin-bottom: 24px; max-width: 520px; line-height: 1.55; }
-        .banner-btn-primary { display: inline-block; background: #7da8c7; color: #ffffff; font-family: var(--font-montserrat), sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; padding: 12px 26px; border: none; cursor: pointer; transition: background 0.25s; text-decoration: none; }
-        .banner-btn-primary:hover { background: #5f92b5; }
-        .banner-btn-ghost   { display: inline-block; margin-left: 18px; font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase; color: rgba(248,250,252,0.85); border-bottom: 1px solid rgba(125,168,199,0.65); padding-bottom: 2px; cursor: pointer; transition: color 0.2s; text-decoration: none; }
-        .banner-btn-ghost:hover { color: #7da8c7; }
-
-        .banner-duo { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(8px, 1.2vw, 14px); padding: 0 clamp(8px, 1.2vw, 14px); }
-        .duo-cell   { position: relative; min-height: clamp(380px, 58vh, 720px); height: 58vh; max-height: 760px; overflow: hidden; cursor: pointer; border-radius: 2px; }
-        .duo-cell img { width: 100%; height: 100%; object-fit: cover; object-position: center top; transition: transform 7s ease; }
-        .duo-cell:hover img { transform: scale(1.05); }
-        .duo-overlay {
-          position: absolute; inset: 0; display: flex; flex-direction: column;
-          justify-content: flex-end; padding: clamp(24px, 4vw, 44px);
-          background: linear-gradient(to top, rgba(15,23,42,0.82) 0%, rgba(15,23,42,0.18) 52%, transparent 100%);
+        .zn-mobile-dual-cell {
+          position: relative;
+          overflow: hidden;
+          margin: 0;
+          padding: 0;
+          line-height: 0;
+          text-decoration: none;
+          color: inherit;
+          min-height: 0;
         }
-        .duo-tag   { font-size: 8px; letter-spacing: 3.5px; color: #7da8c7; text-transform: uppercase; font-weight: 600; margin-bottom: 8px; }
-        .duo-title { font-family: var(--font-playfair), Georgia, serif; font-size: clamp(24px, 3.2vw, 40px); font-weight: 700; color: #f8fafc; line-height: 1.1; margin-bottom: 8px; }
-        .duo-title em { font-style: italic; color: #7da8c7; }
-        .duo-sub   { font-family: var(--font-cormorant), Georgia, serif; font-size: clamp(13px, 1.4vw, 15px); font-style: italic; color: rgba(248,250,252,0.78); margin-bottom: 18px; }
-        .duo-cta   { display: inline-block; font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase; color: #7da8c7; font-weight: 600; border-bottom: 2px solid rgba(125,168,199,0.7); padding-bottom: 2px; cursor: pointer; }
-
-        /* ══════════════════════════════════════
-           COLLECTION COLLAGE — bento, tall, light chrome
-        ══════════════════════════════════════ */
-        .collage-section {
-          width: 100%; background: #f8fafc;
-          border-top: 1px solid #e2e8f0;
-          font-family: var(--font-montserrat), system-ui, sans-serif;
-          padding-bottom: clamp(40px, 6vw, 72px);
-        }
-        .collage-header {
-          display: flex; align-items: center; justify-content: space-between;
-          padding: clamp(24px, 4vw, 40px) clamp(16px, 4vw, 40px) clamp(12px, 2vw, 20px);
-        }
-        .collage-title         { font-family: var(--font-playfair), Georgia, serif; font-size: clamp(26px, 3.5vw, 40px); font-weight: 700; color: #0f172a; letter-spacing: 0.5px; }
-        .collage-title em      { color: #7da8c7; font-style: italic; }
-        .collage-subtitle      { font-family: var(--font-montserrat), sans-serif; font-size: 10px; letter-spacing: 0.28em; color: rgba(15,23,42,0.5); text-transform: uppercase; font-weight: 600; }
-
-        .collage-arrows        { display: flex; align-items: center; gap: 10px; }
-        .collage-arrow-btn {
-          width: 44px; height: 44px; border: 1px solid rgba(15,23,42,0.12);
-          background: #ffffff; color: #0f172a; cursor: pointer;
-          display: flex; align-items: center; justify-content: center;
-          font-size: 15px; transition: all 0.25s;
-          flex-shrink: 0;
-        }
-        .collage-arrow-btn:hover         { border-color: #7da8c7; color: #7da8c7; }
-        .collage-arrow-btn:disabled      { opacity: 0.3; cursor: not-allowed; }
-
-        .collage-viewport      { position: relative; overflow: hidden; margin: 0 clamp(8px, 1.5vw, 20px); min-height: min(78vh, 900px); }
-        .collage-grid-track {
-          display: grid;
-          grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr) minmax(0, 1fr);
-          grid-template-rows: minmax(280px, 44vh) minmax(200px, 32vh);
-          gap: clamp(8px, 1.1vw, 14px);
+        .zn-mobile-dual-cell img {
+          display: block;
           width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center 22%;
         }
-        .collage-grid-track .collage-cell:nth-child(1) {
-          grid-column: 1;
-          grid-row: 1 / span 2;
-        }
-        .collage-grid-track .collage-cell:nth-child(2) { grid-column: 2; grid-row: 1; }
-        .collage-grid-track .collage-cell:nth-child(3) { grid-column: 3; grid-row: 1; }
-        .collage-grid-track .collage-cell:nth-child(4) { grid-column: 2; grid-row: 2; }
-        .collage-grid-track .collage-cell:nth-child(5) { grid-column: 3; grid-row: 2; }
 
-        .collage-grid-track.enter-from-right { animation: collageEnterRight 650ms cubic-bezier(.22,.61,.36,1) both; }
-        .collage-grid-track.enter-from-left  { animation: collageEnterLeft  650ms cubic-bezier(.22,.61,.36,1) both; }
-        .collage-grid-track.exit-to-left {
-          position: absolute; inset: 0;
-          animation: collageExitLeft  650ms cubic-bezier(.22,.61,.36,1) both;
+        .zn-mobile-dual-ov {
+          position: absolute;
+          inset: 0;
+          z-index: 2;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
+          align-items: flex-start;
+          text-align: left;
+          padding: 0.65rem 0.45rem 0.9rem;
+          background: linear-gradient(
+            to top,
+            rgba(15, 23, 42, 0.94) 0%,
+            rgba(15, 23, 42, 0.42) 48%,
+            transparent 78%
+          );
+          pointer-events: none;
+          line-height: 1.2;
         }
-        .collage-grid-track.exit-to-right {
-          position: absolute; inset: 0;
-          animation: collageExitRight 650ms cubic-bezier(.22,.61,.36,1) both;
+        .zn-mobile-dual-ov--right {
+          align-items: flex-end;
+          text-align: right;
         }
-        @keyframes collageEnterRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
-        @keyframes collageEnterLeft  { from { transform: translateX(-100%);} to { transform: translateX(0); } }
-        @keyframes collageExitLeft   { from { transform: translateX(0); } to { transform: translateX(-100%); } }
-        @keyframes collageExitRight  { from { transform: translateX(0); } to { transform: translateX(100%);  } }
+        .zn-mobile-dual-tag {
+          font-family: var(--ff-ui);
+          font-size: 6px;
+          letter-spacing: 0.24em;
+          text-transform: uppercase;
+          color: var(--zen-accent);
+          font-weight: 600;
+          margin-bottom: 0.3rem;
+        }
+        .zn-mobile-dual-title {
+          font-family: var(--ff-display);
+          font-size: clamp(12px, 3.4vw, 16px);
+          font-weight: 700;
+          color: var(--zen-surface);
+          margin: 0 0 0.4rem;
+          letter-spacing: -0.02em;
+          line-height: 1.05;
+        }
+        .zn-mobile-dual-title em {
+          display: block;
+          font-style: italic;
+          font-weight: 400;
+          color: var(--zen-accent-soft);
+          margin-top: 0.06em;
+        }
+        .zn-mobile-dual-cta {
+          font-family: var(--ff-ui);
+          font-size: 6px;
+          letter-spacing: 0.2em;
+          text-transform: uppercase;
+          font-weight: 700;
+          color: var(--zen-surface);
+          border-bottom: 1px solid var(--zen-accent);
+          padding-bottom: 3px;
+          display: inline-block;
+        }
 
-        .collage-cell          { position: relative; overflow: hidden; cursor: pointer; border-radius: 3px; border: 1px solid rgba(15,23,42,0.06); background: #e2e8f0; }
-        .collage-cell img      { width: 100%; height: 100%; object-fit: cover; object-position: center top; transition: transform 0.75s cubic-bezier(.22,.61,.36,1); }
-        .collage-cell:hover img { transform: scale(1.06); }
+        /* ══════════════════════════════════════
+           BANNER 1 — FULL WIDTH SUITS (dark editorial)
+        ══════════════════════════════════════ */
+        .bn-full {
+          position: relative; width: 100%;
+          height: clamp(480px, 88vh, 960px);
+          overflow: hidden;
+          background: var(--zen-ink);
+        }
+        .bn-full img {
+          width: 100%; height: 100%;
+          object-fit: cover; object-position: center center;
+          transition: transform 8s ease;
+        }
+        .bn-full:hover img { transform: scale(1.03); }
 
-        .collage-cell-overlay  {
+        .bn-full-ov {
           position: absolute; inset: 0;
-          background: linear-gradient(to top, rgba(15,23,42,0.78) 0%, rgba(15,23,42,0.2) 50%, transparent 100%);
+          display: flex; flex-direction: column;
+          justify-content: flex-end; align-items: center;
+          padding: clamp(32px,6vw,72px);
+          text-align: center;
+          background: linear-gradient(to top, rgba(5,8,15,0.9) 0%, rgba(5,8,15,0.25) 50%, transparent 80%);
+        }
+        .bn-eyebrow {
+          font-family: var(--ff-ui); font-size: 9px; letter-spacing: 6px;
+          color: var(--gold); text-transform: uppercase; font-weight: 600;
+          margin-bottom: 14px;
+          display: flex; align-items: center; gap: 16px;
+        }
+        .bn-eyebrow::before, .bn-eyebrow::after { content:''; flex: 1; max-width: 60px; height: 1px; background: var(--gold); opacity: 0.6; }
+        .bn-full-title {
+          font-family: var(--ff-display); font-size: clamp(48px, 9vw, 128px);
+          font-weight: 700; color: var(--zen-surface); line-height: 0.9;
+          letter-spacing: -0.02em; margin-bottom: 18px;
+        }
+        .bn-full-title em { font-style: italic; color: var(--zen-accent-soft); font-weight: 300; }
+        .bn-full-sub {
+          font-family: var(--ff-display); font-size: clamp(14px, 1.5vw, 18px);
+          font-style: italic; font-weight: 300; color: color-mix(in srgb, var(--zen-surface) 76%, transparent);
+          max-width: 560px; margin: 0 auto 30px; line-height: 1.65;
+        }
+        .bn-btn-row { display: flex; align-items: center; gap: 18px; justify-content: center; flex-wrap: wrap; }
+        .bn-btn-gold {
+          display: inline-block; background: var(--zen-accent); color: var(--zen-ink);
+          font-family: var(--ff-ui); font-size: 9px; font-weight: 700;
+          letter-spacing: 3.5px; text-transform: uppercase;
+          padding: 14px 34px; text-decoration: none; transition: background 0.25s, transform 0.2s;
+        }
+        .bn-btn-gold:hover { background: var(--zen-accent-soft); transform: translateY(-2px); }
+        .bn-btn-line {
+          display: inline-block; font-family: var(--ff-ui); font-size: 9px;
+          letter-spacing: 3px; text-transform: uppercase;
+          color: color-mix(in srgb, var(--zen-surface) 85%, transparent); text-decoration: none;
+          border-bottom: 1px solid color-mix(in srgb, var(--zen-accent) 55%, transparent); padding-bottom: 3px;
+          transition: color 0.2s, border-color 0.2s;
+        }
+        .bn-btn-line:hover { color: var(--zen-accent-soft); border-color: var(--zen-accent-soft); }
+
+        /* ══════════════════════════════════════
+           BANNER 2 — DUO SPLIT (shirts)
+        ══════════════════════════════════════ */
+        .bn-duo {
+          display: grid; grid-template-columns: 1fr 1fr;
+          height: clamp(420px, 78vh, 860px);
+          overflow: hidden;
+        }
+        .bn-duo-cell { position: relative; overflow: hidden; cursor: pointer; }
+        .bn-duo-cell img {
+          width: 100%; height: 100%;
+          object-fit: cover; object-position: center center;
+          transition: transform 7s ease;
+        }
+        .bn-duo-cell:hover img { transform: scale(1.06); }
+        .bn-duo-ov {
+          position: absolute; inset: 0;
           display: flex; flex-direction: column; justify-content: flex-end;
-          padding: clamp(14px, 2.2vw, 22px);
+          padding: clamp(24px, 4vw, 48px);
+          background: linear-gradient(to top, rgba(5,8,15,0.85) 0%, rgba(5,8,15,0.2) 55%, transparent 100%);
           transition: background 0.4s;
         }
-        .collage-cell:hover .collage-cell-overlay {
-          background: linear-gradient(to top, rgba(15,23,42,0.88) 0%, rgba(15,23,42,0.35) 55%, transparent 100%);
+        .bn-duo-cell:hover .bn-duo-ov {
+          background: linear-gradient(to top, rgba(5,8,15,0.92) 0%, rgba(5,8,15,0.35) 60%, transparent 100%);
         }
-
-        .collage-hover-cta {
-          position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-          opacity: 0; transition: opacity 0.35s;
-          background: rgba(15,23,42,0.12);
+        .bn-duo-tag {
+          font-family: var(--ff-ui); font-size: 8px; letter-spacing: 4px;
+          color: var(--gold); text-transform: uppercase; font-weight: 600; margin-bottom: 10px;
         }
-        .collage-cell:hover .collage-hover-cta { opacity: 1; }
-        .collage-hover-cta-pill {
-          font-size: 9px; letter-spacing: 3px; text-transform: uppercase; font-weight: 700;
-          color: #0f172a; background: #ffffff; padding: 12px 22px;
-          border: 1px solid rgba(125,168,199,0.5);
-          cursor: pointer; white-space: nowrap;
-          transition: background 0.2s, color 0.2s;
+        .bn-duo-h {
+          font-family: var(--ff-display); font-size: clamp(28px, 4vw, 52px);
+          font-weight: 700; color: var(--zen-surface); line-height: 1.0; margin-bottom: 10px;
         }
-        .collage-hover-cta-pill:hover { background: #7da8c7; color: #fff; border-color: #7da8c7; }
-
-        .collage-cell-label    { font-family: var(--font-playfair), Georgia, serif; font-size: clamp(15px, 1.8vw, 22px); color: #f8fafc; font-weight: 700; letter-spacing: 0.3px; margin-bottom: 4px; text-shadow: 0 1px 12px rgba(0,0,0,0.35); }
-        .collage-cell-desc     { font-size: 8px; letter-spacing: 0.2em; color: rgba(248,250,252,0.88); text-transform: uppercase; font-weight: 600; }
-        .collage-cell-tag      { position: absolute; top: 12px; left: 12px; font-size: 7px; letter-spacing: 2px; font-weight: 700; text-transform: uppercase; background: rgba(248,250,252,0.95); border: 1px solid rgba(125,168,199,0.45); color: #0f172a; padding: 4px 10px; z-index: 2; }
-
-        .collage-dots          { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 24px; }
-        .collage-dot           { width: 16px; height: 2px; background: rgba(125,168,199,0.3); cursor: pointer; transition: all 0.3s; }
-        .collage-dot.active    { background: #7da8c7; width: 32px; }
-
-        .collage-view-btn-wrap { display: flex; justify-content: center; margin-top: clamp(28px, 4vw, 40px); }
-        .collage-view-btn {
-          display: inline-flex; align-items: center; gap: 12px;
-          font-size: 9px; letter-spacing: 3.5px; text-transform: uppercase; font-weight: 700;
-          color: #0f172a; border: 1px solid rgba(15,23,42,0.18);
-          padding: 14px 36px; background: #ffffff; cursor: pointer;
-          text-decoration: none; transition: all 0.3s;
+        .bn-duo-h em { font-style: italic; color: var(--zen-accent-soft); font-weight: 300; }
+        .bn-duo-sub {
+          font-family: var(--ff-display); font-size: clamp(13px, 1.3vw, 15px);
+          font-style: italic; font-weight: 300; color: color-mix(in srgb, var(--zen-surface) 76%, transparent);
+          margin-bottom: 20px; line-height: 1.55;
         }
-        .collage-view-btn:hover { background: #7da8c7; color: #ffffff; border-color: #7da8c7; }
-        .collage-view-btn-arrow { font-size: 14px; transition: transform 0.3s; }
-        .collage-view-btn:hover .collage-view-btn-arrow { transform: translateX(4px); }
+        .bn-duo-cta {
+          display: inline-flex; align-items: center; gap: 10px;
+          font-family: var(--ff-ui); font-size: 9px; letter-spacing: 3px;
+          text-transform: uppercase; font-weight: 600;
+          color: var(--zen-accent); text-decoration: none;
+          border-bottom: 1px solid color-mix(in srgb, var(--zen-accent) 50%, transparent); padding-bottom: 3px;
+          transition: color 0.2s;
+        }
+        .bn-duo-cta:hover { color: var(--zen-accent-soft); }
+
+        /* vertical label on duo left */
+        .bn-side-label {
+          position: absolute; left: 20px; top: 50%;
+          transform: translateY(-50%) rotate(-90deg);
+          font-family: var(--ff-ui); font-size: 8px; letter-spacing: 5px;
+          text-transform: uppercase; color: color-mix(in srgb, var(--zen-surface) 32%, transparent);
+          white-space: nowrap; z-index: 2; pointer-events: none;
+        }
 
         /* ══════════════════════════════════════
-           MOBILE RESPONSIVE
+           BANNER 3 — FULL WIDTH KURTA (heritage)
+        ══════════════════════════════════════ */
+        .bn-heritage {
+          position: relative; width: 100%;
+          height: clamp(500px, 90vh, 980px);
+          overflow: hidden; background: var(--zen-deep);
+        }
+        .bn-heritage img {
+          width: 100%; height: 100%;
+          object-fit: cover; object-position: center center;
+          transition: transform 8s ease;
+        }
+        .bn-heritage:hover img { transform: scale(1.025); }
+
+        .bn-heritage-ov {
+          position: absolute; inset: 0;
+          background: linear-gradient(to right, rgba(8,5,2,0.88) 0%, rgba(8,5,2,0.3) 55%, transparent 100%);
+          display: flex; flex-direction: column; justify-content: center;
+          padding: clamp(32px, 8vw, 96px);
+        }
+        .bn-heritage-season {
+          font-family: var(--ff-ui); font-size: 8px; letter-spacing: 6px;
+          color: var(--gold); text-transform: uppercase; font-weight: 600;
+          margin-bottom: 18px; opacity: 0.9;
+        }
+        .bn-heritage-h {
+          font-family: var(--ff-display); font-size: clamp(40px, 7.5vw, 108px);
+          font-weight: 700; color: var(--zen-surface); line-height: 0.92;
+          letter-spacing: -0.015em; margin-bottom: 22px;
+        }
+        .bn-heritage-h .line-ital { display: block; font-style: italic; color: var(--zen-accent-soft); font-weight: 300; }
+        .bn-heritage-sub {
+          font-family: var(--ff-display); font-size: clamp(14px, 1.5vw, 18px);
+          font-style: italic; font-weight: 300; color: color-mix(in srgb, var(--zen-surface) 78%, transparent);
+          max-width: 440px; line-height: 1.65; margin-bottom: 32px;
+        }
+        .bn-heritage-btns { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+
+        /* ══════════════════════════════════════
+           COLLECTION COLLAGE
+        ══════════════════════════════════════ */
+        .collage-section {
+          width: 100%; background: var(--zen-surface);
+          border-top: 1px solid var(--fog);
+          font-family: var(--ff-ui);
+          padding-bottom: clamp(48px, 7vw, 80px);
+        }
+        .collage-hdr {
+          display: flex; align-items: flex-end; justify-content: space-between;
+          padding: clamp(28px, 4.5vw, 52px) clamp(20px, 4vw, 48px) clamp(14px, 2vw, 24px);
+        }
+        .collage-hdr-left { display: flex; flex-direction: column; gap: 6px; }
+        .collage-sup { font-family: var(--ff-ui); font-size: 9px; letter-spacing: 5px; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+        .collage-ttl { font-family: var(--ff-display); font-size: clamp(28px, 4vw, 46px); font-weight: 700; color: var(--zen-ink); }
+        .collage-ttl em { color: var(--zen-accent); font-style: italic; }
+        .collage-arrows { display: flex; gap: 10px; }
+        .c-arr-btn {
+          width: 46px; height: 46px; border: 1px solid rgba(15, 23, 42, 0.12);
+          background: #fff; color: var(--zen-ink); cursor: pointer;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 15px; transition: all 0.25s;
+        }
+        .c-arr-btn:hover { border-color: var(--zen-accent); color: var(--zen-accent); }
+        .c-arr-btn:disabled { opacity: 0.25; cursor: default; }
+
+        .collage-vp { position: relative; overflow: hidden; margin: 0 clamp(10px, 2vw, 24px); min-height: min(80vh, 920px); }
+        .collage-grid {
+          display: grid;
+          grid-template-columns: minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr);
+          grid-template-rows: minmax(290px,46vh) minmax(210px,34vh);
+          gap: clamp(8px, 1.1vw, 14px); width: 100%;
+        }
+        .collage-grid .c-cell:nth-child(1) { grid-column:1; grid-row:1/span 2; }
+        .collage-grid .c-cell:nth-child(2) { grid-column:2; grid-row:1; }
+        .collage-grid .c-cell:nth-child(3) { grid-column:3; grid-row:1; }
+        .collage-grid .c-cell:nth-child(4) { grid-column:2; grid-row:2; }
+        .collage-grid .c-cell:nth-child(5) { grid-column:3; grid-row:2; }
+
+        .collage-grid.enter-r { animation: cEnR 650ms cubic-bezier(.22,.61,.36,1) both; }
+        .collage-grid.enter-l { animation: cEnL 650ms cubic-bezier(.22,.61,.36,1) both; }
+        .collage-grid.exit-l  { position:absolute;inset:0; animation: cExL 650ms cubic-bezier(.22,.61,.36,1) both; }
+        .collage-grid.exit-r  { position:absolute;inset:0; animation: cExR 650ms cubic-bezier(.22,.61,.36,1) both; }
+        @keyframes cEnR { from{transform:translateX(100%)} to{transform:translateX(0)} }
+        @keyframes cEnL { from{transform:translateX(-100%)} to{transform:translateX(0)} }
+        @keyframes cExL { from{transform:translateX(0)} to{transform:translateX(-100%)} }
+        @keyframes cExR { from{transform:translateX(0)} to{transform:translateX(100%)} }
+
+        .c-cell { position:relative; overflow:hidden; cursor:pointer; background: var(--fog); }
+        .c-cell img { width:100%; height:100%; object-fit:cover; object-position:center top; transition:transform 0.75s cubic-bezier(.22,.61,.36,1); }
+        .c-cell:hover img { transform:scale(1.07); }
+        .c-cell-ov {
+          position:absolute; inset:0;
+          background:linear-gradient(to top, rgba(5,8,15,0.82) 0%, rgba(5,8,15,0.18) 52%, transparent 100%);
+          display:flex; flex-direction:column; justify-content:flex-end;
+          padding: clamp(14px,2vw,22px); transition:background 0.4s;
+        }
+        .c-cell:hover .c-cell-ov { background:linear-gradient(to top, rgba(5,8,15,0.9) 0%, rgba(5,8,15,0.35) 56%, transparent 100%); }
+        .c-cell-lbl { font-family:var(--ff-display); font-size:clamp(15px,1.9vw,24px); color:var(--zen-surface); font-weight:700; margin-bottom:4px; }
+        .c-cell-desc { font-family:var(--ff-ui); font-size:8px; letter-spacing:0.22em; color:color-mix(in srgb, var(--zen-surface) 82%, transparent); text-transform:uppercase; font-weight:500; }
+        .c-cell-tag { position:absolute; top:12px; left:12px; font-family:var(--ff-ui); font-size:7px; letter-spacing:2.5px; font-weight:700; text-transform:uppercase; background:var(--zen-surface); border:1px solid color-mix(in srgb, var(--zen-accent) 45%, transparent); color:var(--zen-ink); padding:4px 10px; z-index:2; }
+
+        .c-hover-pill {
+          position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+          opacity:0; transition:opacity 0.35s; background:rgba(5,8,15,0.1);
+        }
+        .c-cell:hover .c-hover-pill { opacity:1; }
+        .c-pill-inner {
+          font-family:var(--ff-ui); font-size:9px; letter-spacing:3px; text-transform:uppercase; font-weight:700;
+          color:var(--zen-ink); background:var(--zen-surface); padding:12px 24px;
+          border:1px solid color-mix(in srgb, var(--zen-accent) 50%, transparent); transition:background 0.2s, color 0.2s;
+        }
+        .c-pill-inner:hover { background:var(--zen-accent); color:var(--zen-surface); border-color:var(--zen-accent); }
+
+        .collage-dots { display:flex; align-items:center; justify-content:center; gap:8px; margin-top:24px; }
+        .collage-dot  { width:18px; height:2px; background:color-mix(in srgb, var(--zen-accent) 25%, transparent); cursor:pointer; transition:all 0.3s; }
+        .collage-dot.on { background:var(--zen-accent); width:36px; }
+
+        .collage-view-wrap { display:flex; justify-content:center; margin-top:clamp(28px,4vw,44px); }
+        .collage-view-btn {
+          display:inline-flex; align-items:center; gap:14px;
+          font-family:var(--ff-ui); font-size:9px; letter-spacing:3.5px; text-transform:uppercase; font-weight:700;
+          color:var(--zen-ink); border:1px solid rgba(15, 23, 42, 0.15); padding:15px 40px;
+          background:#fff; cursor:pointer; text-decoration:none; transition:all 0.3s;
+        }
+        .collage-view-btn:hover { background:var(--zen-accent); color:var(--zen-surface); border-color:var(--zen-accent); }
+        .c-v-arrow { font-size:14px; transition:transform 0.3s; }
+        .collage-view-btn:hover .c-v-arrow { transform:translateX(5px); }
+
+        /* ══════════════════════════════════════
+           MOBILE
         ══════════════════════════════════════ */
         @media (max-width: 768px) {
-          .fw-overlay     { padding-bottom: 70px; }
-          .fw-text        { padding: 0 20px !important; }
-          .fw-subtitle    { max-width: 100% !important; text-align: inherit; }
-          .fw-scroll-cue  { display: none; }
-          .fw-vert-text   { display: none; }
-          .fw-counter     { bottom: 20px; right: 20px; }
-          .fw-arrow       { width: 36px; height: 36px; font-size: 14px; }
-          .fw-arrow.left  { left: 10px; }
-          .fw-arrow.right { right: 10px; }
-          .fw-topbar      { padding: 20px 16px; }
-
-          .banner-duo     { grid-template-columns: 1fr; padding: 0 10px; }
-          .duo-cell       { min-height: 320px; height: 48vh; max-height: none; }
-          .banner-full    { min-height: 360px; height: 58vh; max-height: none; }
-          .banner-full-overlay { padding: 22px; }
-          .banner-btn-ghost { margin-left: 0; margin-top: 10px; display: block; }
-
-          .collage-viewport { min-height: auto; margin: 0 10px; }
-          .collage-grid-track {
-            grid-template-columns: 1fr 1fr !important;
-            grid-template-rows: minmax(200px, 28vh) minmax(140px, 20vh) minmax(140px, 20vh) !important;
-            gap: 8px;
+          .zn-mobile-dual-banner {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: min(88svh, 780px);
+            width: 100%;
+            gap: 0;
+            background: var(--zen-ink);
           }
-          .collage-grid-track .collage-cell:nth-child(1) {
-            grid-column: 1 / -1 !important;
-            grid-row: 1 !important;
-            min-height: 200px;
+          .zn-mobile-dual-cell {
+            height: 100%;
+            align-self: stretch;
           }
-          .collage-grid-track .collage-cell:nth-child(2) { grid-column: 1 !important; grid-row: 2 !important; }
-          .collage-grid-track .collage-cell:nth-child(3) { grid-column: 2 !important; grid-row: 2 !important; }
-          .collage-grid-track .collage-cell:nth-child(4) { grid-column: 1 !important; grid-row: 3 !important; }
-          .collage-grid-track .collage-cell:nth-child(5) { grid-column: 2 !important; grid-row: 3 !important; }
-          .collage-header { flex-direction: column; align-items: flex-start; gap: 12px; }
-          .collage-arrows { align-self: flex-end; }
+          .zn-mobile-dual-cell img {
+            position: absolute;
+            inset: 0;
+            min-height: 100%;
+            object-fit: cover;
+            object-position: center 28%;
+          }
+
+          /* Full-bleed hero: image fills the viewport (cover), not letterboxed */
+          .zn-hero {
+            min-height: 100svh;
+            min-height: 100dvh;
+            height: 100svh;
+            height: 100dvh;
+            min-height: -webkit-fill-available;
+            max-height: none;
+          }
+          .zn-slide-img {
+            object-fit: cover;
+            object-position: center 32%;
+            width: 100%;
+            height: 100%;
+          }
+          .zn-slide-img.active {
+            animation: zoomSlowMobile 9s ease forwards;
+          }
+          @keyframes zoomSlowMobile {
+            from { transform: scale(1.04); }
+            to { transform: scale(1); }
+          }
+
+          .zn-overlay { padding-bottom: 72px; }
+          .zn-sub { max-width:100% !important; }
+          .zn-scroll { display:none; }
+          .zn-vert { display:none; }
+          .zn-arrow { width:38px; height:38px; font-size:13px; }
+          .zn-arrow.l { left:10px; } .zn-arrow.r { right:10px; }
+          .zn-title-line { font-size: clamp(32px, 10vw, 56px); }
+
+          .bn-full {
+            height: min(92vh, 800px);
+            min-height: 420px;
+          }
+          .bn-full img {
+            object-fit: cover;
+            object-position: center 30%;
+          }
+          .bn-duo { grid-template-columns:1fr; height:auto; }
+          .bn-duo-cell { height:clamp(340px, 58vh, 580px); }
+          .bn-duo-cell img {
+            object-fit: cover;
+            object-position: center 28%;
+          }
+          .bn-heritage {
+            height: min(92vh, 840px);
+            min-height: 420px;
+          }
+          .bn-heritage img {
+            object-fit: cover;
+            object-position: center 25%;
+          }
+          .bn-heritage-ov { background: linear-gradient(to top, rgba(8,5,2,0.88) 0%, rgba(8,5,2,0.45) 55%, transparent 100%); justify-content:flex-end; padding-bottom: clamp(32px,6vw,56px); }
+
+          .collage-vp { min-height:auto; margin:0 10px; }
+          .collage-grid {
+            grid-template-columns:1fr 1fr !important;
+            grid-template-rows:minmax(200px,28vh) minmax(150px,22vh) minmax(150px,22vh) !important;
+            gap:8px;
+          }
+          .collage-grid .c-cell:nth-child(1) { grid-column:1/-1 !important; grid-row:1 !important; }
+          .collage-grid .c-cell:nth-child(2) { grid-column:1 !important; grid-row:2 !important; }
+          .collage-grid .c-cell:nth-child(3) { grid-column:2 !important; grid-row:2 !important; }
+          .collage-grid .c-cell:nth-child(4) { grid-column:1 !important; grid-row:3 !important; }
+          .collage-grid .c-cell:nth-child(5) { grid-column:2 !important; grid-row:3 !important; }
+          .collage-hdr { flex-direction:column; align-items:flex-start; gap:14px; }
+          .collage-arrows { align-self:flex-end; }
+          .c-cell img {
+            object-fit: cover;
+            object-position: center 35%;
+          }
         }
 
         @media (max-width: 480px) {
-          .fw-cta-row { flex-direction: column; align-items: flex-start; gap: 10px; }
-          .fw-btn-outline { width: 100%; text-align: center; }
-          .collage-grid-track {
-            grid-template-columns: 1fr !important;
-            grid-template-rows: minmax(220px, 34vh) repeat(4, minmax(160px, 22vh)) !important;
+          .zn-btns { flex-direction:column; align-items:flex-start; gap:10px; }
+          .zn-btn-ghost { width:100%; text-align:center; }
+          .bn-btn-row { flex-direction:column; align-items:center; }
+          .collage-grid {
+            grid-template-columns:1fr !important;
+            grid-template-rows:repeat(5, minmax(180px,28vh)) !important;
           }
-          .collage-grid-track .collage-cell:nth-child(1) { grid-column: 1 !important; grid-row: 1 !important; }
-          .collage-grid-track .collage-cell:nth-child(2) { grid-row: 2 !important; }
-          .collage-grid-track .collage-cell:nth-child(3) { grid-row: 3 !important; }
-          .collage-grid-track .collage-cell:nth-child(4) { grid-row: 4 !important; }
-          .collage-grid-track .collage-cell:nth-child(5) { grid-row: 5 !important; }
-          .duo-cell { min-height: 280px; height: 42vh; }
+          .collage-grid .c-cell:nth-child(1) { grid-row:1 !important; }
+          .collage-grid .c-cell:nth-child(2) { grid-row:2 !important; }
+          .collage-grid .c-cell:nth-child(3) { grid-row:3 !important; }
+          .collage-grid .c-cell:nth-child(4) { grid-row:4 !important; }
+          .collage-grid .c-cell:nth-child(5) { grid-row:5 !important; }
         }
       `}</style>
 
       {/* ══════════════════════════════════════
           SECTION 1 — CINEMATIC HERO
       ══════════════════════════════════════ */}
-      <section className="fw-hero" id="home">
-        {heroSlides.map((s, i) => (
-          <img
-            key={i}
-            src={s.img}
-            alt={s.tag}
-            className={`fw-slide-img ${i === current ? "active" : i === prev ? "exiting" : "hidden"}`}
+      <section className="zn-hero" id="home">
+        {heroSlidesActive.map((s, i) => (
+          <img key={s.img + i} src={s.img} alt={s.tag}
+            className={`zn-slide-img ${i === current ? "active" : i === prev ? "exiting" : "hidden"}`}
           />
         ))}
 
-        <div className="fw-topbar" />
+        <div className="zn-topbar" />
 
-        <div className="fw-overlay" style={{ background: overlayGradient }}>
-          <div
-            className="fw-text"
-            key={animKey}
-            style={{
-              alignItems:
-                slide.textAlign === "left"
-                  ? "flex-start"
-                  : slide.textAlign === "right"
-                    ? "flex-end"
-                    : "center",
-              textAlign: slide.textAlign as "left" | "center" | "right",
-              paddingLeft:
-                slide.textAlign === "left"
-                  ? "clamp(24px,6vw,80px)"
-                  : slide.textAlign === "right"
-                    ? "40%"
-                    : "15%",
-              paddingRight:
-                slide.textAlign === "right"
-                  ? "clamp(24px,6vw,80px)"
-                  : slide.textAlign === "left"
-                    ? "40%"
-                    : "15%",
-            }}
-          >
-            <div className="fw-tag">{slide.tag}</div>
-            <h1 className="fw-title">
-              <span className="fw-title-line">{slide.title[0]}</span>
-              <span
-                className={`fw-title-line${slide.titleItalic === 1 ? " italic" : ""}`}
-              >
-                {slide.title[1]}
-              </span>
-              <span
-                className={`fw-title-line${slide.titleItalic === 2 ? " italic" : ""}`}
-              >
-                {slide.title[2]}
-              </span>
+        <div className="zn-overlay" style={{ background: overlayGradient }}>
+          <div className="zn-text" key={animKey} style={{
+            alignItems: isMobileHero
+              ? "center"
+              : slide.textAlign === "left"
+                ? "flex-start"
+                : slide.textAlign === "right"
+                  ? "flex-end"
+                  : "center",
+            textAlign: (isMobileHero ? "center" : slide.textAlign) as "left" | "center" | "right",
+            paddingLeft: isMobileHero
+              ? "1.25rem"
+              : slide.textAlign === "left"
+                ? "clamp(24px,7vw,96px)"
+                : slide.textAlign === "right"
+                  ? "38%"
+                  : "12%",
+            paddingRight: isMobileHero
+              ? "1.25rem"
+              : slide.textAlign === "right"
+                ? "clamp(24px,7vw,96px)"
+                : slide.textAlign === "left"
+                  ? "38%"
+                  : "12%",
+          }}>
+            <div className="zn-tag">{slide.tag}</div>
+            <h1 className="zn-title">
+              <span className="zn-title-line">{slide.title[0]}</span>
+              <span className={`zn-title-line${slide.titleItalic === 1 ? " ital" : ""}`}>{slide.title[1]}</span>
+              <span className={`zn-title-line${slide.titleItalic === 2 ? " ital" : ""}`}>{slide.title[2]}</span>
             </h1>
-            <p
-              className="fw-subtitle"
-              style={
-                slide.textAlign === "center" ? { textAlign: "center" } : {}
-              }
-            >
-              {slide.subtitle}
-            </p>
-            <div
-              className="fw-cta-row"
-              style={{
-                justifyContent:
-                  slide.textAlign === "left"
-                    ? "flex-start"
-                    : slide.textAlign === "right"
-                      ? "flex-end"
-                      : "center",
-              }}
-            >
-              <a href="#contact" className="fw-btn-primary">
-                {slide.cta}
-              </a>
-              <Link href="/collection" className="fw-btn-outline">
-                {slide.ctaSecondary}
-              </Link>
+            <p className="zn-sub" style={(isMobileHero || slide.textAlign === "center") ? { textAlign: "center" } : {}}>{slide.subtitle}</p>
+            <div className="zn-btns" style={{ justifyContent: isMobileHero ? "center" : slide.textAlign === "left" ? "flex-start" : slide.textAlign === "right" ? "flex-end" : "center" }}>
+              <a href="#contact" className="zn-btn-fill">{slide.cta}</a>
+              <Link href="/collection" className="zn-btn-ghost">{slide.ctaSecondary}</Link>
             </div>
           </div>
         </div>
 
-        <button className="fw-arrow left" onClick={heroPrev}>
-          &#8592;
-        </button>
-        <button className="fw-arrow right" onClick={heroNext}>
-          &#8594;
-        </button>
+        <button className="zn-arrow l" onClick={heroPrev}>&#8592;</button>
+        <button className="zn-arrow r" onClick={heroNext}>&#8594;</button>
 
-        <div className="fw-dots">
-          {heroSlides.map((_, i) => (
-            <div
-              key={i}
-              className={`fw-dot ${i === current ? "active" : ""}`}
-              onClick={() => goTo(i)}
-            />
+        <div className="zn-dots">
+          {heroSlidesActive.map((_, i) => (
+            <div key={i} className={`zn-dot ${i === current ? "on" : ""}`} onClick={() => goTo(i)} />
           ))}
         </div>
 
-        <div className="fw-counter">
-          {String(current + 1).padStart(2, "0")} /{" "}
-          {String(heroSlides.length).padStart(2, "0")}
-        </div>
-
-        <div className="fw-scroll-cue">
-          <span className="fw-scroll-line" />
-          Scroll to Explore
-        </div>
-
-        <div className="fw-vert-text">Bespoke · Premium · Timeless</div>
-
-        <div className="fw-progress">
-          <div className="fw-progress-bar" key={animKey} />
-        </div>
+        <div className="zn-counter">{String(current + 1).padStart(2, "0")} / {String(heroSlidesActive.length).padStart(2, "0")}</div>
+        <div className="zn-scroll"><span className="zn-scroll-ln" />Scroll to Explore</div>
+        <div className="zn-vert">Bespoke · Premium · Timeless</div>
+        <div className="zn-progress"><div className="zn-bar" key={animKey} /></div>
       </section>
 
-      {/* ══════════════════════════════════════
-          SECTION 2 — EDITORIAL BANNERS
-      ══════════════════════════════════════ */}
-      <div className="banners-section">
-        <div className="gold-divider" />
-
-        {/* Duo banner */}
-        <div className="banner-duo">
-          <div className="duo-cell">
-            <img
-              src="https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=900&q=90"
-              alt="Overcoats"
-              style={{ objectPosition: "center 35%" }}
-            />
-            <div className="duo-overlay">
-              <div className="duo-tag">Winter Edit · Premium Wool</div>
-              <h3 className="duo-title">
-                Tailored
-                <br />
-                <em>Overcoats</em>
-              </h3>
-              <p className="duo-sub">
-                Italian wool layers for polished winter presence.
-              </p>
-              <Link href="/collection?category=Overcoats" className="duo-cta">
-                View Winter Edit →
-              </Link>
-            </div>
-          </div>
-          <div className="duo-cell">
-            <img
-              src="/zenmen_shirt_black.jpeg"
-              alt="Shirts"
-              style={{ objectPosition: "center 45%" }}
-            />
-            <div className="duo-overlay">
-              <div className="duo-tag">Shirt Bar · Luxury Cotton</div>
-              <h3 className="duo-title">
-                Crisp
-                <br />
-                <em>Shirts</em>
-              </h3>
-              <p className="duo-sub">
-                Egyptian cotton, built to impress from dawn to dusk.
-              </p>
-              <Link href="/collection?category=Shirts" className="duo-cta">
-                Browse Shirts →
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        <div className="gold-divider" />
-
-        {/* Full-width centered banner */}
-        <div className="banner-full">
-          <img
-            src="https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?w=1600&q=90"
-            alt="Eveningwear"
-            style={{ objectPosition: "center 20%" }}
-          />
-          <div
-            className="banner-full-overlay"
-            style={{ alignItems: "center", textAlign: "center" }}
+      <section
+        className="zn-mobile-dual-banner"
+        aria-label="Formal and evening tailoring"
+      >
+        {mobileDualBanners.map((b) => (
+          <Link
+            key={b.src}
+            href={b.href}
+            className="zn-mobile-dual-cell"
           >
-            <div className="banner-full-tag">
-              Signature Eveningwear · Limited Edition
-            </div>
-            <h2 className="banner-full-title" style={{ textAlign: "center" }}>
-              Dressed for
-              <br />
-              <em>Extraordinary</em> Moments
-            </h2>
-            <p
-              className="banner-full-sub"
-              style={{
-                textAlign: "center",
-                marginLeft: "auto",
-                marginRight: "auto",
-              }}
-            >
-              Velvet tuxedos and black-tie tailoring designed for unforgettable
-              entrances. Limited to 40 pieces per season.
-            </p>
+            <img src={b.src} alt={b.alt} sizes="50vw" decoding="async" />
             <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "16px",
-                flexWrap: "wrap",
-                justifyContent: "center",
-              }}
+              className={`zn-mobile-dual-ov${b.align === "right" ? " zn-mobile-dual-ov--right" : ""}`}
             >
-              <Link href="/collection" className="banner-btn-primary">
-                Shop Eveningwear
-              </Link>
-              <Link
-                href="/contact"
-                className="banner-btn-ghost"
-                style={{ marginLeft: 0 }}
-              >
-                View Lookbook
-              </Link>
+              <span className="zn-mobile-dual-tag">{b.tag}</span>
+              <h2 className="zn-mobile-dual-title">
+                {b.titleStrong}
+                <em>{b.titleItalic}</em>
+              </h2>
+              <span className="zn-mobile-dual-cta">View collection</span>
             </div>
-          </div>
-        </div>
+          </Link>
+        ))}
+      </section>
 
-        <div className="gold-divider" />
-      </div>
-
-      {/* ══════════════════════════════════════
-          SECTION 3 — PREMIUM COLLECTION COLLAGE
-      ══════════════════════════════════════ */}
+      <div className="zn-divider" />
     </>
   );
 }

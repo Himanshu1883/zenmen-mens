@@ -4,6 +4,7 @@ import Link from "next/link";
 interface MegaMenuProps {
   isOpen: boolean;
   shellClass: string;
+  onClose: () => void;
 }
 
 const collections = [
@@ -23,7 +24,7 @@ const collections = [
   { name: "Broches", featured: false, q: "brooch" },
 ] as const;
 
-const MegaMenu = ({ isOpen, shellClass }: MegaMenuProps) => {
+const MegaMenu = ({ isOpen, shellClass, onClose }: MegaMenuProps) => {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -47,6 +48,7 @@ const MegaMenu = ({ isOpen, shellClass }: MegaMenuProps) => {
                     >
                       <Link
                         href={`/collection?q=${encodeURIComponent(item.q)}`}
+                        onClick={onClose}
                         className="group inline-block no-underline mb-3"
                       >
                         <motion.div className="inline-flex items-center gap-6 relative">
@@ -68,6 +70,7 @@ const MegaMenu = ({ isOpen, shellClass }: MegaMenuProps) => {
                 <motion.div className="mt-12 pt-8 border-t border-[#e2e8f0]">
                   <Link
                     href="/collection"
+                    onClick={onClose}
                     className="inline-block no-underline px-8 py-3 bg-[#0f172a] text-white text-[11px] tracking-[0.15em] uppercase hover:bg-[#7da8c7] transition-colors duration-300 rounded-sm"
                   >
                     View All Collections
@@ -110,6 +113,7 @@ const MegaMenu = ({ isOpen, shellClass }: MegaMenuProps) => {
                       </h3>
                       <Link
                         href="/collection"
+                        onClick={onClose}
                         className="inline-block no-underline text-[11px] tracking-[0.15em] text-white uppercase border-b border-white/40 hover:border-white pb-1 transition-colors duration-300"
                       >
                         Explore Collection

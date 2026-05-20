@@ -114,6 +114,9 @@ const Navbar = () => {
                 >
                   <Link
                     href={link.href}
+                    onClick={() =>
+                      link.hasMegaMenu && setIsMegaMenuOpen(false)
+                    }
                     className="text-[11px] tracking-[0.2em] text-[#0f172a] hover:text-[#7da8c7] transition-colors duration-300 font-[300] uppercase no-underline"
                   >
                     {link.name}
@@ -269,7 +272,11 @@ const Navbar = () => {
           onMouseEnter={() => setIsMegaMenuOpen(true)}
           onMouseLeave={() => setIsMegaMenuOpen(false)}
         >
-          <MegaMenu shellClass={shellClass} isOpen={isMegaMenuOpen} />
+          <MegaMenu
+            shellClass={shellClass}
+            isOpen={isMegaMenuOpen}
+            onClose={() => setIsMegaMenuOpen(false)}
+          />
         </div>
 
         {/* Thin bottom border */}
