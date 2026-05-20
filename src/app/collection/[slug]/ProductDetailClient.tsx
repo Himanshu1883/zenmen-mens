@@ -209,6 +209,8 @@ function AccordionItem({
 const DESKTOP_ZOOM_SCALE = 2;
 const LENS_MAGNIFY = 2.75;
 const LENS_SIZE_PX = 132;
+/** Lens center sits above the finger so the fabric stays visible under the circle */
+const LENS_ABOVE_TOUCH_PX = 100;
 
 function ZoomableImage({
   src,
@@ -227,7 +229,10 @@ function ZoomableImage({
   const [desktopZoomed, setDesktopZoomed] = useState(false);
   const [desktopOrigin, setDesktopOrigin] = useState({ x: 50, y: 50 });
 
-  const [lensPos, setLensPos] = useState({ x: 50, y: 50 });
+  /** Where the circle is drawn (above finger) */
+  const [lensDisplay, setLensDisplay] = useState({ x: 50, y: 50 });
+  /** What part of the image is magnified (under finger) */
+  const [lensSample, setLensSample] = useState({ x: 50, y: 50 });
   const [showLens, setShowLens] = useState(false);
   const [containerSize, setContainerSize] = useState({ w: 0, h: 0 });
 
@@ -248,7 +253,8 @@ function ZoomableImage({
     hideLens();
     setDesktopZoomed(false);
     setDesktopOrigin({ x: 50, y: 50 });
-    setLensPos({ x: 50, y: 50 });
+    setLensDisplay({ x: 50, y: 50 });
+    setLensSample({ x: 50, y: 50 });
   }, [src, isMobile, hideLens]);
 
   useEffect(() => {
@@ -275,29 +281,41 @@ function ZoomableImage({
     return () => el.removeEventListener("touchmove", blockScroll);
   }, [isMobile]);
 
-  const getLensPos = useCallback((clientX: number, clientY: number) => {
+  const getLensPositions = useCallback((clientX: number, clientY: number) => {
     const el = containerRef.current;
-    if (!el) return { x: 50, y: 50 };
+    if (!el) {
+      return { display: { x: 50, y: 50 }, sample: { x: 50, y: 50 } };
+    }
     const rect = el.getBoundingClientRect();
-    const rawX = ((clientX - rect.left) / rect.width) * 100;
-    const rawY = ((clientY - rect.top) / rect.height) * 100;
     const marginX = (LENS_SIZE_PX / 2 / rect.width) * 100;
     const marginY = (LENS_SIZE_PX / 2 / rect.height) * 100;
-    return {
-      x: Math.min(100 - marginX, Math.max(marginX, rawX)),
-      y: Math.min(100 - marginY, Math.max(marginY, rawY)),
-    };
+    const offsetY = (LENS_ABOVE_TOUCH_PX / rect.height) * 100;
+
+    const sampleX = ((clientX - rect.left) / rect.width) * 100;
+    const sampleY = ((clientY - rect.top) / rect.height) * 100;
+
+    const clamp = (x: number, y: number) => ({
+      x: Math.min(100 - marginX, Math.max(marginX, x)),
+      y: Math.min(100 - marginY, Math.max(marginY, y)),
+    });
+
+    const sample = clamp(sampleX, sampleY);
+    const display = clamp(sampleX, sampleY - offsetY);
+
+    return { display, sample };
   }, []);
 
   const updateLensFromTouch = useCallback(
     (clientX: number, clientY: number) => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       rafRef.current = requestAnimationFrame(() => {
-        setLensPos(getLensPos(clientX, clientY));
+        const { display, sample } = getLensPositions(clientX, clientY);
+        setLensDisplay(display);
+        setLensSample(sample);
         rafRef.current = null;
       });
     },
-    [getLensPos],
+    [getLensPositions],
   );
 
   // ── Desktop: hover zoom ───────────────────────────────────────────────────
@@ -357,11 +375,11 @@ function ZoomableImage({
   const lensH = containerSize.h * LENS_MAGNIFY;
   const lensImgLeft =
     containerSize.w > 0
-      ? -(lensPos.x / 100) * lensW + LENS_SIZE_PX / 2
+      ? -(lensSample.x / 100) * lensW + LENS_SIZE_PX / 2
       : 0;
   const lensImgTop =
     containerSize.h > 0
-      ? -(lensPos.y / 100) * lensH + LENS_SIZE_PX / 2
+      ? -(lensSample.y / 100) * lensH + LENS_SIZE_PX / 2
       : 0;
 
   return (
@@ -413,12 +431,19 @@ function ZoomableImage({
           style={{
             width: LENS_SIZE_PX,
             height: LENS_SIZE_PX,
-            left: `${lensPos.x}%`,
-            top: `${lensPos.y}%`,
+            left: `${lensDisplay.x}%`,
+            top: `${lensDisplay.y}%`,
             transform: "translate(-50%, -50%)",
           }}
           aria-hidden
         >
+          {/* Pointer toward finger / fabric sample point */}
+          <div
+            className="absolute left-1/2 top-full z-10 -translate-x-1/2"
+            aria-hidden
+          >
+            <div className="mx-auto h-0 w-0 border-x-[7px] border-t-[9px] border-x-transparent border-t-white/90" />
+          </div>
           <div className="absolute inset-0 overflow-hidden rounded-full">
             <img
               src={src}
