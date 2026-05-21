@@ -97,8 +97,7 @@ export default function DashboardOverview() {
         </div>
         <div className="flex items-center gap-3">
           <button
-            className="px-6 py-3 rounded-xl font-semibold transition-all hover:scale-105 hover:shadow-2xl group relative overflow-hidden"
-            className="text-white"
+            className="px-6 py-3 rounded-xl font-semibold transition-all hover:scale-105 hover:shadow-2xl group relative overflow-hidden text-white"
             style={{
               background: "linear-gradient(135deg, #7da8c7 0%, #5a8faf 100%)",
             }}
