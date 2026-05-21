@@ -2,52 +2,90 @@
 
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import Link from "next/link";
+
+type CategoryItem = {
+  name: string;
+  subtitle: string;
+  image: string;
+  layout: string;
+  /** Exact collection category filter (DB category name) */
+  category?: string;
+  /** Search fallback when no category or to widen results */
+  q?: string;
+};
+
+const categories: CategoryItem[] = [
+  {
+    name: "Designer Suits",
+    subtitle: "Three Piece Excellence",
+    image: "/WhatsApp_Image_2026-05-03_at_4.30.36_PM.jpeg",
+    layout: "large",
+    category: "Designer Suits",
+    q: "suit",
+  },
+  {
+    name: "Indo Western",
+    subtitle: "Luxury Kurtas",
+    image: "/WhatsApp_Image_2026-04-28_at_9.56.47_PM.jpeg",
+    layout: "tall",
+    category: "Indo Western",
+    q: "indo western",
+  },
+  {
+    name: "Formal Collection",
+    subtitle: "Premium Tuxedos",
+    image: "/WhatsApp_Image_2026-05-03_at_4.30.33_PM.jpeg",
+    layout: "wide",
+    category: "Formal Collection",
+    q: "tuxedo",
+  },
+  {
+    name: "Embroidered Kurta",
+    subtitle: "Black Elegance",
+    image: "/WhatsApp_Image_2026-04-28_at_9.56.46_PM.jpeg",
+    layout: "medium",
+    q: "kurta",
+  },
+  {
+    name: "Safari Shirts",
+    subtitle: "Contemporary Style",
+    image: "/WhatsApp_Image_2026-04-28_at_9.56.51_PM.jpeg",
+    layout: "medium",
+    q: "shirt",
+  },
+  {
+    name: "Wedding Specials",
+    subtitle: "Mauve Collection",
+    image: "/WhatsApp_Image_2026-04-28_at_9.56.46_PM.jpeg",
+    layout: "tall",
+    category: "Wedding Special",
+    q: "wedding",
+  },
+  {
+    name: "White Tuxedo",
+    subtitle: "Luxury Eveningwear",
+    image: "/WhatsApp_Image_2026-04-28_at_9.56.39_PM.jpeg",
+    layout: "medium",
+    category: "Evening Wear",
+    q: "tuxedo",
+  },
+];
+
+function collectionHref(item: CategoryItem): string {
+  const params = new URLSearchParams();
+  if (item.category) params.set("category", item.category);
+  if (item.q) params.set("q", item.q);
+  const qs = params.toString();
+  return qs ? `/collection?${qs}` : "/collection";
+}
+
+const ctaLinkClass =
+  "flex items-center gap-2 text-white text-[9px] tracking-[0.2em] uppercase group-hover:text-[#7da8c7] transition-colors";
+const ctaLinkClassLg =
+  "flex items-center gap-3 text-white text-[11px] tracking-[0.2em] uppercase group-hover:text-[#7da8c7] transition-colors";
 
 const ShopByCategory = () => {
-  const categories = [
-    {
-      name: "Designer Suits",
-      subtitle: "Three Piece Excellence",
-      image: "/WhatsApp_Image_2026-05-03_at_4.30.36_PM.jpeg",
-      layout: "large",
-    },
-    {
-      name: "Indo Western",
-      subtitle: "Luxury Kurtas",
-      image: "/WhatsApp_Image_2026-04-28_at_9.56.47_PM.jpeg",
-      layout: "tall",
-    },
-    {
-      name: "Formal Collection",
-      subtitle: "Premium Tuxedos",
-      image: "/WhatsApp_Image_2026-05-03_at_4.30.33_PM.jpeg",
-      layout: "wide",
-    },
-    {
-      name: "Embroidered Kurta",
-      subtitle: "Black Elegance",
-      image: "/WhatsApp_Image_2026-04-28_at_9.56.46_PM.jpeg",
-      layout: "medium",
-    },
-    {
-      name: "Safari Shirts",
-      subtitle: "Contemporary Style",
-      image: "/WhatsApp_Image_2026-04-28_at_9.56.51_PM.jpeg",
-      layout: "medium",
-    },
-    {
-      name: "Wedding Specials",
-      subtitle: "Mauve Collection",
-      image: "/WhatsApp_Image_2026-04-28_at_9.56.46_PM.jpeg",
-      layout: "tall",
-    },
-    {
-      name: "White Tuxedo",
-      subtitle: "Luxury Eveningwear",
-      image: "/WhatsApp_Image_2026-04-28_at_9.56.39_PM.jpeg",
-      layout: "medium",
-    },
-  ];
 
   return (
     <section className="py-16 px-0 bg-white overflow-hidden">
@@ -97,8 +135,13 @@ const ShopByCategory = () => {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="col-span-12 lg:col-span-6 row-span-2 relative group overflow-hidden cursor-pointer"
+            className="col-span-12 lg:col-span-6 row-span-2 relative group overflow-hidden"
           >
+            <Link
+              href={collectionHref(categories[0])}
+              className="absolute inset-0 z-10 block cursor-pointer no-underline"
+              aria-label={`Explore ${categories[0].name}`}
+            />
             <div className="absolute inset-0">
               <img
                 src={categories[0].image}
@@ -132,13 +175,10 @@ const ShopByCategory = () => {
               >
                 {categories[0].name}
               </motion.h3>
-              <motion.button
-                whileHover={{ x: 10 }}
-                className="flex items-center gap-3 text-white text-[11px] tracking-[0.2em] uppercase group-hover:text-[#7da8c7] transition-colors"
-              >
+              <span className={`relative z-20 pointer-events-none ${ctaLinkClassLg}`}>
                 <span>Explore Collection</span>
                 <ArrowRight className="w-4 h-4" strokeWidth={1.5} />
-              </motion.button>
+              </span>
             </div>
           </motion.div>
 
@@ -148,8 +188,13 @@ const ShopByCategory = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1, duration: 0.6 }}
-            className="col-span-6 lg:col-span-3 row-span-2 relative group overflow-hidden cursor-pointer"
+            className="col-span-6 lg:col-span-3 row-span-2 relative group overflow-hidden"
           >
+            <Link
+              href={collectionHref(categories[1])}
+              className="absolute inset-0 z-10 block cursor-pointer no-underline"
+              aria-label={`Shop ${categories[1].name}`}
+            />
             <div className="absolute inset-0">
               <img
                 src={categories[1].image}
@@ -173,10 +218,10 @@ const ShopByCategory = () => {
               >
                 {categories[1].name}
               </h3>
-              <button className="flex items-center gap-2 text-white text-[10px] tracking-[0.2em] uppercase group-hover:text-[#7da8c7] transition-colors">
+              <span className={`relative z-20 pointer-events-none ${ctaLinkClass}`}>
                 <span>Shop Now</span>
                 <ArrowRight className="w-3 h-3" strokeWidth={1.5} />
-              </button>
+              </span>
             </div>
           </motion.div>
 
@@ -186,8 +231,13 @@ const ShopByCategory = () => {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2, duration: 0.6 }}
-            className="col-span-6 lg:col-span-3 row-span-1 relative group overflow-hidden cursor-pointer"
+            className="col-span-6 lg:col-span-3 row-span-1 relative group overflow-hidden"
           >
+            <Link
+              href={collectionHref(categories[3])}
+              className="absolute inset-0 z-10 block cursor-pointer no-underline"
+              aria-label={`View ${categories[3].name}`}
+            />
             <div className="absolute inset-0">
               <img
                 src={categories[3].image}
@@ -211,10 +261,10 @@ const ShopByCategory = () => {
               >
                 {categories[3].name}
               </h3>
-              <button className="flex items-center gap-2 text-white text-[9px] tracking-[0.2em] uppercase group-hover:text-[#7da8c7] transition-colors">
+              <span className={`relative z-20 pointer-events-none ${ctaLinkClass}`}>
                 <span>View</span>
                 <ArrowRight className="w-3 h-3" strokeWidth={1.5} />
-              </button>
+              </span>
             </div>
           </motion.div>
 
@@ -224,8 +274,13 @@ const ShopByCategory = () => {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.25, duration: 0.6 }}
-            className="col-span-6 lg:col-span-3 row-span-1 relative group overflow-hidden cursor-pointer"
+            className="col-span-6 lg:col-span-3 row-span-1 relative group overflow-hidden"
           >
+            <Link
+              href={collectionHref(categories[4])}
+              className="absolute inset-0 z-10 block cursor-pointer no-underline"
+              aria-label={`View ${categories[4].name}`}
+            />
             <div className="absolute inset-0">
               <img
                 src={categories[4].image}
@@ -249,10 +304,10 @@ const ShopByCategory = () => {
               >
                 {categories[4].name}
               </h3>
-              <button className="flex items-center gap-2 text-white text-[9px] tracking-[0.2em] uppercase group-hover:text-[#7da8c7] transition-colors">
+              <span className={`relative z-20 pointer-events-none ${ctaLinkClass}`}>
                 <span>View</span>
                 <ArrowRight className="w-3 h-3" strokeWidth={1.5} />
-              </button>
+              </span>
             </div>
           </motion.div>
 
@@ -262,8 +317,13 @@ const ShopByCategory = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3, duration: 0.6 }}
-            className="col-span-12 lg:col-span-8 row-span-1 relative group overflow-hidden cursor-pointer"
+            className="col-span-12 lg:col-span-8 row-span-1 relative group overflow-hidden"
           >
+            <Link
+              href={collectionHref(categories[2])}
+              className="absolute inset-0 z-10 block cursor-pointer no-underline"
+              aria-label={`Shop ${categories[2].name}`}
+            />
             <div className="absolute inset-0">
               <img
                 src={categories[2].image}
@@ -288,10 +348,10 @@ const ShopByCategory = () => {
                 >
                   {categories[2].name}
                 </h3>
-                <button className="flex items-center gap-3 text-white text-[11px] tracking-[0.2em] uppercase group-hover:text-[#7da8c7] transition-colors">
+                <span className={`relative z-20 pointer-events-none ${ctaLinkClassLg}`}>
                   <span>Shop Collection</span>
                   <ArrowRight className="w-4 h-4" strokeWidth={1.5} />
-                </button>
+                </span>
               </div>
             </div>
           </motion.div>
@@ -302,8 +362,13 @@ const ShopByCategory = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.35, duration: 0.6 }}
-            className="col-span-12 lg:col-span-4 row-span-1 relative group overflow-hidden cursor-pointer"
+            className="col-span-12 lg:col-span-4 row-span-1 relative group overflow-hidden"
           >
+            <Link
+              href={collectionHref(categories[6])}
+              className="absolute inset-0 z-10 block cursor-pointer no-underline"
+              aria-label={`Explore ${categories[6].name}`}
+            />
             <div className="absolute inset-0">
               <img
                 src={categories[6].image}
@@ -327,10 +392,10 @@ const ShopByCategory = () => {
               >
                 {categories[6].name}
               </h3>
-              <button className="flex items-center gap-2 text-white text-[10px] tracking-[0.2em] uppercase group-hover:text-[#7da8c7] transition-colors">
+              <span className={`relative z-20 pointer-events-none ${ctaLinkClass}`}>
                 <span>Explore</span>
                 <ArrowRight className="w-3 h-3" strokeWidth={1.5} />
-              </button>
+              </span>
             </div>
           </motion.div>
         </div>
@@ -343,14 +408,15 @@ const ShopByCategory = () => {
           transition={{ delay: 0.5 }}
           className="text-center mt-16 px-8"
         >
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="px-12 py-4 border border-gray text-[#0f172a] text-[11px] tracking-[0.2em] uppercase hover:bg-[#7da8c7] hover:text-white transition-all duration-300 inline-flex items-center gap-4 cursor-pointer"
-          >
-            <span>View All Categories</span>
-            <ArrowRight className="w-4 h-4" strokeWidth={1.5} />
-          </motion.button>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Link
+              href="/collection"
+              className="px-12 py-4 border border-gray text-[#0f172a] text-[11px] tracking-[0.2em] uppercase hover:bg-[#7da8c7] hover:text-white transition-all duration-300 inline-flex items-center gap-4 cursor-pointer no-underline"
+            >
+              <span>View All Categories</span>
+              <ArrowRight className="w-4 h-4" strokeWidth={1.5} />
+            </Link>
+          </motion.div>
         </motion.div>
       </div>
     </section>

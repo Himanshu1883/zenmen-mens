@@ -1,9 +1,9 @@
 "use client";
 
-import type { Product } from "@/types/product";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setCartOpen } from "@/store/slices/cartSlice";
 import { fetchProducts } from "@/store/slices/productSlice";
+import type { Product } from "@/types/product";
 import { Search, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -160,7 +160,7 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
         </div>
         <div className="flex flex-col">
           <p className="m-0 whitespace-nowrap text-[22px] leading-[0.92] text-[#0f172a] sm:text-[26px]">
-            ZENmen
+            ZENMEN
           </p>
           <p className="m-0 mt-0.5 whitespace-nowrap text-[8px] uppercase tracking-[0.2em] text-[#7da8c7] sm:text-[9px] sm:tracking-[0.28em]">
             Bespoke Tailoring
@@ -222,7 +222,7 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
             ) : (
               <ul className="divide-y divide-[#e8e0d6] rounded-lg border border-[#e8e0d6] bg-white">
                 {results.map((p) => {
-                  const href = `/collection/${p.slug}`;
+                  const href = `/collection/${encodeURIComponent(p.slug)}`;
                   const img = primaryImage(p);
                   const color = p.colors?.[0];
                   return (
@@ -311,7 +311,7 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
                 return (
                   <Link
                     key={p._id}
-                    href={`/collection/${p.slug}`}
+                    href={`/collection/${encodeURIComponent(p.slug)}`}
                     onClick={onClose}
                     className="group w-[7.5rem] shrink-0 sm:w-[8.5rem]"
                   >

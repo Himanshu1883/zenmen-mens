@@ -617,7 +617,7 @@ export default function Products() {
               return (
                 <Link
                   key={product._id}
-                  href={`/collection/${product.slug ?? ""}`}
+                  href={`/collection/${encodeURIComponent(product.slug ?? "")}`}
                   className={`product-card ${shouldAutoPreview ? "auto-preview" : ""}`}
                   style={{ animationDelay: `${index * 80}ms` }}
                 >
@@ -659,7 +659,7 @@ export default function Products() {
                         onClick={(e) => {
                           e.preventDefault();
                           if (!product.slug) return;
-                          window.location.href = `/collection/${product.slug}`;
+                          window.location.href = `/collection/${encodeURIComponent(product.slug)}`;
                         }}
                       >
                         Quick View

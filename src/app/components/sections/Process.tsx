@@ -26,7 +26,7 @@ export default function Process() {
             id="process-heading"
             className="mt-4 font-[family-name:var(--font-playfair)] text-[2.1rem] font-medium leading-[1.1] tracking-tight text-[#0f172a] sm:text-4xl md:text-[2.85rem]"
           >
-            The ZENmen <em className="not-italic text-[#7da8c7]">experience</em>
+            The ZENMEN <em className="not-italic text-[#7da8c7]">experience</em>
           </h2>
           <p className="mt-4 font-[family-name:var(--font-cormorant)] text-[1.05rem] italic leading-relaxed text-[#64748b] sm:text-lg">
             Four deliberate steps. Zero noise — from first conversation to final

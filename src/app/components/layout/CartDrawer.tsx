@@ -161,7 +161,7 @@ export default function CartDrawer() {
                   >
                     <div className="flex gap-3 p-3 sm:gap-4 sm:p-4">
                       <Link
-                        href={`/collection/${item.slug}`}
+                        href={`/collection/${encodeURIComponent(item.slug)}`}
                         onClick={close}
                         className="relative h-[4.5rem] w-[4.5rem] shrink-0 overflow-hidden rounded-sm border border-[#e2e8f0] bg-[#f8fafc] no-underline"
                       >
@@ -174,7 +174,7 @@ export default function CartDrawer() {
                       </Link>
                       <div className="min-w-0 flex-1">
                         <Link
-                          href={`/collection/${item.slug}`}
+                          href={`/collection/${encodeURIComponent(item.slug)}`}
                           onClick={close}
                           className="font-[family-name:var(--font-montserrat)] text-[14px] font-medium leading-snug text-[#0f172a] no-underline hover:text-[#7da8c7]"
                         >

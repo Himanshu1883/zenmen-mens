@@ -28,7 +28,7 @@ export default function Testimonials() {
             Words from our <em className="not-italic text-[#7da8c7]">gentlemen</em>
           </h2>
           <p className="mx-auto mt-4 max-w-lg font-[family-name:var(--font-cormorant)] text-base italic leading-relaxed text-[#64748b] md:mx-0">
-            Bespoke clients on fit, fabric, and the ZENmen experience.
+            Bespoke clients on fit, fabric, and the ZENMEN experience.
           </p>
         </div>
 

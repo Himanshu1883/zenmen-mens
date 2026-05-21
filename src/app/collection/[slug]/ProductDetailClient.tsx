@@ -1246,7 +1246,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             {relatedProducts.map((item) => (
               <Link
                 key={item._id}
-                href={`/collection/${item.slug}`}
+                href={`/collection/${encodeURIComponent(item.slug)}`}
                 className="group block overflow-hidden rounded-[3px] border border-[#e2e8f0] bg-white text-inherit no-underline transition-all duration-300 hover:-translate-y-1 hover:border-[#7da8c7] hover:shadow-[0_8px_32px_rgba(125,168,199,0.15)]"
               >
                 <div className="overflow-hidden h-[280px]">
@@ -1293,7 +1293,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             {mosaicData.map((item, i) => (
               <Link
                 key={`${item._id}-mosaic`}
-                href={`/collection/${item.slug}`}
+                href={`/collection/${encodeURIComponent(item.slug)}`}
                 className="group relative cursor-pointer overflow-hidden rounded-[3px] border border-[#e2e8f0] no-underline"
                 style={i === 0 ? { gridColumn: "1 / 3", gridRow: "1 / 3" } : {}}
               >

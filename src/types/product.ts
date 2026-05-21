@@ -5,6 +5,7 @@ export interface ProductImage {
   alt?: string;
   isPrimary?: boolean;
   order?: number;
+  public_id?: string;
 }
 
 export interface ProductReview {

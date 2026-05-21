@@ -6,15 +6,32 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 // -- HERO SLIDES -------------------------------------------------------------
-const heroSlides = [
+type HeroSlide = {
+  img: string;
+  tag: string;
+  title: [string, string, string];
+  titleItalic: 1 | 2;
+  subtitle: string;
+  cta: string;
+  ctaHref: string;
+  ctaSecondary: string;
+  ctaSecondaryHref: string;
+  textAlign: "left" | "center" | "right";
+  overlayDir: "left" | "center" | "right";
+};
+
+const heroSlides: HeroSlide[] = [
   {
     img: "/ChatGPT_Image_May_20__2026__12_08_02_PM.png",
     tag: "Bespoke Suiting · SS 2025",
     title: ["Command", "Every", "Room"],
     titleItalic: 1,
-    subtitle: "Five silhouettes. One uncompromising standard. Bespoke suits built for the modern gentleman.",
+    subtitle:
+      "Five silhouettes. One uncompromising standard. Bespoke suits built for the modern gentleman.",
     cta: "Begin Your Journey",
+    ctaHref: "/collection?q=suit",
     ctaSecondary: "View Collection",
+    ctaSecondaryHref: "/collection",
     textAlign: "center",
     overlayDir: "center",
   },
@@ -23,9 +40,12 @@ const heroSlides = [
     tag: "The Kurta Edit · Heritage 2025",
     title: ["Royal Heritage,", "Modern", "Soul"],
     titleItalic: 1,
-    subtitle: "Hand-embroidered kurtas crafted for the discerning groom. Tradition reimagined.",
+    subtitle:
+      "Hand-embroidered kurtas crafted for the discerning groom. Tradition reimagined.",
     cta: "Explore Kurtas",
+    ctaHref: "/collection?q=kurta",
     ctaSecondary: "Book a Fitting",
+    ctaSecondaryHref: "/appointment",
     textAlign: "left",
     overlayDir: "left",
   },
@@ -34,9 +54,12 @@ const heroSlides = [
     tag: "Signature Collection · Limited",
     title: ["Elevate", "Every", "Moment"],
     titleItalic: 2,
-    subtitle: "Impeccably tailored tuxedos and suits crafted for unforgettable entrances. Timeless style, modern sophistication.",
+    subtitle:
+      "Impeccably tailored tuxedos and suits crafted for unforgettable entrances. Timeless style, modern sophistication.",
     cta: "Shop Now",
+    ctaHref: "/collection?q=suit",
     ctaSecondary: "View Lookbook",
+    ctaSecondaryHref: "/collection?q=suit",
     textAlign: "center",
     overlayDir: "center",
   },
@@ -895,8 +918,12 @@ export default function Hero() {
             </h1>
             <p className="zn-sub" style={(isMobileHero || slide.textAlign === "center") ? { textAlign: "center" } : {}}>{slide.subtitle}</p>
             <div className="zn-btns" style={{ justifyContent: isMobileHero ? "center" : slide.textAlign === "left" ? "flex-start" : slide.textAlign === "right" ? "flex-end" : "center" }}>
-              <a href="#contact" className="zn-btn-fill">{slide.cta}</a>
-              <Link href="/collection" className="zn-btn-ghost">{slide.ctaSecondary}</Link>
+              <Link href={slide.ctaHref} className="zn-btn-fill no-underline">
+                {slide.cta}
+              </Link>
+              <Link href={slide.ctaSecondaryHref} className="zn-btn-ghost no-underline">
+                {slide.ctaSecondary}
+              </Link>
             </div>
           </div>
         </div>

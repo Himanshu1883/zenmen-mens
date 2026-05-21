@@ -585,7 +585,7 @@ export default function Footer() {
 
         {/* ── Bottom Bar ── */}
         <div className="zf-bottom">
-          <p className="zf-copy">© {year} ZENmen. All rights reserved.</p>
+          <p className="zf-copy">© {year} ZENMEN. All rights reserved.</p>
 
           <ul className="zf-legal">
             <li>
