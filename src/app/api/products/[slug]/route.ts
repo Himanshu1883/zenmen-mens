@@ -232,13 +232,13 @@ export async function PUT(request: Request, context: Params) {
       await destroyCloudinaryImages(removed);
 
       try {
-        updates.images = await processIncomingImages(
+        const processedImages = await processIncomingImages(
           body.images,
           title,
           existingImages,
         );
 
-        if (!updates.images.length) {
+        if (!processedImages.length) {
           return NextResponse.json(
             {
               error:
@@ -247,6 +247,8 @@ export async function PUT(request: Request, context: Params) {
             { status: 400 },
           );
         }
+
+        updates.images = processedImages;
       } catch (imgErr) {
         console.error("[PUT images]", imgErr);
         return NextResponse.json(
