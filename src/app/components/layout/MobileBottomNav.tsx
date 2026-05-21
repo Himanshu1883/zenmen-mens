@@ -82,6 +82,7 @@ export default function MobileBottomNav() {
   const pathname = usePathname();
   /** Product detail replaces global bottom nav with page-local CTAs */
   const isProductDetailPage = /^\/collection\/[^/]+$/.test(pathname);
+  const isAdminPage = pathname.startsWith("/admin");
 
   const [visible, setVisible] = useState(true);
   const [active, setActive] = useState("home");
@@ -94,6 +95,11 @@ export default function MobileBottomNav() {
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
 
   useEffect(() => {
+    if (isAdminPage) {
+      setVisible(true);
+      return;
+    }
+
     const onScroll = () => {
       if (!ticking.current) {
         requestAnimationFrame(() => {
@@ -114,9 +120,9 @@ export default function MobileBottomNav() {
 
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [isAdminPage]);
 
-  if (isProductDetailPage) return null;
+  if (isProductDetailPage || isAdminPage) return null;
 
   const navItems: NavItem[] = [
     {

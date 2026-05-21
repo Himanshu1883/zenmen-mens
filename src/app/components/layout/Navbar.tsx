@@ -5,6 +5,7 @@ import { setCartOpen } from "@/store/slices/cartSlice";
 import { motion } from "framer-motion";
 import { Menu, Search, ShoppingBag, User, X } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import CartDrawer from "./CartDrawer";
 import CurrencySwitcher from "./CurrencySwitcher";
@@ -14,6 +15,9 @@ import SearchOverlay from "./SearchOverlay";
 import UserAuthPanel from "./UserAuthPanel";
 
 const Navbar = () => {
+  const pathname = usePathname();
+  const isAdmin = pathname.startsWith("/admin");
+
   const dispatch = useAppDispatch();
   const cartCount = useAppSelector((s) =>
     s.cart.items.reduce((n, item) => n + item.qty, 0),
@@ -26,6 +30,11 @@ const Navbar = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   useEffect(() => {
+    if (isAdmin) {
+      setScrolled(false);
+      return;
+    }
+
     let ticking = false;
 
     const updateScrollState = () => {
@@ -44,7 +53,7 @@ const Navbar = () => {
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [isAdmin]);
 
   const toggleCart = () => {
     setIsSearchOpen(false);
@@ -83,20 +92,30 @@ const Navbar = () => {
   const shellClass =
     "w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-10 xl:px-14";
 
+  const navScrolled = isAdmin ? false : scrolled;
+
   return (
     <>
       <motion.nav
-        className={`fixed top-0 left-0 right-0 z-50 will-change-transform transition-[background-color,box-shadow,height] duration-300 ${
-          scrolled ? "bg-white/95 shadow-sm" : "bg-white"
+        className={`fixed top-0 left-0 right-0 z-50 will-change-transform ${
+          isAdmin
+            ? "bg-white shadow-sm"
+            : `transition-[background-color,box-shadow,height] duration-300 ${
+                navScrolled ? "bg-white/95 shadow-sm" : "bg-white"
+              }`
         }`}
         initial={false}
         animate={{ y: 0 }}
-        transition={{ duration: 0.2, ease: "linear" }}
+        transition={isAdmin ? { duration: 0 } : { duration: 0.2, ease: "linear" }}
       >
         <div className={shellClass}>
           <div
-            className={`flex items-center justify-between gap-2 sm:gap-3 transition-all duration-300 ${
-              scrolled ? "h-[80px]" : "h-[96px] lg:h-[110px]"
+            className={`flex items-center justify-between gap-2 sm:gap-3 ${
+              isAdmin
+                ? "h-[80px]"
+                : `transition-all duration-300 ${
+                    navScrolled ? "h-[80px]" : "h-[96px] lg:h-[110px]"
+                  }`
             }`}
           >
             {/* Left Navigation - Desktop */}
@@ -304,7 +323,10 @@ const Navbar = () => {
       />
 
       <CartDrawer />
-      <div className="h-[96px] lg:h-[110px]" />
+      <div
+        className={isAdmin ? "h-[80px]" : "h-[96px] lg:h-[110px]"}
+        aria-hidden
+      />
     </>
   );
 };

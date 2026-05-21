@@ -1,10 +1,10 @@
 "use client";
+
+import { adminAvatarParams } from "@/app/components/adminComponents/admin-theme";
 import {
   BarChart3,
   ChevronLeft,
-  Globe,
   HelpCircle,
-  Image as ImageIcon,
   LayoutDashboard,
   LogOut,
   Package,
@@ -13,9 +13,9 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
 
 interface SidebarProps {
   collapsed: boolean;
@@ -24,8 +24,6 @@ interface SidebarProps {
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/admin", badge: null },
-  // { icon: Globe, label: "Website", path: "/admin/sections", badge: "7" },
-  // { icon: ImageIcon, label: "Gallery", path: "/admin/images", badge: null },
   { icon: Package, label: "Products", path: "/admin/products", badge: "156" },
   { icon: Users, label: "Clients", path: "/admin/users", badge: null },
   { icon: ShoppingCart, label: "Orders", path: "/admin/orders", badge: "24" },
@@ -43,66 +41,49 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const { data: session } = useSession();
 
   const sessionUser = session?.user;
-  const profileName = sessionUser?.name ?? "Sarah Anderson";
-  const profileRole = (sessionUser as any)?.role ?? "Administrator";
+  const profileName = sessionUser?.name ?? "Admin";
+  const profileRole =
+    (sessionUser as { role?: string })?.role ?? "Administrator";
   const profileAvatar =
     sessionUser?.image ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(
-      profileName,
-    )}&background=C8A96E&color=050a18`;
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(profileName)}&${adminAvatarParams}`;
 
   return (
     <>
-      {/* Mobile Overlay */}
       {!collapsed && (
         <div
-          className="fixed inset-0 bg-black/60 z-20 md:hidden backdrop-blur-sm"
+          className="fixed inset-0 bg-[#0f172a]/20 z-20 md:hidden backdrop-blur-sm"
           onClick={onToggle}
         />
       )}
 
-      {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-20 h-screen transition-all duration-300 z-30 flex flex-col ${
+        className={`fixed left-0 top-20 h-screen transition-all duration-300 z-30 flex flex-col bg-white border-r border-[#e2e8f0] shadow-sm ${
           collapsed ? "w-20 -translate-x-full md:translate-x-0" : "w-72"
         }`}
-        style={{
-          background: "linear-gradient(180deg, #0A1220 0%, #050a18 100%)",
-          borderRight: "1px solid rgba(200, 169, 110, 0.1)",
-        }}
       >
-        {/* Logo Section */}
-        <div className="h-20 flex items-center justify-between px-6 relative">
+        <div className="h-20 flex items-center justify-between px-6 relative border-b border-[#e2e8f0]">
           {!collapsed ? (
             <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-[#0A1220]"></div>
-              </div>
+              <img
+                src="/logo_zenmen.png"
+                alt="ZENmen"
+                className="h-9 w-auto object-contain rounded-full"
+              />
               <div>
-                <h1
-                  className="text-lg font-bold tracking-tight"
-                  style={{ color: "#FAF8F4" }}
-                >
-                  ZENmen
+                <h1 className="text-lg font-bold tracking-tight text-[#0f172a]">
+                  ZENMEN
                 </h1>
-                <p className="text-xs" style={{ color: "#9AA5B8" }}>
-                  Bespoke Tailoring
-                </p>
+                <p className="text-xs text-[#64748b]">Admin</p>
               </div>
             </div>
           ) : (
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto"
-              style={{
-                background: "linear-gradient(135deg, #C8A96E 0%, #8B6E3A 100%)",
-              }}
-            >
-              <Sparkles className="w-5 h-5 text-[#050a18]" />
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto bg-[#7da8c7]">
+              <Sparkles className="w-5 h-5 text-white" />
             </div>
           )}
         </div>
 
-        {/* Navigation Menu */}
         <nav className="sidebar-nav px-4 py-6 flex-1 overflow-y-auto">
           <ul className="space-y-1">
             {menuItems.map((item) => {
@@ -113,45 +94,31 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 <li key={item.path}>
                   <Link
                     href={item.path}
-                    className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all group relative ${
-                      isActive ? "" : "hover:bg-white/5"
+                    className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all group relative border-l-[3px] ${
+                      isActive
+                        ? "bg-[#f0f6fb] border-[#7da8c7] text-[#0f172a]"
+                        : "border-transparent hover:bg-[#f8fafc] text-[#64748b] hover:text-[#0f172a]"
                     }`}
-                    style={{
-                      background: isActive
-                        ? "linear-gradient(135deg, rgba(200, 169, 110, 0.15) 0%, rgba(200, 169, 110, 0.05) 100%)"
-                        : "transparent",
-                      borderLeft: isActive
-                        ? "3px solid #C8A96E"
-                        : "3px solid transparent",
-                    }}
                   >
                     <Icon
                       className={`w-5 h-5 transition-colors ${
                         isActive
-                          ? "text-[#C8A96E]"
-                          : "text-[#9AA5B8] group-hover:text-[#C8A96E]"
+                          ? "text-[#7da8c7]"
+                          : "text-[#94a3b8] group-hover:text-[#7da8c7]"
                       }`}
                     />
                     {!collapsed && (
                       <>
-                        <span
-                          className={`text-sm font-medium flex-1 ${
-                            isActive
-                              ? "text-[#FAF8F4]"
-                              : "text-[#B8C4D4] group-hover:text-[#FAF8F4]"
-                          }`}
-                        >
+                        <span className="text-sm font-medium flex-1">
                           {item.label}
                         </span>
                         {item.badge && (
                           <span
-                            className="px-2 py-0.5 rounded-full text-xs font-semibold"
-                            style={{
-                              background: isActive
-                                ? "rgba(200, 169, 110, 0.2)"
-                                : "rgba(154, 165, 184, 0.1)",
-                              color: isActive ? "#C8A96E" : "#9AA5B8",
-                            }}
+                            className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                              isActive
+                                ? "bg-[#7da8c7]/15 text-[#5a8faf]"
+                                : "bg-[#f1f5f9] text-[#64748b]"
+                            }`}
                           >
                             {item.badge}
                           </span>
@@ -165,90 +132,50 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           </ul>
         </nav>
 
-        {/* Bottom Section */}
-        <div
-          className="p-4 border-t"
-          style={{ borderColor: "rgba(200, 169, 110, 0.1)" }}
-        >
+        <div className="mb-20 p-4 border-t border-[#e2e8f0]">
           {!collapsed ? (
             <div className="space-y-2">
-              <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-white/5 group">
-                <HelpCircle className="w-5 h-5 text-[#9AA5B8] group-hover:text-[#C8A96E]" />
-                <span className="text-sm font-medium text-[#B8C4D4] group-hover:text-[#FAF8F4]">
-                  Help & Support
-                </span>
-              </button>
-
-              <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-white/5 group">
-                <LogOut className="w-5 h-5 text-[#9AA5B8] group-hover:text-red-400" />
-                <span className="text-sm font-medium text-[#B8C4D4] group-hover:text-red-400">
-                  Logout
-                </span>
-              </button>
-
-              {/* User Profile */}
-              <div
-                className="mt-4 p-4 rounded-xl"
-                style={{
-                  background:
-                    "linear-gradient(135deg, rgba(200, 169, 110, 0.1) 0%, rgba(200, 169, 110, 0.05) 100%)",
-                  border: "1px solid rgba(200, 169, 110, 0.2)",
-                }}
+              <button
+                type="button"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-[#f8fafc] group text-[#64748b] hover:text-[#0f172a]"
               >
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-10 h-10 rounded-full"
-                    style={{
-                      background:
-                        "linear-gradient(135deg, #C8A96E 0%, #8B6E3A 100%)",
-                    }}
-                  >
-                    <img
-                      src={profileAvatar}
-                      alt="Profile"
-                      className="w-full h-full rounded-full"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p
-                      className="text-sm font-semibold truncate"
-                      style={{ color: "#FAF8F4" }}
-                    >
-                      {profileName}
-                    </p>
-                    <p
-                      className="text-xs truncate"
-                      style={{ color: "#9AA5B8" }}
-                    >
-                      {profileRole}
-                    </p>
-                  </div>
-                </div>
-              </div>
+                <HelpCircle className="w-5 h-5 group-hover:text-[#7da8c7]" />
+                <span className="text-sm font-medium">Help & Support</span>
+              </button>
+
+              <button
+                type="button"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-red-50 group text-[#64748b] hover:text-red-600"
+              >
+                <LogOut className="w-5 h-5" />
+                <span className="text-sm font-medium">Logout</span>
+              </button>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2">
-              <button className="w-10 h-10 rounded-lg flex items-center justify-center hover:bg-white/5 transition-all">
-                <HelpCircle className="w-5 h-5 text-[#9AA5B8]" />
+              <button
+                type="button"
+                className="w-10 h-10 rounded-lg flex items-center justify-center hover:bg-[#f8fafc] text-[#64748b]"
+              >
+                <HelpCircle className="w-5 h-5" />
               </button>
-              <button className="w-10 h-10 rounded-lg flex items-center justify-center hover:bg-white/5 transition-all">
-                <LogOut className="w-5 h-5 text-[#9AA5B8]" />
+              <button
+                type="button"
+                className="w-10 h-10 rounded-lg flex items-center justify-center hover:bg-red-50 text-[#64748b]"
+              >
+                <LogOut className="w-5 h-5" />
               </button>
             </div>
           )}
         </div>
 
-        {/* Collapse Toggle Button */}
         <button
+          type="button"
           onClick={onToggle}
-          className="absolute -right-3 top-24 w-6 h-6 rounded-full flex items-center justify-center transition-all hover:scale-110 hidden md:flex"
-          style={{
-            background: "linear-gradient(135deg, #C8A96E 0%, #8B6E3A 100%)",
-            boxShadow: "0 2px 8px rgba(200, 169, 110, 0.3)",
-          }}
+          className="absolute -right-3 top-24 w-6 h-6 rounded-full flex items-center justify-center transition-all hover:scale-110 hidden md:flex bg-[#7da8c7] text-white shadow-md shadow-[#7da8c7]/30"
         >
           <ChevronLeft
-            className={`w-4 h-4 text-[#050a18] transition-transform ${
+            className={`w-4 h-4 transition-transform ${
               collapsed ? "rotate-180" : ""
             }`}
           />

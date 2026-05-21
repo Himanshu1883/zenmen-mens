@@ -7,6 +7,8 @@ export type EditableImage = {
   isPrimary?: boolean;
   order?: number;
   public_id?: string;
+  /** Base64 data URL for new uploads */
+  file?: string;
 };
 
 export type ProductEditForm = {
@@ -40,6 +42,34 @@ function splitLines(text: string): string[] {
     .split(/\n|,/)
     .map((s) => s.trim())
     .filter(Boolean);
+}
+
+export function emptyProductForm(): ProductEditForm {
+  return {
+    _id: "",
+    slug: "",
+    title: "",
+    tagline: "",
+    description: "",
+    category: "",
+    subCategory: "",
+    price: 0,
+    comparePrice: "",
+    discount: "",
+    stock: 0,
+    badge: "",
+    care: "",
+    colorsText: "",
+    sizesText: "",
+    detailsText: "",
+    specifications: [{ label: "", value: "" }],
+    accordion: [{ title: "", content: "" }],
+    seoTitle: "",
+    seoDescription: "",
+    isFeatured: false,
+    isAvailable: true,
+    images: [],
+  };
 }
 
 export function productToEditForm(product: Product): ProductEditForm {
@@ -81,35 +111,11 @@ export function productToEditForm(product: Product): ProductEditForm {
   };
 }
 
-export function editFormToUpdatePayload(form: ProductEditForm) {
+function buildCommonFields(form: ProductEditForm) {
   const comparePrice = form.comparePrice.trim()
     ? Number(form.comparePrice)
     : undefined;
   const discount = form.discount.trim() ? Number(form.discount) : undefined;
-
-  const images = form.images
-    .map((img, index) => {
-      const public_id = resolveImagePublicId(img);
-      if (!public_id) return null;
-      return {
-        url: img.url,
-        alt: img.alt || form.title,
-        isPrimary: img.isPrimary ?? index === 0,
-        order: img.order ?? index,
-        public_id,
-      };
-    })
-    .filter(Boolean) as {
-    url: string;
-    alt: string;
-    isPrimary: boolean;
-    order: number;
-    public_id: string;
-  }[];
-
-  if (images.length > 0 && !images.some((i) => i.isPrimary)) {
-    images[0].isPrimary = true;
-  }
 
   return {
     title: form.title.trim(),
@@ -143,6 +149,80 @@ export function editFormToUpdatePayload(form: ProductEditForm) {
     seoTitle: form.seoTitle.trim() || undefined,
     seoDescription: form.seoDescription.trim() || undefined,
     isFeatured: form.isFeatured,
-    images,
   };
+}
+
+function buildImagesPayload(form: ProductEditForm, requireFile = false) {
+  const images = form.images
+    .map((img, index) => {
+      if (img.file) {
+        return {
+          file: img.file,
+          alt: img.alt || form.title,
+          isPrimary: img.isPrimary ?? index === 0,
+          order: img.order ?? index,
+        };
+      }
+
+      const public_id = resolveImagePublicId(img);
+      if (!public_id && requireFile) return null;
+      if (!public_id) return null;
+
+      return {
+        url: img.url,
+        alt: img.alt || form.title,
+        isPrimary: img.isPrimary ?? index === 0,
+        order: img.order ?? index,
+        public_id,
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => item != null);
+
+  if (images.length > 0 && !images.some((img) => img.isPrimary)) {
+    images[0].isPrimary = true;
+  }
+
+  return images;
+}
+
+export function editFormToCreatePayload(form: ProductEditForm) {
+  return {
+    ...buildCommonFields(form),
+    images: buildImagesPayload(form, true),
+  };
+}
+
+export function editFormToUpdatePayload(form: ProductEditForm) {
+  return {
+    ...buildCommonFields(form),
+    images: buildImagesPayload(form, false),
+  };
+}
+
+export async function filesToEditableImages(
+  files: FileList | File[],
+  title: string,
+): Promise<EditableImage[]> {
+  const list = Array.from(files);
+  const results: EditableImage[] = [];
+
+  for (let i = 0; i < list.length; i++) {
+    const file = list[i];
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    results.push({
+      url: dataUrl,
+      file: dataUrl,
+      alt: title || file.name,
+      isPrimary: i === 0,
+      order: i,
+    });
+  }
+
+  return results;
 }

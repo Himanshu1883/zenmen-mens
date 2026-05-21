@@ -77,14 +77,14 @@ export default function WebsiteSections() {
       {/* Page Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-semibold text-white mb-2">
+          <h1 className="text-3xl font-semibold text-[#0f172a] mb-2">
             Website Sections
           </h1>
-          <p className="text-gray-400">
+          <p className="text-[#64748b]">
             Manage your website pages and sections
           </p>
         </div>
-        <Button className="bg-[#C8A96E] hover:bg-[#C8A96E]/90 text-white">
+        <Button className="bg-[#7da8c7] hover:bg-[#5a8faf] text-white">
           <Plus className="w-4 h-4 mr-2" />
           Add Section
         </Button>
@@ -93,16 +93,16 @@ export default function WebsiteSections() {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <GlassCard className="p-4">
-          <p className="text-gray-400 text-sm mb-1">Total Sections</p>
-          <p className="text-2xl font-semibold text-white">7</p>
+          <p className="text-[#64748b] text-sm mb-1">Total Sections</p>
+          <p className="text-2xl font-semibold text-[#0f172a]">7</p>
         </GlassCard>
         <GlassCard className="p-4">
-          <p className="text-gray-400 text-sm mb-1">Active</p>
+          <p className="text-[#64748b] text-sm mb-1">Active</p>
           <p className="text-2xl font-semibold text-green-400">7</p>
         </GlassCard>
         <GlassCard className="p-4">
-          <p className="text-gray-400 text-sm mb-1">Total Images</p>
-          <p className="text-2xl font-semibold text-[#C8A96E]">68</p>
+          <p className="text-[#64748b] text-sm mb-1">Total Images</p>
+          <p className="text-2xl font-semibold text-[#7da8c7]">68</p>
         </GlassCard>
       </div>
 
@@ -118,7 +118,7 @@ export default function WebsiteSections() {
                     "linear-gradient(135deg, rgba(244, 167, 157, 0.2) 0%, rgba(244, 167, 157, 0.05) 100%)",
                 }}
               >
-                <Globe className="w-6 h-6 text-[#C8A96E]" />
+                <Globe className="w-6 h-6 text-[#7da8c7]" />
               </div>
               <Badge
                 variant="outline"
@@ -128,33 +128,33 @@ export default function WebsiteSections() {
               </Badge>
             </div>
 
-            <h3 className="text-white font-semibold text-lg mb-2">
+            <h3 className="text-[#0f172a] font-semibold text-lg mb-2">
               {section.name}
             </h3>
-            <p className="text-gray-400 text-sm mb-4">{section.slug}</p>
+            <p className="text-[#64748b] text-sm mb-4">{section.slug}</p>
 
-            <div className="flex items-center justify-between mb-4 pb-4 border-b border-white/10">
+            <div className="flex items-center justify-between mb-4 pb-4 border-b border-[#e2e8f0]">
               <div className="text-sm">
-                <span className="text-gray-400">Images: </span>
-                <span className="text-[#C8A96E] font-medium">
+                <span className="text-[#64748b]">Images: </span>
+                <span className="text-[#7da8c7] font-medium">
                   {section.images}
                 </span>
               </div>
-              <div className="text-xs text-gray-500">{section.lastUpdated}</div>
+              <div className="text-xs text-[#94a3b8]">{section.lastUpdated}</div>
             </div>
 
             <div className="flex items-center gap-2">
               <Button
                 size="sm"
                 variant="outline"
-                className="flex-1 border-white/10 text-gray-300 hover:text-[#C8A96E] hover:border-[#C8A96E]/50"
+                className="flex-1 border-[#e2e8f0] text-[#64748b] hover:text-[#7da8c7] hover:border-[#7da8c7]/50"
               >
                 <Eye className="w-4 h-4 mr-2" />
                 View
               </Button>
               <Button
                 size="sm"
-                className="flex-1 bg-[#C8A96E] hover:bg-[#C8A96E]/90 text-white"
+                className="flex-1 bg-[#7da8c7] hover:bg-[#5a8faf] text-white"
               >
                 <Edit className="w-4 h-4 mr-2" />
                 Edit

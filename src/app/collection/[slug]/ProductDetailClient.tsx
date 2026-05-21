@@ -1,13 +1,17 @@
 "use client";
 
 import { useDisplayPrice } from "@/hooks/useDisplayPrice";
+import { addRecentlyViewed } from "@/lib/recently-viewed";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { addItem, setCartOpen } from "@/store/slices/cartSlice";
+import { fetchProducts } from "@/store/slices/productSlice";
 import type { Product } from "@/types/product";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import ProductRecoSlider from "./ProductRecoSlider";
+import RecentlyViewedCarousel from "./RecentlyViewedCarousel";
 
 // ─── Static data ────────────────────────────────────────────────────────────
 
@@ -722,6 +726,8 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const dispatch = useAppDispatch();
   const { format: displayPrice } = useDisplayPrice();
   const allProducts = useAppSelector((s) => s.products.products);
+  const productsLoaded = useAppSelector((s) => s.products.loaded);
+  const productsLoading = useAppSelector((s) => s.products.loading);
 
   const [activeImage, setActiveImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] ?? "M");
@@ -734,11 +740,77 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const [openAccordion, setOpenAccordion] = useState<string | null>(null);
   const [addedToCart, setAddedToCart] = useState(false);
   const [wishlisted, setWishlisted] = useState(false);
+  const [pastPurchasePanel, setPastPurchasePanel] = useState(false);
+  const [footerInView, setFooterInView] = useState(false);
+  const purchaseAnchorRef = useRef<HTMLDivElement>(null);
+
+  const showStickyPurchase = pastPurchasePanel && !footerInView;
+
+  useEffect(() => {
+    if (!productsLoaded && !productsLoading) {
+      dispatch(fetchProducts());
+    }
+  }, [dispatch, productsLoaded, productsLoading]);
 
   useEffect(() => {
     setActiveImage(0);
     setSelectedSize(product.sizes?.[0] ?? "M");
     setSelectedColor(product.colors?.[0] ?? COLORS[0].name);
+  }, [product._id]);
+
+  useEffect(() => {
+    const primary =
+      product.images?.find((img) => img.isPrimary) ?? product.images?.[0];
+    addRecentlyViewed({
+      _id: product._id,
+      slug: product.slug,
+      title: product.title,
+      price: product.price,
+      imageUrl: primary?.url ?? "",
+      category: product.category,
+    });
+  }, [
+    product._id,
+    product.slug,
+    product.title,
+    product.price,
+    product.category,
+    product.images,
+  ]);
+
+  useEffect(() => {
+    const anchor = purchaseAnchorRef.current;
+    if (!anchor) return;
+
+    const purchaseObserver = new IntersectionObserver(
+      ([entry]) => setPastPurchasePanel(!entry.isIntersecting),
+      { threshold: 0, rootMargin: "0px 0px -48px 0px" },
+    );
+    purchaseObserver.observe(anchor);
+
+    let footerObserver: IntersectionObserver | null = null;
+
+    const attachFooterObserver = () => {
+      const footerEl =
+        document.getElementById("zenmen-footer") ??
+        document.querySelector("footer.zf");
+      if (!footerEl || footerObserver) return;
+
+      footerObserver = new IntersectionObserver(
+        ([entry]) => setFooterInView(entry.isIntersecting),
+        { threshold: 0, rootMargin: "0px 0px -24px 0px" },
+      );
+      footerObserver.observe(footerEl);
+    };
+
+    attachFooterObserver();
+    const footerRetry = window.setTimeout(attachFooterObserver, 400);
+
+    return () => {
+      purchaseObserver.disconnect();
+      footerObserver?.disconnect();
+      window.clearTimeout(footerRetry);
+    };
   }, [product._id]);
 
   const isColorAvailable = useMemo(
@@ -775,11 +847,6 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         )
         .slice(0, 4),
     [allProducts, product._id, product.category, product.colors],
-  );
-
-  const mosaicData = useMemo(
-    () => allProducts.filter((item) => item._id !== product._id).slice(0, 5),
-    [allProducts, product._id],
   );
 
   const handleWhatsAppInquiry = () => {
@@ -829,7 +896,9 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     "/new.jpg";
 
   return (
-    <main className="relative min-h-screen overflow-x-hidden bg-[#f8fafc] pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))] font-['Jost'] font-light text-[#0f172a] md:pb-0">
+    <main
+      className={`relative min-h-screen overflow-x-hidden bg-[#f8fafc] font-['Jost'] font-light text-[#0f172a] pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))] ${showStickyPurchase ? "md:pb-28" : "md:pb-0"}`}
+    >
       {/* ── Breadcrumb ── */}
       <div className="relative z-10 mx-auto flex max-w-[1800px] items-center gap-2 px-5 pb-0 pt-8 text-[.6rem] uppercase tracking-[.25em] text-[#94a3b8] sm:px-8 lg:px-10">
         <Link
@@ -1035,6 +1104,12 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               </div>
             </div>
 
+            <div
+              ref={purchaseAnchorRef}
+              className="h-px w-full shrink-0"
+              aria-hidden
+            />
+
             {/* CTA buttons */}
             <div className="mt-7 hidden flex-col gap-3 md:flex">
               {isColorAvailable || selectedColor === product.colors?.[0] ? (
@@ -1174,92 +1249,82 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         </aside>
       </div>
 
-      {/* ── You May Also Desire ── */}
       {relatedProducts.length > 0 && (
-        <section className="relative z-10 mx-auto w-full max-w-[1800px] px-5 py-14 sm:px-8 lg:px-10">
-          <div className="mb-7 flex items-baseline justify-between">
-            <h2 className="font-['Cormorant_Garamond'] text-[2rem] font-light text-[#0f172a]">
-              You May Also Desire
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-            {relatedProducts.map((item) => (
-              <Link
-                key={item._id}
-                href={`/collection/${encodeURIComponent(item.slug)}`}
-                className="group block overflow-hidden rounded-[3px] border border-[#e2e8f0] bg-white text-inherit no-underline transition-all duration-300 hover:-translate-y-0.5 hover:border-[#7da8c7] hover:shadow-[0_6px_28px_rgba(125,168,199,0.12)]"
-              >
-                <div className="overflow-hidden" style={{ aspectRatio: "3/4" }}>
-                  <img
-                    src={item.images?.[0]?.url ?? "/new.jpg"}
-                    alt={item.title}
-                    loading="lazy"
-                    decoding="async"
-                    className="block h-full w-full object-cover object-[center_10%] transition-transform duration-500 group-hover:scale-[1.03]"
-                  />
-                </div>
-                <div className="p-4">
-                  <p className="mb-0.5 font-['Cormorant_Garamond'] text-[1.45rem] font-light text-[#0f172a]">
-                    {item.title}
-                  </p>
-                  <p className="text-[.58rem] uppercase tracking-[.18em] text-[#94a3b8]">
-                    {item.category} · {item.colors?.[0] ?? "-"}
-                  </p>
-                  <p className="mt-1.5 text-[1.15rem] text-[#0f172a]">
-                    {displayPrice(item.price)}
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
+        <ProductRecoSlider
+          title="You May Also Desire"
+          ariaLabel="You may also desire"
+          products={relatedProducts}
+        />
       )}
 
-      {/* ── More from the Collection (mosaic) ── */}
-      {mosaicData.length > 0 && (
-        <section className="relative z-10 mx-auto w-full max-w-[1800px] px-5 py-14 sm:px-8 lg:px-10">
-          <div className="mb-7 flex items-baseline justify-between">
-            <h2 className="font-['Cormorant_Garamond'] text-[2rem] font-light text-[#0f172a]">
-              More from the Collection
-            </h2>
-          </div>
-          <div
-            className="grid gap-3"
-            style={{
-              gridTemplateColumns: "repeat(4, 1fr)",
-              gridTemplateRows: "220px 220px",
-            }}
-          >
-            {mosaicData.map((item, i) => (
-              <Link
-                key={`${item._id}-mosaic`}
-                href={`/collection/${encodeURIComponent(item.slug)}`}
-                className="group relative cursor-pointer overflow-hidden rounded-[3px] border border-[#e2e8f0] no-underline"
-                style={i === 0 ? { gridColumn: "1 / 3", gridRow: "1 / 3" } : {}}
+      <RecentlyViewedCarousel excludeProductId={product._id} />
+
+      {/* Desktop: floating purchase bar */}
+      {showStickyPurchase ? (
+        <div
+          className="pointer-events-none fixed bottom-6 left-1/2 z-[95] hidden w-full max-w-[min(94vw,760px)] -translate-x-1/2 px-4 md:block"
+          role="region"
+          aria-label="Product quick purchase"
+        >
+          <div className="pointer-events-auto flex items-center gap-4 rounded-2xl border border-[#e2e8f0] bg-white/96 px-4 shadow-[0_16px_48px_rgba(15,23,42,0.12)] backdrop-blur-md sm:gap-5 sm:px-5">
+            <div className="h-[72px] w-[58px] shrink-0 overflow-hidden rounded-xl border border-[#e2e8f0] bg-[#f8fafc] sm:h-[80px] sm:w-[64px]">
+              <img
+                src={currentImageSrc}
+                alt=""
+                className="h-full w-full object-cover object-[center_15%]"
+              />
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-['Cormorant_Garamond'] text-[1.15rem] font-light leading-snug text-[#0f172a] sm:text-[1.35rem]">
+                {product.title}
+              </p>
+              <p className="mt-1 truncate text-[10px] uppercase tracking-[0.14em] text-[#94a3b8]">
+                {selectedColor} · Size {selectedSize}
+              </p>
+              <p className="mt-1.5 font-['Cormorant_Garamond'] text-[1.25rem] leading-none text-[#0f172a] sm:text-[1.45rem]">
+                {displayPrice(product.price)}
+              </p>
+            </div>
+
+            <div className="flex shrink-0 items-stretch gap-2 sm:gap-2.5">
+              <button
+                type="button"
+                onClick={handleWhatsAppBestPrice}
+                className="inline-flex h-11 min-w-[44px] items-center justify-center gap-2 rounded-xl border border-[#e2e8f0] bg-[#f8fafc] px-3 font-['Jost'] text-[9px] font-semibold uppercase tracking-[0.16em] text-[#0f172a] transition-colors hover:border-[#7da8c7] hover:bg-[#f0f6fb] sm:h-12 sm:min-w-0 sm:px-4 sm:text-[10px]"
+                aria-label="Chat on WhatsApp for best price"
               >
-                <img
-                  src={item.images?.[0]?.url ?? "/new.jpg"}
-                  alt={item.title}
-                  loading="lazy"
-                  decoding="async"
-                  className="h-full w-full object-cover object-[center_10%] transition-transform duration-700 group-hover:scale-[1.04]"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[rgba(15,23,42,0.65)] via-[rgba(15,23,42,0.05)] to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5">
-                  <span
-                    className={`block font-['Cormorant_Garamond'] font-light text-white ${i === 0 ? "text-[2.1rem]" : "text-[1.5rem]"}`}
-                  >
-                    {item.title}
-                  </span>
-                  <span className="mt-0.5 block text-[.72rem] text-[#7da8c7]">
-                    {displayPrice(item.price)}
-                  </span>
-                </div>
-              </Link>
-            ))}
+                <IconWhatsAppGreen className="h-[18px] w-[18px] shrink-0" />
+                <span className="hidden lg:inline">WhatsApp</span>
+              </button>
+
+              {canAddToCart ? (
+                <button
+                  type="button"
+                  onClick={handleAddToCart}
+                  className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl px-4 font-['Jost'] text-[9px] font-semibold uppercase tracking-[0.18em] transition-all sm:h-12 sm:min-w-[148px] sm:px-5 sm:text-[10px] ${
+                    addedToCart
+                      ? "bg-[#4a7c59] text-white"
+                      : "bg-[#0f172a] text-white hover:bg-[#7da8c7] hover:text-[#0f172a]"
+                  }`}
+                >
+                  <IconBag />
+                  {addedToCart ? "Added" : "Add to bag"}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleWhatsAppInquiry}
+                  className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 font-['Jost'] text-[9px] font-semibold uppercase tracking-[0.16em] text-white transition-colors hover:bg-[#1cb757] sm:h-12 sm:min-w-[148px] sm:px-5 sm:text-[10px]"
+                >
+                  <IconWhatsApp />
+                  Book now
+                </button>
+              )}
+            </div>
           </div>
-        </section>
-      )}
+        </div>
+      ) : null}
 
       {/* ── Mobile fixed CTA bar ── */}
       <div

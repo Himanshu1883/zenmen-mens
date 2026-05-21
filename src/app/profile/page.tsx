@@ -1,15 +1,42 @@
 import { getAuthSession } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
+import Order from "@/models/Order";
 import User from "@/models/User";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import mongoose from "mongoose";
+import RecentlyViewedSection from "./RecentlyViewedSection";
 
 type ProfileUser = {
+  _id?: mongoose.Types.ObjectId;
   name?: string;
   email?: string;
   role?: "user" | "admin";
   createdAt?: Date | string;
   updatedAt?: Date | string;
+};
+
+type OrderItem = {
+  title: string;
+  slug: string;
+  price: number;
+  qty: number;
+  selectedColor?: string;
+  selectedSize?: string;
+  imageUrl?: string;
+};
+
+type ProfileOrder = {
+  _id: mongoose.Types.ObjectId;
+  orderNumber: string;
+  items: OrderItem[];
+  subtotal: number;
+  codFee?: number;
+  total: number;
+  paymentMethod: "cod" | "online";
+  paymentStatus: "pending" | "paid" | "failed";
+  status: "pending" | "confirmed" | "cancelled";
+  createdAt?: Date | string;
 };
 
 function formatDate(value?: Date | string) {
@@ -21,6 +48,39 @@ function formatDate(value?: Date | string) {
     month: "short",
     day: "numeric",
   });
+}
+
+function formatDateTime(value?: Date | string) {
+  if (!value) return "N/A";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "N/A";
+  return d.toLocaleString("en-IN", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function formatInr(amount: number) {
+  return `₹${amount.toLocaleString("en-IN")}`;
+}
+
+function labelize(value: string) {
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+function orderStatusClass(status: ProfileOrder["status"]) {
+  if (status === "confirmed") return "status-confirmed";
+  if (status === "cancelled") return "status-cancelled";
+  return "status-pending";
+}
+
+function paymentStatusClass(status: ProfileOrder["paymentStatus"]) {
+  if (status === "paid") return "pay-paid";
+  if (status === "failed") return "pay-failed";
+  return "pay-pending";
 }
 
 export default async function ProfilePage() {
@@ -39,6 +99,24 @@ export default async function ProfilePage() {
   const user = (await User.findOne({ email: session.user.email })
     .select("name email role createdAt updatedAt")
     .lean()) as ProfileUser | null;
+
+  const sessionUserId = session.user.id;
+  const userObjectId =
+    user?._id ??
+    (sessionUserId && mongoose.Types.ObjectId.isValid(sessionUserId)
+      ? new mongoose.Types.ObjectId(sessionUserId)
+      : null);
+
+  const orderFilter: Record<string, unknown> = userObjectId
+    ? {
+        $or: [{ userId: userObjectId }, { userEmail: session.user.email }],
+      }
+    : { userEmail: session.user.email };
+
+  const orders = (await Order.find(orderFilter)
+    .sort({ createdAt: -1 })
+    .limit(100)
+    .lean()) as ProfileOrder[];
 
   if (!user) {
     return (
@@ -110,10 +188,112 @@ export default async function ProfilePage() {
           <Link href="/collection" className="profile-btn">
             View Collection
           </Link>
+          <Link href="#recently-viewed" className="profile-btn ghost">
+            Recently Viewed
+          </Link>
           <Link href="/appointment" className="profile-btn ghost">
             Book Appointment
           </Link>
         </div>
+
+        <section className="profile-orders">
+          <div className="orders-head">
+            <div>
+              <p className="profile-eyebrow">Purchases</p>
+              <h2 className="orders-title">My Orders</h2>
+              <p className="orders-sub">
+                {orders.length === 0
+                  ? "You have not placed any orders yet."
+                  : `${orders.length} order${orders.length === 1 ? "" : "s"} on your account.`}
+              </p>
+            </div>
+          </div>
+
+          {orders.length === 0 ? (
+            <div className="orders-empty">
+              <p>When you checkout from the collection, your orders will appear here.</p>
+              <Link href="/collection" className="profile-btn">
+                Shop Collection
+              </Link>
+            </div>
+          ) : (
+            <ul className="orders-list">
+              {orders.map((order) => (
+                <li key={String(order._id)} className="order-card">
+                  <div className="order-card-head">
+                    <div>
+                      <p className="order-number">{order.orderNumber}</p>
+                      <p className="order-date">{formatDateTime(order.createdAt)}</p>
+                    </div>
+                    <div className="order-badges">
+                      <span
+                        className={`order-badge ${orderStatusClass(order.status)}`}
+                      >
+                        {labelize(order.status)}
+                      </span>
+                      <span
+                        className={`order-badge ${paymentStatusClass(order.paymentStatus)}`}
+                      >
+                        {labelize(order.paymentStatus)}
+                      </span>
+                      <span className="order-badge method">
+                        {order.paymentMethod === "cod"
+                          ? "Cash on Delivery"
+                          : "Online"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <ul className="order-items">
+                    {order.items.map((item, index) => (
+                      <li key={`${order.orderNumber}-${index}`} className="order-item">
+                        {item.imageUrl ? (
+                          <img
+                            src={item.imageUrl}
+                            alt={item.title}
+                            className="order-item-img"
+                          />
+                        ) : (
+                          <div className="order-item-img placeholder" aria-hidden />
+                        )}
+                        <div className="order-item-body">
+                          <Link
+                            href={`/collection/${encodeURIComponent(item.slug)}`}
+                            className="order-item-title"
+                          >
+                            {item.title}
+                          </Link>
+                          <p className="order-item-meta">
+                            Qty {item.qty}
+                            {item.selectedSize
+                              ? ` · Size ${item.selectedSize}`
+                              : ""}
+                            {item.selectedColor
+                              ? ` · ${item.selectedColor}`
+                              : ""}
+                          </p>
+                          <p className="order-item-price">
+                            {formatInr(item.price * item.qty)}
+                          </p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="order-card-foot">
+                    <div className="order-totals">
+                      <span>Subtotal {formatInr(order.subtotal)}</span>
+                      {(order.codFee ?? 0) > 0 ? (
+                        <span>COD fee {formatInr(order.codFee ?? 0)}</span>
+                      ) : null}
+                    </div>
+                    <p className="order-total">Total {formatInr(order.total)}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
 
         <section className="profile-story">
           <h3 className="story-title">Your Bespoke Journey</h3>
@@ -150,6 +330,9 @@ export default async function ProfilePage() {
           </div>
         </section>
       </div>
+
+      <RecentlyViewedSection />
+
       <style>{styles}</style>
     </div>
   );
@@ -163,11 +346,19 @@ const styles = `
       radial-gradient(circle at 88% 0%, rgba(125,168,199,0.14), transparent 42%),
       linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
     color: #0f172a;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .profile-shell,
+  .profile-recent-shell {
+    max-width: 1040px;
+    margin: 0 auto;
+    width: 100%;
   }
 
   .profile-shell {
-    max-width: 1040px;
-    margin: 0 auto;
     border: 1px solid #e2e8f0;
     background: #ffffff;
     box-shadow: 0 20px 50px rgba(15, 23, 42, 0.06);
@@ -313,6 +504,344 @@ const styles = `
     color: #0f172a;
   }
 
+  .profile-orders {
+    margin-top: 30px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    padding: clamp(16px, 3vw, 28px);
+  }
+
+  .orders-head { margin-bottom: 18px; }
+
+  .orders-title {
+    margin: 0;
+    font-family: "Playfair Display", serif;
+    font-size: clamp(24px, 3vw, 34px);
+    color: #0f172a;
+    font-weight: 600;
+  }
+
+  .orders-sub {
+    margin: 8px 0 0;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .orders-empty {
+    border: 1px dashed #cbd5e1;
+    background: #f8fafc;
+    padding: 22px;
+    display: grid;
+    gap: 14px;
+    justify-items: start;
+  }
+
+  .orders-empty p {
+    margin: 0;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .orders-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 14px;
+  }
+
+  .order-card {
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    padding: 16px;
+  }
+
+  .order-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .order-number {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: 0.04em;
+  }
+
+  .order-date {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: #94a3b8;
+  }
+
+  .order-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: flex-end;
+  }
+
+  .order-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 700;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    color: #475569;
+  }
+
+  .order-badge.status-confirmed {
+    border-color: rgba(34, 197, 94, 0.35);
+    background: rgba(34, 197, 94, 0.1);
+    color: #15803d;
+  }
+
+  .order-badge.status-pending {
+    border-color: rgba(234, 179, 8, 0.35);
+    background: rgba(234, 179, 8, 0.1);
+    color: #a16207;
+  }
+
+  .order-badge.status-cancelled {
+    border-color: rgba(239, 68, 68, 0.35);
+    background: rgba(239, 68, 68, 0.1);
+    color: #b91c1c;
+  }
+
+  .order-badge.pay-paid {
+    border-color: rgba(125, 168, 199, 0.45);
+    background: rgba(125, 168, 199, 0.15);
+    color: #0f172a;
+  }
+
+  .order-badge.pay-pending {
+    border-color: rgba(234, 179, 8, 0.35);
+    background: rgba(234, 179, 8, 0.08);
+    color: #a16207;
+  }
+
+  .order-badge.pay-failed {
+    border-color: rgba(239, 68, 68, 0.35);
+    background: rgba(239, 68, 68, 0.08);
+    color: #b91c1c;
+  }
+
+  .order-badge.method {
+    border-color: #e2e8f0;
+    background: #fff;
+    color: #64748b;
+  }
+
+  .order-items {
+    list-style: none;
+    margin: 0;
+    padding: 12px 0 0;
+    display: grid;
+    gap: 10px;
+  }
+
+  .order-item {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .order-item-img {
+    width: 56px;
+    height: 56px;
+    object-fit: cover;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+  }
+
+  .order-item-img.placeholder {
+    background: #e2e8f0;
+  }
+
+  .order-item-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+    text-decoration: none;
+    line-height: 1.4;
+  }
+
+  .order-item-title:hover {
+    color: #7da8c7;
+  }
+
+  .order-item-meta {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: #94a3b8;
+  }
+
+  .order-item-price {
+    margin: 4px 0 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #0f172a;
+  }
+
+  .order-card-foot {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .order-totals {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 12px;
+    color: #94a3b8;
+  }
+
+  .order-total {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .profile-recent-shell {
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.06);
+    padding: clamp(22px, 4vw, 46px);
+    scroll-margin-top: 120px;
+  }
+
+  .recent-head { margin-bottom: 22px; }
+
+  .recent-title {
+    margin: 0;
+    font-family: "Playfair Display", serif;
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: 600;
+    color: #0f172a;
+    line-height: 1.1;
+  }
+
+  .recent-sub {
+    margin: 10px 0 0;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.7;
+    max-width: 560px;
+  }
+
+  .recent-loading {
+    margin: 0;
+    color: #94a3b8;
+    font-size: 14px;
+  }
+
+  .recent-empty {
+    border: 1px dashed #cbd5e1;
+    background: #f8fafc;
+    padding: 22px;
+    display: grid;
+    gap: 14px;
+    justify-items: start;
+  }
+
+  .recent-empty p {
+    margin: 0;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .recent-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px;
+  }
+
+  .recent-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    text-decoration: none;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .recent-card:hover {
+    border-color: #7da8c7;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  }
+
+  .recent-img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    background: #fff;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .recent-img.placeholder { background: #e2e8f0; }
+
+  .recent-body {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+  }
+
+  .recent-cat {
+    margin: 0;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #7da8c7;
+    font-weight: 600;
+  }
+
+  .recent-name {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .recent-price {
+    margin: 4px 0 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
   .profile-story {
     margin-top: 30px;
     border: 1px solid #e2e8f0;
@@ -374,5 +903,8 @@ const styles = `
   @media (max-width: 800px) {
     .profile-grid { grid-template-columns: 1fr; }
     .story-grid { grid-template-columns: 1fr; }
+    .order-card-head { flex-direction: column; }
+    .order-badges { justify-content: flex-start; }
+    .recent-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
 `;

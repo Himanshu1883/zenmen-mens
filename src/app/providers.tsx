@@ -12,6 +12,7 @@ import {
 } from "@/lib/currency";
 import { useAppDispatch } from "@/store/hooks";
 import { setCurrency } from "@/store/slices/currencySlice";
+import CartHydrate from "@/app/components/cart/CartHydrate";
 
 function CurrencyHydrate() {
   const dispatch = useAppDispatch();
@@ -35,6 +36,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     <SessionProvider>
       <Provider store={store}>
         <CurrencyHydrate />
+        <CartHydrate />
         {children}
         <Toaster
           position="bottom-right"

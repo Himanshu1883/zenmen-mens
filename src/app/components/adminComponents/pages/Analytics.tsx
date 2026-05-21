@@ -61,17 +61,17 @@ const productCategoryData = [
   { id: "pc-jun", month: "Jun", suits: 67, dresses: 58, accessories: 38 },
 ];
 
-const COLORS = ["#C8A96E", "#c98e87", "#9d6e68", "#7a524c", "#5a3e39"];
+const COLORS = ["#7da8c7", "#9fbdd5", "#64748b", "#94a3b8", "#cbd5e1"];
 
 export default function Analytics() {
   return (
     <div className="space-y-6 mt-16">
       {/* Premium Header */}
       <div className="mb-6">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-white via-[#E8D5A8] to-[#C8A96E] bg-clip-text text-transparent mb-2">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-[#0f172a] via-[#7da8c7] to-[#5a8faf] bg-clip-text text-transparent mb-2">
           Business Intelligence
         </h1>
-        <p className="text-gray-400 text-base">
+        <p className="text-[#64748b] text-base">
           Deep insights into your luxury tailoring empire
         </p>
       </div>
@@ -82,34 +82,34 @@ export default function Analytics() {
           className="relative rounded-2xl p-6 border overflow-hidden group hover:scale-[1.02] transition-all"
           style={{
             background:
-              "linear-gradient(135deg, rgba(200, 169, 110, 0.12) 0%, rgba(139, 110, 58, 0.06) 100%)",
-            borderColor: "rgba(200, 169, 110, 0.25)",
+              "linear-gradient(135deg, rgba(125, 168, 199, 0.12) 0%, rgba(90, 143, 175, 0.06) 100%)",
+            borderColor: "rgba(125, 168, 199, 0.25)",
           }}
         >
-          <div className="absolute top-0 right-0 w-24 h-24 bg-[#C8A96E] opacity-10 blur-2xl group-hover:opacity-20 transition-opacity"></div>
+          <div className="absolute top-0 right-0 w-24 h-24 bg-[#7da8c7] opacity-10 blur-2xl group-hover:opacity-20 transition-opacity"></div>
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-4">
               <div
                 className="w-11 h-11 rounded-xl flex items-center justify-center"
                 style={{
                   background:
-                    "linear-gradient(135deg, rgba(200, 169, 110, 0.25) 0%, rgba(200, 169, 110, 0.08) 100%)",
+                    "linear-gradient(135deg, rgba(125, 168, 199, 0.25) 0%, rgba(125, 168, 199, 0.08) 100%)",
                 }}
               >
-                <Users className="w-6 h-6 text-[#C8A96E]" />
+                <Users className="w-6 h-6 text-[#7da8c7]" />
               </div>
               <div className="px-2.5 py-1 rounded-lg bg-green-500/15 border border-green-500/20">
                 <span className="text-xs font-bold text-green-400">+12.5%</span>
               </div>
             </div>
-            <p className="text-gray-400 text-sm mb-1.5 font-medium">
+            <p className="text-[#64748b] text-sm mb-1.5 font-medium">
               User Growth
             </p>
-            <p className="text-3xl font-bold text-white mb-1">+428</p>
+            <p className="text-3xl font-bold text-[#0f172a] mb-1">+428</p>
             <div className="flex items-center gap-1.5 mt-2">
-              <div className="flex-1 h-1.5 rounded-full bg-white/5">
+              <div className="flex-1 h-1.5 rounded-full bg-[#f8fafc]">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-[#C8A96E] to-[#8B6E3A]"
+                  className="h-full rounded-full bg-gradient-to-r from-[#7da8c7] to-[#5a8faf]"
                   style={{ width: "68%" }}
                 ></div>
               </div>
@@ -121,8 +121,8 @@ export default function Analytics() {
           className="relative rounded-2xl p-6 border overflow-hidden group hover:scale-[1.02] transition-all"
           style={{
             background:
-              "linear-gradient(135deg, rgba(8, 17, 34, 0.8) 0%, rgba(10, 18, 32, 0.6) 100%)",
-            borderColor: "rgba(200, 169, 110, 0.15)",
+              "linear-gradient(135deg, #ffffff 0%, #f0f6fb 100%)",
+            borderColor: "rgba(125, 168, 199, 0.15)",
           }}
         >
           <div className="relative z-10">
@@ -134,20 +134,20 @@ export default function Analytics() {
                     "linear-gradient(135deg, rgba(232, 213, 168, 0.2) 0%, rgba(232, 213, 168, 0.05) 100%)",
                 }}
               >
-                <Eye className="w-6 h-6 text-[#E8D5A8]" />
+                <Eye className="w-6 h-6 text-[#9fbdd5]" />
               </div>
               <div className="px-2.5 py-1 rounded-lg bg-green-500/15 border border-green-500/20">
                 <span className="text-xs font-bold text-green-400">+8.2%</span>
               </div>
             </div>
-            <p className="text-gray-400 text-sm mb-1.5 font-medium">
+            <p className="text-[#64748b] text-sm mb-1.5 font-medium">
               Page Views
             </p>
-            <p className="text-3xl font-bold text-white mb-1">13.2K</p>
+            <p className="text-3xl font-bold text-[#0f172a] mb-1">13.2K</p>
             <div className="flex items-center gap-1.5 mt-2">
-              <div className="flex-1 h-1.5 rounded-full bg-white/5">
+              <div className="flex-1 h-1.5 rounded-full bg-[#f8fafc]">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-[#E8D5A8] to-[#C8A96E]"
+                  className="h-full rounded-full bg-gradient-to-r from-[#9fbdd5] to-[#7da8c7]"
                   style={{ width: "82%" }}
                 ></div>
               </div>
@@ -159,8 +159,8 @@ export default function Analytics() {
           className="relative rounded-2xl p-6 border overflow-hidden group hover:scale-[1.02] transition-all"
           style={{
             background:
-              "linear-gradient(135deg, rgba(139, 110, 58, 0.12) 0%, rgba(139, 110, 58, 0.05) 100%)",
-            borderColor: "rgba(139, 110, 58, 0.25)",
+              "linear-gradient(135deg, rgba(90, 143, 175, 0.12) 0%, rgba(90, 143, 175, 0.05) 100%)",
+            borderColor: "rgba(90, 143, 175, 0.25)",
           }}
         >
           <div className="relative z-10">
@@ -169,23 +169,23 @@ export default function Analytics() {
                 className="w-11 h-11 rounded-xl flex items-center justify-center"
                 style={{
                   background:
-                    "linear-gradient(135deg, rgba(139, 110, 58, 0.25) 0%, rgba(139, 110, 58, 0.08) 100%)",
+                    "linear-gradient(135deg, rgba(90, 143, 175, 0.25) 0%, rgba(90, 143, 175, 0.08) 100%)",
                 }}
               >
-                <MousePointer className="w-6 h-6 text-[#8B6E3A]" />
+                <MousePointer className="w-6 h-6 text-[#5a8faf]" />
               </div>
               <div className="px-2.5 py-1 rounded-lg bg-green-500/15 border border-green-500/20">
                 <span className="text-xs font-bold text-green-400">+15.3%</span>
               </div>
             </div>
-            <p className="text-gray-400 text-sm mb-1.5 font-medium">
+            <p className="text-[#64748b] text-sm mb-1.5 font-medium">
               Engagement
             </p>
-            <p className="text-3xl font-bold text-white mb-1">87.3%</p>
+            <p className="text-3xl font-bold text-[#0f172a] mb-1">87.3%</p>
             <div className="flex items-center gap-1.5 mt-2">
-              <div className="flex-1 h-1.5 rounded-full bg-white/5">
+              <div className="flex-1 h-1.5 rounded-full bg-[#f8fafc]">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-[#8B6E3A] to-[#C8A96E]"
+                  className="h-full rounded-full bg-gradient-to-r from-[#5a8faf] to-[#7da8c7]"
                   style={{ width: "87%" }}
                 ></div>
               </div>
@@ -197,34 +197,34 @@ export default function Analytics() {
           className="relative rounded-2xl p-6 border overflow-hidden group hover:scale-[1.02] transition-all"
           style={{
             background:
-              "linear-gradient(135deg, rgba(22, 32, 53, 0.8) 0%, rgba(10, 18, 32, 0.6) 100%)",
-            borderColor: "rgba(200, 169, 110, 0.2)",
+              "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
+            borderColor: "rgba(125, 168, 199, 0.2)",
           }}
         >
-          <div className="absolute top-0 right-0 w-20 h-20 bg-[#C8A96E]/10 blur-2xl"></div>
+          <div className="absolute top-0 right-0 w-20 h-20 bg-[#7da8c7]/10 blur-2xl"></div>
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-4">
               <div
                 className="w-11 h-11 rounded-xl flex items-center justify-center"
                 style={{
                   background:
-                    "linear-gradient(135deg, rgba(200, 169, 110, 0.25) 0%, rgba(200, 169, 110, 0.08) 100%)",
+                    "linear-gradient(135deg, rgba(125, 168, 199, 0.25) 0%, rgba(125, 168, 199, 0.08) 100%)",
                 }}
               >
-                <Zap className="w-6 h-6 text-[#C8A96E]" />
+                <Zap className="w-6 h-6 text-[#7da8c7]" />
               </div>
               <div className="px-2.5 py-1 rounded-lg bg-green-500/15 border border-green-500/20">
                 <span className="text-xs font-bold text-green-400">+23.1%</span>
               </div>
             </div>
-            <p className="text-gray-400 text-sm mb-1.5 font-medium">
+            <p className="text-[#64748b] text-sm mb-1.5 font-medium">
               Conversions
             </p>
-            <p className="text-3xl font-bold text-white mb-1">34</p>
+            <p className="text-3xl font-bold text-[#0f172a] mb-1">34</p>
             <div className="flex items-center gap-1.5 mt-2">
-              <div className="flex-1 h-1.5 rounded-full bg-white/5">
+              <div className="flex-1 h-1.5 rounded-full bg-[#f8fafc]">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-[#C8A96E] to-[#E8D5A8]"
+                  className="h-full rounded-full bg-gradient-to-r from-[#7da8c7] to-[#5a8faf]"
                   style={{ width: "91%" }}
                 ></div>
               </div>
@@ -240,24 +240,24 @@ export default function Analytics() {
           className="col-span-12 lg:col-span-8 rounded-2xl p-7 border relative overflow-hidden"
           style={{
             background:
-              "linear-gradient(135deg, rgba(22, 32, 53, 0.8) 0%, rgba(10, 18, 32, 0.6) 100%)",
-            borderColor: "rgba(200, 169, 110, 0.2)",
+              "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
+            borderColor: "rgba(125, 168, 199, 0.2)",
           }}
         >
-          <div className="absolute top-0 right-0 w-72 h-72 bg-[#C8A96E]/10 blur-3xl"></div>
+          <div className="absolute top-0 right-0 w-72 h-72 bg-[#7da8c7]/10 blur-3xl"></div>
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-xl font-bold text-white mb-1">
+                <h3 className="text-xl font-bold text-[#0f172a] mb-1">
                   Audience Growth Trajectory
                 </h3>
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-[#64748b]">
                   Monthly user acquisition trend
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <div className="px-4 py-2 rounded-xl bg-[#C8A96E]/10 border border-[#C8A96E]/30">
-                  <span className="text-[#C8A96E] text-sm font-semibold">
+                <div className="px-4 py-2 rounded-xl bg-[#7da8c7]/10 border border-[#7da8c7]/30">
+                  <span className="text-[#7da8c7] text-sm font-semibold">
                     6 Months
                   </span>
                 </div>
@@ -273,14 +273,14 @@ export default function Analytics() {
                     x2="0"
                     y2="1"
                   >
-                    <stop offset="0%" stopColor="#C8A96E" stopOpacity={0.35} />
-                    <stop offset="100%" stopColor="#C8A96E" stopOpacity={0} />
+                    <stop offset="0%" stopColor="#7da8c7" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="#7da8c7" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid
                   key="user-grid"
                   strokeDasharray="3 3"
-                  stroke="rgba(200,169,110,0.08)"
+                  stroke="rgba(226,232,240,0.9)"
                   vertical={false}
                 />
                 <XAxis
@@ -297,10 +297,7 @@ export default function Analytics() {
                 <Tooltip
                   key="user-tooltip"
                   contentStyle={{
-                    backgroundColor: "rgba(10, 18, 32, 0.98)",
-                    border: "1px solid rgba(200, 169, 110, 0.3)",
-                    borderRadius: "14px",
-                    color: "#FAF8F4",
+                    backgroundColor: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "12px", color: "#0f172a",
                     boxShadow: "0 10px 40px rgba(0,0,0,0.5)",
                   }}
                 />
@@ -308,14 +305,14 @@ export default function Analytics() {
                   key="users-area"
                   type="monotone"
                   dataKey="users"
-                  stroke="#C8A96E"
+                  stroke="#7da8c7"
                   strokeWidth={3}
                   fill="url(#userGrowthGradient)"
-                  dot={{ fill: "#C8A96E", strokeWidth: 2, r: 5 }}
+                  dot={{ fill: "#7da8c7", strokeWidth: 2, r: 5 }}
                   activeDot={{
                     r: 7,
-                    fill: "#C8A96E",
-                    stroke: "#050a18",
+                    fill: "#7da8c7",
+                    stroke: "#0f172a",
                     strokeWidth: 2,
                   }}
                 />
@@ -329,15 +326,15 @@ export default function Analytics() {
           className="col-span-12 lg:col-span-4 rounded-2xl p-6 border"
           style={{
             background:
-              "linear-gradient(135deg, rgba(8, 17, 34, 0.8) 0%, rgba(10, 18, 32, 0.6) 100%)",
-            borderColor: "rgba(200, 169, 110, 0.15)",
+              "linear-gradient(135deg, #ffffff 0%, #f0f6fb 100%)",
+            borderColor: "rgba(125, 168, 199, 0.15)",
           }}
         >
           <div className="mb-6">
-            <h3 className="text-lg font-bold text-white mb-1">
+            <h3 className="text-lg font-bold text-[#0f172a] mb-1">
               Section Traffic
             </h3>
-            <p className="text-sm text-gray-400">Page view distribution</p>
+            <p className="text-sm text-[#64748b]">Page view distribution</p>
           </div>
           <ResponsiveContainer width="100%" height={320}>
             <BarChart
@@ -353,14 +350,14 @@ export default function Analytics() {
                   x2="1"
                   y2="0"
                 >
-                  <stop offset="0%" stopColor="#C8A96E" stopOpacity={1} />
-                  <stop offset="100%" stopColor="#8B6E3A" stopOpacity={0.7} />
+                  <stop offset="0%" stopColor="#7da8c7" stopOpacity={1} />
+                  <stop offset="100%" stopColor="#5a8faf" stopOpacity={0.7} />
                 </linearGradient>
               </defs>
               <CartesianGrid
                 key="section-grid"
                 strokeDasharray="3 3"
-                stroke="rgba(200,169,110,0.08)"
+                stroke="rgba(226,232,240,0.9)"
                 horizontal={false}
               />
               <XAxis
@@ -380,10 +377,7 @@ export default function Analytics() {
               <Tooltip
                 key="section-tooltip"
                 contentStyle={{
-                  backgroundColor: "rgba(10, 18, 32, 0.98)",
-                  border: "1px solid rgba(200, 169, 110, 0.3)",
-                  borderRadius: "12px",
-                  color: "#FAF8F4",
+                  backgroundColor: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "12px", color: "#0f172a",
                 }}
               />
               <Bar
@@ -404,18 +398,18 @@ export default function Analytics() {
           className="rounded-2xl p-6 border relative overflow-hidden"
           style={{
             background:
-              "linear-gradient(135deg, rgba(200, 169, 110, 0.1) 0%, rgba(139, 110, 58, 0.05) 100%)",
-            borderColor: "rgba(200, 169, 110, 0.25)",
+              "linear-gradient(135deg, rgba(125, 168, 199, 0.1) 0%, rgba(90, 143, 175, 0.05) 100%)",
+            borderColor: "rgba(125, 168, 199, 0.25)",
           }}
         >
-          <div className="absolute top-0 right-0 w-64 h-64 bg-[#C8A96E]/10 blur-3xl"></div>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#7da8c7]/10 blur-3xl"></div>
           <div className="relative z-10">
             <div className="mb-6">
-              <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
-                <Target className="w-5 h-5 text-[#C8A96E]" />
+              <h3 className="text-lg font-bold text-[#0f172a] mb-1 flex items-center gap-2">
+                <Target className="w-5 h-5 text-[#7da8c7]" />
                 Category Performance
               </h3>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-[#64748b]">
                 Sales trends by product line
               </p>
             </div>
@@ -432,14 +426,14 @@ export default function Analytics() {
                     x2="0"
                     y2="1"
                   >
-                    <stop offset="0%" stopColor="#C8A96E" stopOpacity={0.2} />
-                    <stop offset="100%" stopColor="#C8A96E" stopOpacity={0} />
+                    <stop offset="0%" stopColor="#7da8c7" stopOpacity={0.2} />
+                    <stop offset="100%" stopColor="#7da8c7" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid
                   key="category-grid"
                   strokeDasharray="3 3"
-                  stroke="rgba(200,169,110,0.08)"
+                  stroke="rgba(226,232,240,0.9)"
                   vertical={false}
                 />
                 <XAxis
@@ -456,10 +450,7 @@ export default function Analytics() {
                 <Tooltip
                   key="category-tooltip"
                   contentStyle={{
-                    backgroundColor: "rgba(10, 18, 32, 0.98)",
-                    border: "1px solid rgba(200, 169, 110, 0.3)",
-                    borderRadius: "12px",
-                    color: "#FAF8F4",
+                    backgroundColor: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "12px", color: "#0f172a",
                   }}
                 />
                 <Legend
@@ -471,24 +462,24 @@ export default function Analytics() {
                   type="monotone"
                   dataKey="suits"
                   fill="url(#suitsGradient)"
-                  stroke="#C8A96E"
+                  stroke="#7da8c7"
                   strokeWidth={2}
                 />
                 <Line
                   key="dresses-line-new"
                   type="monotone"
                   dataKey="dresses"
-                  stroke="#E8D5A8"
+                  stroke="#9fbdd5"
                   strokeWidth={2}
-                  dot={{ r: 4, fill: "#E8D5A8" }}
+                  dot={{ r: 4, fill: "#9fbdd5" }}
                 />
                 <Line
                   key="accessories-line-new"
                   type="monotone"
                   dataKey="accessories"
-                  stroke="#8B6E3A"
+                  stroke="#5a8faf"
                   strokeWidth={2}
-                  dot={{ r: 4, fill: "#8B6E3A" }}
+                  dot={{ r: 4, fill: "#5a8faf" }}
                 />
               </ComposedChart>
             </ResponsiveContainer>
@@ -500,16 +491,16 @@ export default function Analytics() {
           className="rounded-2xl p-6 border"
           style={{
             background:
-              "linear-gradient(135deg, rgba(8, 17, 34, 0.8) 0%, rgba(10, 18, 32, 0.6) 100%)",
-            borderColor: "rgba(200, 169, 110, 0.15)",
+              "linear-gradient(135deg, #ffffff 0%, #f0f6fb 100%)",
+            borderColor: "rgba(125, 168, 199, 0.15)",
           }}
         >
           <div className="mb-6">
-            <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
-              <Image className="w-5 h-5 text-[#C8A96E]" />
+            <h3 className="text-lg font-bold text-[#0f172a] mb-1 flex items-center gap-2">
+              <Image className="w-5 h-5 text-[#7da8c7]" />
               Content Updates
             </h3>
-            <p className="text-sm text-gray-400">Distribution by section</p>
+            <p className="text-sm text-[#64748b]">Distribution by section</p>
           </div>
           <div className="flex items-center justify-center">
             <ResponsiveContainer width="100%" height={280}>
@@ -540,10 +531,7 @@ export default function Analytics() {
                 <Tooltip
                   key="pie-tooltip"
                   contentStyle={{
-                    backgroundColor: "rgba(10, 18, 32, 0.98)",
-                    border: "1px solid rgba(200, 169, 110, 0.3)",
-                    borderRadius: "12px",
-                    color: "#FAF8F4",
+                    backgroundColor: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "12px", color: "#0f172a",
                   }}
                 />
               </PieChart>
@@ -557,48 +545,48 @@ export default function Analytics() {
         className="rounded-2xl p-8 border relative overflow-hidden"
         style={{
           background:
-            "linear-gradient(135deg, rgba(22, 32, 53, 0.8) 0%, rgba(10, 18, 32, 0.6) 100%)",
-          borderColor: "rgba(200, 169, 110, 0.2)",
+            "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
+          borderColor: "rgba(125, 168, 199, 0.2)",
         }}
       >
-        <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-[#C8A96E]/10 to-transparent blur-3xl"></div>
+        <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-[#7da8c7]/10 to-transparent blur-3xl"></div>
         <div className="relative z-10">
-          <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-            <TrendingUp className="w-6 h-6 text-[#C8A96E]" />
+          <h3 className="text-2xl font-bold text-[#0f172a] mb-6 flex items-center gap-2">
+            <TrendingUp className="w-6 h-6 text-[#7da8c7]" />
             Executive Summary
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="relative">
-              <div className="absolute -left-4 top-0 w-1 h-full rounded-full bg-gradient-to-b from-[#C8A96E] to-transparent"></div>
-              <p className="text-gray-400 text-sm mb-3 font-medium">
+              <div className="absolute -left-4 top-0 w-1 h-full rounded-full bg-gradient-to-b from-[#7da8c7] to-transparent"></div>
+              <p className="text-[#64748b] text-sm mb-3 font-medium">
                 Top Performing Section
               </p>
-              <p className="text-white text-2xl font-bold mb-2">Home Page</p>
-              <p className="text-[#C8A96E] text-base font-semibold">
+              <p className="text-[#0f172a] text-2xl font-bold mb-2">Home Page</p>
+              <p className="text-[#7da8c7] text-base font-semibold">
                 4,823 views
               </p>
               <p className="text-green-400 text-sm mt-2">+28.5% increase</p>
             </div>
             <div className="relative">
-              <div className="absolute -left-4 top-0 w-1 h-full rounded-full bg-gradient-to-b from-[#E8D5A8] to-transparent"></div>
-              <p className="text-gray-400 text-sm mb-3 font-medium">
+              <div className="absolute -left-4 top-0 w-1 h-full rounded-full bg-gradient-to-b from-[#9fbdd5] to-transparent"></div>
+              <p className="text-[#64748b] text-sm mb-3 font-medium">
                 Best Selling Category
               </p>
-              <p className="text-white text-2xl font-bold mb-2">
+              <p className="text-[#0f172a] text-2xl font-bold mb-2">
                 Bespoke Suits
               </p>
-              <p className="text-[#E8D5A8] text-base font-semibold">
+              <p className="text-[#9fbdd5] text-base font-semibold">
                 67 units sold
               </p>
               <p className="text-green-400 text-sm mt-2">+22.8% growth</p>
             </div>
             <div className="relative">
-              <div className="absolute -left-4 top-0 w-1 h-full rounded-full bg-gradient-to-b from-[#8B6E3A] to-transparent"></div>
-              <p className="text-gray-400 text-sm mb-3 font-medium">
+              <div className="absolute -left-4 top-0 w-1 h-full rounded-full bg-gradient-to-b from-[#5a8faf] to-transparent"></div>
+              <p className="text-[#64748b] text-sm mb-3 font-medium">
                 Average Transaction
               </p>
-              <p className="text-white text-2xl font-bold mb-2">$2,847</p>
-              <p className="text-[#8B6E3A] text-base font-semibold">
+              <p className="text-[#0f172a] text-2xl font-bold mb-2">$2,847</p>
+              <p className="text-[#5a8faf] text-base font-semibold">
                 Per order
               </p>
               <p className="text-green-400 text-sm mt-2">

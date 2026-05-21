@@ -15,11 +15,14 @@ import {
   Package,
   ShieldCheck,
 } from "lucide-react";
-import { signIn, useSession } from "next-auth/react";
+import { loadCartFromStorage, saveCartToStorage } from "@/lib/cart-storage";
+import { setCartItems } from "@/store/slices/cartSlice";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import CheckoutAuthForm from "./CheckoutAuthForm";
 
 type PaymentMethod = "cod" | "online";
 
@@ -64,6 +67,7 @@ export default function CheckoutClient() {
   const { data: session, status } = useSession();
   const { format: displayPrice } = useDisplayPrice();
   const items = useAppSelector((s) => s.cart.items);
+  const cartHydrated = useAppSelector((s) => s.cart.hydrated);
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("online");
   const [shipping, setShipping] = useState<ShippingInput>(EMPTY_SHIPPING);
@@ -87,6 +91,20 @@ export default function CheckoutClient() {
       }));
     }
   }, [session?.user?.email, session?.user?.name]);
+
+  useEffect(() => {
+    if (!cartHydrated || items.length > 0) return;
+    const stored = loadCartFromStorage();
+    if (stored.length > 0) {
+      dispatch(setCartItems(stored));
+    }
+  }, [cartHydrated, items.length, dispatch]);
+
+  useEffect(() => {
+    if (cartHydrated && items.length > 0) {
+      saveCartToStorage(items);
+    }
+  }, [items, cartHydrated]);
 
   const updateShipping = useCallback(
     (field: keyof ShippingInput, value: string) => {
@@ -249,7 +267,7 @@ export default function CheckoutClient() {
     }
   }
 
-  if (status === "loading") {
+  if (status === "loading" || !cartHydrated) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center bg-[#f8fafc]">
         <Loader2 className="h-8 w-8 animate-spin text-[#7da8c7]" />
@@ -258,29 +276,82 @@ export default function CheckoutClient() {
   }
 
   if (status === "unauthenticated") {
+    const guestItems =
+      items.length > 0 ? items : loadCartFromStorage();
+    const guestSubtotal = guestItems.reduce(
+      (sum, i) => sum + i.price * i.qty,
+      0,
+    );
+
     return (
-      <div className="mx-auto max-w-lg px-6 py-24 text-center">
-        <Lock className="mx-auto mb-6 h-10 w-10 text-[#7da8c7]" />
-        <h1 className="font-['Playfair_Display'] text-3xl text-[#0f172a]">
-          Sign in to checkout
-        </h1>
-        <p className="mt-3 text-sm text-[#64748b]">
-          Secure checkout requires a ZENmen account. Your cart is saved on this
-          device.
-        </p>
-        <button
-          type="button"
-          onClick={() => signIn(undefined, { callbackUrl: "/checkout" })}
-          className="mt-8 inline-flex items-center justify-center bg-[#0f172a] px-10 py-4 text-[11px] font-medium uppercase tracking-[0.2em] text-white transition-colors hover:bg-[#7da8c7] hover:text-[#0f172a]"
-        >
-          Sign in / Register
-        </button>
-        <Link
-          href="/collection"
-          className="mt-4 block text-[11px] uppercase tracking-[0.15em] text-[#7da8c7] no-underline hover:text-[#0f172a]"
-        >
-          Continue shopping
-        </Link>
+      <div className="min-h-screen bg-[#f8fafc] px-6 py-12 md:py-16">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-10 text-center">
+            <Lock className="mx-auto mb-4 h-10 w-10 text-[#7da8c7]" />
+            <h1 className="font-['Playfair_Display'] text-3xl text-[#0f172a] md:text-4xl">
+              Sign in to checkout
+            </h1>
+            <p className="mx-auto mt-3 max-w-md text-sm text-[#64748b]">
+              Create an account or sign in to complete your order. Items in your
+              bag stay saved on this device.
+            </p>
+          </div>
+
+          <div className="grid gap-10 lg:grid-cols-[1fr_380px] lg:items-start">
+            <CheckoutAuthForm cartItems={guestItems} />
+
+            <aside className="rounded-sm border border-[#e2e8f0] bg-white p-6 shadow-sm">
+              <h2 className="font-['Playfair_Display'] text-xl text-[#0f172a]">
+                Your bag
+              </h2>
+              <p className="mt-1 text-sm text-[#64748b]">
+                {guestItems.length === 0
+                  ? "No items yet"
+                  : `${guestItems.length} item${guestItems.length === 1 ? "" : "s"}`}
+              </p>
+              <ul className="mt-6 max-h-[320px] space-y-4 overflow-y-auto">
+                {guestItems.map((item) => (
+                  <li
+                    key={`${item._id}-${item.selectedColor}-${item.selectedSize}`}
+                    className="flex gap-3 border-b border-[#f1f5f9] pb-4 last:border-0"
+                  >
+                    {item.image?.url ? (
+                      <img
+                        src={item.image.url}
+                        alt={item.title}
+                        className="h-16 w-14 shrink-0 rounded-sm border border-[#e2e8f0] object-cover"
+                      />
+                    ) : null}
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-[#0f172a]">
+                        {item.title}
+                      </p>
+                      <p className="text-xs text-[#94a3b8]">
+                        Qty {item.qty}
+                        {item.selectedSize ? ` · ${item.selectedSize}` : ""}
+                      </p>
+                      <p className="mt-1 text-sm text-[#0f172a]">
+                        {displayPrice(item.price * item.qty)}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              {guestItems.length > 0 ? (
+                <p className="mt-6 border-t border-[#e2e8f0] pt-4 text-right font-['Cormorant_Garamond'] text-2xl text-[#0f172a]">
+                  {displayPrice(guestSubtotal)}
+                </p>
+              ) : (
+                <Link
+                  href="/collection"
+                  className="mt-6 inline-flex w-full items-center justify-center border border-[#7da8c7] bg-[#7da8c7] py-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#0f172a] no-underline hover:bg-[#0f172a] hover:text-white"
+                >
+                  Shop collection
+                </Link>
+              )}
+            </aside>
+          </div>
+        </div>
       </div>
     );
   }

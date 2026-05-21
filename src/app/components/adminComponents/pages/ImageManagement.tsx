@@ -224,15 +224,15 @@ export default function ImageManagement() {
       {/* Page Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-semibold text-white mb-2">
+          <h1 className="text-3xl font-semibold text-[#0f172a] mb-2">
             Website Image Management
           </h1>
-          <p className="text-gray-400">
+          <p className="text-[#64748b]">
             Manage all images across your website pages
           </p>
         </div>
         <Button
-          className="bg-[#C8A96E] hover:bg-[#C8A96E]/90 text-white"
+          className="bg-[#7da8c7] hover:bg-[#5a8faf] text-white"
           onClick={handleCreateNew}
         >
           <Upload className="w-4 h-4 mr-2" />
@@ -247,14 +247,14 @@ export default function ImageManagement() {
             <AccordionItem
               key={pageName}
               value={pageName}
-              className="border-white/10 rounded-xl overflow-hidden"
+              className="border-[#e2e8f0] rounded-xl overflow-hidden"
             >
-              <AccordionTrigger className="px-6 py-4 hover:bg-white/5 hover:no-underline">
+              <AccordionTrigger className="px-6 py-4 hover:bg-[#f1f5f9] hover:no-underline">
                 <div className="flex items-center justify-between w-full pr-4">
-                  <span className="text-lg font-medium text-white">
+                  <span className="text-lg font-medium text-[#0f172a]">
                     {pageName}
                   </span>
-                  <span className="text-sm text-gray-400">
+                  <span className="text-sm text-[#64748b]">
                     {items.length} images
                   </span>
                 </div>
@@ -264,7 +264,7 @@ export default function ImageManagement() {
                   {items.map((item) => (
                     <div
                       key={item.id}
-                      className="rounded-xl border border-white/10 overflow-hidden bg-black/20 hover:border-[#C8A96E]/30 transition-all"
+                      className="rounded-xl border border-[#e2e8f0] overflow-hidden bg-black/20 hover:border-[#7da8c7]/30 transition-all"
                     >
                       {/* Image Preview */}
                       <div className="aspect-video overflow-hidden relative group">
@@ -277,7 +277,7 @@ export default function ImageManagement() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            className="text-white hover:text-[#C8A96E] hover:bg-white/10"
+                            className="text-[#0f172a] hover:text-[#7da8c7] hover:bg-[#f0f6fb]"
                             onClick={() => handleEdit(item)}
                           >
                             <Eye className="w-4 h-4" />
@@ -288,7 +288,7 @@ export default function ImageManagement() {
                       {/* Content */}
                       <div className="p-4">
                         <div className="flex items-start justify-between mb-2">
-                          <h4 className="text-white font-medium text-sm">
+                          <h4 className="text-[#0f172a] font-medium text-sm">
                             {item.title}
                           </h4>
                           <div className="flex items-center gap-1">
@@ -299,16 +299,16 @@ export default function ImageManagement() {
                             )}
                           </div>
                         </div>
-                        <p className="text-gray-400 text-xs mb-3 line-clamp-2">
+                        <p className="text-[#64748b] text-xs mb-3 line-clamp-2">
                           {item.description.join(" ")}
                         </p>
                         <div className="flex items-center justify-between">
                           <div className="flex flex-col">
-                            <span className="text-[#C8A96E] text-xs">
+                            <span className="text-[#7da8c7] text-xs">
                               {item.section}
                             </span>
                             {item.price && (
-                              <span className="text-gray-500 text-xs">
+                              <span className="text-[#94a3b8] text-xs">
                                 ${item.price}
                               </span>
                             )}
@@ -317,7 +317,7 @@ export default function ImageManagement() {
                             <Button
                               size="sm"
                               variant="ghost"
-                              className="h-8 w-8 p-0 text-gray-400 hover:text-[#C8A96E] hover:bg-white/5"
+                              className="h-8 w-8 p-0 text-[#64748b] hover:text-[#7da8c7] hover:bg-[#f1f5f9]"
                               onClick={() => handleEdit(item)}
                             >
                               <Edit className="w-4 h-4" />
@@ -325,7 +325,7 @@ export default function ImageManagement() {
                             <Button
                               size="sm"
                               variant="ghost"
-                              className="h-8 w-8 p-0 text-gray-400 hover:text-red-400 hover:bg-white/5"
+                              className="h-8 w-8 p-0 text-[#64748b] hover:text-red-400 hover:bg-[#f1f5f9]"
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>
@@ -343,12 +343,12 @@ export default function ImageManagement() {
 
       {/* Edit Modal */}
       <Dialog open={!!editingItem} onOpenChange={() => setEditingItem(null)}>
-        <DialogContent className="max-w-[100vw] w-[100vw] max-h-[90vh] overflow-y-auto bg-[#081122] border-white/10">
+        <DialogContent className="max-w-[100vw] w-[100vw] max-h-[90vh] overflow-y-auto bg-[#081122] border-[#e2e8f0]">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-semibold text-white">
+            <DialogTitle className="text-2xl font-semibold text-[#0f172a]">
               Edit Collection Item
             </DialogTitle>
-            <DialogDescription className="text-gray-400">
+            <DialogDescription className="text-[#64748b]">
               Update collection details, product information, and images
             </DialogDescription>
           </DialogHeader>
@@ -357,12 +357,12 @@ export default function ImageManagement() {
             {/* Left Column - Basic Info & Images */}
             <div className="space-y-6">
               <div className="space-y-4">
-                <h3 className="text-lg font-medium text-white border-b border-white/10 pb-2">
+                <h3 className="text-lg font-medium text-[#0f172a] border-b border-[#e2e8f0] pb-2">
                   Basic Information
                 </h3>
 
                 <div>
-                  <Label className="text-gray-300 mb-2">Title *</Label>
+                  <Label className="text-[#64748b] mb-2">Title *</Label>
                   <Input
                     value={formData?.title || ""}
                     onChange={(e) =>
@@ -370,12 +370,12 @@ export default function ImageManagement() {
                         prev ? { ...prev, title: e.target.value } : null,
                       )
                     }
-                    className="bg-white/5 border-white/10 text-white"
+                    className="bg-[#f8fafc] border-[#e2e8f0] text-[#0f172a]"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-gray-300 mb-2">Subtitle</Label>
+                  <Label className="text-[#64748b] mb-2">Subtitle</Label>
                   <Input
                     value={formData?.subtitle || ""}
                     onChange={(e) =>
@@ -388,12 +388,12 @@ export default function ImageManagement() {
                           : null,
                       )
                     }
-                    className="bg-white/5 border-white/10 text-white"
+                    className="bg-[#f8fafc] border-[#e2e8f0] text-[#0f172a]"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-gray-300 mb-2">Tagline</Label>
+                  <Label className="text-[#64748b] mb-2">Tagline</Label>
                   <Input
                     value={formData?.tagline || ""}
                     onChange={(e) =>
@@ -401,12 +401,12 @@ export default function ImageManagement() {
                         prev ? { ...prev, tagline: e.target.value } : null,
                       )
                     }
-                    className="bg-white/5 border-white/10 text-white"
+                    className="bg-[#f8fafc] border-[#e2e8f0] text-[#0f172a]"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-gray-300 mb-2">
+                  <Label className="text-[#64748b] mb-2">
                     Description Paragraphs
                   </Label>
                   <Textarea
@@ -423,14 +423,14 @@ export default function ImageManagement() {
                           : null,
                       )
                     }
-                    className="bg-white/5 border-white/10 text-white min-h-[120px]"
+                    className="bg-[#f8fafc] border-[#e2e8f0] text-[#0f172a] min-h-[120px]"
                     placeholder="Separate paragraphs with double line breaks"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-gray-300 mb-2">Price</Label>
+                    <Label className="text-[#64748b] mb-2">Price</Label>
                     <Input
                       type="number"
                       value={formData?.price || ""}
@@ -444,12 +444,12 @@ export default function ImageManagement() {
                             : null,
                         )
                       }
-                      className="bg-white/5 border-white/10 text-white"
+                      className="bg-[#f8fafc] border-[#e2e8f0] text-[#0f172a]"
                     />
                   </div>
 
                   <div>
-                    <Label className="text-gray-300 mb-2">Category</Label>
+                    <Label className="text-[#64748b] mb-2">Category</Label>
                     <Input
                       value={formData?.category || ""}
                       onChange={(e) =>
@@ -462,13 +462,13 @@ export default function ImageManagement() {
                             : null,
                         )
                       }
-                      className="bg-white/5 border-white/10 text-white"
+                      className="bg-[#f8fafc] border-[#e2e8f0] text-[#0f172a]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <Label className="text-gray-300 mb-2">
+                  <Label className="text-[#64748b] mb-2">
                     Occasions (comma separated)
                   </Label>
                   <Input
@@ -487,12 +487,12 @@ export default function ImageManagement() {
                       )
                     }
                     placeholder="Wedding, Party, Formal"
-                    className="bg-white/5 border-white/10 text-white"
+                    className="bg-[#f8fafc] border-[#e2e8f0] text-[#0f172a]"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-gray-300 mb-2">Orientation</Label>
+                  <Label className="text-[#64748b] mb-2">Orientation</Label>
                   <Select
                     value={formData?.orientation || ""}
                     onValueChange={(value: string) =>
@@ -501,25 +501,25 @@ export default function ImageManagement() {
                       )
                     }
                   >
-                    <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                    <SelectTrigger className="bg-[#f8fafc] border-[#e2e8f0] text-[#0f172a]">
                       <SelectValue placeholder="Select orientation" />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#081122] border-white/10">
-                      <SelectItem value="portrait" className="text-white">
+                    <SelectContent className="bg-[#081122] border-[#e2e8f0]">
+                      <SelectItem value="portrait" className="text-[#0f172a]">
                         Portrait
                       </SelectItem>
-                      <SelectItem value="landscape" className="text-white">
+                      <SelectItem value="landscape" className="text-[#0f172a]">
                         Landscape
                       </SelectItem>
-                      <SelectItem value="square" className="text-white">
+                      <SelectItem value="square" className="text-[#0f172a]">
                         Square
                       </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div className="flex items-center justify-between p-4 rounded-xl bg-white/5">
-                  <Label className="text-gray-300">Featured</Label>
+                <div className="flex items-center justify-between p-4 rounded-xl bg-[#f8fafc]">
+                  <Label className="text-[#64748b]">Featured</Label>
                   <Switch
                     checked={formData?.featured || false}
                     onCheckedChange={(checked: boolean) =>
@@ -530,8 +530,8 @@ export default function ImageManagement() {
                   />
                 </div>
 
-                <div className="flex items-center justify-between p-4 rounded-xl bg-white/5">
-                  <Label className="text-gray-300">Active Status</Label>
+                <div className="flex items-center justify-between p-4 rounded-xl bg-[#f8fafc]">
+                  <Label className="text-[#64748b]">Active Status</Label>
                   <Switch
                     checked={formData?.status || false}
                     onCheckedChange={(checked: boolean) =>
@@ -544,31 +544,31 @@ export default function ImageManagement() {
               </div>
 
               <div className="space-y-4">
-                <h3 className="text-lg font-medium text-white border-b border-white/10 pb-2">
+                <h3 className="text-lg font-medium text-[#0f172a] border-b border-[#e2e8f0] pb-2">
                   Images
                 </h3>
 
                 <div>
-                  <Label className="text-gray-300 mb-2">Main Image</Label>
-                  <div className="border-2 border-dashed border-white/10 rounded-xl p-6 text-center hover:border-[#C8A96E]/50 transition-colors cursor-pointer">
-                    <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-400">Upload main image</p>
+                  <Label className="text-[#64748b] mb-2">Main Image</Label>
+                  <div className="border-2 border-dashed border-[#e2e8f0] rounded-xl p-6 text-center hover:border-[#7da8c7]/50 transition-colors cursor-pointer">
+                    <Upload className="w-6 h-6 text-[#64748b] mx-auto mb-2" />
+                    <p className="text-sm text-[#64748b]">Upload main image</p>
                   </div>
                 </div>
 
                 <div>
-                  <Label className="text-gray-300 mb-2">Front Image</Label>
-                  <div className="border-2 border-dashed border-white/10 rounded-xl p-6 text-center hover:border-[#C8A96E]/50 transition-colors cursor-pointer">
-                    <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-400">Upload front view</p>
+                  <Label className="text-[#64748b] mb-2">Front Image</Label>
+                  <div className="border-2 border-dashed border-[#e2e8f0] rounded-xl p-6 text-center hover:border-[#7da8c7]/50 transition-colors cursor-pointer">
+                    <Upload className="w-6 h-6 text-[#64748b] mx-auto mb-2" />
+                    <p className="text-sm text-[#64748b]">Upload front view</p>
                   </div>
                 </div>
 
                 <div>
-                  <Label className="text-gray-300 mb-2">Back Image</Label>
-                  <div className="border-2 border-dashed border-white/10 rounded-xl p-6 text-center hover:border-[#C8A96E]/50 transition-colors cursor-pointer">
-                    <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-400">Upload back view</p>
+                  <Label className="text-[#64748b] mb-2">Back Image</Label>
+                  <div className="border-2 border-dashed border-[#e2e8f0] rounded-xl p-6 text-center hover:border-[#7da8c7]/50 transition-colors cursor-pointer">
+                    <Upload className="w-6 h-6 text-[#64748b] mx-auto mb-2" />
+                    <p className="text-sm text-[#64748b]">Upload back view</p>
                   </div>
                 </div>
               </div>
@@ -577,12 +577,12 @@ export default function ImageManagement() {
             {/* Middle Column - Details & Additional Info */}
             <div className="space-y-6">
               <div className="space-y-4">
-                <h3 className="text-lg font-medium text-white border-b border-white/10 pb-2">
+                <h3 className="text-lg font-medium text-[#0f172a] border-b border-[#e2e8f0] pb-2">
                   Product Details
                 </h3>
 
                 <div>
-                  <Label className="text-gray-300 mb-2">Fabric</Label>
+                  <Label className="text-[#64748b] mb-2">Fabric</Label>
                   <Input
                     value={formData?.details?.fabric || ""}
                     onChange={(e) =>
@@ -598,12 +598,12 @@ export default function ImageManagement() {
                           : null,
                       )
                     }
-                    className="bg-white/5 border-white/10 text-white"
+                    className="bg-[#f8fafc] border-[#e2e8f0] text-[#0f172a]"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-gray-300 mb-2">Type</Label>
+                  <Label className="text-[#64748b] mb-2">Type</Label>
                   <Input
                     value={formData?.details?.type || ""}
                     onChange={(e) =>
@@ -619,12 +619,12 @@ export default function ImageManagement() {
                           : null,
                       )
                     }
-                    className="bg-white/5 border-white/10 text-white"
+                    className="bg-[#f8fafc] border-[#e2e8f0] text-[#0f172a]"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-gray-300 mb-2">
+                  <Label className="text-[#64748b] mb-2">
                     Embellishment (comma separated)
                   </Label>
                   <Input
@@ -646,13 +646,13 @@ export default function ImageManagement() {
                       )
                     }
                     placeholder="Beads, Sequins, Embroidery"
-                    className="bg-white/5 border-white/10 text-white"
+                    className="bg-[#f8fafc] border-[#e2e8f0] text-[#0f172a]"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-gray-300 mb-2">Neckline</Label>
+                    <Label className="text-[#64748b] mb-2">Neckline</Label>
                     <Input
                       value={formData?.details?.neckline || ""}
                       onChange={(e) =>
@@ -668,12 +668,12 @@ export default function ImageManagement() {
                             : null,
                         )
                       }
-                      className="bg-white/5 border-white/10 text-white"
+                      className="bg-[#f8fafc] border-[#e2e8f0] text-[#0f172a]"
                     />
                   </div>
 
                   <div>
-                    <Label className="text-gray-300 mb-2">Closure</Label>
+                    <Label className="text-[#64748b] mb-2">Closure</Label>
                     <Input
                       value={formData?.details?.closure || ""}
                       onChange={(e) =>
@@ -689,14 +689,14 @@ export default function ImageManagement() {
                             : null,
                         )
                       }
-                      className="bg-white/5 border-white/10 text-white"
+                      className="bg-[#f8fafc] border-[#e2e8f0] text-[#0f172a]"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-gray-300 mb-2">Size</Label>
+                    <Label className="text-[#64748b] mb-2">Size</Label>
                     <Input
                       value={formData?.details?.size || ""}
                       onChange={(e) =>
@@ -712,12 +712,12 @@ export default function ImageManagement() {
                             : null,
                         )
                       }
-                      className="bg-white/5 border-white/10 text-white"
+                      className="bg-[#f8fafc] border-[#e2e8f0] text-[#0f172a]"
                     />
                   </div>
 
                   <div>
-                    <Label className="text-gray-300 mb-2">Color</Label>
+                    <Label className="text-[#64748b] mb-2">Color</Label>
                     <Input
                       value={formData?.details?.color || ""}
                       onChange={(e) =>
@@ -733,13 +733,13 @@ export default function ImageManagement() {
                             : null,
                         )
                       }
-                      className="bg-white/5 border-white/10 text-white"
+                      className="bg-[#f8fafc] border-[#e2e8f0] text-[#0f172a]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <Label className="text-gray-300 mb-2">Style</Label>
+                  <Label className="text-[#64748b] mb-2">Style</Label>
                   <Input
                     value={formData?.details?.style || ""}
                     onChange={(e) =>
@@ -755,12 +755,12 @@ export default function ImageManagement() {
                           : null,
                       )
                     }
-                    className="bg-white/5 border-white/10 text-white"
+                    className="bg-[#f8fafc] border-[#e2e8f0] text-[#0f172a]"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-gray-300 mb-2">Wash Care</Label>
+                  <Label className="text-[#64748b] mb-2">Wash Care</Label>
                   <Textarea
                     value={formData?.details?.washCare || ""}
                     onChange={(e) =>
@@ -776,18 +776,18 @@ export default function ImageManagement() {
                           : null,
                       )
                     }
-                    className="bg-white/5 border-white/10 text-white min-h-[80px]"
+                    className="bg-[#f8fafc] border-[#e2e8f0] text-[#0f172a] min-h-[80px]"
                   />
                 </div>
               </div>
 
               <div className="space-y-4">
-                <h3 className="text-lg font-medium text-white border-b border-white/10 pb-2">
+                <h3 className="text-lg font-medium text-[#0f172a] border-b border-[#e2e8f0] pb-2">
                   Additional Information
                 </h3>
 
                 <div>
-                  <Label className="text-gray-300 mb-2">Includes</Label>
+                  <Label className="text-[#64748b] mb-2">Includes</Label>
                   <Textarea
                     value={formData?.includes || ""}
                     onChange={(e) =>
@@ -800,13 +800,13 @@ export default function ImageManagement() {
                           : null,
                       )
                     }
-                    className="bg-white/5 border-white/10 text-white min-h-[80px]"
+                    className="bg-[#f8fafc] border-[#e2e8f0] text-[#0f172a] min-h-[80px]"
                     placeholder="What's included with the product"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-gray-300 mb-2">Disclaimer</Label>
+                  <Label className="text-[#64748b] mb-2">Disclaimer</Label>
                   <Textarea
                     value={formData?.disclaimer || ""}
                     onChange={(e) =>
@@ -819,7 +819,7 @@ export default function ImageManagement() {
                           : null,
                       )
                     }
-                    className="bg-white/5 border-white/10 text-white min-h-[80px]"
+                    className="bg-[#f8fafc] border-[#e2e8f0] text-[#0f172a] min-h-[80px]"
                   />
                 </div>
               </div>
@@ -828,12 +828,12 @@ export default function ImageManagement() {
             {/* Right Column - Manufacturing & Contact */}
             <div className="space-y-6">
               <div className="space-y-4">
-                <h3 className="text-lg font-medium text-white border-b border-white/10 pb-2">
+                <h3 className="text-lg font-medium text-[#0f172a] border-b border-[#e2e8f0] pb-2">
                   Manufacturing Details
                 </h3>
 
                 <div>
-                  <Label className="text-gray-300 mb-2">Country</Label>
+                  <Label className="text-[#64748b] mb-2">Country</Label>
                   <Input
                     value={formData?.manufacturing?.country || ""}
                     onChange={(e) =>
@@ -849,12 +849,12 @@ export default function ImageManagement() {
                           : null,
                       )
                     }
-                    className="bg-white/5 border-white/10 text-white"
+                    className="bg-[#f8fafc] border-[#e2e8f0] text-[#0f172a]"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-gray-300 mb-2">Manufacturer</Label>
+                  <Label className="text-[#64748b] mb-2">Manufacturer</Label>
                   <Input
                     value={formData?.manufacturing?.manufacturer || ""}
                     onChange={(e) =>
@@ -870,12 +870,12 @@ export default function ImageManagement() {
                           : null,
                       )
                     }
-                    className="bg-white/5 border-white/10 text-white"
+                    className="bg-[#f8fafc] border-[#e2e8f0] text-[#0f172a]"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-gray-300 mb-2">Packed By</Label>
+                  <Label className="text-[#64748b] mb-2">Packed By</Label>
                   <Input
                     value={formData?.manufacturing?.packedBy || ""}
                     onChange={(e) =>
@@ -891,12 +891,12 @@ export default function ImageManagement() {
                           : null,
                       )
                     }
-                    className="bg-white/5 border-white/10 text-white"
+                    className="bg-[#f8fafc] border-[#e2e8f0] text-[#0f172a]"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-gray-300 mb-2">Address</Label>
+                  <Label className="text-[#64748b] mb-2">Address</Label>
                   <Textarea
                     value={formData?.manufacturing?.address || ""}
                     onChange={(e) =>
@@ -912,18 +912,18 @@ export default function ImageManagement() {
                           : null,
                       )
                     }
-                    className="bg-white/5 border-white/10 text-white min-h-[80px]"
+                    className="bg-[#f8fafc] border-[#e2e8f0] text-[#0f172a] min-h-[80px]"
                   />
                 </div>
               </div>
 
               <div className="space-y-4">
-                <h3 className="text-lg font-medium text-white border-b border-white/10 pb-2">
+                <h3 className="text-lg font-medium text-[#0f172a] border-b border-[#e2e8f0] pb-2">
                   Contact Information
                 </h3>
 
                 <div>
-                  <Label className="text-gray-300 mb-2">Phone</Label>
+                  <Label className="text-[#64748b] mb-2">Phone</Label>
                   <Input
                     value={formData?.contact?.phone || ""}
                     onChange={(e) =>
@@ -939,12 +939,12 @@ export default function ImageManagement() {
                           : null,
                       )
                     }
-                    className="bg-white/5 border-white/10 text-white"
+                    className="bg-[#f8fafc] border-[#e2e8f0] text-[#0f172a]"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-gray-300 mb-2">Note</Label>
+                  <Label className="text-[#64748b] mb-2">Note</Label>
                   <Textarea
                     value={formData?.contact?.note || ""}
                     onChange={(e) =>
@@ -960,13 +960,13 @@ export default function ImageManagement() {
                           : null,
                       )
                     }
-                    className="bg-white/5 border-white/10 text-white min-h-[80px]"
+                    className="bg-[#f8fafc] border-[#e2e8f0] text-[#0f172a] min-h-[80px]"
                   />
                 </div>
               </div>
 
               <div className="space-y-4">
-                <h3 className="text-lg font-medium text-white border-b border-white/10 pb-2">
+                <h3 className="text-lg font-medium text-[#0f172a] border-b border-[#e2e8f0] pb-2">
                   Preview
                 </h3>
 
@@ -977,8 +977,8 @@ export default function ImageManagement() {
                     onClick={() => setPreviewMode("before")}
                     className={
                       previewMode === "before"
-                        ? "bg-[#C8A96E] hover:bg-[#C8A96E]/90"
-                        : "border-white/10 text-gray-300"
+                        ? "bg-[#7da8c7] hover:bg-[#7da8c7]/90"
+                        : "border-[#e2e8f0] text-[#64748b]"
                     }
                   >
                     Before
@@ -989,15 +989,15 @@ export default function ImageManagement() {
                     onClick={() => setPreviewMode("after")}
                     className={
                       previewMode === "after"
-                        ? "bg-[#C8A96E] hover:bg-[#C8A96E]/90"
-                        : "border-white/10 text-gray-300"
+                        ? "bg-[#7da8c7] hover:bg-[#7da8c7]/90"
+                        : "border-[#e2e8f0] text-[#64748b]"
                     }
                   >
                     After
                   </Button>
                 </div>
 
-                <div className="rounded-xl overflow-hidden border border-white/10">
+                <div className="rounded-xl overflow-hidden border border-[#e2e8f0]">
                   <img
                     src={editingItem?.imageUrl}
                     alt="Preview"
@@ -1006,40 +1006,40 @@ export default function ImageManagement() {
                 </div>
 
                 <GlassCard className="p-4">
-                  <h4 className="text-white font-medium mb-2">Summary</h4>
+                  <h4 className="text-[#0f172a] font-medium mb-2">Summary</h4>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Title:</span>
-                      <span className="text-white truncate ml-2">
+                      <span className="text-[#64748b]">Title:</span>
+                      <span className="text-[#0f172a] truncate ml-2">
                         {formData?.title}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Category:</span>
-                      <span className="text-white">
+                      <span className="text-[#64748b]">Category:</span>
+                      <span className="text-[#0f172a]">
                         {formData?.category || "N/A"}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Price:</span>
-                      <span className="text-white">
+                      <span className="text-[#64748b]">Price:</span>
+                      <span className="text-[#0f172a]">
                         ${formData?.price || 0}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Featured:</span>
+                      <span className="text-[#64748b]">Featured:</span>
                       <span
                         className={
                           formData?.featured
-                            ? "text-[#C8A96E]"
-                            : "text-gray-400"
+                            ? "text-[#7da8c7]"
+                            : "text-[#64748b]"
                         }
                       >
                         {formData?.featured ? "Yes" : "No"}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-400">Status:</span>
+                      <span className="text-[#64748b]">Status:</span>
                       <span
                         className={
                           formData?.status ? "text-green-400" : "text-red-400"
@@ -1054,17 +1054,17 @@ export default function ImageManagement() {
             </div>
           </div>
 
-          <div className="flex gap-3 pt-6 border-t border-white/10 mt-6">
+          <div className="flex gap-3 pt-6 border-t border-[#e2e8f0] mt-6">
             <Button
               onClick={handleSave}
-              className="flex-1 bg-[#C8A96E] hover:bg-[#C8A96E]/90 text-white"
+              className="flex-1 bg-[#7da8c7] hover:bg-[#5a8faf] text-white"
             >
               Save Changes
             </Button>
             <Button
               variant="outline"
               onClick={() => setEditingItem(null)}
-              className="flex-1 border-white/10 text-gray-300 hover:bg-white/5"
+              className="flex-1 border-[#e2e8f0] text-[#64748b] hover:bg-[#f1f5f9]"
             >
               Cancel
             </Button>

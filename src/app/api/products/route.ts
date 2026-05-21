@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/lib/admin-auth";
 import cloudinary from "@/lib/cloudinary";
 import { connectDB } from "@/lib/db";
 import Product from "@/models/Product";
@@ -20,10 +21,13 @@ export async function GET(request: Request) {
     const category = url.searchParams.get("category") || undefined;
 
     const featured = url.searchParams.get("featured");
+    const admin = url.searchParams.get("admin") === "1";
 
-    const query: Record<string, any> = {
-      isAvailable: true,
-    };
+    const query: Record<string, unknown> = {};
+
+    if (!admin) {
+      query.isAvailable = true;
+    }
 
     if (category) {
       query.category = category;
@@ -65,6 +69,9 @@ export async function GET(request: Request) {
 // CREATE PRODUCT
 export async function POST(request: Request) {
   try {
+    const admin = await requireAdmin();
+    if (admin.error) return admin.error;
+
     await connectDB();
 
     const body = await request.json();
@@ -90,6 +97,7 @@ export async function POST(request: Request) {
       seoTitle,
       seoDescription,
       isFeatured,
+      isAvailable,
     } = body;
 
     // REQUIRED VALIDATION
@@ -181,7 +189,8 @@ export async function POST(request: Request) {
 
       isFeatured: isFeatured || false,
 
-      isAvailable: stock > 0,
+      isAvailable:
+        typeof isAvailable === "boolean" ? isAvailable : (stock ?? 0) > 0,
     });
 
     return NextResponse.json(product, {

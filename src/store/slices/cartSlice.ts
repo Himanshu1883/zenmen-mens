@@ -1,4 +1,5 @@
 // src/store/slices/cartSlice.ts
+import { clearCartStorage } from "@/lib/cart-storage";
 import type { ProductImage } from "@/types/product";
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
@@ -16,11 +17,13 @@ export interface CartItem {
 interface CartState {
   items: CartItem[];
   open: boolean;
+  hydrated: boolean;
 }
 
 const initialState: CartState = {
   items: [],
   open: false,
+  hydrated: false,
 };
 
 const cartSlice = createSlice({
@@ -79,6 +82,13 @@ const cartSlice = createSlice({
     },
     clearCart(state) {
       state.items = [];
+      clearCartStorage();
+    },
+    setCartItems(state, action: PayloadAction<CartItem[]>) {
+      state.items = action.payload;
+    },
+    setCartHydrated(state, action: PayloadAction<boolean>) {
+      state.hydrated = action.payload;
     },
     setCartOpen(state, action: PayloadAction<boolean>) {
       state.open = action.payload;
@@ -86,6 +96,13 @@ const cartSlice = createSlice({
   },
 });
 
-export const { addItem, removeItem, updateQty, clearCart, setCartOpen } =
-  cartSlice.actions;
+export const {
+  addItem,
+  removeItem,
+  updateQty,
+  clearCart,
+  setCartItems,
+  setCartHydrated,
+  setCartOpen,
+} = cartSlice.actions;
 export default cartSlice.reducer;

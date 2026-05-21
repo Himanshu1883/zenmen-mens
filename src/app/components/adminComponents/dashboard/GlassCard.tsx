@@ -18,22 +18,14 @@ export function GlassCard({
   return (
     <div
       className={`rounded-2xl border transition-all duration-300 ${
+        gradient
+          ? "border-[#7da8c7]/30 bg-gradient-to-br from-[#f0f6fb] to-white"
+          : "border-[#e2e8f0] bg-white"
+      } shadow-sm ${
         hover
-          ? "hover:border-[#C8A96E]/50 hover:shadow-2xl hover:shadow-[#C8A96E]/10 hover:scale-[1.015]"
+          ? "hover:border-[#7da8c7]/50 hover:shadow-md hover:shadow-[#7da8c7]/10 hover:scale-[1.01]"
           : ""
       } ${className}`}
-      style={{
-        background: gradient
-          ? "linear-gradient(135deg, rgba(200, 169, 110, 0.12) 0%, rgba(139, 110, 58, 0.06) 100%)"
-          : "linear-gradient(135deg, rgba(8, 17, 34, 0.7) 0%, rgba(10, 18, 32, 0.5) 100%)",
-        backdropFilter: "blur(24px)",
-        borderColor: gradient
-          ? "rgba(200, 169, 110, 0.3)"
-          : "rgba(200, 169, 110, 0.18)",
-        boxShadow: hover
-          ? "0 10px 40px 0 rgba(0, 0, 0, 0.4)"
-          : "0 6px 20px 0 rgba(0, 0, 0, 0.25)",
-      }}
     >
       {children}
     </div>

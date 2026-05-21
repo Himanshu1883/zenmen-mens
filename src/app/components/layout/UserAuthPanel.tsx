@@ -3,6 +3,7 @@
 import { loginSchema, registerSchema } from "@/lib/validations/auth.schema";
 import {
   ChevronRight,
+  Clock,
   LayoutDashboard,
   Loader2,
   LogOut,
@@ -491,6 +492,28 @@ export default function UserAuthPanel({ open, onClose }: UserAuthPanelProps) {
                       </span>
                       <span className="font-[family-name:var(--font-montserrat)] text-[11px] font-medium tracking-[0.2em] uppercase">
                         Your profile
+                      </span>
+                    </span>
+                    <ChevronRight
+                      className="h-4 w-4 shrink-0 text-[#cbd5e1] group-hover:translate-x-0.5 group-hover:text-[#7da8c7]"
+                      strokeWidth={1.5}
+                    />
+                  </Link>
+
+                  <Link
+                    href="/profile#recently-viewed"
+                    onClick={handleClose}
+                    className="group flex items-center justify-between gap-3 border border-[#1b2232]/10 bg-white px-4 py-3.5 text-[#0f172a] no-underline shadow-sm transition-[transform,box-shadow] duration-150 hover:-translate-y-px hover:border-[#7da8c7]/35 hover:shadow-md"
+                  >
+                    <span className="flex items-center gap-3">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-[2px] bg-[#f8fafc]">
+                        <Clock
+                          className="h-4 w-4 text-[#7da8c7]"
+                          strokeWidth={1.5}
+                        />
+                      </span>
+                      <span className="font-[family-name:var(--font-montserrat)] text-[11px] font-medium tracking-[0.2em] uppercase">
+                        Recently viewed
                       </span>
                     </span>
                     <ChevronRight

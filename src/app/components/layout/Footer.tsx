@@ -473,7 +473,7 @@ export default function Footer() {
         .zf p, .zf h4, .zf h5, .zf ul { margin: 0; padding: 0; }
       `}</style>
 
-      <footer className="zf">
+      <footer id="zenmen-footer" className="zf">
         {/* ── Top Divider ── */}
         <div className="zf-divider" />
 

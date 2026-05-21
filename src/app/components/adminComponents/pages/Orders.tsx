@@ -82,12 +82,12 @@ export default function Orders() {
       {/* Page Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-semibold text-white mb-2">Orders</h1>
-          <p className="text-gray-400">
+          <h1 className="text-3xl font-semibold text-[#0f172a] mb-2">Orders</h1>
+          <p className="text-[#64748b]">
             Manage customer orders and fulfillment
           </p>
         </div>
-        <Button variant="outline" className="border-white/10 text-gray-300">
+        <Button variant="outline" className="border-[#e2e8f0] text-[#64748b]">
           Export Orders
         </Button>
       </div>
@@ -95,20 +95,20 @@ export default function Orders() {
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <GlassCard className="p-4">
-          <p className="text-gray-400 text-sm mb-1">Total Orders</p>
-          <p className="text-2xl font-semibold text-white">892</p>
+          <p className="text-[#64748b] text-sm mb-1">Total Orders</p>
+          <p className="text-2xl font-semibold text-[#0f172a]">892</p>
           <p className="text-xs text-green-400 mt-1">+23.1% vs last month</p>
         </GlassCard>
         <GlassCard className="p-4">
-          <p className="text-gray-400 text-sm mb-1">Pending</p>
+          <p className="text-[#64748b] text-sm mb-1">Pending</p>
           <p className="text-2xl font-semibold text-yellow-400">34</p>
         </GlassCard>
         <GlassCard className="p-4">
-          <p className="text-gray-400 text-sm mb-1">Processing</p>
+          <p className="text-[#64748b] text-sm mb-1">Processing</p>
           <p className="text-2xl font-semibold text-blue-400">127</p>
         </GlassCard>
         <GlassCard className="p-4">
-          <p className="text-gray-400 text-sm mb-1">Completed</p>
+          <p className="text-[#64748b] text-sm mb-1">Completed</p>
           <p className="text-2xl font-semibold text-green-400">731</p>
         </GlassCard>
       </div>
@@ -118,26 +118,26 @@ export default function Orders() {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-white/10">
-                <th className="text-left p-4 text-sm font-medium text-gray-400">
+              <tr className="border-b border-[#e2e8f0]">
+                <th className="text-left p-4 text-sm font-medium text-[#64748b]">
                   Order ID
                 </th>
-                <th className="text-left p-4 text-sm font-medium text-gray-400">
+                <th className="text-left p-4 text-sm font-medium text-[#64748b]">
                   Customer
                 </th>
-                <th className="text-left p-4 text-sm font-medium text-gray-400">
+                <th className="text-left p-4 text-sm font-medium text-[#64748b]">
                   Product
                 </th>
-                <th className="text-left p-4 text-sm font-medium text-gray-400">
+                <th className="text-left p-4 text-sm font-medium text-[#64748b]">
                   Date
                 </th>
-                <th className="text-left p-4 text-sm font-medium text-gray-400">
+                <th className="text-left p-4 text-sm font-medium text-[#64748b]">
                   Amount
                 </th>
-                <th className="text-left p-4 text-sm font-medium text-gray-400">
+                <th className="text-left p-4 text-sm font-medium text-[#64748b]">
                   Status
                 </th>
-                <th className="text-left p-4 text-sm font-medium text-gray-400">
+                <th className="text-left p-4 text-sm font-medium text-[#64748b]">
                   Actions
                 </th>
               </tr>
@@ -146,27 +146,27 @@ export default function Orders() {
               {mockOrders.map((order) => (
                 <tr
                   key={order.id}
-                  className="border-b border-white/5 hover:bg-white/5 transition-colors"
+                  className="border-b border-white/5 hover:bg-[#f1f5f9] transition-colors"
                 >
                   <td className="p-4">
-                    <p className="text-[#C8A96E] text-sm font-mono">
+                    <p className="text-[#7da8c7] text-sm font-mono">
                       {order.id}
                     </p>
                   </td>
                   <td className="p-4">
-                    <p className="text-white text-sm">{order.customer}</p>
+                    <p className="text-[#0f172a] text-sm">{order.customer}</p>
                   </td>
                   <td className="p-4">
                     <div className="flex items-center gap-2">
-                      <Package className="w-4 h-4 text-gray-400" />
-                      <p className="text-gray-300 text-sm">{order.product}</p>
+                      <Package className="w-4 h-4 text-[#64748b]" />
+                      <p className="text-[#64748b] text-sm">{order.product}</p>
                     </div>
                   </td>
                   <td className="p-4">
-                    <p className="text-gray-400 text-sm">{order.date}</p>
+                    <p className="text-[#64748b] text-sm">{order.date}</p>
                   </td>
                   <td className="p-4">
-                    <p className="text-white text-sm font-semibold">
+                    <p className="text-[#0f172a] text-sm font-semibold">
                       ${order.amount.toLocaleString()}
                     </p>
                   </td>
@@ -183,7 +183,7 @@ export default function Orders() {
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="h-8 w-8 p-0 text-gray-400 hover:text-[#C8A96E] hover:bg-white/5"
+                        className="h-8 w-8 p-0 text-[#64748b] hover:text-[#7da8c7] hover:bg-[#f1f5f9]"
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
@@ -192,7 +192,7 @@ export default function Orders() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            className="h-8 w-8 p-0 text-gray-400 hover:text-blue-400 hover:bg-white/5"
+                            className="h-8 w-8 p-0 text-[#64748b] hover:text-blue-400 hover:bg-[#f1f5f9]"
                           >
                             <Truck className="w-4 h-4" />
                           </Button>
@@ -206,20 +206,20 @@ export default function Orders() {
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between p-4 border-t border-white/10">
-          <p className="text-sm text-gray-400">Showing 1-6 of 892 orders</p>
+        <div className="flex items-center justify-between p-4 border-t border-[#e2e8f0]">
+          <p className="text-sm text-[#64748b]">Showing 1-6 of 892 orders</p>
           <div className="flex gap-2">
             <Button
               size="sm"
               variant="outline"
-              className="border-white/10 text-gray-300"
+              className="border-[#e2e8f0] text-[#64748b]"
               disabled
             >
               Previous
             </Button>
             <Button
               size="sm"
-              className="bg-[#C8A96E] hover:bg-[#C8A96E]/90 text-white"
+              className="bg-[#7da8c7] hover:bg-[#5a8faf] text-white"
             >
               Next
             </Button>
@@ -229,7 +229,7 @@ export default function Orders() {
 
       {/* Recent Activity */}
       <GlassCard className="p-6">
-        <h3 className="text-lg font-semibold text-white mb-4">
+        <h3 className="text-lg font-semibold text-[#0f172a] mb-4">
           Recent Order Activity
         </h3>
         <div className="space-y-4">
@@ -261,7 +261,7 @@ export default function Orders() {
           ].map((activity, index) => (
             <div
               key={index}
-              className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors"
+              className="flex items-center gap-4 p-4 rounded-xl hover:bg-[#f1f5f9] transition-colors"
             >
               <div
                 className="w-10 h-10 rounded-full flex items-center justify-center"
@@ -270,13 +270,13 @@ export default function Orders() {
                     "linear-gradient(135deg, rgba(244, 167, 157, 0.2) 0%, rgba(244, 167, 157, 0.05) 100%)",
                 }}
               >
-                <activity.icon className="w-5 h-5 text-[#C8A96E]" />
+                <activity.icon className="w-5 h-5 text-[#7da8c7]" />
               </div>
               <div className="flex-1">
-                <p className="text-white text-sm">{activity.action}</p>
-                <p className="text-gray-400 text-xs">{activity.order}</p>
+                <p className="text-[#0f172a] text-sm">{activity.action}</p>
+                <p className="text-[#64748b] text-xs">{activity.order}</p>
               </div>
-              <span className="text-xs text-gray-500">{activity.time}</span>
+              <span className="text-xs text-[#94a3b8]">{activity.time}</span>
             </div>
           ))}
         </div>

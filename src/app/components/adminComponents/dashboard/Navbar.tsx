@@ -1,14 +1,10 @@
 "use client";
-import {
-  Bell,
-  Menu,
-  Search,
-  Settings as SettingsIcon,
-  Sun,
-} from "lucide-react";
+
+import { adminAvatarParams } from "@/app/components/adminComponents/admin-theme";
+import { Bell, Menu, Search, Settings as SettingsIcon } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { useSession } from "next-auth/react";
 
 interface NavbarProps {
   onMenuClick: () => void;
@@ -26,169 +22,119 @@ const pageTitles: Record<string, { title: string; subtitle: string }> = {
   "/admin/images": { title: "Gallery", subtitle: "Image Library" },
   "/admin/products": { title: "Products", subtitle: "Catalog Management" },
   "/admin/users": { title: "Clients", subtitle: "Customer Directory" },
-  "/admin/orders": { title: "Orders", subtitle: "Commission Management" },
+  "/admin/orders": { title: "Orders", subtitle: "Order Management" },
   "/admin/analytics": { title: "Analytics", subtitle: "Business Insights" },
   "/admin/settings": { title: "Settings", subtitle: "System Configuration" },
 };
 
 export function Navbar({ onMenuClick, sidebarCollapsed, admin }: NavbarProps) {
   const pathname = usePathname();
-
   const { data: session } = useSession();
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const defaultAdmin = {
-    name: "Sarah Anderson",
-    role: "Admin",
-    avatarUrl:
-      "https://ui-avatars.com/api/?name=Sarah+Anderson&background=C8A96E&color=050a18",
+    name: "Admin",
+    role: "admin",
+    avatarUrl: `https://ui-avatars.com/api/?name=Admin&${adminAvatarParams}`,
   };
 
   const sessionUser = session?.user;
-
   const currentAdmin = {
     ...defaultAdmin,
     ...(admin || {}),
-    // Prefer session values when available
     name: sessionUser?.name ?? admin?.name ?? defaultAdmin.name,
     role:
-      // If a custom role is attached to session.user (common pattern), use it
-      // otherwise fall back to admin prop or default
-      (sessionUser as any)?.role ?? admin?.role ?? defaultAdmin.role,
+      (sessionUser as { role?: string })?.role ??
+      admin?.role ??
+      defaultAdmin.role,
     avatarUrl:
       sessionUser?.image ||
       admin?.avatarUrl ||
       `https://ui-avatars.com/api/?name=${encodeURIComponent(
         (sessionUser?.name ?? admin?.name ?? defaultAdmin.name) as string,
-      )}&background=C8A96E&color=050a18`,
+      )}&${adminAvatarParams}`,
   };
 
   const currentPage = pageTitles[pathname] || pageTitles["/admin"];
-  const [searchFocused, setSearchFocused] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
 
   return (
     <header
-      className={`fixed top-16 right-0 left-0 ${
+      className={`fixed top-20 right-0 left-0 ${
         sidebarCollapsed ? "md:left-20" : "md:left-72"
-      } h-20 z-20 transition-all duration-300`}
-      style={{
-        background: "rgba(5, 10, 24, 0.8)",
-        backdropFilter: "blur(20px)",
-        borderBottom: "1px solid rgba(200, 169, 110, 0.1)",
-      }}
+      } h-20 z-20 transition-all duration-300 bg-white/90 backdrop-blur-md border-b border-[#e2e8f0]`}
     >
       <div className="h-full px-6 flex items-center justify-between gap-4">
-        {/* Left Section */}
         <div className="flex items-center gap-4 flex-shrink-0 min-w-0">
-          {/* Mobile Menu Button */}
           <button
+            type="button"
             onClick={onMenuClick}
-            className="md:hidden p-2 hover:bg-white/5 rounded-lg transition-colors flex-shrink-0"
+            className="md:hidden p-2 hover:bg-[#f1f5f9] rounded-lg transition-colors flex-shrink-0 text-[#0f172a]"
           >
-            <Menu className="w-5 h-5" style={{ color: "#FAF8F4" }} />
+            <Menu className="w-5 h-5" />
           </button>
 
-          {/* Page Title */}
           <div className="hidden md:block min-w-0">
-            <h2
-              className="text-lg font-semibold leading-tight"
-              style={{ color: "#FAF8F4" }}
-            >
+            <h2 className="text-lg font-semibold leading-tight text-[#0f172a]">
               {currentPage.title}
             </h2>
-            <p
-              className="text-xs leading-tight mt-0.5"
-              style={{ color: "#9AA5B8" }}
-            >
+            <p className="text-xs leading-tight mt-0.5 text-[#64748b]">
               {currentPage.subtitle}
             </p>
           </div>
         </div>
 
-        {/* Search Bar */}
         <div className="flex-1 max-w-2xl hidden lg:block mx-auto">
           <div
             className={`relative transition-all ${
-              searchFocused ? "scale-105" : ""
+              searchFocused ? "scale-[1.02]" : ""
             }`}
           >
             <Search
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors"
-              style={{ color: searchFocused ? "#C8A96E" : "#9AA5B8" }}
+              className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${
+                searchFocused ? "text-[#7da8c7]" : "text-[#94a3b8]"
+              }`}
             />
             <input
               type="text"
               placeholder="Search orders, clients, products..."
               onFocus={() => setSearchFocused(true)}
               onBlur={() => setSearchFocused(false)}
-              className="w-full pl-11 pr-4 py-2.5 rounded-xl text-sm transition-all focus:outline-none"
-              style={{
-                background: searchFocused
-                  ? "rgba(200, 169, 110, 0.1)"
-                  : "rgba(255, 255, 255, 0.05)",
-                border: `1px solid ${
-                  searchFocused
-                    ? "rgba(200, 169, 110, 0.3)"
-                    : "rgba(255, 255, 255, 0.1)"
-                }`,
-                color: "#E8E4DC",
-              }}
+              className={`w-full pl-11 pr-4 py-2.5 rounded-xl text-sm transition-all focus:outline-none bg-[#f8fafc] text-[#0f172a] placeholder:text-[#94a3b8] border ${
+                searchFocused
+                  ? "border-[#7da8c7] ring-1 ring-[#7da8c7]/20"
+                  : "border-[#e2e8f0]"
+              }`}
             />
           </div>
         </div>
 
-        {/* Right Section */}
         <div className="flex items-center gap-2 flex-shrink-0">
-          {/* Theme Toggle */}
           <button
-            className="p-2.5 hover:bg-white/5 rounded-xl transition-all"
-            title="Toggle Theme"
-          >
-            <Sun className="w-5 h-5" style={{ color: "#9AA5B8" }} />
-          </button>
-
-          {/* Settings */}
-          <button
-            className="p-2.5 hover:bg-white/5 rounded-xl transition-all hidden md:block"
+            type="button"
+            className="p-2.5 hover:bg-[#f1f5f9] rounded-xl transition-all hidden md:block text-[#64748b] hover:text-[#7da8c7]"
             title="Settings"
           >
-            <SettingsIcon className="w-5 h-5" style={{ color: "#9AA5B8" }} />
+            <SettingsIcon className="w-5 h-5" />
           </button>
 
-          {/* Notifications */}
           <div className="relative">
             <button
+              type="button"
               onClick={() => setShowNotifications(!showNotifications)}
-              className="relative p-2.5 hover:bg-white/5 rounded-xl transition-all"
+              className="relative p-2.5 hover:bg-[#f1f5f9] rounded-xl transition-all text-[#64748b]"
             >
-              <Bell className="w-5 h-5" style={{ color: "#9AA5B8" }} />
-              <span
-                className="absolute top-2 right-2 w-2 h-2 rounded-full"
-                style={{
-                  background: "#C8A96E",
-                  boxShadow: "0 0 0 3px rgba(5, 10, 24, 0.8)",
-                }}
-              ></span>
+              <Bell className="w-5 h-5" />
+              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#7da8c7] ring-2 ring-white" />
             </button>
 
-            {/* Notifications Dropdown */}
             {showNotifications && (
-              <div
-                className="absolute right-0 mt-2 w-80 rounded-xl shadow-2xl overflow-hidden"
-                style={{
-                  background:
-                    "linear-gradient(135deg, #0A1220 0%, #050a18 100%)",
-                  border: "1px solid rgba(200, 169, 110, 0.2)",
-                }}
-              >
-                <div
-                  className="p-4 border-b"
-                  style={{ borderColor: "rgba(200, 169, 110, 0.1)" }}
-                >
-                  <h3 className="font-semibold" style={{ color: "#FAF8F4" }}>
+              <div className="absolute right-0 mt-2 w-80 rounded-xl shadow-lg overflow-hidden bg-white border border-[#e2e8f0]">
+                <div className="p-4 border-b border-[#e2e8f0]">
+                  <h3 className="font-semibold text-[#0f172a]">
                     Notifications
                   </h3>
-                  <p className="text-xs mt-1" style={{ color: "#9AA5B8" }}>
+                  <p className="text-xs mt-1 text-[#64748b]">
                     You have 3 unread messages
                   </p>
                 </div>
@@ -202,7 +148,7 @@ export function Navbar({ onMenuClick, sidebarCollapsed, admin }: NavbarProps) {
                     },
                     {
                       title: "Payment Confirmed",
-                      desc: "$3,200 from David Park",
+                      desc: "₹3,200 from David Park",
                       time: "5h ago",
                       unread: true,
                     },
@@ -215,33 +161,22 @@ export function Navbar({ onMenuClick, sidebarCollapsed, admin }: NavbarProps) {
                   ].map((notif, i) => (
                     <div
                       key={i}
-                      className="p-4 hover:bg-white/5 transition-colors cursor-pointer border-b"
-                      style={{ borderColor: "rgba(200, 169, 110, 0.05)" }}
+                      className="p-4 hover:bg-[#f8fafc] transition-colors cursor-pointer border-b border-[#f1f5f9]"
                     >
                       <div className="flex items-start gap-3">
                         <div
-                          className={`w-2 h-2 rounded-full mt-2 ${
+                          className={`w-2 h-2 rounded-full mt-2 bg-[#7da8c7] ${
                             notif.unread ? "opacity-100" : "opacity-0"
                           }`}
-                          style={{ background: "#C8A96E" }}
-                        ></div>
+                        />
                         <div className="flex-1 min-w-0">
-                          <p
-                            className="text-sm font-medium"
-                            style={{ color: "#FAF8F4" }}
-                          >
+                          <p className="text-sm font-medium text-[#0f172a]">
                             {notif.title}
                           </p>
-                          <p
-                            className="text-xs mt-1"
-                            style={{ color: "#9AA5B8" }}
-                          >
+                          <p className="text-xs mt-1 text-[#64748b]">
                             {notif.desc}
                           </p>
-                          <p
-                            className="text-xs mt-1"
-                            style={{ color: "#C8A96E" }}
-                          >
+                          <p className="text-xs mt-1 text-[#7da8c7]">
                             {notif.time}
                           </p>
                         </div>
@@ -249,13 +184,10 @@ export function Navbar({ onMenuClick, sidebarCollapsed, admin }: NavbarProps) {
                     </div>
                   ))}
                 </div>
-                <div
-                  className="p-3 text-center border-t"
-                  style={{ borderColor: "rgba(200, 169, 110, 0.1)" }}
-                >
+                <div className="p-3 text-center border-t border-[#e2e8f0]">
                   <button
-                    className="text-sm font-medium transition-colors hover:opacity-80"
-                    style={{ color: "#C8A96E" }}
+                    type="button"
+                    className="text-sm font-medium text-[#7da8c7] hover:text-[#5a8faf]"
                   >
                     View All Notifications
                   </button>
@@ -264,41 +196,24 @@ export function Navbar({ onMenuClick, sidebarCollapsed, admin }: NavbarProps) {
             )}
           </div>
 
-          {/* Profile */}
           <div className="hidden md:block">
-            <button className="flex items-center gap-3 px-3 py-2 hover:bg-white/5 rounded-xl transition-all">
+            <button
+              type="button"
+              className="flex items-center gap-3 px-3 py-2 hover:bg-[#f1f5f9] rounded-xl transition-all"
+            >
               <div className="text-right">
-                <p
-                  className="text-sm font-medium leading-tight"
-                  style={{ color: "#FAF8F4" }}
-                >
+                <p className="text-sm font-medium leading-tight text-[#0f172a]">
                   {currentAdmin.name}
                 </p>
-                <p
-                  className="text-xs leading-tight mt-0.5"
-                  style={{ color: "#9AA5B8" }}
-                >
+                <p className="text-xs leading-tight mt-0.5 text-[#64748b] capitalize">
                   {currentAdmin.role}
                 </p>
               </div>
-              <div
-                className="w-10 h-10 rounded-full ring-2 transition-all shrink-0"
-                style={{
-                  background:
-                    "linear-gradient(135deg, #C8A96E 0%, #8B6E3A 100%)",
-                }}
-              >
-                <img
-                  src={
-                    currentAdmin.avatarUrl ||
-                    `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                      currentAdmin.name || "Admin",
-                    )}&background=C8A96E&color=050a18`
-                  }
-                  alt="Profile"
-                  className="w-full h-full rounded-full"
-                />
-              </div>
+              <img
+                src={currentAdmin.avatarUrl}
+                alt="Profile"
+                className="w-10 h-10 rounded-full ring-2 ring-[#7da8c7]/30 shrink-0"
+              />
             </button>
           </div>
         </div>
