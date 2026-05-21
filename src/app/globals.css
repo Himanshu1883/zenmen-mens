@@ -163,3 +163,14 @@
     zoom: 0.9;
   }
 } */
+
+/* globals.css */
+@keyframes zenshimmer {
+  0%   { background-position: -700px 0; }
+  100% { background-position:  700px 0; }
+}
+.zen-bone {
+  background: linear-gradient(90deg, #e8edf2 0px, #f1f5f9 40%, #e8edf2 80%);
+  background-size: 700px 100%;
+  animation: zenshimmer 1.6s ease-in-out infinite;
+}

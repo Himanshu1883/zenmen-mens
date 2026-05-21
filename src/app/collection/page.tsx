@@ -456,15 +456,22 @@ export default function CollectionPage() {
       <div className="px-4 md:px-12 lg:px-20 pb-8 md:pb-20">
         {/* Skeleton */}
         {loading && (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div
-                key={i}
-                className="aspect-[3/4] bg-[rgba(200,169,110,0.05)] animate-pulse"
-              />
-            ))}
-          </div>
-        )}
+  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
+    {Array.from({ length: 8 }).map((_, i) => (
+      <div key={i}>
+        <div className="zen-bone relative mb-3 border border-[#e2e8f0]" style={{ aspectRatio: "3/4", position: "relative" }}>
+          <img src="/zenmen_watermark.png" alt="" aria-hidden="true"
+            style={{ position:"absolute", top:"50%", left:"50%", transform:"translate(-50%,-50%)",
+              width:"95%", maxWidth:200, opacity:0.2, filter:"grayscale(1) brightness(0.6)",
+              pointerEvents:"none" }} />
+        </div>
+        <div className="zen-bone h-2.5 w-16 mb-2" />
+        <div className="zen-bone h-3.5 w-full mb-1.5" />
+        <div className="zen-bone h-3.5 w-20" />
+      </div>
+    ))}
+  </div>
+)}
 
         {/* Empty state */}
         {!loading && sortedProducts.length === 0 && (
