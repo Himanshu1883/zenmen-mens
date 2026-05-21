@@ -242,6 +242,8 @@ export default function Products() {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
           gap: clamp(18px, 2.5vw, 28px);
+          /* Align all rows — every card in a row stretches to equal height */
+          align-items: stretch;
         }
 
         @keyframes cardIn {
@@ -249,6 +251,7 @@ export default function Products() {
           to   { opacity: 1; transform: translateY(0); }
         }
 
+        /* ── KEY FIX: card is a flex column so body can push footer to bottom ── */
         .product-card {
           background: #ffffff;
           border: 1px solid #e2e8f0;
@@ -258,7 +261,9 @@ export default function Products() {
           animation: cardIn 0.5s both;
           position: relative;
           text-decoration: none;
-          display: block;
+          /* flex column so card-body can fill remaining height */
+          display: flex;
+          flex-direction: column;
           box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
         }
         .product-card:hover {
@@ -281,8 +286,12 @@ export default function Products() {
         }
 
         .card-img {
-          position: relative; aspect-ratio: 3 / 4; overflow: hidden;
+          /* Fixed aspect ratio — image area never shrinks or grows */
+          position: relative;
+          aspect-ratio: 3 / 4;
+          overflow: hidden;
           background: #f1f5f9;
+          flex-shrink: 0;
         }
         .card-img img {
           width: 100%; height: 100%; object-fit: cover; object-position: center;
@@ -366,29 +375,40 @@ export default function Products() {
           border-color: #7da8c7;
         }
 
+        /* ── KEY FIX: card-body is flex column, fills remaining card height ── */
         .card-body {
-          padding: 22px 22px 20px;
+          padding: 20px 22px 0;
           border-top: 1px solid #f1f5f9;
+          /* grow to fill all space below the image */
+          flex: 1;
+          display: flex;
+          flex-direction: column;
         }
 
         .card-cat {
           font-size: 9px; font-weight: 600;
           letter-spacing: 0.24em; text-transform: uppercase;
-          margin-bottom: 8px;
+          margin-bottom: 7px;
           color: #7da8c7;
+          /* fixed single line — never wraps */
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
+        /* Title clamped to exactly 2 lines so height is predictable */
         .card-name {
           font-family: var(--font-playfair), Georgia, serif;
-          font-size: 1.35rem; font-weight: 500;
-          color: #0f172a; line-height: 1.25;
-          margin-bottom: 6px;
-        }
-
-        .card-sub {
-          font-size: 10px; font-weight: 500;
-          letter-spacing: 0.14em; color: #94a3b8;
-          text-transform: uppercase;
+          font-size: 1.3rem; font-weight: 500;
+          color: #0f172a; line-height: 1.28;
+          margin-bottom: 0;
+          /* always exactly 2 lines tall */
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          /* reserve height for 2 lines even if text is shorter */
+          min-height: calc(1.3rem * 1.28 * 2);
         }
 
         .card-desc {
@@ -401,26 +421,23 @@ export default function Products() {
           overflow: hidden;
         }
 
+        /* ── KEY FIX: footer always pushed to bottom of card-body ── */
         .card-footer {
+          margin-top: auto;           /* pushes footer to bottom regardless of content above */
+          padding: 14px 0 20px;       /* breathing room above and below */
+          border-top: 1px solid #f1f5f9;
           display: flex;
           flex-direction: column;
-          align-items: flex-start;
-          gap: 12px;
-          border-top: 1px solid #f1f5f9;
-          padding-top: 14px;
-          margin-top: 4px;
+          gap: 10px;
         }
+
         .card-price-wrap {
           width: 100%;
-          text-align: left;
-        }
-        .card-footer .add-btn {
-          align-self: stretch;
         }
 
         .card-price {
           font-family: var(--font-playfair), Georgia, serif;
-          font-size: 1.5rem; font-weight: 500;
+          font-size: 1.45rem; font-weight: 500;
           color: #0f172a;
           letter-spacing: 0.02em;
         }
@@ -470,8 +487,6 @@ export default function Products() {
           z-index: 1;
           width: 16px;
           height: 16px;
-          border-radius: 0;
-          border: none;
           display: inline-flex;
           align-items: center;
           justify-content: center;
@@ -548,6 +563,21 @@ export default function Products() {
           .products-filter-btn { padding: 12px 14px 14px; font-size: 10px; }
           .view-collection-btn { padding: 16px 20px; }
           .view-collection-text { font-size: 10px; }
+          /* On mobile single-column, cards don't need equal height — reset */
+          .card-name { min-height: unset; }
+        }
+
+        /* 2-column breakpoint: enforce equal row heights so buttons align */
+        @media (min-width: 641px) and (max-width: 1023px) {
+          .products-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .products-grid {
+            grid-template-columns: repeat(4, 1fr);
+          }
         }
       `}</style>
 
@@ -673,14 +703,6 @@ export default function Products() {
                       {product.subCategory || "Ready to Wear"}
                     </div>
                     <h3 className="card-name">{product.title}</h3>
-                    {/* <p className="card-sub">
-                      {product.tagline ||
-                        product.colors?.[0] ||
-                        "Premium Quality"}
-                    </p> */}
-                    {/* <p className="card-desc">
-                      {product.description?.slice(0, 100)}...
-                    </p> */}
 
                     <div className="card-footer">
                       <div className="card-price-wrap">

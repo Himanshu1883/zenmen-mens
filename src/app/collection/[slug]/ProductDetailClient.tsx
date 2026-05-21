@@ -60,8 +60,8 @@ function IconHeart({ filled }: { filled: boolean }) {
 function IconBag() {
   return (
     <svg
-      width="17"
-      height="17"
+      width="16"
+      height="16"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -76,7 +76,7 @@ function IconBag() {
 
 function IconWhatsApp() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
       <path
         d="M12.032 3.024c-4.967 0-9 4.033-9 9 0 1.59.414 3.153 1.2 4.53L3 21.024l4.545-1.212a8.97 8.97 0 0 0 4.287 1.092c4.967 0 9-4.033 9-9s-4.033-9-9-9z"
         fill="currentColor"
@@ -89,15 +89,9 @@ function IconWhatsApp() {
   );
 }
 
-/** Official WhatsApp green mark for light buttons */
 function IconWhatsAppGreen({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      className={className}
-      fill="#25D366"
-      aria-hidden
-    >
+    <svg viewBox="0 0 24 24" className={className} fill="#25D366" aria-hidden>
       <path d="M20.52 3.48A11.85 11.85 0 0 0 12.06 0C5.5 0 .16 5.34.16 11.9c0 2.1.55 4.16 1.6 5.98L0 24l6.3-1.65a11.86 11.86 0 0 0 5.76 1.47h.01c6.56 0 11.9-5.34 11.9-11.9 0-3.18-1.24-6.17-3.45-8.44Zm-8.46 18.33h-.01a9.9 9.9 0 0 1-5.04-1.38l-.36-.21-3.74.98 1-3.64-.24-.37a9.9 9.9 0 0 1-1.53-5.29c0-5.46 4.44-9.9 9.91-9.9 2.64 0 5.12 1.03 6.98 2.89a9.82 9.82 0 0 1 2.92 7.01c0 5.46-4.44 9.9-9.9 9.9Zm5.43-7.42c-.3-.15-1.78-.88-2.06-.98-.27-.1-.47-.15-.67.15-.2.3-.77.98-.95 1.18-.17.2-.35.23-.65.08-.3-.15-1.27-.47-2.42-1.49-.89-.79-1.5-1.76-1.68-2.06-.17-.3-.02-.46.13-.6.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.38-.03-.53-.08-.15-.67-1.62-.92-2.23-.24-.58-.48-.5-.67-.51l-.57-.01c-.2 0-.52.08-.8.38-.27.3-1.05 1.03-1.05 2.5 0 1.48 1.08 2.9 1.23 3.1.15.2 2.12 3.24 5.14 4.54.72.31 1.29.49 1.73.63.73.23 1.4.2 1.92.12.59-.09 1.78-.73 2.03-1.43.25-.7.25-1.3.17-1.43-.08-.13-.28-.2-.58-.35Z" />
     </svg>
   );
@@ -106,8 +100,8 @@ function IconWhatsAppGreen({ className }: { className?: string }) {
 function IconChevron() {
   return (
     <svg
-      width="14"
-      height="14"
+      width="13"
+      height="13"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -121,8 +115,8 @@ function IconChevron() {
 function IconZoomIn() {
   return (
     <svg
-      width="16"
-      height="16"
+      width="15"
+      height="15"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -153,8 +147,8 @@ function IconClose() {
 function StarIcon({ filled }: { filled: boolean }) {
   return (
     <svg
-      width="12"
-      height="12"
+      width="11"
+      height="11"
       viewBox="0 0 12 12"
       fill={filled ? "#7da8c7" : "none"}
       stroke={filled ? "none" : "#7da8c7"}
@@ -180,9 +174,9 @@ function AccordionItem({
     <div className="border-b border-[#e2e8f0]">
       <button
         onClick={onToggle}
-        className="group flex w-full items-center justify-between bg-transparent py-4 text-left"
+        className="group flex w-full items-center justify-between bg-transparent py-3.5 text-left"
       >
-        <span className="font-['Jost'] text-[.7rem] uppercase tracking-[.2em] text-black transition-colors group-hover:text-[#7da8c7]">
+        <span className="font-['Jost'] text-[.65rem] uppercase tracking-[.22em] text-[#0f172a] transition-colors group-hover:text-[#7da8c7]">
           {item.label}
         </span>
         <span
@@ -198,7 +192,7 @@ function AccordionItem({
           paddingBottom: isOpen ? "1rem" : "0",
         }}
       >
-        <p className="text-[.82rem] leading-[1.85] text-black">
+        <p className="text-[.8rem] leading-[1.85] text-[#64748b]">
           {item.content}
         </p>
       </div>
@@ -207,6 +201,7 @@ function AccordionItem({
 }
 
 // ─── Image Zoom (desktop hover · mobile hold-loupe · pinch modal) ─────────────
+// NOTE: All zoom logic preserved exactly as original
 
 const DESKTOP_ZOOM_SCALE = 2;
 const LENS_MAGNIFY = 2.75;
@@ -247,7 +242,6 @@ function PinchZoomModal({
     startY: number;
     startPan: { x: number; y: number };
   } | null>(null);
-
   const [scale, setScale] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [origin, setOrigin] = useState({ x: 50, y: 50 });
@@ -272,16 +266,6 @@ function PinchZoomModal({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
-
-  const getOrigin = (clientX: number, clientY: number) => {
-    const el = viewportRef.current;
-    if (!el) return { x: 50, y: 50 };
-    const rect = el.getBoundingClientRect();
-    return {
-      x: Math.min(100, Math.max(0, ((clientX - rect.left) / rect.width) * 100)),
-      y: Math.min(100, Math.max(0, ((clientY - rect.top) / rect.height) * 100)),
-    };
-  };
 
   const clampPan = (next: { x: number; y: number }, s: number) => {
     const el = viewportRef.current;
@@ -362,7 +346,7 @@ function PinchZoomModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[200] flex flex-col bg-[#0f172a]/95 backdrop-blur-sm"
+      className="fixed inset-0 z-[200] flex flex-col bg-[#0f172a]/96 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-label="Zoom product image"
@@ -372,7 +356,7 @@ function PinchZoomModal({
         className="flex shrink-0 items-center justify-between px-4 py-3 sm:px-6"
         onClick={(e) => e.stopPropagation()}
       >
-        <p className="text-[10px] tracking-[0.2em] uppercase text-[#e2e8f0]/80">
+        <p className="text-[10px] tracking-[0.2em] uppercase text-[#7da8c7]/70">
           Pinch to zoom · drag to pan
         </p>
         <button
@@ -384,7 +368,6 @@ function PinchZoomModal({
           <IconClose />
         </button>
       </div>
-
       <div
         ref={viewportRef}
         className="relative min-h-0 flex-1 overflow-hidden touch-none"
@@ -416,10 +399,12 @@ function ZoomableImage({
   src,
   alt,
   className,
+  style,
 }: {
   src: string;
   alt: string;
   className?: string;
+  style?: React.CSSProperties;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
@@ -431,7 +416,6 @@ function ZoomableImage({
   const [desktopZoomed, setDesktopZoomed] = useState(false);
   const [desktopOrigin, setDesktopOrigin] = useState({ x: 50, y: 50 });
   const [pinchModalOpen, setPinchModalOpen] = useState(false);
-
   const [lensDisplay, setLensDisplay] = useState({ x: 50, y: 50 });
   const [lensSample, setLensSample] = useState({ x: 50, y: 50 });
   const [showLens, setShowLens] = useState(false);
@@ -476,9 +460,11 @@ function ZoomableImage({
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-
     const ro = new ResizeObserver((entries) => {
-      const { width, height } = entries[0]?.contentRect ?? { width: 0, height: 0 };
+      const { width, height } = entries[0]?.contentRect ?? {
+        width: 0,
+        height: 0,
+      };
       setContainerSize({ w: width, h: height });
     });
     ro.observe(el);
@@ -488,11 +474,9 @@ function ZoomableImage({
   useEffect(() => {
     const el = containerRef.current;
     if (!el || !isMobile) return;
-
     const blockScroll = (e: TouchEvent) => {
       if (lensActiveRef.current) e.preventDefault();
     };
-
     el.addEventListener("touchmove", blockScroll, { passive: false });
     return () => el.removeEventListener("touchmove", blockScroll);
   }, [isMobile]);
@@ -501,25 +485,19 @@ function ZoomableImage({
 
   const getLensPositions = useCallback((clientX: number, clientY: number) => {
     const el = containerRef.current;
-    if (!el) {
-      return { display: { x: 50, y: 50 }, sample: { x: 50, y: 50 } };
-    }
+    if (!el) return { display: { x: 50, y: 50 }, sample: { x: 50, y: 50 } };
     const rect = el.getBoundingClientRect();
     const marginX = (LENS_SIZE_PX / 2 / rect.width) * 100;
     const marginY = (LENS_SIZE_PX / 2 / rect.height) * 100;
     const offsetY = (LENS_ABOVE_TOUCH_PX / rect.height) * 100;
-
     const sampleX = ((clientX - rect.left) / rect.width) * 100;
     const sampleY = ((clientY - rect.top) / rect.height) * 100;
-
     const clamp = (x: number, y: number) => ({
       x: Math.min(100 - marginX, Math.max(marginX, x)),
       y: Math.min(100 - marginY, Math.max(marginY, y)),
     });
-
     const sample = clamp(sampleX, sampleY);
     const display = clamp(sampleX, sampleY - offsetY);
-
     return { display, sample };
   }, []);
 
@@ -536,13 +514,10 @@ function ZoomableImage({
     [getLensPositions],
   );
 
-  // ── Desktop: hover zoom ───────────────────────────────────────────────────
-
   const handleMouseEnter = () => {
     if (isMobile) return;
     setDesktopZoomed(true);
   };
-
   const handleMouseMove = (e: React.MouseEvent) => {
     if (isMobile || !desktopZoomed) return;
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
@@ -551,36 +526,35 @@ function ZoomableImage({
       if (!el) return;
       const rect = el.getBoundingClientRect();
       setDesktopOrigin({
-        x: Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100)),
-        y: Math.min(100, Math.max(0, ((e.clientY - rect.top) / rect.height) * 100)),
+        x: Math.min(
+          100,
+          Math.max(0, ((e.clientX - rect.left) / rect.width) * 100),
+        ),
+        y: Math.min(
+          100,
+          Math.max(0, ((e.clientY - rect.top) / rect.height) * 100),
+        ),
       });
       rafRef.current = null;
     });
   };
-
   const handleMouseLeave = () => {
     if (isMobile) return;
     setDesktopZoomed(false);
     setDesktopOrigin({ x: 50, y: 50 });
   };
 
-  // ── Mobile: hold for loupe · pinch opens fullscreen modal ─────────────────
-
   const handleTouchStart = (e: React.TouchEvent) => {
     if (!isMobile) return;
-
     if (e.touches.length >= 2) {
       clearHoldTimer();
       hideLens();
       openPinchModal();
       return;
     }
-
     if (e.touches.length !== 1) return;
-
     const touch = e.touches[0];
     touchStartRef.current = { x: touch.clientX, y: touch.clientY };
-
     clearHoldTimer();
     holdTimerRef.current = setTimeout(() => {
       holdTimerRef.current = null;
@@ -592,18 +566,14 @@ function ZoomableImage({
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isMobile) return;
-
     if (e.touches.length >= 2) {
       clearHoldTimer();
       hideLens();
       if (!pinchModalOpen) openPinchModal();
       return;
     }
-
     if (e.touches.length !== 1) return;
-
     const touch = e.touches[0];
-
     if (!lensActiveRef.current && touchStartRef.current) {
       const dx = touch.clientX - touchStartRef.current.x;
       const dy = touch.clientY - touchStartRef.current.y;
@@ -613,9 +583,7 @@ function ZoomableImage({
       }
       return;
     }
-
     if (!lensActiveRef.current) return;
-
     e.preventDefault();
     updateLensFromTouch(touch.clientX, touch.clientY);
   };
@@ -626,7 +594,6 @@ function ZoomableImage({
     touchStartRef.current = null;
     hideLens();
   };
-
   const handleTouchCancel = () => {
     if (!isMobile) return;
     clearHoldTimer();
@@ -637,13 +604,9 @@ function ZoomableImage({
   const lensW = containerSize.w * LENS_MAGNIFY;
   const lensH = containerSize.h * LENS_MAGNIFY;
   const lensImgLeft =
-    containerSize.w > 0
-      ? -(lensSample.x / 100) * lensW + LENS_SIZE_PX / 2
-      : 0;
+    containerSize.w > 0 ? -(lensSample.x / 100) * lensW + LENS_SIZE_PX / 2 : 0;
   const lensImgTop =
-    containerSize.h > 0
-      ? -(lensSample.y / 100) * lensH + LENS_SIZE_PX / 2
-      : 0;
+    containerSize.h > 0 ? -(lensSample.y / 100) * lensH + LENS_SIZE_PX / 2 : 0;
 
   return (
     <div
@@ -662,6 +625,7 @@ function ZoomableImage({
         WebkitTouchCallout: "none",
         WebkitUserSelect: "none",
         userSelect: "none",
+        ...style,
       }}
     >
       <img
@@ -700,7 +664,6 @@ function ZoomableImage({
           }}
           aria-hidden
         >
-          {/* Pointer toward finger / fabric sample point */}
           <div
             className="absolute left-1/2 top-full z-10 -translate-x-1/2"
             aria-hidden
@@ -726,19 +689,19 @@ function ZoomableImage({
       )}
 
       {!isMobile && !desktopZoomed && (
-        <div className="pointer-events-none absolute bottom-4 right-4 flex items-center gap-1.5 rounded-sm border border-white/15 bg-[#0f172a]/70 px-2.5 py-1.5 text-[9px] tracking-[0.15em] uppercase text-[#e2e8f0] backdrop-blur-sm">
+        <div className="pointer-events-none absolute bottom-5 right-5 flex items-center gap-1.5 rounded-sm border border-white/20 bg-[#0f172a]/75 px-2.5 py-1.5 text-[9px] tracking-[0.15em] uppercase text-[#f8fafc] backdrop-blur-sm">
           <IconZoomIn />
-          <span className="hidden sm:inline">Zoom</span>
+          <span className="hidden sm:inline">Hover to zoom</span>
         </div>
       )}
 
       {isMobile && !showLens && !pinchModalOpen && (
-        <div className="pointer-events-none absolute bottom-4 right-4 flex flex-col items-end gap-1 rounded-sm border border-white/15 bg-[#0f172a]/70 px-2.5 py-1.5 text-[9px] tracking-[0.15em] uppercase text-[#e2e8f0] backdrop-blur-sm text-right">
+        <div className="pointer-events-none absolute bottom-4 right-4 flex flex-col items-end gap-1 rounded-sm border border-white/20 bg-[#0f172a]/75 px-2.5 py-1.5 text-[9px] tracking-[0.15em] uppercase text-[#f8fafc] backdrop-blur-sm text-right">
           <span className="flex items-center gap-1.5">
             <IconZoomIn />
             Hold to magnify
           </span>
-          <span className="text-[8px] text-white/60">Pinch for fullscreen</span>
+          <span className="text-[8px] text-white/50">Pinch for fullscreen</span>
         </div>
       )}
 
@@ -782,7 +745,6 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     () => !!product.colors?.includes(selectedColor),
     [product.colors, selectedColor],
   );
-
   const canAddToCart = useMemo(
     () => isColorAvailable || selectedColor === product.colors?.[0],
     [isColorAvailable, selectedColor, product.colors],
@@ -868,27 +830,18 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
   return (
     <main className="relative min-h-screen overflow-x-hidden bg-[#f8fafc] pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))] font-['Jost'] font-light text-[#0f172a] md:pb-0">
-      {/* Noise texture */}
-      <div
-        className="pointer-events-none fixed inset-0 z-0 opacity-[.03]"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-          backgroundSize: "256px",
-        }}
-      />
-
-      {/* Breadcrumb */}
-      <div className="relative z-10 mx-auto flex items-center gap-2 px-8 pb-0 pt-10 text-[.65rem] uppercase tracking-[.22em] text-black lg:px-16">
+      {/* ── Breadcrumb ── */}
+      <div className="relative z-10 mx-auto flex max-w-[1800px] items-center gap-2 px-5 pb-0 pt-8 text-[.6rem] uppercase tracking-[.25em] text-[#94a3b8] sm:px-8 lg:px-10">
         <Link
           href="/"
-          className="text-black no-underline transition-colors hover:text-[#7da8c7]"
+          className="transition-colors hover:text-[#7da8c7] no-underline text-[#94a3b8]"
         >
           Home
         </Link>
         <span className="opacity-40">/</span>
         <Link
           href="/collection"
-          className="text-black no-underline transition-colors hover:text-[#7da8c7]"
+          className="transition-colors hover:text-[#7da8c7] no-underline text-[#94a3b8]"
         >
           Collection
         </Link>
@@ -896,20 +849,21 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         <span className="text-[#7da8c7]">{product.title}</span>
       </div>
 
-      <div className="relative z-10 mx-auto grid max-w-[1440px] grid-cols-1 items-start gap-12 px-8 pb-20 pt-10 lg:gap-16 lg:px-16 xl:grid-cols-[1fr_420px]">
-        {/* ── LEFT: sticky image gallery ── */}
-        <div className="xl:sticky xl:top-[88px] xl:self-start">
+      {/* ── Main layout: full-bleed image left + wide details right ── */}
+      <div className="relative z-10 mx-auto grid w-full max-w-[1800px] grid-cols-1 items-start gap-0 px-5 pt-6 pb-16 sm:px-8 lg:px-10 xl:grid-cols-[1fr_560px] xl:gap-10 2xl:grid-cols-[1fr_620px]">
+        {/* ── LEFT: Full image gallery ── */}
+        <div className="xl:sticky xl:top-[76px] xl:self-start">
           <div className="flex items-start gap-3">
-            {/* Desktop thumbnails */}
-            <div className="hidden xl:flex w-[86px] shrink-0 flex-col gap-3">
+            {/* Desktop vertical thumbnails */}
+            <div className="hidden xl:flex w-[74px] shrink-0 flex-col gap-2.5">
               {(product.images ?? []).map((img, i) => (
                 <button
                   key={`thumb-${i}`}
                   onClick={() => setActiveImage(i)}
-                  className={`overflow-hidden rounded-[3px] border-[1.5px] bg-transparent p-0 transition-all duration-200 ${
+                  className={`overflow-hidden rounded-[2px] border p-0 bg-transparent transition-all duration-200 ${
                     activeImage === i
                       ? "border-[#7da8c7]"
-                      : "border-[#dbe4ef] hover:border-[#9fbdd5]"
+                      : "border-[#cbd5e1] hover:border-[#9fbdd5]"
                   }`}
                 >
                   <img
@@ -917,37 +871,39 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                     alt={img.alt ?? `Thumbnail ${i + 1}`}
                     loading="lazy"
                     decoding="async"
-                    className="block h-[96px] w-full object-cover object-[center_15%]"
+                    className="block h-[88px] w-full object-cover object-[center_15%]"
                   />
                 </button>
               ))}
             </div>
 
-            {/* Main zoomable image */}
-            <div className="relative min-w-0 flex-1 rounded-[4px] border border-[#dbe4ef] bg-[#f1f5f9] overflow-hidden">
+            {/* Main image — full aspect, no crop */}
+            <div className="relative min-w-0 flex-1 overflow-hidden rounded-[3px] bg-[#f1f5f9]">
               {/* Badge */}
-              <div className="absolute left-6 top-6 z-20 rounded-[2px] border border-white/15 bg-[#0f172a]/70 px-4 py-1.5 text-[.6rem] uppercase tracking-[.28em] text-[#7da8c7] pointer-events-none backdrop-blur-sm">
+              <div className="absolute left-5 top-5 z-20 pointer-events-none rounded-[2px] border border-white/20 bg-[#0f172a]/70 px-3.5 py-1.5 text-[.55rem] uppercase tracking-[.3em] text-[#7da8c7] backdrop-blur-sm">
                 {product.badge ?? "Featured"}
               </div>
 
+              {/* Full-fit image — object-contain so nothing is cropped */}
               <ZoomableImage
                 src={currentImageSrc}
                 alt={product.title}
-                className="h-[520px] sm:h-[640px] w-full"
+                className="w-full"
+                style={{ aspectRatio: "3/4", maxHeight: "82vh" }}
               />
             </div>
           </div>
 
           {/* Mobile thumbnails */}
-          <div className="mt-3 grid grid-cols-4 gap-3 xl:hidden">
+          <div className="mt-3 grid grid-cols-4 gap-2 xl:hidden">
             {(product.images ?? []).map((img, i) => (
               <button
                 key={`thumb-mobile-${i}`}
                 onClick={() => setActiveImage(i)}
-                className={`rounded-[3px] border-[1.5px] bg-transparent p-0 overflow-hidden transition-all duration-200 ${
+                className={`overflow-hidden rounded-[2px] border p-0 bg-transparent transition-all duration-200 ${
                   activeImage === i
                     ? "border-[#7da8c7]"
-                    : "border-[#dbe4ef] hover:border-[#9fbdd5]"
+                    : "border-[#cbd5e1] hover:border-[#9fbdd5]"
                 }`}
               >
                 <img
@@ -955,88 +911,71 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   alt={img.alt ?? `Thumbnail ${i + 1}`}
                   loading="lazy"
                   decoding="async"
-                  className="block h-[80px] w-full object-cover object-[center_15%]"
+                  className="block h-[72px] w-full object-cover object-[center_15%]"
                 />
               </button>
             ))}
           </div>
 
-          {/* Zoom instruction hint */}
-          <p className="mt-3 text-center text-[10px] tracking-[0.1em] uppercase text-[#94a3b8]">
-            <span className="hidden md:inline">Hover</span>
-            <span className="md:hidden">Hold</span> image to magnify
-            <span className="hidden md:inline"> · move cursor to explore</span>
+          <p className="mt-3 text-center text-[9px] tracking-[0.12em] uppercase text-[#94a3b8]">
+            <span className="hidden md:inline">
+              Hover to zoom · move cursor to explore
+            </span>
             <span className="md:hidden">
-              {" "}
-              · swipe to scroll · pinch for fullscreen zoom
+              Hold to magnify · pinch for fullscreen
             </span>
           </p>
         </div>
 
-        {/* ── RIGHT: scrollable details panel ── */}
-        <aside className="xl:max-h-[calc(100vh-108px)] xl:overflow-y-auto xl:[scrollbar-width:none] xl:[&::-webkit-scrollbar]:hidden">
-          <div className="rounded-[4px] border border-[#dbe4ef] bg-white p-8 sm:p-9">
-            <p className="mb-2 text-[.6rem] uppercase tracking-[.35em] text-[#7da8c7]">
-              {product.category} · Limited Edition
+        {/* ── RIGHT: Wide details panel ── */}
+        <aside className="mt-8 xl:mt-0 xl:max-h-[calc(100vh-92px)] xl:overflow-y-auto xl:[scrollbar-width:none] xl:[&::-webkit-scrollbar]:hidden">
+          <div className="rounded-[3px] border border-[#e2e8f0] bg-white px-8 py-9 sm:px-10 sm:py-10">
+            {/* Label + title */}
+            <p className="mb-1.5 text-[11px] uppercase tracking-[0.3em] text-[#7da8c7]">
+              {product.category}
+              {product.subCategory ? ` · ${product.subCategory}` : ""}
             </p>
-            <h1 className="mb-3 font-['Cormorant_Garamond'] text-[3.5rem] font-light leading-[.95] text-[#0f172a]">
+            <h1 className="font-['Cormorant_Garamond'] text-[3.2rem] font-light leading-[.93] text-[#0f172a] sm:text-[3.8rem]">
               {product.title}
             </h1>
-            <p className="text-[.82rem] leading-[1.8] text-black">
+            <p className="mt-3 text-[.83rem] leading-[1.85] text-[#64748b]">
               {product.tagline ??
                 "Crafted for timeless style and everyday confidence."}
             </p>
 
-            {/* Stars */}
-            <div className="mt-4 flex items-center gap-3 border-t border-[#dbe4ef] pt-4">
-              <div className="flex gap-0.5">
-                {stars.map((filled, i) => (
-                  <StarIcon key={i} filled={filled} />
-                ))}
+            {/* Stars + price on same row */}
+            <div className="mt-5 flex items-center justify-between border-t border-[#e2e8f0] pt-5">
+              <div className="flex items-center gap-2.5">
+                <div className="flex gap-[3px]">
+                  {stars.map((filled, i) => (
+                    <StarIcon key={i} filled={filled} />
+                  ))}
+                </div>
+                <span className="text-[.68rem] tracking-[.08em] text-[#64748b]">
+                  {rating} · {reviewCount} reviews
+                </span>
               </div>
-              <span className="text-[.7rem] tracking-[.1em] text-black">
-                {rating} · {reviewCount} reviews
-              </span>
-            </div>
-
-            {/* Price */}
-            {/* <div className="my-4 border-y border-[#dbe4ef] py-4">
-              <p
-                className="text-[2.5rem] font-normal leading-tight text-[#0f172a]"
-                style={{ color: "#0f172a" }}
-              >
+              <p className="font-['Cormorant_Garamond'] text-[2.4rem] font-normal leading-none text-[#0f172a]">
                 {displayPrice(product.price)}
               </p>
-            </div> */}
-
-            <p
-              className="text-[2.5rem] font-normal leading-tight text-[#0f172a]"
-              style={{ color: "#0f172a" }}
-            >
-              {displayPrice(product.price)}
-            </p>
+            </div>
 
             {/* Color picker */}
-            <div className="mb-5">
-              <p className="mb-3 flex items-center justify-between text-[.62rem] uppercase tracking-[.22em] text-black">
+            <div className="mt-6">
+              <p className="mb-3 flex items-center justify-between text-[.6rem] uppercase tracking-[.22em] text-[#0f172a]">
                 Color
                 <span
-                  className={`normal-case tracking-normal ${
-                    !isColorAvailable && selectedColor !== COLORS[0].name
-                      ? "text-[#7da8c7]"
-                      : "text-[#94a3b8]"
-                  }`}
+                  className={`normal-case tracking-normal text-[.75rem] ${!isColorAvailable && selectedColor !== COLORS[0].name ? "text-[#7da8c7]" : "text-[#94a3b8]"}`}
                 >
                   {selectedColor}
                   {!isColorAvailable && selectedColor !== COLORS[0].name && (
-                    <span className="ml-2 text-[.55rem] text-[#7da8c7]">
+                    <span className="ml-2 text-[.6rem] text-[#7da8c7]">
                       (Custom Order)
                     </span>
                   )}
                 </span>
               </p>
-
-              <div className="flex gap-2.5">
+              <div className="flex gap-3">
                 {COLORS.map((c) => (
                   <button
                     key={c.name}
@@ -1049,7 +988,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                     } ${
                       !product.colors?.includes(c.name) &&
                       c.name !== product.colors?.[0]
-                        ? "opacity-60 ring-1 ring-[rgba(125,168,199,0.3)]"
+                        ? "opacity-50 ring-1 ring-[rgba(125,168,199,0.3)]"
                         : ""
                     }`}
                   >
@@ -1062,57 +1001,58 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   </button>
                 ))}
               </div>
-
-              <p className="mt-2 text-[.65rem] text-black">
+              <p className="mt-2 text-[.65rem] text-[#94a3b8]">
                 {!isColorAvailable && selectedColor !== product.colors?.[0]
                   ? "✨ This color is available on custom order. Contact us for details."
                   : product.colors?.includes(selectedColor)
-                    ? "✓ In stock and ready to ship"
+                    ? "✓ In stock · ready to ship"
                     : "Select a color to check availability"}
               </p>
             </div>
 
             {/* Size picker */}
-            <p className="mb-3 flex items-center justify-between text-[.62rem] uppercase tracking-[.22em] text-black">
-              Size
-              <span className="normal-case tracking-normal text-[#94a3b8]">
-                {selectedSize}
-              </span>
-            </p>
-            <div className="mb-5 flex flex-wrap gap-2">
-              {(product.sizes ?? ["M"]).map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setSelectedSize(s)}
-                  className={`h-11 min-w-[48px] cursor-pointer rounded-[3px] border px-3 font-['Jost'] text-[.78rem] tracking-[.08em] transition-all ${
-                    selectedSize === s
-                      ? "border-[#7da8c7] bg-[#f0f6fb] text-[#0f172a]"
-                      : "border-[#e2e8f0] bg-transparent text-black hover:border-[#7da8c7] hover:text-[#0f172a]"
-                  }`}
-                >
-                  {s}
-                </button>
-              ))}
+            <div className="mt-6">
+              <p className="mb-3 flex items-center justify-between text-[.6rem] uppercase tracking-[.22em] text-[#0f172a]">
+                Size
+                <span className="normal-case tracking-normal text-[.75rem] text-[#94a3b8]">
+                  {selectedSize}
+                </span>
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {(product.sizes ?? ["M"]).map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setSelectedSize(s)}
+                    className={`h-11 min-w-[52px] cursor-pointer rounded-[2px] border px-4 font-['Jost'] text-[.76rem] tracking-[.1em] transition-all ${
+                      selectedSize === s
+                        ? "border-[#7da8c7] bg-[#f0f6fb] text-[#0f172a]"
+                        : "border-[#e2e8f0] bg-transparent text-[#64748b] hover:border-[#7da8c7] hover:text-[#0f172a]"
+                    }`}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {/* CTA row — desktop / tablet; mobile uses fixed bar below */}
-            <div className="hidden flex-col gap-3 md:flex">
+            {/* CTA buttons */}
+            <div className="mt-7 hidden flex-col gap-3 md:flex">
               {isColorAvailable || selectedColor === product.colors?.[0] ? (
                 <button
                   onClick={handleAddToCart}
-                  className={`flex h-[52px] items-center justify-center gap-2.5 rounded-[3px] border-0 font-['Jost'] text-[.72rem] font-medium uppercase tracking-[.25em] transition-all ${
+                  className={`flex h-[54px] items-center justify-center gap-2.5 rounded-[2px] border-0 font-['Jost'] text-[.7rem] font-medium uppercase tracking-[.28em] transition-all ${
                     addedToCart
-                      ? "bg-[#3b82f6] text-white"
-                      : "bg-[#7da8c7] text-white hover:bg-[#5a8faf]"
+                      ? "bg-[#4a7c59] text-white"
+                      : "bg-[#0f172a] text-white hover:bg-[#7da8c7] hover:text-[#0f172a]"
                   }`}
                 >
                   <IconBag />
-                  {addedToCart ? "Added to Cart" : "Add to Cart"}
+                  {addedToCart ? "Added to Bag" : "Add to Bag"}
                 </button>
               ) : (
                 <button
                   onClick={handleWhatsAppInquiry}
-                  className="flex h-[52px] items-center justify-center gap-2.5 rounded-[3px] border-0 bg-[#25D366] font-['Jost'] text-[.72rem] font-medium uppercase tracking-[.25em] text-white transition-all hover:bg-[#20b859]"
+                  className="flex h-[54px] items-center justify-center gap-2.5 rounded-[2px] border-0 bg-[#25D366] font-['Jost'] text-[.7rem] font-medium uppercase tracking-[.28em] text-white transition-all hover:bg-[#1cb757]"
                 >
                   <IconWhatsApp />
                   Book Now
@@ -1123,14 +1063,14 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 <button
                   type="button"
                   onClick={handleBuyNow}
-                  className="h-[52px] rounded-[3px] border border-[#d6e1ec] bg-transparent font-['Jost'] text-[.72rem] uppercase tracking-[.25em] text-[#0f172a] transition-all hover:border-[#7da8c7] hover:bg-[#f0f6fb]"
+                  className="h-[54px] rounded-[2px] border border-[#9fbdd5] bg-transparent font-['Jost'] text-[.7rem] uppercase tracking-[.28em] text-[#0f172a] transition-all hover:border-[#7da8c7] hover:bg-[#f0f6fb]"
                 >
                   Buy Now · Express Checkout
                 </button>
               ) : (
                 <button
                   onClick={handleWhatsAppInquiry}
-                  className="flex h-[52px] items-center justify-center gap-2 rounded-[3px] border border-[#d6e1ec] bg-transparent font-['Jost'] text-[.72rem] uppercase tracking-[.25em] text-[#0f172a] transition-all hover:border-[#7da8c7] hover:text-[#7da8c7]"
+                  className="flex h-[54px] items-center justify-center gap-2 rounded-[2px] border border-[#e2e8f0] bg-transparent font-['Jost'] text-[.7rem] uppercase tracking-[.28em] text-[#64748b] transition-all hover:border-[#7da8c7] hover:text-[#7da8c7]"
                 >
                   <IconWhatsApp />
                   Inquire on WhatsApp
@@ -1141,16 +1081,19 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             {/* Wishlist */}
             <button
               onClick={() => setWishlisted((w) => !w)}
-              className="mt-3 flex w-full items-center justify-center gap-2 border-0 bg-transparent opacity-60 transition-opacity hover:opacity-100"
+              className="mt-4 flex w-full items-center justify-center gap-2 border-0 bg-transparent opacity-50 transition-opacity hover:opacity-100"
             >
               <IconHeart filled={wishlisted} />
-              <span className="font-['Jost'] text-[.65rem] uppercase tracking-[.2em] text-black">
+              <span className="font-['Jost'] text-[.62rem] uppercase tracking-[.22em] text-[#64748b]">
                 {wishlisted ? "Saved to Wishlist" : "Add to Wishlist"}
               </span>
             </button>
 
+            {/* Divider */}
+            <div className="my-7 border-t border-[#e2e8f0]" />
+
             {/* Accordion */}
-            <div className="mt-6 border-t border-[#e2e8f0]">
+            <div>
               {ACCORDION_ITEMS.map((item) => (
                 <AccordionItem
                   key={item.id}
@@ -1161,73 +1104,70 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   }
                 />
               ))}
+            </div>
 
-              {/* Tabs */}
-              <div className="mt-10 overflow-hidden rounded-[4px] border border-[#e2e8f0] bg-[#f8fafc] px-4">
-                <div className="flex gap-1 border-b border-[#e2e8f0]">
-                  {(["desc", "details", "specs", "care"] as const).map(
-                    (tab) => (
-                      <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
-                        className={`flex-1 border-0 bg-transparent py-4 font-['Jost'] text-[.65rem] uppercase tracking-[.2em] transition-all ${
-                          activeTab === tab
-                            ? "-mb-px border-b-[1.5px] border-[#7da8c7] bg-[#f0f6fb] text-[#7da8c7]"
-                            : "text-black hover:text-[#0f172a]"
-                        }`}
+            {/* Tabs */}
+            <div className="mt-8 overflow-hidden rounded-[3px] border border-[#e2e8f0] bg-[#f8fafc]">
+              <div className="flex border-b border-[#e2e8f0]">
+                {(["desc", "details", "specs", "care"] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`flex-1 border-0 bg-transparent py-4 font-['Jost'] text-[.6rem] uppercase tracking-[.2em] transition-all ${
+                      activeTab === tab
+                        ? "-mb-px border-b-[1.5px] border-[#7da8c7] bg-white text-[#7da8c7]"
+                        : "text-[#94a3b8] hover:text-[#0f172a]"
+                    }`}
+                  >
+                    {tab === "desc"
+                      ? "Description"
+                      : tab === "details"
+                        ? "Details"
+                        : tab === "specs"
+                          ? "Specs"
+                          : "Care"}
+                  </button>
+                ))}
+              </div>
+              <div className="p-7 sm:p-8">
+                {activeTab === "desc" && (
+                  <p className="text-[.85rem] leading-[1.95] text-[#64748b]">
+                    {product.description}
+                  </p>
+                )}
+                {activeTab === "details" && (
+                  <ul className="grid list-none grid-cols-1 gap-3 sm:grid-cols-2">
+                    {(product.details ?? []).map((d, i) => (
+                      <li
+                        key={i}
+                        className="flex items-start gap-2.5 text-[.82rem] text-[#64748b]"
                       >
-                        {tab === "desc"
-                          ? "Description"
-                          : tab === "details"
-                            ? "Details"
-                            : tab === "specs"
-                              ? "Specs"
-                              : "Care"}
-                      </button>
-                    ),
-                  )}
-                </div>
-
-                <div className="p-8">
-                  {activeTab === "desc" && (
-                    <p className="text-[.88rem] leading-[1.9] text-black">
-                      {product.description}
-                    </p>
-                  )}
-                  {activeTab === "details" && (
-                    <ul className="grid list-none grid-cols-1 gap-3 sm:grid-cols-2">
-                      {(product.details ?? []).map((d, i) => (
-                        <li
-                          key={i}
-                          className="flex items-start gap-2.5 text-[.82rem] text-black"
-                        >
-                          <span className="mt-[7px] h-1 w-1 flex-shrink-0 rounded-full bg-[#7da8c7]" />
-                          {d}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                  {activeTab === "specs" && (
-                    <div className="grid grid-cols-2">
-                      {specs.map((s) => (
-                        <div key={s.label} className="contents">
-                          <span className="border-b border-[#e2e8f0] py-3 text-[.72rem] uppercase tracking-[.15em] text-black">
-                            {s.label}
-                          </span>
-                          <span className="border-b border-[#e2e8f0] py-3 text-right text-[.82rem] text-black">
-                            {s.value}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {activeTab === "care" && (
-                    <p className="text-[.88rem] leading-[1.9] text-black">
-                      {product.care ??
-                        "Dry clean only. Steam preferred. Store on a shaped hanger away from direct sunlight."}
-                    </p>
-                  )}
-                </div>
+                        <span className="mt-[7px] h-1 w-1 flex-shrink-0 rounded-full bg-[#7da8c7]" />
+                        {d}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {activeTab === "specs" && (
+                  <div className="grid grid-cols-2">
+                    {specs.map((s) => (
+                      <div key={s.label} className="contents">
+                        <span className="border-b border-[#e2e8f0] py-3 text-[.68rem] uppercase tracking-[.15em] text-[#94a3b8]">
+                          {s.label}
+                        </span>
+                        <span className="border-b border-[#e2e8f0] py-3 text-right text-[.82rem] text-[#0f172a]">
+                          {s.value}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {activeTab === "care" && (
+                  <p className="text-[.85rem] leading-[1.95] text-[#64748b]">
+                    {product.care ??
+                      "Dry clean only. Steam preferred. Store on a shaped hanger away from direct sunlight."}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -1236,36 +1176,36 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
       {/* ── You May Also Desire ── */}
       {relatedProducts.length > 0 && (
-        <section className="relative z-10 mx-auto px-8 py-14 lg:px-16">
-          <div className="mb-8 flex items-baseline justify-between">
-            <h2 className="font-['Cormorant_Garamond'] text-[2.2rem] font-light text-[#0f172a]">
+        <section className="relative z-10 mx-auto w-full max-w-[1800px] px-5 py-14 sm:px-8 lg:px-10">
+          <div className="mb-7 flex items-baseline justify-between">
+            <h2 className="font-['Cormorant_Garamond'] text-[2rem] font-light text-[#0f172a]">
               You May Also Desire
             </h2>
           </div>
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-6">
             {relatedProducts.map((item) => (
               <Link
                 key={item._id}
                 href={`/collection/${encodeURIComponent(item.slug)}`}
-                className="group block overflow-hidden rounded-[3px] border border-[#e2e8f0] bg-white text-inherit no-underline transition-all duration-300 hover:-translate-y-1 hover:border-[#7da8c7] hover:shadow-[0_8px_32px_rgba(125,168,199,0.15)]"
+                className="group block overflow-hidden rounded-[3px] border border-[#e2e8f0] bg-white text-inherit no-underline transition-all duration-300 hover:-translate-y-0.5 hover:border-[#7da8c7] hover:shadow-[0_6px_28px_rgba(125,168,199,0.12)]"
               >
-                <div className="overflow-hidden h-[280px]">
+                <div className="overflow-hidden" style={{ aspectRatio: "3/4" }}>
                   <img
                     src={item.images?.[0]?.url ?? "/new.jpg"}
                     alt={item.title}
                     loading="lazy"
                     decoding="async"
-                    className="block h-full w-full object-cover object-[center_10%]"
+                    className="block h-full w-full object-cover object-[center_10%] transition-transform duration-500 group-hover:scale-[1.03]"
                   />
                 </div>
                 <div className="p-4">
-                  <p className="mb-0.5 font-['Cormorant_Garamond'] text-[1.5rem] font-light text-[#0f172a]">
+                  <p className="mb-0.5 font-['Cormorant_Garamond'] text-[1.45rem] font-light text-[#0f172a]">
                     {item.title}
                   </p>
-                  <p className="text-[.6rem] uppercase tracking-[.18em] text-black">
+                  <p className="text-[.58rem] uppercase tracking-[.18em] text-[#94a3b8]">
                     {item.category} · {item.colors?.[0] ?? "-"}
                   </p>
-                  <p className="mt-2 text-[1.25rem] text-black">
+                  <p className="mt-1.5 text-[1.15rem] text-[#0f172a]">
                     {displayPrice(item.price)}
                   </p>
                 </div>
@@ -1277,17 +1217,17 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
       {/* ── More from the Collection (mosaic) ── */}
       {mosaicData.length > 0 && (
-        <section className="relative z-10 mx-auto px-8 py-14 lg:px-16">
-          <div className="mb-8 flex items-baseline justify-between">
-            <h2 className="font-['Cormorant_Garamond'] text-[2.2rem] font-light text-[#0f172a]">
+        <section className="relative z-10 mx-auto w-full max-w-[1800px] px-5 py-14 sm:px-8 lg:px-10">
+          <div className="mb-7 flex items-baseline justify-between">
+            <h2 className="font-['Cormorant_Garamond'] text-[2rem] font-light text-[#0f172a]">
               More from the Collection
             </h2>
           </div>
           <div
-            className="grid gap-4"
+            className="grid gap-3"
             style={{
               gridTemplateColumns: "repeat(4, 1fr)",
-              gridTemplateRows: "200px 200px",
+              gridTemplateRows: "220px 220px",
             }}
           >
             {mosaicData.map((item, i) => (
@@ -1302,18 +1242,16 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   alt={item.title}
                   loading="lazy"
                   decoding="async"
-                  className="h-full w-full object-cover object-[center_10%]"
+                  className="h-full w-full object-cover object-[center_10%] transition-transform duration-700 group-hover:scale-[1.04]"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[rgba(15,23,42,0.6)] via-[rgba(15,23,42,0.08)] to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[rgba(15,23,42,0.65)] via-[rgba(15,23,42,0.05)] to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5">
                   <span
-                    className={`block font-['Cormorant_Garamond'] font-light text-white ${
-                      i === 0 ? "text-[2.2rem]" : "text-[1.6rem]"
-                    }`}
+                    className={`block font-['Cormorant_Garamond'] font-light text-white ${i === 0 ? "text-[2.1rem]" : "text-[1.5rem]"}`}
                   >
                     {item.title}
                   </span>
-                  <span className="mt-0.5 block text-[.75rem] text-[#7da8c7]">
+                  <span className="mt-0.5 block text-[.72rem] text-[#7da8c7]">
                     {displayPrice(item.price)}
                   </span>
                 </div>
@@ -1323,9 +1261,9 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         </section>
       )}
 
-      {/* Mobile: dual CTAs — global MobileBottomNav is hidden on /collection/[slug] */}
+      {/* ── Mobile fixed CTA bar ── */}
       <div
-        className="fixed inset-x-0 bottom-0 z-[100] border-t border-[#e2e8f0] bg-[#f8fafc]/95 px-3 pt-2.5 pb-[calc(0.65rem+env(safe-area-inset-bottom,0px))] backdrop-blur-md md:hidden"
+        className="fixed inset-x-0 bottom-0 z-[100] border-t border-[#e2e8f0] bg-[#f8fafc]/96 px-3 pt-2.5 pb-[calc(0.65rem+env(safe-area-inset-bottom,0px))] backdrop-blur-md md:hidden"
         role="region"
         aria-label="Product actions"
       >
@@ -1333,7 +1271,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
           <button
             type="button"
             onClick={handleWhatsAppBestPrice}
-            className="flex h-[52px] min-h-[52px] items-center justify-center gap-2 rounded-sm border border-[#0f172a] bg-white px-1.5 font-['Jost'] text-[8.5px] font-semibold uppercase leading-[1.15] tracking-[0.12em] text-[#0f172a] shadow-[0_1px_0_rgba(255,255,255,1)_inset,0_4px_14px_-6px_rgba(15,23,42,0.14)] transition-opacity active:opacity-90 [-webkit-tap-highlight-color:transparent]"
+            className="flex h-[52px] min-h-[52px] items-center justify-center gap-2 rounded-sm border border-[#7da8c7] bg-white px-1.5 font-['Jost'] text-[8.5px] font-semibold uppercase leading-[1.15] tracking-[0.12em] text-[#0f172a] transition-colors hover:bg-[#f0f6fb] active:opacity-80 [-webkit-tap-highlight-color:transparent]"
           >
             <IconWhatsAppGreen className="h-[17px] w-[17px] shrink-0" />
             <span className="max-[360px]:text-[8px]">Chat for best price</span>
@@ -1341,9 +1279,9 @@ export default function ProductDetailClient({ product }: { product: Product }) {
           <button
             type="button"
             onClick={canAddToCart ? handleAddToCart : handleWhatsAppInquiry}
-            className="flex h-[52px] min-h-[52px] items-center justify-center rounded-sm border border-black bg-[#0f172a] px-1.5 font-['Jost'] text-[9.5px] font-bold uppercase tracking-[0.16em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.16),inset_1px_0_0_rgba(255,255,255,0.06),0_8px_22px_-8px_rgba(0,0,0,0.42)] transition-opacity active:opacity-90 [-webkit-tap-highlight-color:transparent]"
+            className="flex h-[52px] min-h-[52px] items-center justify-center rounded-sm border border-[#0f172a] bg-[#0f172a] px-1.5 font-['Jost'] text-[9.5px] font-bold uppercase tracking-[0.16em] text-white transition-colors hover:bg-[#7da8c7] hover:border-[#7da8c7] hover:text-[#0f172a] active:opacity-90 [-webkit-tap-highlight-color:transparent]"
           >
-            {addedToCart ? "Added" : canAddToCart ? "Add to cart" : "Book now"}
+            {addedToCart ? "Added" : canAddToCart ? "Add to bag" : "Book now"}
           </button>
         </div>
       </div>
