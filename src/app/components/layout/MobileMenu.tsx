@@ -1,8 +1,8 @@
 "use client";
 
+import { ZenIcon } from "@/components/icons";
 import { useAppSelector } from "@/store/hooks";
 import { AnimatePresence, motion } from "framer-motion";
-import { Search, ShoppingBag, User, X } from "lucide-react";
 import Link from "next/link";
 import CurrencyIcon from "./CurrencyIcon";
 import CurrencySwitcher from "./CurrencySwitcher";
@@ -88,7 +88,7 @@ const MobileMenu = ({ isOpen, onClose, onOpenAuth }: MobileMenuProps) => {
                   className="bg-transparent border-0 text-[#0f172a] p-2 hover:bg-[#f8fafc] rounded-full transition-colors cursor-pointer"
                   aria-label="Close menu"
                 >
-                  <X className="w-6 h-6" strokeWidth={1.5} />
+                  <ZenIcon name="times" className="w-6 h-6" />
                 </button>
               </div>
 
@@ -146,7 +146,7 @@ const MobileMenu = ({ isOpen, onClose, onOpenAuth }: MobileMenuProps) => {
                   type="button"
                   className="w-full bg-transparent border-0 flex items-center gap-4 py-4 px-4 text-[13px] tracking-[0.1em] text-[#0f172a] hover:bg-[#f8fafc] transition-colors rounded-sm uppercase cursor-pointer"
                 >
-                  <Search className="w-5 h-5" strokeWidth={1.5} />
+                  <ZenIcon name="search" className="w-5 h-5" />
                   Search
                 </button>
                 <div className="border-t border-[#e2e8f0] pt-4 -mx-2">
@@ -170,14 +170,14 @@ const MobileMenu = ({ isOpen, onClose, onOpenAuth }: MobileMenuProps) => {
                   }}
                   className="w-full bg-transparent border-0 flex items-center gap-4 py-4 px-4 text-[13px] tracking-[0.1em] text-[#0f172a] hover:bg-[#f8fafc] transition-colors rounded-sm uppercase cursor-pointer"
                 >
-                  <User className="w-5 h-5" strokeWidth={1.5} />
+                  <ZenIcon name="user" className="w-5 h-5" />
                   Account
                 </button>
                 <button
                   type="button"
                   className="w-full bg-transparent border-0 flex items-center gap-4 py-4 px-4 text-[13px] tracking-[0.1em] text-[#0f172a] hover:bg-[#f8fafc] transition-colors rounded-sm uppercase cursor-pointer"
                 >
-                  <ShoppingBag className="w-5 h-5" strokeWidth={1.5} />
+                  <ZenIcon name="shopping-bag" className="w-5 h-5" />
                   Cart
                 </button>
               </div>

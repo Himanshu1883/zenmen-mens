@@ -244,7 +244,7 @@ export default function ProductFormModal({
         .zm-modal-footer { border-top: 1px solid #e2e8f0; display: flex; gap: 12px; background: #f8fafc; }
         .zm-modal-body { overflow-y: auto; flex: 1; padding: 28px 32px; display: flex; flex-direction: column; gap: 22px; }
         .zm-eyebrow { font-size: 9px; letter-spacing: 0.38em; text-transform: uppercase; color: #7da8c7; margin: 0 0 4px; }
-        .zm-modal-title { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 300; color: #0f172a; margin: 0; }
+        .zm-modal-title { font-family: var(--heading-font-family); font-size: 1.5rem; font-weight: var(--heading-font-weight); color: #0f172a; margin: 0; }
         .zm-close-btn { width: 36px; height: 36px; border: 1px solid #e2e8f0; background: transparent; cursor: pointer; color: #64748b; }
         .zm-badge { font-size: 9px; letter-spacing: 0.32em; text-transform: uppercase; color: #7da8c7; }
         .zm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -385,6 +385,51 @@ export default function ProductFormModal({
                       onChange={(e) => patch({ badge: e.target.value })}
                       placeholder="New, Limited, etc."
                     />
+                  </Field>
+                  <Field label="Delivery estimate" full>
+                    <label className="zm-check-row mb-3">
+                      <input
+                        type="checkbox"
+                        className="zm-check-box"
+                        checked={form.showDeliveryLead}
+                        onChange={(e) =>
+                          patch({ showDeliveryLead: e.target.checked })
+                        }
+                      />
+                      <span className="text-sm text-[#475569]">
+                        Show delivery timeline on collection &amp; product page
+                      </span>
+                    </label>
+                    <div className="zm-row">
+                      <input
+                        type="number"
+                        min={0}
+                        className="zm-input"
+                        value={form.deliveryLeadValue}
+                        onChange={(e) =>
+                          patch({ deliveryLeadValue: e.target.value })
+                        }
+                        placeholder="e.g. 14"
+                      />
+                      <select
+                        className="zm-input"
+                        value={form.deliveryLeadUnit}
+                        onChange={(e) =>
+                          patch({
+                            deliveryLeadUnit: e.target
+                              .value as typeof form.deliveryLeadUnit,
+                          })
+                        }
+                      >
+                        <option value="days">Days</option>
+                        <option value="weeks">Weeks</option>
+                        <option value="months">Months</option>
+                      </select>
+                    </div>
+                    <p className="zm-hint mt-2">
+                      Customers see a badge like &quot;Ready in 14 days&quot; when
+                      enabled and a value is set.
+                    </p>
                   </Field>
                   <Field label="Description" full>
                     <textarea

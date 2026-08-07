@@ -1,4 +1,5 @@
 import Razorpay from "razorpay";
+import crypto from "crypto";
 
 let instance: Razorpay | null = null;
 
@@ -33,4 +34,55 @@ export function getRazorpayKeySecret(): string {
     throw new Error("RAZORPAY_KEY_SECRET is not set");
   }
   return keySecret;
+}
+
+export function verifyPaymentSignature(
+  orderId: string,
+  paymentId: string,
+  signature: string,
+): boolean {
+  const expected = crypto
+    .createHmac("sha256", getRazorpayKeySecret())
+    .update(`${orderId}|${paymentId}`)
+    .digest("hex");
+  try {
+    return crypto.timingSafeEqual(
+      Buffer.from(expected),
+      Buffer.from(signature),
+    );
+  } catch {
+    return expected === signature;
+  }
+}
+
+export function verifyWebhookSignature(
+  rawBody: string,
+  signature: string,
+): boolean {
+  const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
+  if (!secret) return false;
+  const expected = crypto
+    .createHmac("sha256", secret)
+    .update(rawBody)
+    .digest("hex");
+  try {
+    return crypto.timingSafeEqual(
+      Buffer.from(expected),
+      Buffer.from(signature),
+    );
+  } catch {
+    return expected === signature;
+  }
+}
+
+export async function initiateRefund(
+  paymentId: string,
+  amountPaise?: number,
+  notes: Record<string, string> = {},
+) {
+  const razorpay = getRazorpay();
+  const payload: { speed: "normal"; notes: Record<string, string>; amount?: number } =
+    { speed: "normal", notes };
+  if (amountPaise != null) payload.amount = amountPaise;
+  return razorpay.payments.refund(paymentId, payload);
 }

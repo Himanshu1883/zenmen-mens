@@ -19,7 +19,7 @@ export default function GlobalError({
       <p className="text-[10px] tracking-[4px] uppercase text-[#c8a96e] mb-4">
         Error
       </p>
-      <h2 className="font-['Cormorant_Garamond'] text-4xl font-light mb-4">
+      <h2 className="font-heading text-4xl font-light mb-4">
         Something went wrong
       </h2>
       <p className="text-sm text-[rgba(247,242,232,0.5)] mb-8 text-center max-w-md">

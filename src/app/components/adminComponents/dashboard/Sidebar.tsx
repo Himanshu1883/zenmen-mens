@@ -1,19 +1,6 @@
 "use client";
 
-import { adminAvatarParams } from "@/app/components/adminComponents/admin-theme";
-import {
-  BarChart3,
-  ChevronLeft,
-  HelpCircle,
-  LayoutDashboard,
-  LogOut,
-  Package,
-  Settings,
-  ShoppingCart,
-  Sparkles,
-  Users,
-} from "lucide-react";
-import { useSession } from "next-auth/react";
+import { ZenIcon, type ZenIconName } from "@/components/icons";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -22,31 +9,22 @@ interface SidebarProps {
   onToggle: () => void;
 }
 
-const menuItems = [
-  { icon: LayoutDashboard, label: "Dashboard", path: "/admin", badge: null },
-  { icon: Package, label: "Products", path: "/admin/products", badge: "156" },
-  { icon: Users, label: "Clients", path: "/admin/users", badge: null },
-  { icon: ShoppingCart, label: "Orders", path: "/admin/orders", badge: "24" },
-  {
-    icon: BarChart3,
-    label: "Analytics",
-    path: "/admin/analytics",
-    badge: null,
-  },
-  { icon: Settings, label: "Settings", path: "/admin/settings", badge: null },
+const menuItems: {
+  icon: ZenIconName;
+  label: string;
+  path: string;
+  badge: string | null;
+}[] = [
+  { icon: "dashboard", label: "Dashboard", path: "/admin", badge: null },
+  { icon: "box", label: "Products", path: "/admin/products", badge: "156" },
+  { icon: "users", label: "Clients", path: "/admin/users", badge: null },
+  { icon: "shopping-cart", label: "Orders", path: "/admin/orders", badge: "24" },
+  { icon: "chart-bar", label: "Analytics", path: "/admin/analytics", badge: null },
+  { icon: "cog", label: "Settings", path: "/admin/settings", badge: null },
 ];
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
-  const { data: session } = useSession();
-
-  const sessionUser = session?.user;
-  const profileName = sessionUser?.name ?? "Admin";
-  const profileRole =
-    (sessionUser as { role?: string })?.role ?? "Administrator";
-  const profileAvatar =
-    sessionUser?.image ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(profileName)}&${adminAvatarParams}`;
 
   return (
     <>
@@ -79,7 +57,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
             </div>
           ) : (
             <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto bg-[#7da8c7]">
-              <Sparkles className="w-5 h-5 text-white" />
+              <ZenIcon name="sparkles" className="w-5 h-5 text-white" />
             </div>
           )}
         </div>
@@ -87,7 +65,6 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         <nav className="sidebar-nav px-4 py-6 flex-1 overflow-y-auto">
           <ul className="space-y-1">
             {menuItems.map((item) => {
-              const Icon = item.icon;
               const isActive = pathname === item.path;
 
               return (
@@ -100,7 +77,8 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                         : "border-transparent hover:bg-[#f8fafc] text-[#64748b] hover:text-[#0f172a]"
                     }`}
                   >
-                    <Icon
+                    <ZenIcon
+                      name={item.icon}
                       className={`w-5 h-5 transition-colors ${
                         isActive
                           ? "text-[#7da8c7]"
@@ -139,7 +117,10 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 type="button"
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-[#f8fafc] group text-[#64748b] hover:text-[#0f172a]"
               >
-                <HelpCircle className="w-5 h-5 group-hover:text-[#7da8c7]" />
+                <ZenIcon
+                  name="question-circle"
+                  className="w-5 h-5 group-hover:text-[#7da8c7]"
+                />
                 <span className="text-sm font-medium">Help & Support</span>
               </button>
 
@@ -147,7 +128,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 type="button"
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-red-50 group text-[#64748b] hover:text-red-600"
               >
-                <LogOut className="w-5 h-5" />
+                <ZenIcon name="sign-out" className="w-5 h-5" />
                 <span className="text-sm font-medium">Logout</span>
               </button>
             </div>
@@ -157,13 +138,13 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 type="button"
                 className="w-10 h-10 rounded-lg flex items-center justify-center hover:bg-[#f8fafc] text-[#64748b]"
               >
-                <HelpCircle className="w-5 h-5" />
+                <ZenIcon name="question-circle" className="w-5 h-5" />
               </button>
               <button
                 type="button"
                 className="w-10 h-10 rounded-lg flex items-center justify-center hover:bg-red-50 text-[#64748b]"
               >
-                <LogOut className="w-5 h-5" />
+                <ZenIcon name="sign-out" className="w-5 h-5" />
               </button>
             </div>
           )}
@@ -174,7 +155,8 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           onClick={onToggle}
           className="absolute -right-3 top-24 w-6 h-6 rounded-full flex items-center justify-center transition-all hover:scale-110 hidden md:flex bg-[#7da8c7] text-white shadow-md shadow-[#7da8c7]/30"
         >
-          <ChevronLeft
+          <ZenIcon
+            name="chevron-left"
             className={`w-4 h-4 transition-transform ${
               collapsed ? "rotate-180" : ""
             }`}

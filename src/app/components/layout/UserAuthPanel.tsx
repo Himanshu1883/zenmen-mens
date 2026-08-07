@@ -1,15 +1,12 @@
 "use client";
 
 import { loginSchema, registerSchema } from "@/lib/validations/auth.schema";
+import { resolveAccountContact } from "@/lib/auth-contact";
+import { ZenIcon } from "@/components/icons";
 import {
-  ChevronRight,
   Clock,
-  LayoutDashboard,
   Loader2,
-  LogOut,
   Sparkles,
-  UserRound,
-  X,
 } from "lucide-react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
@@ -36,6 +33,7 @@ type SessionUser = {
   name?: string | null;
   email?: string | null;
   image?: string | null;
+  phone?: string | null;
   role?: string;
 };
 
@@ -283,7 +281,7 @@ export default function UserAuthPanel({ open, onClose }: UserAuthPanelProps) {
         redirect: false,
       });
       if (res?.error) {
-        toast.error("Invalid email or password");
+        toast.error("Invalid email/mobile or password");
         return;
       }
       toast.success("Signed in");
@@ -384,7 +382,7 @@ export default function UserAuthPanel({ open, onClose }: UserAuthPanelProps) {
             aria-label="Close"
             className="absolute right-4 top-4 z-10 cursor-pointer rounded-full p-2 text-[#64748b] transition-colors hover:bg-[#f1f5f9] hover:text-[#0f172a]"
           >
-            <X className="h-5 w-5" strokeWidth={1.5} />
+            <ZenIcon name="times" className="h-5 w-5" />
           </button>
 
           <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-6 pb-6 pt-12 sm:px-8 sm:pt-14">
@@ -428,13 +426,18 @@ export default function UserAuthPanel({ open, onClose }: UserAuthPanelProps) {
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center text-[#7da8c7]">
-                        <UserRound className="h-7 w-7" strokeWidth={1} />
+                        <ZenIcon name="user" className="h-7 w-7" />
                       </div>
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="m-0 truncate font-[family-name:var(--font-montserrat)] text-[13px] font-medium text-[#0f172a]">
-                      {sessionUser?.email}
+                      {
+                        resolveAccountContact({
+                          email: sessionUser?.email,
+                          phone: sessionUser?.phone,
+                        }).displayContact
+                      }
                     </p>
                     <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-[#1b2232]/8 bg-white px-2.5 py-0.5">
                       <Sparkles
@@ -457,9 +460,9 @@ export default function UserAuthPanel({ open, onClose }: UserAuthPanelProps) {
                     >
                       <span className="flex items-center gap-3">
                         <span className="flex h-9 w-9 items-center justify-center rounded-[2px] bg-white/10">
-                          <LayoutDashboard
+                          <ZenIcon
+                            name="dashboard"
                             className="h-4 w-4 text-[#7da8c7]"
-                            strokeWidth={1.5}
                           />
                         </span>
                         <span className="text-left">
@@ -471,9 +474,9 @@ export default function UserAuthPanel({ open, onClose }: UserAuthPanelProps) {
                           </span>
                         </span>
                       </span>
-                      <ChevronRight
+                      <ZenIcon
+                        name="chevron-right"
                         className="h-4 w-4 shrink-0 text-white/50 group-hover:translate-x-0.5"
-                        strokeWidth={1.5}
                       />
                     </Link>
                   )}
@@ -485,18 +488,18 @@ export default function UserAuthPanel({ open, onClose }: UserAuthPanelProps) {
                   >
                     <span className="flex items-center gap-3">
                       <span className="flex h-9 w-9 items-center justify-center rounded-[2px] bg-[#f8fafc]">
-                        <UserRound
+                        <ZenIcon
+                          name="user"
                           className="h-4 w-4 text-[#7da8c7]"
-                          strokeWidth={1.5}
                         />
                       </span>
                       <span className="font-[family-name:var(--font-montserrat)] text-[11px] font-medium tracking-[0.2em] uppercase">
                         Your profile
                       </span>
                     </span>
-                    <ChevronRight
+                    <ZenIcon
+                      name="chevron-right"
                       className="h-4 w-4 shrink-0 text-[#cbd5e1] group-hover:translate-x-0.5 group-hover:text-[#7da8c7]"
-                      strokeWidth={1.5}
                     />
                   </Link>
 
@@ -516,9 +519,9 @@ export default function UserAuthPanel({ open, onClose }: UserAuthPanelProps) {
                         Recently viewed
                       </span>
                     </span>
-                    <ChevronRight
+                    <ZenIcon
+                      name="chevron-right"
                       className="h-4 w-4 shrink-0 text-[#cbd5e1] group-hover:translate-x-0.5 group-hover:text-[#7da8c7]"
-                      strokeWidth={1.5}
                     />
                   </Link>
 
@@ -542,65 +545,68 @@ export default function UserAuthPanel({ open, onClose }: UserAuthPanelProps) {
                         strokeWidth={1.5}
                       />
                     ) : (
-                      <LogOut className="h-4 w-4" strokeWidth={1.5} />
+                      <ZenIcon name="sign-out" className="h-4 w-4" />
                     )}
                     Sign out
                   </button>
                 </nav>
               </div>
             ) : (
-              <div className="mx-auto w-full max-w-[360px] space-y-5">
-                <button
-                  type="button"
-                  disabled={busy}
-                  onClick={handleGoogle}
-                  className="flex w-full cursor-pointer items-center justify-center gap-3 border border-[#1b2232]/12 bg-white py-3.5 font-[family-name:var(--font-montserrat)] text-[12px] font-medium tracking-[0.1em] text-[#0f172a] shadow-sm transition-[transform,box-shadow] duration-150 hover:-translate-y-px hover:shadow-md disabled:opacity-50"
-                >
-                  <GoogleMark />
-                  Continue with Google
-                </button>
-
-                <div className="flex items-center gap-4">
-                  <span className="h-px flex-1 bg-[#e2e8f0]" />
-                  <span className="shrink-0 font-[family-name:var(--font-montserrat)] text-[9px] font-medium tracking-[0.28em] text-[#94a3b8] uppercase">
-                    or with email
-                  </span>
-                  <span className="h-px flex-1 bg-[#e2e8f0]" />
-                </div>
-
-                <div className="flex border border-[#e2e8f0] p-1">
+              <div className="mx-auto w-full max-w-[360px] space-y-6">
+                <div className="flex flex-col gap-4">
                   <button
                     type="button"
-                    onClick={() => setMode("login")}
-                    className={`flex-1 cursor-pointer border-0 py-2.5 font-[family-name:var(--font-montserrat)] text-[10px] font-medium tracking-[0.2em] uppercase transition-colors ${
-                      mode === "login"
-                        ? "bg-[#0f172a] text-white"
-                        : "bg-transparent text-[#64748b] hover:text-[#0f172a]"
-                    }`}
+                    disabled={busy}
+                    onClick={handleGoogle}
+                    className="flex w-full cursor-pointer items-center justify-center gap-3 border border-[#e2e8f0] bg-white py-3.5 font-[family-name:var(--font-montserrat)] text-[12px] font-medium tracking-[0.08em] text-[#0f172a] transition-colors duration-150 hover:border-[#cbd5e1] hover:bg-[#f8fafc] disabled:opacity-50"
                   >
-                    Login
+                    <GoogleMark />
+                    Continue with Google
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setMode("signup")}
-                    className={`flex-1 cursor-pointer border-0 py-2.5 font-[family-name:var(--font-montserrat)] text-[10px] font-medium tracking-[0.2em] uppercase transition-colors ${
-                      mode === "signup"
-                        ? "bg-[#0f172a] text-white"
-                        : "bg-transparent text-[#64748b] hover:text-[#0f172a]"
-                    }`}
-                  >
-                    Sign up
-                  </button>
+
+                  <div className="flex items-center gap-3" role="separator">
+                    <span className="h-px min-w-0 flex-1 bg-[#e2e8f0]" />
+                    <span className="shrink-0 px-1 font-[family-name:var(--font-montserrat)] text-[9px] font-medium tracking-[0.2em] text-[#94a3b8] uppercase">
+                      or email / mobile
+                    </span>
+                    <span className="h-px min-w-0 flex-1 bg-[#e2e8f0]" />
+                  </div>
+
+                  <div className="flex border border-[#e2e8f0]">
+                    <button
+                      type="button"
+                      onClick={() => setMode("login")}
+                      className={`flex-1 cursor-pointer border-0 py-3 font-[family-name:var(--font-montserrat)] text-[10px] font-medium tracking-[0.2em] uppercase transition-colors ${
+                        mode === "login"
+                          ? "bg-[#0f172a] text-white"
+                          : "bg-white text-[#94a3b8] hover:text-[#0f172a]"
+                      }`}
+                    >
+                      Login
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMode("signup")}
+                      className={`flex-1 cursor-pointer border-0 py-3 font-[family-name:var(--font-montserrat)] text-[10px] font-medium tracking-[0.2em] uppercase transition-colors ${
+                        mode === "signup"
+                          ? "bg-[#0f172a] text-white"
+                          : "bg-white text-[#94a3b8] hover:text-[#0f172a]"
+                      }`}
+                    >
+                      Sign up
+                    </button>
+                  </div>
                 </div>
 
                 {mode === "login" ? (
                   <form onSubmit={handleLogin} className="space-y-5">
                     <Field
-                      label="Email"
-                      type="email"
-                      autoComplete="email"
+                      label="Email or mobile number"
+                      type="text"
+                      autoComplete="username"
                       value={loginEmail}
                       onChange={setLoginEmail}
+                      requiredMark
                     />
                     <Field
                       label="Password"
@@ -633,11 +639,12 @@ export default function UserAuthPanel({ open, onClose }: UserAuthPanelProps) {
                       onChange={setSignupName}
                     />
                     <Field
-                      label="Email"
-                      type="email"
-                      autoComplete="email"
+                      label="Email or mobile number"
+                      type="text"
+                      autoComplete="username"
                       value={signupEmail}
                       onChange={setSignupEmail}
+                      requiredMark
                     />
                     <Field
                       label="Password"
@@ -697,20 +704,23 @@ const Field = memo(function Field({
   autoComplete,
   value,
   onChange,
+  requiredMark = false,
 }: {
   label: string;
   type: string;
   autoComplete: string;
   value: string;
   onChange: (v: string) => void;
+  requiredMark?: boolean;
 }) {
   return (
     <label className="block">
       <span className="sr-only">{label}</span>
       <input
         type={type}
+        inputMode={type === "text" && requiredMark ? "email" : undefined}
         autoComplete={autoComplete}
-        placeholder={`${label}${type === "email" ? " *" : ""}`}
+        placeholder={`${label}${requiredMark ? " *" : ""}`}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="w-full border-0 border-b border-[#cbd5e1] bg-transparent px-0 py-2.5 font-[family-name:var(--font-montserrat)] text-sm font-light tracking-wide text-[#0f172a] outline-none transition-[border-color] duration-150 placeholder:text-[#94a3b8] focus:border-[#0f172a]"

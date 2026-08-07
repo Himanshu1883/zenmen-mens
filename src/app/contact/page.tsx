@@ -303,7 +303,6 @@ export default function ContactPage() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400;0,700;1,400;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@200;300;400;500&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
 
@@ -485,7 +484,7 @@ export default function ContactPage() {
             position: "absolute",
             right: "-2vw",
             bottom: "-1vw",
-            fontFamily: "'Playfair Display', serif",
+            fontFamily: "var(--heading-font-family)",
             fontSize: "clamp(6rem,18vw,15rem)",
             fontWeight: 700,
             color: "transparent",
@@ -529,7 +528,7 @@ export default function ContactPage() {
           <h1
             className="c-banner-title"
             style={{
-              fontFamily: "'Playfair Display', serif",
+              fontFamily: "var(--heading-font-family)",
               fontSize: "clamp(3.2rem,8.5vw,7.5rem)",
               fontWeight: 300,
               lineHeight: 0.93,
@@ -559,7 +558,7 @@ export default function ContactPage() {
           >
             <p
               style={{
-                fontFamily: "'Cormorant Garamond', serif",
+                fontFamily: "var(--heading-font-family)",
                 fontSize: "clamp(1rem,1.4vw,1.15rem)",
                 fontStyle: "italic",
                 fontWeight: 300,
@@ -617,7 +616,7 @@ export default function ContactPage() {
                 </p>
                 <p
                   style={{
-                    fontFamily: "'Cormorant Garamond', serif",
+                    fontFamily: "var(--heading-font-family)",
                     fontSize: "1rem",
                     fontWeight: 400,
                     color: "#0f172a",
@@ -723,7 +722,7 @@ export default function ContactPage() {
 
             <h2
               style={{
-                fontFamily: "'Playfair Display', serif",
+                fontFamily: "var(--heading-font-family)",
                 fontSize: "clamp(1.9rem,3.5vw,2.8rem)",
                 fontWeight: 300,
                 color: "#0f172a",
@@ -739,7 +738,7 @@ export default function ContactPage() {
 
             <p
               style={{
-                fontFamily: "'Cormorant Garamond', serif",
+                fontFamily: "var(--heading-font-family)",
                 fontSize: "1.05rem",
                 fontWeight: 300,
                 lineHeight: 1.9,
@@ -778,7 +777,7 @@ export default function ContactPage() {
                   </p>
                   <p
                     style={{
-                      fontFamily: "'Cormorant Garamond', serif",
+                      fontFamily: "var(--heading-font-family)",
                       fontSize: "1.05rem",
                       fontWeight: 400,
                       color: "#0f172a",
@@ -883,7 +882,7 @@ export default function ContactPage() {
                 </p>
                 <h3
                   style={{
-                    fontFamily: "'Playfair Display', serif",
+                    fontFamily: "var(--heading-font-family)",
                     fontSize: "clamp(1.6rem,3vw,2.1rem)",
                     fontWeight: 300,
                     color: "#0f172a",
@@ -897,7 +896,7 @@ export default function ContactPage() {
                 </h3>
                 <p
                   style={{
-                    fontFamily: "'Cormorant Garamond', serif",
+                    fontFamily: "var(--heading-font-family)",
                     fontSize: ".95rem",
                     fontStyle: "italic",
                     color: "rgba(100,116,139,.6)",
@@ -923,7 +922,7 @@ export default function ContactPage() {
                 >
                   <p
                     style={{
-                      fontFamily: "'Playfair Display', serif",
+                      fontFamily: "var(--heading-font-family)",
                       fontSize: "1.2rem",
                       fontWeight: 300,
                       color: "#4cae72",
@@ -934,7 +933,7 @@ export default function ContactPage() {
                   </p>
                   <p
                     style={{
-                      fontFamily: "'Cormorant Garamond', serif",
+                      fontFamily: "var(--heading-font-family)",
                       fontSize: ".95rem",
                       color: "rgba(100,116,139,.7)",
                       fontStyle: "italic",
@@ -1196,7 +1195,7 @@ export default function ContactPage() {
 
                 <p
                   style={{
-                    fontFamily: "'Cormorant Garamond', serif",
+                    fontFamily: "var(--heading-font-family)",
                     fontSize: ".85rem",
                     fontStyle: "italic",
                     color: "rgba(125,168,199,.4)",
@@ -1244,7 +1243,7 @@ export default function ContactPage() {
             </p>
             <h2
               style={{
-                fontFamily: "'Playfair Display', serif",
+                fontFamily: "var(--heading-font-family)",
                 fontSize: "clamp(1.8rem,3vw,2.6rem)",
                 fontWeight: 300,
                 color: "#0f172a",
@@ -1290,7 +1289,7 @@ export default function ContactPage() {
                   </p>
                   <p
                     style={{
-                      fontFamily: "'Playfair Display', serif",
+                      fontFamily: "var(--heading-font-family)",
                       fontSize: "1.1rem",
                       fontWeight: 300,
                       color: "#0f172a",
@@ -1301,7 +1300,7 @@ export default function ContactPage() {
                   </p>
                   <p
                     style={{
-                      fontFamily: "'Cormorant Garamond', serif",
+                      fontFamily: "var(--heading-font-family)",
                       fontSize: ".9rem",
                       color: "rgba(100,116,139,.55)",
                       marginTop: 4,
@@ -1360,7 +1359,7 @@ export default function ContactPage() {
               </p>
               <h2
                 style={{
-                  fontFamily: "'Playfair Display', serif",
+                  fontFamily: "var(--heading-font-family)",
                   fontSize: "clamp(1.8rem,3vw,2.6rem)",
                   fontWeight: 300,
                   color: "#0f172a",
@@ -1432,7 +1431,7 @@ export default function ContactPage() {
                 </p>
                 <p
                   style={{
-                    fontFamily: "'Playfair Display', serif",
+                    fontFamily: "var(--heading-font-family)",
                     fontSize: "1.05rem",
                     fontWeight: 300,
                     color: "#0f172a",
@@ -1443,7 +1442,7 @@ export default function ContactPage() {
                 </p>
                 <p
                   style={{
-                    fontFamily: "'Cormorant Garamond', serif",
+                    fontFamily: "var(--heading-font-family)",
                     fontSize: ".9rem",
                     fontStyle: "italic",
                     color: "rgba(100,116,139,.6)",
@@ -1533,7 +1532,7 @@ export default function ContactPage() {
           </p>
           <h2
             style={{
-              fontFamily: "'Playfair Display', serif",
+              fontFamily: "var(--heading-font-family)",
               fontSize: "clamp(2rem,4.5vw,3.2rem)",
               fontWeight: 300,
               lineHeight: 1.05,
@@ -1549,7 +1548,7 @@ export default function ContactPage() {
           </h2>
           <p
             style={{
-              fontFamily: "'Cormorant Garamond', serif",
+              fontFamily: "var(--heading-font-family)",
               fontSize: "1.05rem",
               fontStyle: "italic",
               fontWeight: 300,

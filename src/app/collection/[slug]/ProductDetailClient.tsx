@@ -1,7 +1,15 @@
 "use client";
 
 import { useDisplayPrice } from "@/hooks/useDisplayPrice";
+import {
+  getDeliveryBadgeLabel,
+  getDeliverySummaryLine,
+} from "@/lib/delivery-estimate";
 import { addRecentlyViewed } from "@/lib/recently-viewed";
+import {
+  buildProductWhatsAppMessage,
+  openWhatsAppWithMessage,
+} from "@/lib/whatsapp-product-order";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { addItem, setCartOpen } from "@/store/slices/cartSlice";
 import { fetchProducts } from "@/store/slices/productSlice";
@@ -170,7 +178,7 @@ function AccordionItem({
   isOpen,
   onToggle,
 }: {
-  item: (typeof ACCORDION_ITEMS)[0];
+  item: { id: string; label: string; content: string };
   isOpen: boolean;
   onToggle: () => void;
 }) {
@@ -740,6 +748,8 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const [openAccordion, setOpenAccordion] = useState<string | null>(null);
   const [addedToCart, setAddedToCart] = useState(false);
   const [wishlisted, setWishlisted] = useState(false);
+  const [wantsCustomization, setWantsCustomization] = useState(false);
+  const [customizationNotes, setCustomizationNotes] = useState("");
   const [pastPurchasePanel, setPastPurchasePanel] = useState(false);
   const [footerInView, setFooterInView] = useState(false);
   const purchaseAnchorRef = useRef<HTMLDivElement>(null);
@@ -756,6 +766,8 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     setActiveImage(0);
     setSelectedSize(product.sizes?.[0] ?? "M");
     setSelectedColor(product.colors?.[0] ?? COLORS[0].name);
+    setWantsCustomization(false);
+    setCustomizationNotes("");
   }, [product._id]);
 
   useEffect(() => {
@@ -821,6 +833,24 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     () => isColorAvailable || selectedColor === product.colors?.[0],
     [isColorAvailable, selectedColor, product.colors],
   );
+  const requiresWhatsAppOrder = wantsCustomization || !canAddToCart;
+  const deliveryBadge = getDeliveryBadgeLabel(product);
+
+  const accordionItems = useMemo(() => {
+    const deliveryLine = getDeliverySummaryLine(product);
+    if (product.accordion?.length) {
+      return product.accordion.map((a, i) => ({
+        id: `acc-${i}`,
+        label: a.title,
+        content: a.content,
+      }));
+    }
+    return ACCORDION_ITEMS.map((item) =>
+      item.id === "shipping" && deliveryLine
+        ? { ...item, content: `${deliveryLine} ${item.content}` }
+        : item,
+    );
+  }, [product]);
 
   const rating = product.rating ?? 4.6;
   const reviewCount = product.numReviews ?? 42;
@@ -849,21 +879,22 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     [allProducts, product._id, product.category, product.colors],
   );
 
-  const handleWhatsAppInquiry = () => {
-    const msg = `Hi Zenmen, I'm interested in the "${product.title}" in ${selectedColor} color, size ${selectedSize}. Is this available?`;
-    window.open(
-      `https://wa.me/919650753273?text=${encodeURIComponent(msg)}`,
-      "_blank",
-    );
+  const openWhatsApp = (intent: "order" | "inquiry" | "best_price") => {
+    const message = buildProductWhatsAppMessage({
+      productTitle: product.title,
+      formattedPrice: displayPrice(product.price),
+      color: selectedColor,
+      size: selectedSize,
+      intent: wantsCustomization || !canAddToCart ? "order" : intent,
+      wantsCustomization: wantsCustomization || !canAddToCart,
+      customizationNotes,
+    });
+    openWhatsAppWithMessage(message);
   };
 
-  const handleWhatsAppBestPrice = () => {
-    const msg = `Hi ZENmen — I'd like your best price on "${product.title}" (${selectedColor}, size ${selectedSize}). Thank you.`;
-    window.open(
-      `https://wa.me/919650753273?text=${encodeURIComponent(msg)}`,
-      "_blank",
-    );
-  };
+  const handleWhatsAppInquiry = () => openWhatsApp("inquiry");
+  const handleWhatsAppBestPrice = () => openWhatsApp("best_price");
+  const handleWhatsAppOrder = () => openWhatsApp("order");
 
   function buildCartLine() {
     return {
@@ -897,7 +928,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
   return (
     <main
-      className={`relative min-h-screen overflow-x-hidden bg-[#f8fafc] font-['Jost'] font-light text-[#0f172a] pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))] ${showStickyPurchase ? "md:pb-28" : "md:pb-0"}`}
+      className={`relative min-h-screen overflow-x-hidden bg-[#f8fafc] text-[#0f172a] pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))] ${showStickyPurchase ? "md:pb-28" : "md:pb-0"}`}
     >
       {/* ── Breadcrumb ── */}
       <div className="relative z-10 mx-auto flex max-w-[1800px] items-center gap-2 px-5 pb-0 pt-8 text-[.6rem] uppercase tracking-[.25em] text-[#94a3b8] sm:px-8 lg:px-10">
@@ -948,12 +979,17 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
             {/* Main image — full aspect, no crop */}
             <div className="relative min-w-0 flex-1 overflow-hidden rounded-[3px] bg-[#f1f5f9]">
-              {/* Badge */}
-              <div className="absolute left-5 top-5 z-20 pointer-events-none rounded-[2px] border border-white/20 bg-[#0f172a]/70 px-3.5 py-1.5 text-[.55rem] uppercase tracking-[.3em] text-[#7da8c7] backdrop-blur-sm">
-                {product.badge ?? "Featured"}
+              <div className="absolute left-5 top-5 z-20 flex flex-col gap-2 pointer-events-none">
+                <div className="rounded-[2px] border border-white/20 bg-[#0f172a]/70 px-3.5 py-1.5 text-[11px] font-medium uppercase tracking-wide text-[#7da8c7] backdrop-blur-sm">
+                  {product.badge ?? "Featured"}
+                </div>
+                {deliveryBadge ? (
+                  <div className="w-fit rounded-[2px] border border-white/30 bg-white/90 px-3 py-1.5 text-[11px] font-medium text-[#0f172a] shadow-sm backdrop-blur-sm">
+                    {deliveryBadge}
+                  </div>
+                ) : null}
               </div>
 
-              {/* Full-fit image — object-contain so nothing is cropped */}
               <ZoomableImage
                 src={currentImageSrc}
                 alt={product.title}
@@ -1000,17 +1036,23 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         <aside className="mt-8 xl:mt-0 xl:max-h-[calc(100vh-92px)] xl:overflow-y-auto xl:[scrollbar-width:none] xl:[&::-webkit-scrollbar]:hidden">
           <div className="rounded-[3px] border border-[#e2e8f0] bg-white px-8 py-9 sm:px-10 sm:py-10">
             {/* Label + title */}
-            <p className="mb-1.5 text-[11px] uppercase tracking-[0.3em] text-[#7da8c7]">
+            <p className="mb-1.5 text-xs font-medium uppercase tracking-wider text-[#7da8c7]">
               {product.category}
               {product.subCategory ? ` · ${product.subCategory}` : ""}
             </p>
-            <h1 className="font-['Cormorant_Garamond'] text-[3.2rem] font-light leading-[.93] text-[#0f172a] sm:text-[3.8rem]">
+            <h1 className="font-heading text-[3.2rem] font-normal leading-[.93] text-[#0f172a] sm:text-[3.8rem]">
               {product.title}
             </h1>
-            <p className="mt-3 text-[.83rem] leading-[1.85] text-[#64748b]">
+            <p className="mt-3 text-[15px] leading-relaxed text-[#475569]">
               {product.tagline ??
                 "Crafted for timeless style and everyday confidence."}
             </p>
+            {deliveryBadge ? (
+              <p className="mt-3 inline-flex items-center rounded-sm border border-[#e2e8f0] bg-[#f8fafc] px-3 py-1.5 text-[13px] text-[#0f172a]">
+                <span className="mr-2 h-1.5 w-1.5 rounded-full bg-[#7da8c7]" />
+                {deliveryBadge}
+              </p>
+            ) : null}
 
             {/* Stars + price on same row */}
             <div className="mt-5 flex items-center justify-between border-t border-[#e2e8f0] pt-5">
@@ -1020,11 +1062,11 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                     <StarIcon key={i} filled={filled} />
                   ))}
                 </div>
-                <span className="text-[.68rem] tracking-[.08em] text-[#64748b]">
+                <span className="text-sm text-[#64748b]">
                   {rating} · {reviewCount} reviews
                 </span>
               </div>
-              <p className="font-['Cormorant_Garamond'] text-[2.4rem] font-normal leading-none text-[#0f172a]">
+              <p className="font-heading text-[2.4rem] font-normal leading-none text-[#0f172a]">
                 {displayPrice(product.price)}
               </p>
             </div>
@@ -1104,6 +1146,42 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               </div>
             </div>
 
+            {/* Customization → WhatsApp order */}
+            <div className="mt-6 rounded-[3px] border border-[#e2e8f0] bg-[#f8fafc] p-4 sm:p-5">
+              <label className="flex cursor-pointer items-start gap-3">
+                <input
+                  type="checkbox"
+                  checked={wantsCustomization}
+                  onChange={(e) => setWantsCustomization(e.target.checked)}
+                  className="mt-1 h-4 w-4 shrink-0 accent-[#0f172a]"
+                />
+                <span>
+                  <span className="block text-sm font-medium text-[#0f172a]">
+                    I need customization
+                  </span>
+                  <span className="mt-1 block text-[13px] leading-relaxed text-[#64748b]">
+                    Monogram, fit changes, lining, or fabric notes — orders with
+                    customization are completed on WhatsApp with our stylists.
+                  </span>
+                </span>
+              </label>
+              {wantsCustomization ? (
+                <textarea
+                  value={customizationNotes}
+                  onChange={(e) => setCustomizationNotes(e.target.value)}
+                  rows={4}
+                  placeholder="Describe your requirements (measurements, embroidery, urgency, etc.)"
+                  className="mt-4 w-full resize-y rounded-[2px] border border-[#e2e8f0] bg-white px-3 py-2.5 text-[14px] leading-relaxed text-[#0f172a] outline-none placeholder:text-[#94a3b8] focus:border-[#7da8c7]"
+                />
+              ) : null}
+              {requiresWhatsAppOrder ? (
+                <p className="mt-3 text-[13px] text-[#7da8c7]">
+                  Checkout on the site is for standard sizes. Your selection will
+                  continue on WhatsApp so we can confirm every detail.
+                </p>
+              ) : null}
+            </div>
+
             <div
               ref={purchaseAnchorRef}
               className="h-px w-full shrink-0"
@@ -1112,10 +1190,20 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
             {/* CTA buttons */}
             <div className="mt-7 hidden flex-col gap-3 md:flex">
-              {isColorAvailable || selectedColor === product.colors?.[0] ? (
+              {requiresWhatsAppOrder ? (
                 <button
+                  type="button"
+                  onClick={handleWhatsAppOrder}
+                  className="flex h-[54px] items-center justify-center gap-2.5 rounded-[2px] border-0 bg-[#25D366] text-sm font-medium text-white transition-all hover:bg-[#1cb757]"
+                >
+                  <IconWhatsApp />
+                  Order on WhatsApp
+                </button>
+              ) : (
+                <button
+                  type="button"
                   onClick={handleAddToCart}
-                  className={`flex h-[54px] items-center justify-center gap-2.5 rounded-[2px] border-0 font-['Jost'] text-[.7rem] font-medium uppercase tracking-[.28em] transition-all ${
+                  className={`flex h-[54px] items-center justify-center gap-2.5 rounded-[2px] border-0 text-sm font-medium transition-all ${
                     addedToCart
                       ? "bg-[#4a7c59] text-white"
                       : "bg-[#0f172a] text-white hover:bg-[#7da8c7] hover:text-[#0f172a]"
@@ -1124,31 +1212,24 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   <IconBag />
                   {addedToCart ? "Added to Bag" : "Add to Bag"}
                 </button>
-              ) : (
-                <button
-                  onClick={handleWhatsAppInquiry}
-                  className="flex h-[54px] items-center justify-center gap-2.5 rounded-[2px] border-0 bg-[#25D366] font-['Jost'] text-[.7rem] font-medium uppercase tracking-[.28em] text-white transition-all hover:bg-[#1cb757]"
-                >
-                  <IconWhatsApp />
-                  Book Now
-                </button>
               )}
 
-              {isColorAvailable || selectedColor === product.colors?.[0] ? (
+              {requiresWhatsAppOrder ? (
+                <button
+                  type="button"
+                  onClick={handleWhatsAppInquiry}
+                  className="flex h-[54px] items-center justify-center gap-2 rounded-[2px] border border-[#e2e8f0] bg-transparent text-sm text-[#64748b] transition-all hover:border-[#7da8c7] hover:text-[#7da8c7]"
+                >
+                  <IconWhatsApp />
+                  Ask a question on WhatsApp
+                </button>
+              ) : (
                 <button
                   type="button"
                   onClick={handleBuyNow}
-                  className="h-[54px] rounded-[2px] border border-[#9fbdd5] bg-transparent font-['Jost'] text-[.7rem] uppercase tracking-[.28em] text-[#0f172a] transition-all hover:border-[#7da8c7] hover:bg-[#f0f6fb]"
+                  className="h-[54px] rounded-[2px] border border-[#9fbdd5] bg-transparent text-sm text-[#0f172a] transition-all hover:border-[#7da8c7] hover:bg-[#f0f6fb]"
                 >
-                  Buy Now · Express Checkout
-                </button>
-              ) : (
-                <button
-                  onClick={handleWhatsAppInquiry}
-                  className="flex h-[54px] items-center justify-center gap-2 rounded-[2px] border border-[#e2e8f0] bg-transparent font-['Jost'] text-[.7rem] uppercase tracking-[.28em] text-[#64748b] transition-all hover:border-[#7da8c7] hover:text-[#7da8c7]"
-                >
-                  <IconWhatsApp />
-                  Inquire on WhatsApp
+                  Buy now · express checkout
                 </button>
               )}
             </div>
@@ -1169,7 +1250,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
             {/* Accordion */}
             <div>
-              {ACCORDION_ITEMS.map((item) => (
+              {accordionItems.map((item) => (
                 <AccordionItem
                   key={item.id}
                   item={item}
@@ -1298,11 +1379,20 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 <span className="hidden lg:inline">WhatsApp</span>
               </button>
 
-              {canAddToCart ? (
+              {requiresWhatsAppOrder ? (
+                <button
+                  type="button"
+                  onClick={handleWhatsAppOrder}
+                  className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 text-[10px] font-semibold uppercase tracking-wide text-white transition-colors hover:bg-[#1cb757] sm:h-12 sm:min-w-[148px] sm:px-5"
+                >
+                  <IconWhatsApp />
+                  WhatsApp order
+                </button>
+              ) : (
                 <button
                   type="button"
                   onClick={handleAddToCart}
-                  className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl px-4 font-['Jost'] text-[9px] font-semibold uppercase tracking-[0.18em] transition-all sm:h-12 sm:min-w-[148px] sm:px-5 sm:text-[10px] ${
+                  className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl px-4 text-[10px] font-semibold uppercase tracking-wide transition-all sm:h-12 sm:min-w-[148px] sm:px-5 ${
                     addedToCart
                       ? "bg-[#4a7c59] text-white"
                       : "bg-[#0f172a] text-white hover:bg-[#7da8c7] hover:text-[#0f172a]"
@@ -1310,15 +1400,6 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 >
                   <IconBag />
                   {addedToCart ? "Added" : "Add to bag"}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleWhatsAppInquiry}
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 font-['Jost'] text-[9px] font-semibold uppercase tracking-[0.16em] text-white transition-colors hover:bg-[#1cb757] sm:h-12 sm:min-w-[148px] sm:px-5 sm:text-[10px]"
-                >
-                  <IconWhatsApp />
-                  Book now
                 </button>
               )}
             </div>
@@ -1343,10 +1424,16 @@ export default function ProductDetailClient({ product }: { product: Product }) {
           </button>
           <button
             type="button"
-            onClick={canAddToCart ? handleAddToCart : handleWhatsAppInquiry}
-            className="flex h-[52px] min-h-[52px] items-center justify-center rounded-sm border border-[#0f172a] bg-[#0f172a] px-1.5 font-['Jost'] text-[9.5px] font-bold uppercase tracking-[0.16em] text-white transition-colors hover:bg-[#7da8c7] hover:border-[#7da8c7] hover:text-[#0f172a] active:opacity-90 [-webkit-tap-highlight-color:transparent]"
+            onClick={
+              requiresWhatsAppOrder ? handleWhatsAppOrder : handleAddToCart
+            }
+            className="flex h-[52px] min-h-[52px] items-center justify-center rounded-sm border border-[#0f172a] bg-[#0f172a] px-1.5 text-[10px] font-semibold uppercase tracking-wide text-white transition-colors hover:bg-[#7da8c7] hover:border-[#7da8c7] hover:text-[#0f172a] active:opacity-90 [-webkit-tap-highlight-color:transparent]"
           >
-            {addedToCart ? "Added" : canAddToCart ? "Add to bag" : "Book now"}
+            {addedToCart && !requiresWhatsAppOrder
+              ? "Added"
+              : requiresWhatsAppOrder
+                ? "Order on WhatsApp"
+                : "Add to bag"}
           </button>
         </div>
       </div>

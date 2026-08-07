@@ -1,7 +1,7 @@
 "use client";
 
 import { adminAvatarParams } from "@/app/components/adminComponents/admin-theme";
-import { Bell, Menu, Search, Settings as SettingsIcon } from "lucide-react";
+import { ZenIcon } from "@/components/icons";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -71,7 +71,7 @@ export function Navbar({ onMenuClick, sidebarCollapsed, admin }: NavbarProps) {
             onClick={onMenuClick}
             className="md:hidden p-2 hover:bg-[#f1f5f9] rounded-lg transition-colors flex-shrink-0 text-[#0f172a]"
           >
-            <Menu className="w-5 h-5" />
+            <ZenIcon name="bars" className="w-5 h-5" />
           </button>
 
           <div className="hidden md:block min-w-0">
@@ -90,7 +90,8 @@ export function Navbar({ onMenuClick, sidebarCollapsed, admin }: NavbarProps) {
               searchFocused ? "scale-[1.02]" : ""
             }`}
           >
-            <Search
+            <ZenIcon
+              name="search"
               className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${
                 searchFocused ? "text-[#7da8c7]" : "text-[#94a3b8]"
               }`}
@@ -115,7 +116,7 @@ export function Navbar({ onMenuClick, sidebarCollapsed, admin }: NavbarProps) {
             className="p-2.5 hover:bg-[#f1f5f9] rounded-xl transition-all hidden md:block text-[#64748b] hover:text-[#7da8c7]"
             title="Settings"
           >
-            <SettingsIcon className="w-5 h-5" />
+            <ZenIcon name="cog" className="w-5 h-5" />
           </button>
 
           <div className="relative">
@@ -124,7 +125,7 @@ export function Navbar({ onMenuClick, sidebarCollapsed, admin }: NavbarProps) {
               onClick={() => setShowNotifications(!showNotifications)}
               className="relative p-2.5 hover:bg-[#f1f5f9] rounded-xl transition-all text-[#64748b]"
             >
-              <Bell className="w-5 h-5" />
+              <ZenIcon name="bell" className="w-5 h-5" />
               <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#7da8c7] ring-2 ring-white" />
             </button>
 

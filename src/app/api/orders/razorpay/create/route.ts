@@ -53,36 +53,61 @@ export async function POST(req: Request) {
       subtotal,
       codFee,
       total,
+      amountPaise,
+      pricing: {
+        itemsTotal: subtotal,
+        shipping: 0,
+        codCharge: codFee,
+        gstAmount: 0,
+        grandTotal: total,
+      },
       paymentMethod: "online",
       paymentStatus: "pending",
       status: "pending",
+      orderStatus: "pending_payment",
+      stockDecremented: false,
       shipping: parsed.data.shipping,
       notes: parsed.data.notes,
+      payment: { method: "razorpay", status: "pending" },
     });
 
-    const razorpay = getRazorpay();
-    const rzOrder = await razorpay.orders.create({
-      amount: amountPaise,
-      currency: "INR",
-      receipt: order.orderNumber,
-      notes: {
+    try {
+      const razorpay = getRazorpay();
+      const rzOrder = await razorpay.orders.create({
+        amount: amountPaise,
+        currency: "INR",
+        receipt: order.orderNumber,
+        notes: {
+          orderId: String(order._id),
+          orderNumber: order.orderNumber,
+          userEmail: auth.email,
+        },
+      });
+
+      order.razorpayOrderId = rzOrder.id;
+      await order.save();
+
+      return NextResponse.json({
         orderId: String(order._id),
         orderNumber: order.orderNumber,
-        userEmail: auth.email,
-      },
-    });
-
-    order.razorpayOrderId = rzOrder.id;
-    await order.save();
-
-    return NextResponse.json({
-      orderId: String(order._id),
-      orderNumber: order.orderNumber,
-      razorpayOrderId: rzOrder.id,
-      amount: amountPaise,
-      currency: "INR",
-      keyId: getRazorpayKeyId(),
-    });
+        razorpayOrderId: rzOrder.id,
+        amount: amountPaise,
+        currency: "INR",
+        keyId: getRazorpayKeyId(),
+      });
+    } catch (rzErr) {
+      await Order.updateOne(
+        { _id: order._id },
+        {
+          $set: {
+            status: "failed",
+            orderStatus: "failed",
+            paymentStatus: "failed",
+          },
+        },
+      );
+      throw rzErr;
+    }
   } catch (err) {
     console.error("[POST /api/orders/razorpay/create]", err);
     const message =

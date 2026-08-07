@@ -269,8 +269,6 @@ export default function Hero() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600;1,700&family=Tenor+Sans&family=Montserrat:wght@300;400;500;600;700&display=swap');
-
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         /* ══════════════════════════════════════
@@ -290,9 +288,9 @@ export default function Hero() {
           --gold: var(--zen-accent);
           --gold-light: var(--zen-accent-soft);
           --slate: var(--zen-muted);
-          --ff-display: 'Cormorant Garamond', Georgia, serif;
-          --ff-sans: 'Tenor Sans', system-ui, sans-serif;
-          --ff-ui: 'Montserrat', system-ui, sans-serif;
+          --ff-display: var(--heading-font-family);
+          --ff-sans: var(--base-font-family);
+          --ff-ui: var(--base-font-family);
         }
 
         /* ══════════════════════════════════════

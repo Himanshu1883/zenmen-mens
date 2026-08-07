@@ -1,42 +1,31 @@
 import { getAuthSession } from "@/lib/auth";
+import {
+  formatPhoneDisplay,
+  resolveAccountContact,
+} from "@/lib/auth-contact";
+import { customerOrdersQuery } from "@/lib/customer-orders";
 import { connectDB } from "@/lib/db";
+import { serializeOrder } from "@/lib/order-display";
 import Order from "@/models/Order";
 import User from "@/models/User";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import mongoose from "mongoose";
+import ProfileMemberCard from "./ProfileMemberCard";
+import ProfileNotifications from "./ProfileNotifications";
+import ProfileOrdersClient from "./ProfileOrdersClient";
 import RecentlyViewedSection from "./RecentlyViewedSection";
+import { collapseCodRetryDuplicates } from "@/services/codRetryCleanup";
 
 type ProfileUser = {
   _id?: mongoose.Types.ObjectId;
   name?: string;
   email?: string;
+  phone?: string;
+  password?: string;
   role?: "user" | "admin";
   createdAt?: Date | string;
   updatedAt?: Date | string;
-};
-
-type OrderItem = {
-  title: string;
-  slug: string;
-  price: number;
-  qty: number;
-  selectedColor?: string;
-  selectedSize?: string;
-  imageUrl?: string;
-};
-
-type ProfileOrder = {
-  _id: mongoose.Types.ObjectId;
-  orderNumber: string;
-  items: OrderItem[];
-  subtotal: number;
-  codFee?: number;
-  total: number;
-  paymentMethod: "cod" | "online";
-  paymentStatus: "pending" | "paid" | "failed";
-  status: "pending" | "confirmed" | "cancelled";
-  createdAt?: Date | string;
 };
 
 function formatDate(value?: Date | string) {
@@ -48,39 +37,6 @@ function formatDate(value?: Date | string) {
     month: "short",
     day: "numeric",
   });
-}
-
-function formatDateTime(value?: Date | string) {
-  if (!value) return "N/A";
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return "N/A";
-  return d.toLocaleString("en-IN", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-function formatInr(amount: number) {
-  return `₹${amount.toLocaleString("en-IN")}`;
-}
-
-function labelize(value: string) {
-  return value.charAt(0).toUpperCase() + value.slice(1);
-}
-
-function orderStatusClass(status: ProfileOrder["status"]) {
-  if (status === "confirmed") return "status-confirmed";
-  if (status === "cancelled") return "status-cancelled";
-  return "status-pending";
-}
-
-function paymentStatusClass(status: ProfileOrder["paymentStatus"]) {
-  if (status === "paid") return "pay-paid";
-  if (status === "failed") return "pay-failed";
-  return "pay-pending";
 }
 
 export default async function ProfilePage() {
@@ -96,27 +52,44 @@ export default async function ProfilePage() {
   }
 
   await connectDB();
-  const user = (await User.findOne({ email: session.user.email })
-    .select("name email role createdAt updatedAt")
-    .lean()) as ProfileUser | null;
 
   const sessionUserId = session.user.id;
+  let user: ProfileUser | null = null;
+  if (sessionUserId && mongoose.Types.ObjectId.isValid(sessionUserId)) {
+    user = (await User.findById(sessionUserId)
+      .select("name email phone password role createdAt updatedAt")
+      .lean()) as ProfileUser | null;
+  }
+  if (!user) {
+    user = (await User.findOne({ email: session.user.email })
+      .select("name email phone password role createdAt updatedAt")
+      .lean()) as ProfileUser | null;
+  }
+
   const userObjectId =
     user?._id ??
     (sessionUserId && mongoose.Types.ObjectId.isValid(sessionUserId)
       ? new mongoose.Types.ObjectId(sessionUserId)
       : null);
 
-  const orderFilter: Record<string, unknown> = userObjectId
-    ? {
-        $or: [{ userId: userObjectId }, { userEmail: session.user.email }],
-      }
-    : { userEmail: session.user.email };
+  if (userObjectId) {
+    // Hide ghost COD rows left by earlier failed checkout retries
+    await collapseCodRetryDuplicates(userObjectId);
+  }
 
-  const orders = (await Order.find(orderFilter)
-    .sort({ createdAt: -1 })
-    .limit(100)
-    .lean()) as ProfileOrder[];
+  const ordersRaw = userObjectId
+    ? await Order.find(customerOrdersQuery(userObjectId))
+        .sort({ createdAt: -1 })
+        .limit(100)
+        .select(
+          "orderNumber userEmail items subtotal codFee total paymentMethod paymentStatus status orderStatus shipping statusHistory cancellation createdAt stockDecremented",
+        )
+        .lean()
+    : [];
+
+  const orders = ordersRaw.map((d) =>
+    serializeOrder(d as Record<string, unknown>),
+  );
 
   if (!user) {
     return (
@@ -135,6 +108,8 @@ export default async function ProfilePage() {
     );
   }
 
+  const contact = resolveAccountContact(user);
+
   return (
     <div className="profile-page">
       <div className="profile-shell">
@@ -147,41 +122,19 @@ export default async function ProfilePage() {
         </div>
 
         <div className="profile-grid">
-          <article className="profile-card">
-            <h2 className="card-title">Member Details</h2>
-            <dl className="profile-list">
-              <div className="profile-row">
-                <dt>Full Name</dt>
-                <dd>{user.name || "N/A"}</dd>
-              </div>
-              <div className="profile-row">
-                <dt>Email</dt>
-                <dd>{user.email || "N/A"}</dd>
-              </div>
-              <div className="profile-row">
-                <dt>Role</dt>
-                <dd className="role-chip">Member</dd>
-              </div>
-            </dl>
-          </article>
-
-          <article className="profile-card">
-            <h2 className="card-title">Account Timeline</h2>
-            <dl className="profile-list">
-              <div className="profile-row">
-                <dt>Joined On</dt>
-                <dd>{formatDate(user.createdAt)}</dd>
-              </div>
-              <div className="profile-row">
-                <dt>Last Updated</dt>
-                <dd>{formatDate(user.updatedAt)}</dd>
-              </div>
-              <div className="profile-row">
-                <dt>Status</dt>
-                <dd>Active</dd>
-              </div>
-            </dl>
-          </article>
+          <ProfileMemberCard
+            initial={{
+              name: user.name || "",
+              email: contact.publicEmail,
+              phone: contact.phone,
+              phoneDisplay: contact.phone
+                ? formatPhoneDisplay(contact.phone)
+                : null,
+              hasPassword: Boolean(user.password && user.password.length > 0),
+              joinedOn: formatDate(user.createdAt),
+              updatedOn: formatDate(user.updatedAt),
+            }}
+          />
         </div>
 
         <div className="profile-actions">
@@ -194,6 +147,7 @@ export default async function ProfilePage() {
           <Link href="/appointment" className="profile-btn ghost">
             Book Appointment
           </Link>
+          <ProfileNotifications />
         </div>
 
         <section className="profile-orders">
@@ -211,87 +165,16 @@ export default async function ProfilePage() {
 
           {orders.length === 0 ? (
             <div className="orders-empty">
-              <p>When you checkout from the collection, your orders will appear here.</p>
+              <p>
+                When you checkout from the collection, your orders will appear
+                here.
+              </p>
               <Link href="/collection" className="profile-btn">
                 Shop Collection
               </Link>
             </div>
           ) : (
-            <ul className="orders-list">
-              {orders.map((order) => (
-                <li key={String(order._id)} className="order-card">
-                  <div className="order-card-head">
-                    <div>
-                      <p className="order-number">{order.orderNumber}</p>
-                      <p className="order-date">{formatDateTime(order.createdAt)}</p>
-                    </div>
-                    <div className="order-badges">
-                      <span
-                        className={`order-badge ${orderStatusClass(order.status)}`}
-                      >
-                        {labelize(order.status)}
-                      </span>
-                      <span
-                        className={`order-badge ${paymentStatusClass(order.paymentStatus)}`}
-                      >
-                        {labelize(order.paymentStatus)}
-                      </span>
-                      <span className="order-badge method">
-                        {order.paymentMethod === "cod"
-                          ? "Cash on Delivery"
-                          : "Online"}
-                      </span>
-                    </div>
-                  </div>
-
-                  <ul className="order-items">
-                    {order.items.map((item, index) => (
-                      <li key={`${order.orderNumber}-${index}`} className="order-item">
-                        {item.imageUrl ? (
-                          <img
-                            src={item.imageUrl}
-                            alt={item.title}
-                            className="order-item-img"
-                          />
-                        ) : (
-                          <div className="order-item-img placeholder" aria-hidden />
-                        )}
-                        <div className="order-item-body">
-                          <Link
-                            href={`/collection/${encodeURIComponent(item.slug)}`}
-                            className="order-item-title"
-                          >
-                            {item.title}
-                          </Link>
-                          <p className="order-item-meta">
-                            Qty {item.qty}
-                            {item.selectedSize
-                              ? ` · Size ${item.selectedSize}`
-                              : ""}
-                            {item.selectedColor
-                              ? ` · ${item.selectedColor}`
-                              : ""}
-                          </p>
-                          <p className="order-item-price">
-                            {formatInr(item.price * item.qty)}
-                          </p>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <div className="order-card-foot">
-                    <div className="order-totals">
-                      <span>Subtotal {formatInr(order.subtotal)}</span>
-                      {(order.codFee ?? 0) > 0 ? (
-                        <span>COD fee {formatInr(order.codFee ?? 0)}</span>
-                      ) : null}
-                    </div>
-                    <p className="order-total">Total {formatInr(order.total)}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
+            <ProfileOrdersClient initialOrders={orders} />
           )}
         </section>
 
@@ -373,13 +256,13 @@ const styles = `
     letter-spacing: 0.26em;
     text-transform: uppercase;
     color: #7da8c7;
-    font-family: "Cormorant Garamond", serif;
+    font-family: var(--heading-font-family);
     font-weight: 600;
   }
 
   .profile-title {
     margin: 0;
-    font-family: "Playfair Display", serif;
+    font-family: var(--heading-font-family);
     font-size: clamp(34px, 5vw, 54px);
     font-weight: 600;
     color: #0f172a;
@@ -406,13 +289,101 @@ const styles = `
     padding: 18px;
   }
 
+  .card-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
   .card-title {
-    margin: 0 0 14px;
-    font-family: "Playfair Display", serif;
+    margin: 0;
+    font-family: var(--heading-font-family);
     font-size: 24px;
     font-weight: 600;
     color: #0f172a;
   }
+
+  .edit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    color: #0f172a;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .edit-btn:hover { border-color: #7da8c7; }
+  .edit-btn.ghost { background: transparent; }
+  .edit-ico { width: 12px; height: 12px; }
+
+  .profile-edit-form { display: grid; gap: 12px; }
+
+  .pe-label {
+    display: grid;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #94a3b8;
+  }
+
+  .pe-input {
+    width: 100%;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+    color: #0f172a;
+  }
+
+  .pe-input:focus { outline: none; border-color: #7da8c7; }
+
+  .pe-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 4px 0;
+    color: #94a3b8;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .pe-divider::before,
+  .pe-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #e2e8f0;
+  }
+
+  .pe-hint {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #64748b;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 500;
+  }
+
+  .pe-save { margin-top: 4px; gap: 8px; cursor: pointer; }
+  .pe-save:disabled { opacity: 0.6; cursor: not-allowed; }
+  .spin { width: 14px; height: 14px; animation: pe-spin 0.8s linear infinite; }
+  @keyframes pe-spin { to { transform: rotate(360deg); } }
 
   .profile-list {
     margin: 0;
@@ -515,7 +486,7 @@ const styles = `
 
   .orders-title {
     margin: 0;
-    font-family: "Playfair Display", serif;
+    font-family: var(--heading-font-family);
     font-size: clamp(24px, 3vw, 34px);
     color: #0f172a;
     font-weight: 600;
@@ -706,6 +677,8 @@ const styles = `
     justify-content: space-between;
     gap: 12px;
     flex-wrap: wrap;
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .order-totals {
@@ -735,7 +708,7 @@ const styles = `
 
   .recent-title {
     margin: 0;
-    font-family: "Playfair Display", serif;
+    font-family: var(--heading-font-family);
     font-size: clamp(28px, 4vw, 40px);
     font-weight: 600;
     color: #0f172a;
@@ -851,7 +824,7 @@ const styles = `
 
   .story-title {
     margin: 0;
-    font-family: "Playfair Display", serif;
+    font-family: var(--heading-font-family);
     font-size: clamp(24px, 3vw, 34px);
     color: #0f172a;
     font-weight: 600;
@@ -880,14 +853,14 @@ const styles = `
 
   .story-num {
     margin: 0 0 8px;
-    font-family: "Cormorant Garamond", serif;
+    font-family: var(--heading-font-family);
     font-size: 22px;
     color: #7da8c7;
   }
 
   .story-card h4 {
     margin: 0 0 8px;
-    font-family: "Playfair Display", serif;
+    font-family: var(--heading-font-family);
     font-size: 18px;
     color: #0f172a;
     font-weight: 600;

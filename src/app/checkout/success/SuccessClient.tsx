@@ -25,7 +25,7 @@ export default function SuccessClient() {
         <p className="mb-3 text-[11px] uppercase tracking-[0.35em] text-[#7da8c7]">
           Hurray!
         </p>
-        <h1 className="font-['Playfair_Display'] text-4xl font-semibold leading-tight text-[#0f172a] md:text-5xl">
+        <h1 className="font-heading text-4xl font-semibold leading-tight text-[#0f172a] md:text-5xl">
           Your order is confirmed
         </h1>
         <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-[#64748b]">
@@ -39,7 +39,7 @@ export default function SuccessClient() {
             <p className="text-[10px] uppercase tracking-[0.22em] text-[#64748b]">
               Order ID
             </p>
-            <p className="mt-2 font-['Playfair_Display'] text-2xl tracking-wide text-[#0f172a]">
+            <p className="mt-2 font-heading text-2xl tracking-wide text-[#0f172a]">
               {orderNumber}
             </p>
           </div>

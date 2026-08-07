@@ -60,6 +60,10 @@ export interface Product {
   badge?: string;
   isFeatured?: boolean;
 
+  deliveryLeadValue?: number;
+  deliveryLeadUnit?: "days" | "weeks" | "months";
+  showDeliveryLead?: boolean;
+
   accordion?: ProductAccordion[];
 
   seoTitle?: string;
@@ -82,4 +86,7 @@ export type ProductSummary = Pick<
   | "category"
   | "colors"
   | "isAvailable"
+  | "deliveryLeadValue"
+  | "deliveryLeadUnit"
+  | "showDeliveryLead"
 >;

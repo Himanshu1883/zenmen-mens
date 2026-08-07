@@ -1,4 +1,7 @@
-import { resolveImagePublicId } from "@/lib/cloudinary-public-id";
+import {
+  parseDeliveryLeadValue,
+  type DeliveryLeadUnit,
+} from "@/lib/delivery-estimate";
 import type { Product, ProductAccordion, ProductSpec } from "@/types/product";
 
 export type EditableImage = {
@@ -34,6 +37,9 @@ export type ProductEditForm = {
   seoDescription: string;
   isFeatured: boolean;
   isAvailable: boolean;
+  deliveryLeadValue: string;
+  deliveryLeadUnit: DeliveryLeadUnit;
+  showDeliveryLead: boolean;
   images: EditableImage[];
 };
 
@@ -68,6 +74,9 @@ export function emptyProductForm(): ProductEditForm {
     seoDescription: "",
     isFeatured: false,
     isAvailable: true,
+    deliveryLeadValue: "",
+    deliveryLeadUnit: "days",
+    showDeliveryLead: false,
     images: [],
   };
 }
@@ -101,6 +110,12 @@ export function productToEditForm(product: Product): ProductEditForm {
     seoDescription: product.seoDescription ?? "",
     isFeatured: Boolean(product.isFeatured),
     isAvailable: product.isAvailable !== false,
+    deliveryLeadValue:
+      product.deliveryLeadValue != null
+        ? String(product.deliveryLeadValue)
+        : "",
+    deliveryLeadUnit: product.deliveryLeadUnit ?? "days",
+    showDeliveryLead: Boolean(product.showDeliveryLead),
     images: (product.images ?? []).map((img, index) => ({
       url: img.url,
       alt: img.alt ?? product.title,
@@ -116,6 +131,7 @@ function buildCommonFields(form: ProductEditForm) {
     ? Number(form.comparePrice)
     : undefined;
   const discount = form.discount.trim() ? Number(form.discount) : undefined;
+  const deliveryLeadValue = parseDeliveryLeadValue(form.deliveryLeadValue);
 
   return {
     title: form.title.trim(),
@@ -149,6 +165,12 @@ function buildCommonFields(form: ProductEditForm) {
     seoTitle: form.seoTitle.trim() || undefined,
     seoDescription: form.seoDescription.trim() || undefined,
     isFeatured: form.isFeatured,
+    deliveryLeadValue,
+    deliveryLeadUnit: form.deliveryLeadUnit,
+    showDeliveryLead:
+      form.showDeliveryLead &&
+      deliveryLeadValue != null &&
+      deliveryLeadValue > 0,
   };
 }
 

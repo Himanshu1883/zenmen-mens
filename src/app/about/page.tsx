@@ -130,7 +130,7 @@ function AnimatedStat({
     >
       <div
         style={{
-          fontFamily: "'Cormorant Garamond', serif",
+          fontFamily: "var(--heading-font-family)",
           fontSize: "clamp(42px,6vw,72px)",
           fontWeight: 300,
           color: "#7da8c7",
@@ -190,7 +190,7 @@ export default function AboutPage() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@200;300;400;500;600&display=swap');
+        *, *::before, *::after { box-sizing: border-box; }
 
         :root {
           --bg:      #f8fafc;
@@ -263,7 +263,7 @@ export default function AboutPage() {
         }
         .hero-eyebrow::before { content: ''; width: 40px; height: 1px; background: var(--accent); opacity: 0.7; }
         .hero-title {
-          font-family: 'Cormorant Garamond', serif;
+          font-family: var(--heading-font-family);
           font-size: clamp(52px,9vw,120px);
           font-weight: 300; line-height: 0.92;
           color: #ffffff; margin-bottom: 28px;
@@ -272,7 +272,7 @@ export default function AboutPage() {
         }
         .hero-title em { font-style: italic; color: var(--accent); }
         .hero-subtitle {
-          font-family: 'Cormorant Garamond', serif;
+          font-family: var(--heading-font-family);
           font-size: clamp(16px,2vw,22px); font-weight: 300; font-style: italic;
           color: rgba(248,250,252,0.92); line-height: 1.7; max-width: 520px;
         }
@@ -294,7 +294,7 @@ export default function AboutPage() {
           background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(12px);
           padding: 16px 20px; text-align: center;
         }
-        .hero-year-num { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 300; color: #7da8c7; line-height: 1; }
+        .hero-year-num { font-family: var(--heading-font-family); font-size: 36px; font-weight: 300; color: #7da8c7; line-height: 1; }
         .hero-year-lbl { font-size: 7px; letter-spacing: 3px; text-transform: uppercase; color: rgba(248,250,252,0.82); margin-top: 4px; }
 
         /* ── SECTION COMMON ── */
@@ -307,7 +307,7 @@ export default function AboutPage() {
         }
         .manifesto-line {
           display: block;
-          font-family: 'Cormorant Garamond', serif;
+          font-family: var(--heading-font-family);
           font-size: clamp(28px,4.5vw,64px);
           font-weight: 300; line-height: 1.1; color: black;
           border-bottom: 1px solid var(--border);
@@ -362,14 +362,14 @@ export default function AboutPage() {
         .timeline-item.active { background: var(--hover-bg); }
         .timeline-item:hover .tl-year { color: var(--accent); }
         .tl-year {
-          font-family: 'Cormorant Garamond', serif;
+          font-family: var(--heading-font-family);
           font-size: clamp(32px,4vw,52px); font-weight: 300;
           color: #64748b; line-height: 1;
           margin-bottom: 8px; transition: color 0.3s;
         }
         .tl-year.active { color: var(--accent); }
         .tl-title {
-          font-family: 'Cormorant Garamond', serif;
+          font-family: var(--heading-font-family);
           font-size: clamp(16px,2vw,22px); font-weight: 400;
           color: black; margin-bottom: 6px;
         }
@@ -419,17 +419,17 @@ export default function AboutPage() {
           font-size: 9px; letter-spacing: 3px; text-transform: uppercase; font-weight: 700;
         }
         .founder-quote-mark {
-          font-family: 'Cormorant Garamond', serif;
+          font-family: var(--heading-font-family);
           font-size: 120px; font-weight: 300;
           color: rgba(125,168,199,0.15); line-height: 0.7;
           margin-bottom: -20px; display: block;
         }
         .founder-quote {
-          font-family: 'Cormorant Garamond', serif;
+          font-family: var(--heading-font-family);
           font-size: clamp(18px,2.5vw,28px); font-weight: 300; font-style: italic;
           color: black; line-height: 1.6; margin-bottom: 28px;
         }
-        .founder-name { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; color: var(--accent); margin-bottom: 4px; }
+        .founder-name { font-family: var(--heading-font-family); font-size: 20px; font-weight: 400; color: var(--accent); margin-bottom: 4px; }
         .founder-role { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: #475569; }
         .founder-philosophy { margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--border); }
         .philosophy-item {
@@ -437,7 +437,7 @@ export default function AboutPage() {
           border-bottom: 1px solid var(--border);
           font-size: 13px; color: var(--ink2); line-height: 1.75;
         }
-        .philosophy-num { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: var(--accent); opacity: 0.6; flex-shrink: 0; width: 24px; }
+        .philosophy-num { font-family: var(--heading-font-family); font-size: 18px; color: var(--accent); opacity: 0.6; flex-shrink: 0; width: 24px; }
 
         /* ── VALUES ── */
         .values-section {
@@ -459,12 +459,12 @@ export default function AboutPage() {
         .value-card:hover { border-color: rgba(125,168,199,0.5); box-shadow: 0 8px 32px rgba(125,168,199,0.1); }
         .value-card:hover::before { opacity: 1; }
         .value-num {
-          font-family: 'Cormorant Garamond', serif;
+          font-family: var(--heading-font-family);
           font-size: 64px; font-weight: 300;
           color: rgba(125,168,199,0.1); line-height: 1;
           position: absolute; top: 16px; right: 24px;
         }
-        .value-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(18px,2.5vw,26px); font-weight: 400; color: black; margin-bottom: 14px; line-height: 1.2; }
+        .value-title { font-family: var(--heading-font-family); font-size: clamp(18px,2.5vw,26px); font-weight: 400; color: black; margin-bottom: 14px; line-height: 1.2; }
         .value-desc { font-size: 13px; color: var(--ink2); line-height: 1.85; }
         .value-line {
           width: 32px; height: 1px; background: var(--accent); opacity: 0.5;
@@ -485,8 +485,8 @@ export default function AboutPage() {
           position: relative; transition: border-color 0.4s, transform 0.4s, box-shadow 0.4s;
         }
         .testi-card:hover { border-color: rgba(125,168,199,0.45); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(125,168,199,0.1); }
-        .testi-mark { font-family: 'Cormorant Garamond', serif; font-size: 64px; font-weight: 300; color: var(--accent); opacity: 0.25; line-height: 0.7; display: block; margin-bottom: -8px; }
-        .testi-text { font-family: 'Cormorant Garamond', serif; font-size: clamp(15px,1.6vw,18px); font-weight: 400; font-style: italic; color: black; line-height: 1.75; margin-bottom: 24px; }
+        .testi-mark { font-family: var(--heading-font-family); font-size: 64px; font-weight: 300; color: var(--accent); opacity: 0.25; line-height: 0.7; display: block; margin-bottom: -8px; }
+        .testi-text { font-family: var(--heading-font-family); font-size: clamp(15px,1.6vw,18px); font-weight: 400; font-style: italic; color: black; line-height: 1.75; margin-bottom: 24px; }
         .testi-initials {
           width: 36px; height: 36px; border-radius: 50%;
           background: rgba(125,168,199,0.12); border: 1px solid var(--border2);
@@ -510,7 +510,7 @@ export default function AboutPage() {
           pointer-events: none;
         }
         .cta-title {
-          font-family: 'Cormorant Garamond', serif;
+          font-family: var(--heading-font-family);
           font-size: clamp(40px,7vw,88px); font-weight: 300;
           color: black; line-height: 1; margin-bottom: 24px;
           position: relative; z-index: 1;
@@ -542,7 +542,7 @@ export default function AboutPage() {
           display: flex; align-items: center; gap: 12px;
         }
         .section-eyebrow::before { content: ''; width: 32px; height: 1px; background: var(--accent); opacity: 0.5; }
-        .section-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(36px,5.5vw,64px); font-weight: 300; color: black; line-height: 1.05; }
+        .section-title { font-family: var(--heading-font-family); font-size: clamp(36px,5.5vw,64px); font-weight: 300; color: black; line-height: 1.05; }
         .section-title em { font-style: italic; color: var(--accent); }
 
         /* ── DIVIDER ── */
@@ -720,7 +720,7 @@ export default function AboutPage() {
               </div>
               <div
                 style={{
-                  fontFamily: "'Cormorant Garamond', serif",
+                  fontFamily: "var(--heading-font-family)",
                   fontSize: "clamp(24px,3vw,36px)",
                   fontWeight: 300,
                   color: "#0f172a",
@@ -952,7 +952,7 @@ export default function AboutPage() {
             />
             <span
               style={{
-                fontFamily: "'Cormorant Garamond', serif",
+                fontFamily: "var(--heading-font-family)",
                 fontSize: "11px",
                 letterSpacing: "6px",
                 textTransform: "uppercase",

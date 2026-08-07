@@ -1,50 +1,48 @@
-﻿"use client";
+"use client";
 
 import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { DEFAULT_ZENMEN_REELS } from "@/lib/instagram/default-reels";
 
-const reels = [
-  {
-    id: "5399",
-    src: "/reels/img_5399.mp4",
-    title: "ZENMEN Studio 01",
-    href: "https://www.instagram.com/_zenmen/",
-  },
-  {
-    id: "5400",
-    src: "/reels/img_5400.mp4",
-    title: "ZENMEN Studio 02",
-    href: "https://www.instagram.com/_zenmen/",
-  },
-  {
-    id: "5401",
-    src: "/reels/img_5401.mp4",
-    title: "ZENMEN Studio 03",
-    href: "https://www.instagram.com/_zenmen/",
-  },
-  {
-    id: "5402",
-    src: "/reels/img_5402.mp4",
-    title: "ZENMEN Studio 04",
-    href: "https://www.instagram.com/_zenmen/",
-  },
-  {
-    id: "5403",
-    src: "/reels/img_5403.mp4",
-    title: "ZENMEN Studio 05",
-    href: "https://www.instagram.com/_zenmen/",
-  },
-  {
-    id: "5404",
-    src: "/reels/img_5404.mov",
-    title: "ZENMEN Studio 06",
-    href: "https://www.instagram.com/_zenmen/",
-  },
-];
+type ReelCard = {
+  id: string;
+  src: string;
+  title: string;
+  href: string;
+};
+
+const fallbackReels: ReelCard[] = DEFAULT_ZENMEN_REELS.map((r) => ({
+  id: r.id,
+  src: r.media_url,
+  title: r.caption,
+  href: r.permalink,
+}));
 
 export default function Reels() {
+  const [reels, setReels] = useState<ReelCard[]>(fallbackReels);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const trackRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/instagram/reels")
+      .then((r) => r.json())
+      .then((data: { reels?: { id: string; caption?: string; media_url?: string; permalink?: string }[] }) => {
+        if (cancelled || !data.reels?.length) return;
+        setReels(
+          data.reels.map((r) => ({
+            id: r.id,
+            src: r.media_url ?? "",
+            title: r.caption ?? "ZENmen Reel",
+            href: r.permalink ?? "https://www.instagram.com/_zenmen/",
+          })),
+        );
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     const videos = videoRefs.current.filter(Boolean) as HTMLVideoElement[];
@@ -66,7 +64,7 @@ export default function Reels() {
 
     videos.forEach((video) => observer.observe(video));
     return () => observer.disconnect();
-  }, []);
+  }, [reels]);
 
   const slideTrack = (direction: "left" | "right") => {
     const track = trackRef.current;

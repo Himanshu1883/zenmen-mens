@@ -1,7 +1,8 @@
 import { z } from "zod";
+import { contactSchema } from "@/lib/auth-contact";
 
 export const loginSchema = z.object({
-  email: z.email("Please provide a valid email address"),
+  email: contactSchema,
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")
@@ -15,7 +16,7 @@ export const registerSchema = z
       .trim()
       .min(2, "Name must be at least 2 characters")
       .max(80, "Name is too long"),
-    email: z.email("Please provide a valid email address"),
+    email: contactSchema,
     password: z
       .string()
       .min(8, "Password must be at least 8 characters")

@@ -10,6 +10,9 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { formatInr, formatOrderStatusLabel } from "@/lib/order-display";
 import {
   Area,
   AreaChart,
@@ -27,7 +30,7 @@ import {
   YAxis,
 } from "recharts";
 
-const revenueData = [
+const MOCK_REVENUE_DATA = [
   { id: "rev-jan", month: "Jan", revenue: 45000, orders: 120 },
   { id: "rev-feb", month: "Feb", revenue: 52000, orders: 145 },
   { id: "rev-mar", month: "Mar", revenue: 48000, orders: 132 },
@@ -44,7 +47,7 @@ const performanceData = [
   { metric: "Efficiency", value: 90 },
 ];
 
-const weeklyData = [
+const MOCK_WEEKLY_DATA = [
   { day: "Mon", orders: 12, revenue: 8400 },
   { day: "Tue", orders: 19, revenue: 12200 },
   { day: "Wed", orders: 15, revenue: 9800 },
@@ -54,7 +57,7 @@ const weeklyData = [
   { day: "Sun", orders: 8, revenue: 5200 },
 ];
 
-const recentOrders = [
+const MOCK_RECENT_ORDERS = [
   {
     id: "#ZEN-2847",
     client: "Marcus Chen",
@@ -81,18 +84,81 @@ const recentOrders = [
   },
 ];
 
+type RecentRow = {
+  id: string;
+  client: string;
+  item: string;
+  status: string;
+  value: number | string;
+  time: string;
+};
+
 export default function DashboardOverview() {
+  const [revenueData, setRevenueData] = useState(MOCK_REVENUE_DATA);
+  const [weeklyData, setWeeklyData] = useState(MOCK_WEEKLY_DATA);
+  const [recentOrders, setRecentOrders] = useState<RecentRow[]>(MOCK_RECENT_ORDERS);
+  const [counts, setCounts] = useState({
+    totalOrders: 0,
+    inFulfillment: 0,
+    totalRevenue: 0,
+    cancellationRequested: 0,
+  });
+  const [liveStats, setLiveStats] = useState(false);
+
+  useEffect(() => {
+    void fetch("/api/admin/stats")
+      .then((r) => r.json())
+      .then((data) => {
+        if (!data.success) return;
+        setLiveStats(Boolean(data.hasRealData));
+        if (data.revenueData?.length) setRevenueData(data.revenueData);
+        if (data.weeklyData?.length) setWeeklyData(data.weeklyData);
+        if (data.recentOrders?.length) {
+          setRecentOrders(
+            data.recentOrders.map(
+              (o: {
+                id: string;
+                client: string;
+                item: string;
+                status: string;
+                value: number;
+                time: string;
+              }) => ({
+                ...o,
+                value: o.value,
+                time: new Date(o.time).toLocaleDateString("en-IN", {
+                  month: "short",
+                  day: "numeric",
+                }),
+              }),
+            ),
+          );
+        } else if (data.hasRealData) {
+          setRecentOrders([]);
+        }
+        if (data.counts) setCounts(data.counts);
+      })
+      .catch(() => undefined);
+  }, []);
+
+  const avgOrder =
+    counts.totalOrders > 0
+      ? Math.round(counts.totalRevenue / counts.totalOrders)
+      : 0;
+
+  const weekOrders = weeklyData.reduce((s, d) => s + d.orders, 0);
+
   return (
     <div className="space-y-6 mt-16">
       {/* Premium Header */}
       <div className="flex items-center justify-between mb-2">
         <div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-[#0f172a] via-[#7da8c7] to-[#5a8faf] bg-clip-text text-transparent mb-2">
-            ZENmen Command Center
+            ZENMEN Center
           </h1>
           <p className="text-[#64748b] text-base flex items-center gap-2">
             <Calendar className="w-4 h-4" />
-            Friday, May 8, 2026 • Real-time Analytics
+            Friday, May 8, 2026 • {liveStats ? "Store orders" : "Sample + store"}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -133,12 +199,16 @@ export default function DashboardOverview() {
                   <Activity className="w-4 h-4" />
                   Revenue Performance
                 </p>
-                <h2 className="text-5xl font-bold text-[#0f172a] mb-2">₹328,450</h2>
+                <h2 className="text-5xl font-bold text-[#0f172a] mb-2">
+                  {formatInr(liveStats ? counts.totalRevenue : 328450)}
+                </h2>
                 <div className="flex items-center gap-2">
                   <div className="px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20">
                     <span className="text-green-400 text-sm font-semibold flex items-center gap-1">
                       <TrendingUp className="w-4 h-4" />
-                      +24.5% vs last period
+                      {liveStats
+                        ? `${counts.totalOrders} orders in database`
+                        : "+24.5% vs last period"}
                     </span>
                   </div>
                 </div>
@@ -247,10 +317,14 @@ export default function DashboardOverview() {
                 </div>
                 <ArrowUpRight className="w-5 h-5 text-green-400" />
               </div>
-              <p className="text-[#64748b] text-sm mb-1">Today's Orders</p>
-              <p className="text-4xl font-bold text-[#0f172a] mb-1">47</p>
+              <p className="text-[#64748b] text-sm mb-1">Orders (7 days)</p>
+              <p className="text-4xl font-bold text-[#0f172a] mb-1">
+                {liveStats ? weekOrders : 47}
+              </p>
               <p className="text-green-400 text-sm font-medium">
-                +18% from yesterday
+                {liveStats
+                  ? `${counts.inFulfillment} in fulfillment`
+                  : "+18% from yesterday"}
               </p>
             </div>
           </div>
@@ -277,10 +351,12 @@ export default function DashboardOverview() {
                 </div>
                 <TrendingUp className="w-5 h-5 text-green-400" />
               </div>
-              <p className="text-[#64748b] text-sm mb-1">Active Clients</p>
-              <p className="text-4xl font-bold text-[#0f172a] mb-1">1,284</p>
+              <p className="text-[#64748b] text-sm mb-1">Cancel requests</p>
+              <p className="text-4xl font-bold text-[#0f172a] mb-1">
+                {liveStats ? counts.cancellationRequested : "—"}
+              </p>
               <p className="text-green-400 text-sm font-medium">
-                +127 this month
+                {liveStats ? "Needs admin review" : "+127 this month"}
               </p>
             </div>
           </div>
@@ -308,9 +384,11 @@ export default function DashboardOverview() {
                 <ArrowUpRight className="w-5 h-5 text-green-400" />
               </div>
               <p className="text-[#64748b] text-sm mb-1">Avg Order Value</p>
-              <p className="text-4xl font-bold text-[#0f172a] mb-1">₹2,847</p>
+              <p className="text-4xl font-bold text-[#0f172a] mb-1">
+                {liveStats && avgOrder > 0 ? formatInr(avgOrder) : "₹2,847"}
+              </p>
               <p className="text-green-400 text-sm font-medium">
-                +12.3% growth
+                {liveStats ? "From paid/confirmed orders" : "+12.3% growth"}
               </p>
             </div>
           </div>
@@ -444,22 +522,30 @@ export default function DashboardOverview() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="text-xl font-bold text-[#0f172a] mb-1">
-                Recent Commissions
+                Recent Orders
               </h3>
-              <p className="text-[#64748b] text-sm">Latest high-value orders</p>
+              <p className="text-[#64748b] text-sm">
+                {liveStats ? "Latest checkout activity" : "Sample commissions"}
+              </p>
             </div>
-            <button
-              className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:bg-[#7da8c7]/10"
+            <Link
+              href="/admin/orders"
+              className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:bg-[#7da8c7]/10 inline-block"
               style={{
                 border: "1px solid rgba(125, 168, 199, 0.3)",
                 color: "#7da8c7",
               }}
             >
               View All Orders
-            </button>
+            </Link>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {recentOrders.length === 0 && liveStats ? (
+              <p className="text-[#64748b] text-sm col-span-full p-4">
+                No orders yet — they will show here after checkout.
+              </p>
+            ) : null}
             {recentOrders.map((order) => (
               <div
                 key={order.id}
@@ -485,21 +571,11 @@ export default function DashboardOverview() {
                   <span
                     className="px-3 py-1 rounded-full text-xs font-semibold"
                     style={{
-                      background:
-                        order.status === "Completed"
-                          ? "rgba(34, 197, 94, 0.15)"
-                          : order.status === "Fitting"
-                            ? "rgba(125, 168, 199, 0.15)"
-                            : "rgba(59, 130, 246, 0.15)",
-                      color:
-                        order.status === "Completed"
-                          ? "#22c55e"
-                          : order.status === "Fitting"
-                            ? "#7da8c7"
-                            : "#3b82f6",
+                      background: "rgba(125, 168, 199, 0.15)",
+                      color: "#0f172a",
                     }}
                   >
-                    {order.status}
+                    {formatOrderStatusLabel(String(order.status))}
                   </span>
                 </div>
                 <div className="space-y-2">
@@ -510,7 +586,9 @@ export default function DashboardOverview() {
                   <p className="text-sm text-[#64748b]">{order.item}</p>
                   <div className="flex items-center justify-between pt-3 mt-3 border-t border-white/5">
                     <span className="text-xl font-bold text-[#0f172a]">
-                      {order.value}
+                      {typeof order.value === "number"
+                        ? formatInr(order.value)
+                        : order.value}
                     </span>
                     <span className="text-xs text-[#94a3b8]">{order.time}</span>
                   </div>

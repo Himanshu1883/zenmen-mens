@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Bell, Globe, Palette, Shield, User } from "lucide-react";
+import AdminInstagramReelsSettings from "./AdminInstagramReelsSettings";
 import { GlassCard } from "../dashboard/GlassCard";
 
 export default function Settings() {
@@ -118,6 +119,8 @@ export default function Settings() {
           </div>
         </div>
       </GlassCard>
+
+      <AdminInstagramReelsSettings />
 
       {/* Security Settings */}
       <GlassCard className="p-6">

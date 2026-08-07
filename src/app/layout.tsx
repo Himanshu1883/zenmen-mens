@@ -1,40 +1,17 @@
 // src/app/layout.tsx
 import Navbar from "@/app/components/layout/Navbar";
+import MobileBottomNav from "@/app/components/layout/MobileBottomNav";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
-import {
-  Cormorant_Garamond,
-  Geist,
-  Montserrat,
-  Playfair_Display,
-} from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
 import RootLayoutClient from "./RootLayoutClient";
-import MobileBottomNav from "@/app/components/layout/MobileBottomNav";
 
-const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
-
-const cormorant = Cormorant_Garamond({
+const inter = Inter({
   subsets: ["latin"],
-  weight: ["300", "400", "600"],
-  style: ["normal", "italic"],
-  variable: "--font-cormorant",
-  display: "swap",
-});
-
-const montserrat = Montserrat({
-  subsets: ["latin"],
-  weight: ["200", "300", "400", "500", "600"],
-  variable: "--font-montserrat",
-  display: "swap",
-});
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
-  style: ["normal", "italic"],
-  variable: "--font-playfair",
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-inter",
   display: "swap",
 });
 
@@ -88,15 +65,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      className={cn(
-        cormorant.variable,
-        montserrat.variable,
-        geist.variable,
-        playfair.variable,
-      )}
-    >
+    <html lang="en" className={cn(inter.variable)}>
       <body>
         <Providers>
           <Navbar />

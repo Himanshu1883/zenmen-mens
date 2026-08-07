@@ -73,7 +73,7 @@ const AccessoriesSection = () => {
             <h2
               className="text-[#0f172a] mb-6"
               style={{
-                fontFamily: 'Playfair Display, serif',
+                fontFamily: 'var(--heading-font-family)',
                 fontSize: 'clamp(36px, 6vw, 72px)',
                 fontWeight: 600,
                 lineHeight: 1.2,
@@ -159,7 +159,7 @@ const AccessoriesSection = () => {
                       {accessory.items}
                     </span>
                   </div>
-                  <h3 className="text-white text-[20px] font-medium mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>
+                  <h3 className="text-white text-[20px] font-medium mb-2" style={{ fontFamily: 'var(--heading-font-family)' }}>
                     {accessory.name}
                   </h3>
                   <p className="text-white/70 text-[12px] mb-3 leading-relaxed">
@@ -199,7 +199,7 @@ const AccessoriesSection = () => {
           <h3
             className="text-[#0f172a]"
             style={{
-              fontFamily: 'Playfair Display, serif',
+              fontFamily: 'var(--heading-font-family)',
               fontSize: 'clamp(28px, 4vw, 48px)',
               fontWeight: 600,
               lineHeight: 1.2,
@@ -244,7 +244,7 @@ const AccessoriesSection = () => {
                 <h4 className="text-[#0f172a] text-[13px] md:text-[14px] font-medium leading-tight group-hover:text-[#7da8c7] transition-colors duration-300">
                   {item.name}
                 </h4>
-                <p className="text-[#0f172a] text-[15px] font-semibold" style={{ fontFamily: 'Playfair Display, serif' }}>
+                <p className="text-[#0f172a] text-[15px] font-semibold" style={{ fontFamily: 'var(--heading-font-family)' }}>
                   {item.price}
                 </p>
               </div>
@@ -275,7 +275,7 @@ const AccessoriesSection = () => {
           <h3
             className="text-[#0f172a] mb-4"
             style={{
-              fontFamily: 'Playfair Display, serif',
+              fontFamily: 'var(--heading-font-family)',
               fontSize: 'clamp(24px, 4vw, 40px)',
               fontWeight: 600,
             }}

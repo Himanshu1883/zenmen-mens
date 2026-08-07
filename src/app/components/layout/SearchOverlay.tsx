@@ -1,10 +1,7 @@
 "use client";
 
+import { ZenIcon } from "@/components/icons";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { setCartOpen } from "@/store/slices/cartSlice";
-import { fetchProducts } from "@/store/slices/productSlice";
-import type { Product } from "@/types/product";
-import { Search, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -143,7 +140,7 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
         className="pointer-events-auto absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-[#0f172a]/10 bg-white/90 text-[#0f172a] shadow-sm transition-colors hover:border-[#7da8c7]/40 hover:text-[#7da8c7] sm:right-8 sm:top-6"
         aria-label="Close search"
       >
-        <X className="h-5 w-5" strokeWidth={1.5} />
+        <ZenIcon name="times" className="h-5 w-5" />
       </button>
 
       <Link
@@ -175,9 +172,9 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
 
         <form onSubmit={onSubmit} className="pointer-events-auto">
           <div className="relative overflow-hidden rounded-lg border border-[#e8e0d6] bg-white shadow-[0_12px_40px_-20px_rgba(15,23,42,0.18)]">
-            <Search
+            <ZenIcon
+              name="search"
               className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#7da8c7]"
-              strokeWidth={1.5}
               aria-hidden
             />
             <input
@@ -281,9 +278,9 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
                 }}
                 className="group inline-flex items-center gap-1.5 border-0 bg-transparent p-0 text-left text-[13px] font-light text-[#0f172a] transition-colors hover:text-[#7da8c7]"
               >
-                <Search
+                <ZenIcon
+                  name="search"
                   className="h-3.5 w-3.5 shrink-0 text-[#7da8c7] opacity-80 group-hover:opacity-100"
-                  strokeWidth={2}
                   aria-hidden
                 />
                 <span>{term}</span>

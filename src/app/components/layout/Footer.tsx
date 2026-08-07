@@ -8,7 +8,6 @@ export default function Footer() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@200;300;400&display=swap');
 
         /* ── CSS Variables ── */
         :root {
@@ -114,7 +113,7 @@ export default function Footer() {
         .zf-logo:hover .zf-logo-img { transform: rotate(360deg); }
 
         .zf-logo-name {
-          font-family: 'Playfair Display', serif;
+          font-family: var(--heading-font-family);
           font-size: 1.3rem;
           font-weight: 300;
           letter-spacing: 0.1em;
@@ -124,7 +123,7 @@ export default function Footer() {
 
         .zf-logo-tagline {
           display: block;
-          font-family: 'Cormorant Garamond', serif;
+          font-family: var(--heading-font-family);
           font-size: 8px;
           letter-spacing: 0.4em;
           text-transform: uppercase;
@@ -149,7 +148,7 @@ export default function Footer() {
           padding: 11px 22px;
           border: 1px solid var(--gold-dim);
           color: var(--gold);
-          font-family: 'Cormorant Garamond', serif;
+          font-family: var(--heading-font-family);
           font-size: 0.78rem;
           letter-spacing: 0.32em;
           text-transform: uppercase;
@@ -183,7 +182,7 @@ export default function Footer() {
         @media (max-width: 1100px) { .zf-col { padding: 0; } }
 
         .zf-col-heading {
-          font-family: 'Cormorant Garamond', serif;
+          font-family: var(--heading-font-family);
           font-size: 9px;
           letter-spacing: 0.38em;
           text-transform: uppercase;
@@ -246,7 +245,7 @@ export default function Footer() {
         }
 
         .zf-newsletter-text h5 {
-          font-family: 'Playfair Display', serif;
+          font-family: var(--heading-font-family);
           font-size: 1rem;
           font-weight: 400;
           letter-spacing: 0.04em;
@@ -291,7 +290,7 @@ export default function Footer() {
           background: var(--gold);
           border: 1px solid var(--gold);
           color: #ffffff;
-          font-family: 'Cormorant Garamond', serif;
+          font-family: var(--heading-font-family);
           font-size: 0.7rem;
           letter-spacing: 0.28em;
           text-transform: uppercase;
@@ -362,7 +361,7 @@ export default function Footer() {
           text-decoration: none;
           color: var(--ivory-dim);
           font-size: 0.65rem;
-          font-family: 'Cormorant Garamond', serif;
+          font-family: var(--heading-font-family);
           letter-spacing: 0.05em;
           transition: border-color 0.25s ease, color 0.25s ease, background 0.25s ease;
           position: relative;
@@ -422,7 +421,7 @@ export default function Footer() {
         // }
 
         .zf-banner-text {
-          font-family: 'Playfair Display', serif;
+          font-family: var(--heading-font-family);
           font-size: clamp(2.8rem, 8vw, 5.5rem);
           font-weight: 300;
           letter-spacing: 0.22em;
@@ -450,7 +449,7 @@ export default function Footer() {
           top: 50%;
           transform: translateY(-50%);
           z-index: 2;
-          font-family: 'Cormorant Garamond', serif;
+          font-family: var(--heading-font-family);
           font-size: 0.72rem;
           letter-spacing: 0.3em;
           text-transform: uppercase;

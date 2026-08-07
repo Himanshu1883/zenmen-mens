@@ -73,7 +73,7 @@ const BookAppointmentSection = () => {
           <h2
             className="text-[#0f172a]"
             style={{
-              fontFamily: "Playfair Display, serif",
+              fontFamily: "var(--heading-font-family)",
               fontSize: "clamp(32px, 5vw, 56px)",
               fontWeight: 600,
               lineHeight: 1.15,

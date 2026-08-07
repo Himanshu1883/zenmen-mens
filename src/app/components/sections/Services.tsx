@@ -4,7 +4,7 @@ import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useRef, useState } from "react";
 
 /* ─── Font Import ─────────────────────────────────────────── */
-const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@200;300;400&display=swap');`;
+const FONTS = ``;
 
 /* ─── Types ─────────────────────────────────────────────────── */
 interface Service {
@@ -301,7 +301,7 @@ function ServiceCard({ service, index }: { service: Service; index: number }) {
             animate={{ color: hovered ? service.accent : "#F5F0E8" }}
             transition={{ duration: 0.35 }}
             style={{
-              fontFamily: "'Cormorant Garamond', Georgia, serif",
+              fontFamily: "var(--heading-font-family)",
               fontSize: "clamp(16px, 1.8vw, 21px)",
               fontWeight: 400,
               lineHeight: 1.2,
@@ -501,7 +501,7 @@ function HeroPanel({ service }: { service: Service }) {
 
         <h3
           style={{
-            fontFamily: "'Cormorant Garamond', Georgia, serif",
+            fontFamily: "var(--heading-font-family)",
             fontSize: "clamp(32px, 4.5vw, 58px)",
             fontWeight: 300,
             color: "#F5F0E8",
@@ -707,7 +707,7 @@ export default function Services() {
 
               <h2
                 style={{
-                  fontFamily: "'Cormorant Garamond', Georgia, serif",
+                  fontFamily: "var(--heading-font-family)",
                   fontSize: "clamp(48px, 6.5vw, 88px)",
                   fontWeight: 300,
                   color: "#F5F0E8",

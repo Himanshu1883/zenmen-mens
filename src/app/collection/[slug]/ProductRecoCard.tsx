@@ -41,7 +41,7 @@ export default function ProductRecoCard({ product }: Props) {
           />
         </div>
         <div className="p-4 pb-3">
-          <p className="mb-0.5 line-clamp-2 font-['Cormorant_Garamond'] text-[1.35rem] font-light leading-tight text-[#0f172a] sm:text-[1.45rem]">
+          <p className="mb-0.5 line-clamp-2 font-heading text-[1.35rem] font-light leading-tight text-[#0f172a] sm:text-[1.45rem]">
             {product.title}
           </p>
           <p className="text-[.58rem] uppercase tracking-[.18em] text-[#94a3b8]">

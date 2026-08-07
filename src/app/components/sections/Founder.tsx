@@ -133,7 +133,7 @@ export default function FounderSection() {
             right: "-4vw",
             top: "50%",
             transform: "translateY(-50%)",
-            fontFamily: "'Playfair Display', serif",
+            fontFamily: "var(--heading-font-family)",
             fontSize: "clamp(6rem, 18vw, 16rem)",
             fontWeight: 300,
             letterSpacing: "-0.04em",
@@ -177,7 +177,7 @@ export default function FounderSection() {
             />
             <p
               style={{
-                fontFamily: "'Cormorant Garamond', serif",
+                fontFamily: "var(--heading-font-family)",
                 fontSize: "10px",
                 fontWeight: 300,
                 letterSpacing: "0.44em",
@@ -208,7 +208,7 @@ export default function FounderSection() {
               <div style={fadeUp(0.1)}>
                 <h2
                   style={{
-                    fontFamily: "'Playfair Display', serif",
+                    fontFamily: "var(--heading-font-family)",
                     fontSize: "clamp(2.2rem, 5vw, 3.6rem)",
                     fontWeight: 300,
                     lineHeight: 1.06,
@@ -254,7 +254,7 @@ export default function FounderSection() {
                   />
                   <span
                     style={{
-                      fontFamily: "'Cormorant Garamond', serif",
+                      fontFamily: "var(--heading-font-family)",
                       fontSize: "12px",
                       letterSpacing: "0.34em",
                       textTransform: "uppercase",
@@ -269,7 +269,7 @@ export default function FounderSection() {
               {/* Bio */}
               <p
                 style={{
-                  fontFamily: "'Cormorant Garamond', serif",
+                  fontFamily: "var(--heading-font-family)",
                   fontSize: "1.05rem",
                   fontWeight: 300,
                   lineHeight: 1.9,
@@ -314,7 +314,7 @@ export default function FounderSection() {
                   <p
                     key={activePhil}
                     style={{
-                      fontFamily: "'Playfair Display', serif",
+                      fontFamily: "var(--heading-font-family)",
                       fontSize: "1rem",
                       fontStyle: "italic",
                       fontWeight: 300,
@@ -353,7 +353,7 @@ export default function FounderSection() {
                     />
                     <p
                       style={{
-                        fontFamily: "'Playfair Display', serif",
+                        fontFamily: "var(--heading-font-family)",
                         fontSize: "1.6rem",
                         fontWeight: 300,
                         letterSpacing: "-0.01em",
@@ -365,7 +365,7 @@ export default function FounderSection() {
                     </p>
                     <p
                       style={{
-                        fontFamily: "'Cormorant Garamond', serif",
+                        fontFamily: "var(--heading-font-family)",
                         fontSize: "9px",
                         letterSpacing: "0.3em",
                         textTransform: "uppercase",
@@ -407,7 +407,7 @@ export default function FounderSection() {
                 >
                   <span
                     style={{
-                      fontFamily: "'Cormorant Garamond', serif",
+                      fontFamily: "var(--heading-font-family)",
                       fontSize: "11px",
                       fontWeight: 600,
                       letterSpacing: "0.32em",
@@ -436,7 +436,7 @@ export default function FounderSection() {
                     alignItems: "center",
                     gap: "8px",
                     textDecoration: "none",
-                    fontFamily: "'Cormorant Garamond', serif",
+                    fontFamily: "var(--heading-font-family)",
                     fontSize: "11px",
                     letterSpacing: "0.32em",
                     textTransform: "uppercase",
@@ -537,7 +537,7 @@ export default function FounderSection() {
                   {/* Name */}
                   <p
                     style={{
-                      fontFamily: "'Playfair Display', serif",
+                      fontFamily: "var(--heading-font-family)",
                       fontSize: "1.5rem",
                       fontWeight: 300,
                       letterSpacing: "0.005em",
@@ -567,7 +567,7 @@ export default function FounderSection() {
                     />
                     <p
                       style={{
-                        fontFamily: "'Cormorant Garamond', serif",
+                        fontFamily: "var(--heading-font-family)",
                         fontSize: "10px",
                         letterSpacing: "0.3em",
                         textTransform: "uppercase",
@@ -590,7 +590,7 @@ export default function FounderSection() {
                   >
                     <p
                       style={{
-                        fontFamily: "'Cormorant Garamond', serif",
+                        fontFamily: "var(--heading-font-family)",
                         fontSize: "0.95rem",
                         fontStyle: "italic",
                         fontWeight: 300,
@@ -633,7 +633,7 @@ export default function FounderSection() {
                     </svg>
                     <p
                       style={{
-                        fontFamily: "'Cormorant Garamond', serif",
+                        fontFamily: "var(--heading-font-family)",
                         fontSize: "11px",
                         letterSpacing: "0.28em",
                         textTransform: "uppercase",
@@ -717,7 +717,7 @@ export default function FounderSection() {
                 </svg>
                 <p
                   style={{
-                    fontFamily: "'Cormorant Garamond', serif",
+                    fontFamily: "var(--heading-font-family)",
                     fontSize: "8px",
                     letterSpacing: "0.22em",
                     textTransform: "uppercase",
@@ -760,7 +760,7 @@ export default function FounderSection() {
                   display: "inline-flex",
                   alignItems: "center",
                   gap: "0",
-                  fontFamily: "'Cormorant Garamond', serif",
+                  fontFamily: "var(--heading-font-family)",
                   fontSize: "10px",
                   letterSpacing: "0.3em",
                   textTransform: "uppercase",

@@ -1,9 +1,9 @@
 "use client";
 
+import { ZenIcon } from "@/components/icons";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setCartOpen } from "@/store/slices/cartSlice";
 import { motion } from "framer-motion";
-import { Menu, Search, ShoppingBag, User, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -178,7 +178,7 @@ const Navbar = () => {
                 className="bg-transparent border-0 text-[#0f172a] hover:text-[#7da8c7] transition-all duration-300 p-2 rounded-full hover:bg-[#f8fafc] cursor-pointer"
                 aria-label={isSearchOpen ? "Close search" : "Open search"}
               >
-                <Search className="w-5 h-5" strokeWidth={1.5} />
+                <ZenIcon name="search" className="w-5 h-5" />
               </button>
               <CurrencySwitcher mode="dropdown" />
               <button
@@ -192,7 +192,7 @@ const Navbar = () => {
                 }}
                 className="bg-transparent border-0 text-[#0f172a] hover:text-[#7da8c7] transition-all duration-300 p-2 rounded-full hover:bg-[#f8fafc] cursor-pointer"
               >
-                <User className="w-5 h-5" strokeWidth={1.5} />
+                <ZenIcon name="user" className="w-5 h-5" />
               </button>
               <button
                 type="button"
@@ -202,7 +202,7 @@ const Navbar = () => {
                 className="bg-transparent border-0 text-[#0f172a] hover:text-[#7da8c7] transition-all duration-300 p-2 rounded-full hover:bg-[#f8fafc] relative cursor-pointer"
                 aria-label={`Shopping bag, ${cartCount} items`}
               >
-                <ShoppingBag className="w-5 h-5" strokeWidth={1.5} />
+                <ZenIcon name="shopping-bag" className="w-5 h-5" />
                 {cartCount > 0 ? (
                   <span className="absolute -top-0.5 -right-0.5 min-w-[1rem] h-4 px-0.5 bg-[#7da8c7] text-white text-[9px] leading-4 rounded-full flex items-center justify-center tabular-nums">
                     {cartCount > 99 ? "99+" : cartCount}
@@ -227,9 +227,9 @@ const Navbar = () => {
                 className="bg-transparent border-0 text-[#0f172a] hover:text-[#7da8c7] transition-colors duration-300 p-1.5 sm:p-2 rounded-full hover:bg-[#f8fafc] cursor-pointer shrink-0"
                 aria-label={isSearchOpen ? "Close search" : "Open search"}
               >
-                <Search
+                <ZenIcon
+                  name="search"
                   className="w-[1.125rem] h-[1.125rem] sm:w-5 sm:h-5"
-                  strokeWidth={1.5}
                 />
               </button>
               <div className="shrink-0 [&_button]:p-1.5 sm:[&_button]:p-2 [&_svg]:h-[1.125rem] [&_svg]:w-[1.125rem] sm:[&_svg]:h-5 sm:[&_svg]:w-5">
@@ -246,9 +246,9 @@ const Navbar = () => {
                 }}
                 className="bg-transparent border-0 text-[#0f172a] hover:text-[#7da8c7] transition-colors duration-300 p-1.5 sm:p-2 rounded-full hover:bg-[#f8fafc] cursor-pointer shrink-0"
               >
-                <User
+                <ZenIcon
+                  name="user"
                   className="w-[1.125rem] h-[1.125rem] sm:w-5 sm:h-5"
-                  strokeWidth={1.5}
                 />
               </button>
               <button
@@ -259,9 +259,9 @@ const Navbar = () => {
                 className="bg-transparent border-0 text-[#0f172a] hover:text-[#7da8c7] transition-colors duration-300 p-1.5 sm:p-2 rounded-full hover:bg-[#f8fafc] relative cursor-pointer shrink-0"
                 aria-label={`Shopping bag, ${cartCount} items`}
               >
-                <ShoppingBag
+                <ZenIcon
+                  name="shopping-bag"
                   className="w-[1.125rem] h-[1.125rem] sm:w-5 sm:h-5"
-                  strokeWidth={1.5}
                 />
                 {cartCount > 0 ? (
                   <span className="absolute top-0 right-0 min-w-[0.875rem] h-3.5 px-0.5 bg-[#7da8c7] text-white text-[8px] leading-[14px] rounded-full flex items-center justify-center tabular-nums">
@@ -277,9 +277,9 @@ const Navbar = () => {
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               >
                 {isMobileMenuOpen ? (
-                  <X className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={1.5} />
+                  <ZenIcon name="times" className="w-5 h-5 sm:w-6 sm:h-6" />
                 ) : (
-                  <Menu className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={1.5} />
+                  <ZenIcon name="bars" className="w-5 h-5 sm:w-6 sm:h-6" />
                 )}
               </button>
             </div>

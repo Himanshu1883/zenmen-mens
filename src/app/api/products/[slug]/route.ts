@@ -184,6 +184,25 @@ export async function PUT(request: Request, context: Params) {
           : existing.isFeatured,
     };
 
+    if (typeof body.deliveryLeadValue === "number") {
+      updates.deliveryLeadValue =
+        body.deliveryLeadValue >= 0 ? body.deliveryLeadValue : undefined;
+    } else if (body.deliveryLeadValue === null) {
+      updates.deliveryLeadValue = undefined;
+    }
+
+    if (
+      body.deliveryLeadUnit === "days" ||
+      body.deliveryLeadUnit === "weeks" ||
+      body.deliveryLeadUnit === "months"
+    ) {
+      updates.deliveryLeadUnit = body.deliveryLeadUnit;
+    }
+
+    if (typeof body.showDeliveryLead === "boolean") {
+      updates.showDeliveryLead = body.showDeliveryLead;
+    }
+
     if (typeof body.stock === "number") {
       updates.stock = body.stock;
     }

@@ -1,5 +1,6 @@
 "use client";
 
+import { ZenIcon } from "@/components/icons";
 import { useDisplayPrice } from "@/hooks/useDisplayPrice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
@@ -7,7 +8,7 @@ import {
   setCartOpen,
   updateQty,
 } from "@/store/slices/cartSlice";
-import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
+import { Minus, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 
@@ -125,7 +126,7 @@ export default function CartDrawer() {
             className="rounded-full border border-transparent bg-white/90 p-2 text-[#64748b] shadow-sm transition-colors hover:border-[#1b2232]/10 hover:text-[#0f172a] cursor-pointer"
             aria-label="Close cart"
           >
-            <X className="h-4 w-4" strokeWidth={1.5} />
+            <ZenIcon name="times" className="h-4 w-4" />
           </button>
         </header>
 
@@ -133,7 +134,7 @@ export default function CartDrawer() {
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center px-4 py-16 text-center">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-[#1b2232]/10 bg-white text-[#7da8c7] shadow-sm">
-                <ShoppingBag className="h-7 w-7" strokeWidth={1.25} />
+                <ZenIcon name="shopping-bag" className="h-7 w-7" />
               </div>
               <p className="m-0 font-[family-name:var(--font-playfair)] text-xl text-[#0f172a]">
                 Your cart is empty

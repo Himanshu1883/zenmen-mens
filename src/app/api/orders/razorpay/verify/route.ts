@@ -1,9 +1,10 @@
 import { requireAuthUser } from "@/lib/api-auth";
 import { connectDB } from "@/lib/db";
-import { getRazorpayKeySecret } from "@/lib/razorpay";
+import { verifyPaymentSignature } from "@/lib/razorpay";
+import { fail, ok } from "@/lib/http-responses";
 import { checkoutVerifySchema } from "@/lib/validations/checkout.schema";
 import Order from "@/models/Order";
-import crypto from "crypto";
+import { finalizePaidOrder } from "@/services/orderFinalizeService";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -15,7 +16,7 @@ export async function POST(req: Request) {
     const parsed = checkoutVerifySchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { error: parsed.error.issues[0]?.message ?? "Invalid payment data" },
+        { success: false, code: "MISSING_PAYMENT_FIELDS", message: parsed.error.issues[0]?.message ?? "Invalid payment data" },
         { status: 422 },
       );
     }
@@ -23,16 +24,8 @@ export async function POST(req: Request) {
     const { orderId, razorpayOrderId, razorpayPaymentId, razorpaySignature } =
       parsed.data;
 
-    const expected = crypto
-      .createHmac("sha256", getRazorpayKeySecret())
-      .update(`${razorpayOrderId}|${razorpayPaymentId}`)
-      .digest("hex");
-
-    if (expected !== razorpaySignature) {
-      return NextResponse.json(
-        { error: "Payment verification failed" },
-        { status: 400 },
-      );
+    if (!verifyPaymentSignature(razorpayOrderId, razorpayPaymentId, razorpaySignature)) {
+      return fail("PAYMENT_SIGNATURE_MISMATCH", "Payment verification failed", 400);
     }
 
     await connectDB();
@@ -43,38 +36,29 @@ export async function POST(req: Request) {
     });
 
     if (!order) {
-      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+      return fail("ORDER_NOT_FOUND", "Order not found", 404);
     }
 
     if (order.razorpayOrderId !== razorpayOrderId) {
-      return NextResponse.json(
-        { error: "Payment does not match this order" },
-        { status: 400 },
-      );
+      return fail("FORBIDDEN", "Payment does not match this order", 400);
     }
 
-    if (order.paymentStatus === "paid") {
-      return NextResponse.json({
-        orderId: String(order._id),
-        orderNumber: order.orderNumber,
-        alreadyPaid: true,
-      });
-    }
-
-    order.paymentStatus = "paid";
-    order.status = "confirmed";
-    order.razorpayPaymentId = razorpayPaymentId;
-    order.razorpaySignature = razorpaySignature;
-    await order.save();
-
-    return NextResponse.json({
+    const result = await finalizePaidOrder({
       orderId: String(order._id),
-      orderNumber: order.orderNumber,
+      paymentId: razorpayPaymentId,
+      signature: razorpaySignature,
+      actor: "user",
+    });
+
+    return ok({
+      orderId: String(result.order._id),
+      orderNumber: result.order.orderNumber,
+      alreadyFinalized: result.alreadyFinalized,
     });
   } catch (err) {
     console.error("[POST /api/orders/razorpay/verify]", err);
     return NextResponse.json(
-      { error: "Payment verification failed" },
+      { success: false, code: "VERIFY_FAILED", message: "Payment verification failed" },
       { status: 500 },
     );
   }

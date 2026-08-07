@@ -148,7 +148,7 @@ const ProductVideosSection = () => {
             <h2
               className="text-[#0f172a]"
               style={{
-                fontFamily: "Playfair Display, serif",
+                fontFamily: "var(--heading-font-family)",
                 fontSize: "clamp(28px, 4vw, 52px)",
                 fontWeight: 600,
                 lineHeight: 1.2,
@@ -312,7 +312,7 @@ const ProductVideosSection = () => {
                         <h3
                           className="text-white mb-3 leading-tight"
                           style={{
-                            fontFamily: "Playfair Display, serif",
+                            fontFamily: "var(--heading-font-family)",
                             fontSize: "clamp(14px, 1.6vw, 19px)",
                             fontWeight: 600,
                           }}
@@ -325,7 +325,7 @@ const ProductVideosSection = () => {
                           <span
                             className="text-white font-light"
                             style={{
-                              fontFamily: "Playfair Display, serif",
+                              fontFamily: "var(--heading-font-family)",
                               fontSize: "clamp(15px, 1.8vw, 19px)",
                               fontWeight: 600,
                             }}

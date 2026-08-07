@@ -34,7 +34,7 @@ export default function ProductRecoSlider({
       aria-label={ariaLabel}
     >
       <div className="mb-7 flex items-end justify-between gap-4">
-        <h2 className="font-['Cormorant_Garamond'] text-[2rem] font-light text-[#0f172a]">
+        <h2 className="font-heading text-[2rem] font-light text-[#0f172a]">
           {title}
         </h2>
         <div className="flex items-center gap-2 pb-1">

@@ -66,7 +66,7 @@ export default function CheckoutAuthForm({ cartItems }: Props) {
         redirect: false,
       });
       if (res?.error) {
-        toast.error("Invalid email or password");
+        toast.error("Invalid email/mobile or password");
         return;
       }
       toast.success("Signed in — your cart is ready");
@@ -119,53 +119,56 @@ export default function CheckoutAuthForm({ cartItems }: Props) {
 
   return (
     <div className="mx-auto w-full max-w-md rounded-sm border border-[#e2e8f0] bg-white p-6 shadow-sm md:p-8">
-      <button
-        type="button"
-        disabled={busy}
-        onClick={() => void handleGoogle()}
-        className="mb-5 flex w-full items-center justify-center gap-2 border border-[#e2e8f0] bg-white py-3.5 font-['Jost'] text-[10px] font-medium uppercase tracking-[0.18em] text-[#0f172a] transition-colors hover:border-[#7da8c7] hover:bg-[#f8fafc] disabled:opacity-60"
-      >
-        Continue with Google
-      </button>
-      <p className="mb-5 text-center font-['Jost'] text-[10px] uppercase tracking-[0.2em] text-[#94a3b8]">
-        or
-      </p>
+      <div className="mb-5 space-y-3">
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => void handleGoogle()}
+          className="flex w-full items-center justify-center gap-2 border border-[#e2e8f0] bg-white py-3.5 font-['Jost'] text-[10px] font-medium uppercase tracking-[0.18em] text-[#0f172a] transition-colors hover:border-[#7da8c7] hover:bg-[#f8fafc] disabled:opacity-60"
+        >
+          Continue with Google
+        </button>
+        <p className="text-center font-['Jost'] text-[10px] uppercase tracking-[0.2em] text-[#94a3b8]">
+          or with email / mobile
+        </p>
 
-      <div className="mb-6 flex gap-2 border-b border-[#e2e8f0]">
-        <button
-          type="button"
-          onClick={() => setMode("login")}
-          className={`flex-1 border-b-2 pb-3 font-['Jost'] text-[10px] font-medium uppercase tracking-[0.2em] transition-colors ${
-            mode === "login"
-              ? "border-[#7da8c7] text-[#0f172a]"
-              : "border-transparent text-[#94a3b8] hover:text-[#0f172a]"
-          }`}
-        >
-          Sign in
-        </button>
-        <button
-          type="button"
-          onClick={() => setMode("signup")}
-          className={`flex-1 border-b-2 pb-3 font-['Jost'] text-[10px] font-medium uppercase tracking-[0.2em] transition-colors ${
-            mode === "signup"
-              ? "border-[#7da8c7] text-[#0f172a]"
-              : "border-transparent text-[#94a3b8] hover:text-[#0f172a]"
-          }`}
-        >
-          Create account
-        </button>
+        <div className="flex gap-2 border-b border-[#e2e8f0]">
+          <button
+            type="button"
+            onClick={() => setMode("login")}
+            className={`flex-1 border-b-2 pb-3 font-['Jost'] text-[10px] font-medium uppercase tracking-[0.2em] transition-colors ${
+              mode === "login"
+                ? "border-[#7da8c7] text-[#0f172a]"
+                : "border-transparent text-[#94a3b8] hover:text-[#0f172a]"
+            }`}
+          >
+            Sign in
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("signup")}
+            className={`flex-1 border-b-2 pb-3 font-['Jost'] text-[10px] font-medium uppercase tracking-[0.2em] transition-colors ${
+              mode === "signup"
+                ? "border-[#7da8c7] text-[#0f172a]"
+                : "border-transparent text-[#94a3b8] hover:text-[#0f172a]"
+            }`}
+          >
+            Create account
+          </button>
+        </div>
       </div>
 
       {mode === "login" ? (
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className={labelClass}>Email</label>
+            <label className={labelClass}>Email or mobile number</label>
             <input
-              type="email"
+              type="text"
+              inputMode="email"
               className={inputClass}
               value={loginEmail}
               onChange={(e) => setLoginEmail(e.target.value)}
-              autoComplete="email"
+              autoComplete="username"
               required
             />
           </div>
@@ -202,13 +205,14 @@ export default function CheckoutAuthForm({ cartItems }: Props) {
             />
           </div>
           <div>
-            <label className={labelClass}>Email</label>
+            <label className={labelClass}>Email or mobile number</label>
             <input
-              type="email"
+              type="text"
+              inputMode="email"
               className={inputClass}
               value={signupEmail}
               onChange={(e) => setSignupEmail(e.target.value)}
-              autoComplete="email"
+              autoComplete="username"
               required
             />
           </div>

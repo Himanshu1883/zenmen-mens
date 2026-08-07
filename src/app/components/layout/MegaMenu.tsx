@@ -103,7 +103,7 @@ const MegaMenu = ({ isOpen, shellClass, onClose }: MegaMenuProps) => {
                       <h3
                         className="text-white mb-4"
                         style={{
-                          fontFamily: "Playfair Display, serif",
+                          fontFamily: "var(--heading-font-family)",
                           fontSize: "36px",
                           fontWeight: 500,
                           lineHeight: 1.3,

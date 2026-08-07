@@ -8,7 +8,8 @@ const ImageSchema = new mongoose.Schema({
   order: { type: Number, default: 0 },
   public_id: {
     type: String,
-    required: true,
+    required: false,
+    default: "",
   },
 });
 
@@ -71,6 +72,14 @@ const ProductSchema = new mongoose.Schema(
 
     badge: String,
     isFeatured: { type: Boolean, default: false, index: true },
+
+    deliveryLeadValue: { type: Number, min: 0 },
+    deliveryLeadUnit: {
+      type: String,
+      enum: ["days", "weeks", "months"],
+      default: "days",
+    },
+    showDeliveryLead: { type: Boolean, default: false },
 
     accordion: [{ title: String, content: String }],
 

@@ -48,10 +48,13 @@ interface MobileFilterBarProps {
   colors: string[];
   sizes: string[];
   priceRanges: string[];
+  brands: string[];
   selectedCategory: string;
   selectedColor: string;
   selectedSize: string;
   selectedPrice: string;
+  selectedBrand: string;
+  selectedAvailability: string;
   sortBy: string;
   search: string;
   resultCount: number;
@@ -60,12 +63,23 @@ interface MobileFilterBarProps {
   onColorChange: (v: string) => void;
   onSizeChange: (v: string) => void;
   onPriceChange: (v: string) => void;
+  onBrandChange: (v: string) => void;
+  onAvailabilityChange: (v: string) => void;
   onSortChange: (v: string) => void;
   onSearchChange: (v: string) => void;
   onReset: () => void;
 }
 
-type FilterPanel = "category" | "price" | "color" | "size" | "sort" | null;
+type FilterPanel =
+  | "category"
+  | "price"
+  | "color"
+  | "size"
+  | "sort"
+  | "availability"
+  | null;
+
+const AVAILABILITY_OPTIONS = ["All", "In stock", "Out of stock"];
 
 // ── Component ────────────────────────────────────────────────────────────────
 
@@ -74,10 +88,13 @@ export default function MobileFilterBar({
   colors,
   sizes,
   priceRanges,
+  brands,
   selectedCategory,
   selectedColor,
   selectedSize,
   selectedPrice,
+  selectedBrand,
+  selectedAvailability,
   sortBy,
   search,
   resultCount,
@@ -86,6 +103,8 @@ export default function MobileFilterBar({
   onColorChange,
   onSizeChange,
   onPriceChange,
+  onBrandChange,
+  onAvailabilityChange,
   onSortChange,
   onSearchChange,
   onReset,
@@ -124,6 +143,8 @@ export default function MobileFilterBar({
     selectedColor !== "All" ||
     selectedSize !== "All" ||
     selectedPrice !== "All" ||
+    selectedBrand !== "All" ||
+    selectedAvailability !== "All" ||
     search.trim() !== "";
 
   const toggle = (panel: FilterPanel) =>
@@ -145,109 +166,8 @@ export default function MobileFilterBar({
 
   return (
     <>
-      {/* ── Desktop sticky filter bar (top) ─────────────────────────────── */}
-      <div className="hidden md:block sticky top-[80px] z-30 bg-[#f8fafc]/95 backdrop-blur border-b border-[#e2e8f0]">
-        <div className="px-12 lg:px-20">
-          {/* Row 1 — filter tabs + sort */}
-          <div className="flex flex-wrap items-center justify-between gap-3 py-3">
-            <div className="flex items-center gap-8">
-              {(
-                [
-                  { key: "category", label: "Category" },
-                  { key: "price", label: "Price" },
-                  { key: "color", label: "Color" },
-                  { key: "size", label: "Size" },
-                ] as const
-              ).map((tab) => (
-                <button
-                  key={tab.key}
-                  onClick={() => toggle(tab.key)}
-                  className={`inline-flex items-center gap-1 py-1 text-[15px] transition ${
-                    isActive(tab.key)
-                      ? "text-[#0f172a] border-b border-[#0f172a]"
-                      : "text-[#64748b] hover:text-[#0f172a]"
-                  }`}
-                >
-                  {tab.label}
-                  <span className="text-[11px] leading-none text-[#94a3b8]">
-                    {isActive(tab.key) ? "⌃" : "⌄"}
-                  </span>
-                </button>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-3 text-[14px] text-[#64748b]">
-              <span>
-                {resultCount} / {totalCount}
-              </span>
-              <span className="text-[#cbd5e1]">|</span>
-              <div className="relative">
-                <select
-                  value={sortBy}
-                  onChange={(e) => onSortChange(e.target.value)}
-                  className="appearance-none bg-transparent border-0 px-0 pr-4 py-1 text-[#0f172a] outline-none text-[13px] cursor-pointer"
-                >
-                  <option value="featured">Sort</option>
-                  <option value="price_low_high">Price: Low to High</option>
-                  <option value="price_high_low">Price: High to Low</option>
-                  <option value="name_az">Name: A-Z</option>
-                  <option value="name_za">Name: Z-A</option>
-                </select>
-                <span className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-[10px] text-[#94a3b8]">
-                  ⌄
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Row 2 — search */}
-          <div className="py-2">
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={search}
-              onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full border-b border-[#d6e1ec] bg-transparent px-0 py-2 text-sm text-[#0f172a] outline-none placeholder:text-[#8ca0b6] focus:border-[#7da8c7]"
-            />
-          </div>
-
-          {/* Filter panel */}
-          {activePanel && (
-            <div data-filter-root className="border-t border-[#e7edf5] py-4">
-              <DesktopFilterPanel
-                panel={activePanel}
-                categories={categories}
-                colors={colors}
-                sizes={sizes}
-                priceRanges={priceRanges}
-                selectedCategory={selectedCategory}
-                selectedColor={selectedColor}
-                selectedSize={selectedSize}
-                selectedPrice={selectedPrice}
-                onCategoryChange={onCategoryChange}
-                onColorChange={onColorChange}
-                onSizeChange={onSizeChange}
-                onPriceChange={onPriceChange}
-              />
-            </div>
-          )}
-
-          {/* Reset */}
-          {hasActiveFilters && (
-            <div className="border-t border-[#e7edf5] py-2">
-              <button
-                onClick={onReset}
-                className="text-[11px] tracking-[0.08em] uppercase text-[#64748b] hover:text-[#0f172a] transition-colors"
-              >
-                Reset Filters
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
       {/* ── Mobile search bar (top, always visible) ──────────────────────── */}
-      <div className="md:hidden px-4 py-3 bg-[#f8fafc] border-b border-[#e2e8f0]">
+      <div className="px-4 py-3 bg-white border-b border-[#e2e8f0]">
         <div className="flex items-center gap-2 border border-[#d6e1ec] bg-white px-3 py-2 rounded-sm">
           <svg
             width="14"
@@ -294,7 +214,7 @@ export default function MobileFilterBar({
       {/* ── Mobile bottom filter bar ──────────────────────────────────────── */}
       <div
         data-filter-root
-        className={`md:hidden fixed bottom-0 left-0 right-0 z-50 transition-transform duration-300 ${
+        className={`fixed bottom-0 left-0 right-0 z-50 transition-transform duration-300 ${
           visible ? "translate-y-0" : "translate-y-full"
         }`}
       >
@@ -307,10 +227,13 @@ export default function MobileFilterBar({
               colors={colors}
               sizes={sizes}
               priceRanges={priceRanges}
+              brands={brands}
               selectedCategory={selectedCategory}
               selectedColor={selectedColor}
               selectedSize={selectedSize}
               selectedPrice={selectedPrice}
+              selectedBrand={selectedBrand}
+              selectedAvailability={selectedAvailability}
               sortBy={sortBy}
               onCategoryChange={(v) => {
                 onCategoryChange(v);
@@ -326,6 +249,14 @@ export default function MobileFilterBar({
               }}
               onPriceChange={(v) => {
                 onPriceChange(v);
+                setActivePanel(null);
+              }}
+              onBrandChange={(v) => {
+                onBrandChange(v);
+                setActivePanel(null);
+              }}
+              onAvailabilityChange={(v) => {
+                onAvailabilityChange(v);
                 setActivePanel(null);
               }}
               onSortChange={(v) => {
@@ -421,6 +352,32 @@ export default function MobileFilterBar({
                 active: selectedPrice !== "All",
               },
               {
+                key: "availability" as FilterPanel,
+                icon: (
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  >
+                    <path
+                      d="M9 12l2 2 4-4M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                ),
+                label:
+                  selectedAvailability !== "All"
+                    ? selectedAvailability === "In stock"
+                      ? "In stock"
+                      : "Sold out"
+                    : "Stock",
+                active: selectedAvailability !== "All",
+              },
+              {
                 key: "sort" as FilterPanel,
                 icon: (
                   <svg
@@ -482,114 +439,7 @@ export default function MobileFilterBar({
       </div>
 
       {/* ── Spacer so content isn't hidden behind mobile bar ─────────────── */}
-      <div className="md:hidden h-[72px]" />
-    </>
-  );
-}
-
-// ── Desktop filter panel content ─────────────────────────────────────────────
-
-function DesktopFilterPanel({
-  panel,
-  categories,
-  colors,
-  sizes,
-  priceRanges,
-  selectedCategory,
-  selectedColor,
-  selectedSize,
-  selectedPrice,
-  onCategoryChange,
-  onColorChange,
-  onSizeChange,
-  onPriceChange,
-}: {
-  panel: FilterPanel;
-  categories: string[];
-  colors: string[];
-  sizes: string[];
-  priceRanges: string[];
-  selectedCategory: string;
-  selectedColor: string;
-  selectedSize: string;
-  selectedPrice: string;
-  onCategoryChange: (v: string) => void;
-  onColorChange: (v: string) => void;
-  onSizeChange: (v: string) => void;
-  onPriceChange: (v: string) => void;
-}) {
-  const btn = (active: boolean) =>
-    `px-0 py-1 text-[13px] tracking-[0.04em] transition-colors ${
-      active ? "text-[#0f172a]" : "text-[#64748b] hover:text-[#0f172a]"
-    }`;
-
-  return (
-    <>
-      {panel === "category" && (
-        <div className="flex flex-wrap gap-x-6 gap-y-2">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => onCategoryChange(cat)}
-              className={btn(selectedCategory === cat)}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-      )}
-      {panel === "price" && (
-        <div className="flex flex-wrap gap-x-6 gap-y-2">
-          {priceRanges.map((range) => (
-            <button
-              key={range}
-              onClick={() => onPriceChange(range)}
-              className={btn(selectedPrice === range)}
-            >
-              {range}
-            </button>
-          ))}
-        </div>
-      )}
-      {panel === "size" && (
-        <div className="flex flex-wrap gap-x-6 gap-y-2">
-          {sizes.map((size) => (
-            <button
-              key={size}
-              onClick={() => onSizeChange(size)}
-              className={btn(selectedSize === size)}
-            >
-              {size}
-            </button>
-          ))}
-        </div>
-      )}
-      {panel === "color" && (
-        <div className="grid grid-cols-2 gap-x-8 gap-y-2 md:grid-cols-4 lg:grid-cols-6">
-          {colors.map((col) => (
-            <button
-              key={col}
-              onClick={() => onColorChange(col)}
-              className="flex items-center gap-2 py-1 text-left"
-            >
-              <span
-                className={`h-3 w-3 rounded-full border flex-shrink-0 ${
-                  selectedColor === col
-                    ? "border-[#7da8c7] bg-[#7da8c7]"
-                    : "border-[#cbd5e1] bg-white"
-                }`}
-              />
-              <span
-                className={`text-[11px] tracking-[0.06em] truncate ${
-                  selectedColor === col ? "text-[#0f172a]" : "text-[#64748b]"
-                }`}
-              >
-                {col}
-              </span>
-            </button>
-          ))}
-        </div>
-      )}
+      <div className="h-[72px]" />
     </>
   );
 }
@@ -602,15 +452,20 @@ function MobileFilterPanel({
   colors,
   sizes,
   priceRanges,
+  brands,
   selectedCategory,
   selectedColor,
   selectedSize,
   selectedPrice,
+  selectedBrand,
+  selectedAvailability,
   sortBy,
   onCategoryChange,
   onColorChange,
   onSizeChange,
   onPriceChange,
+  onBrandChange,
+  onAvailabilityChange,
   onSortChange,
   onClose,
 }: {
@@ -619,15 +474,20 @@ function MobileFilterPanel({
   colors: string[];
   sizes: string[];
   priceRanges: string[];
+  brands: string[];
   selectedCategory: string;
   selectedColor: string;
   selectedSize: string;
   selectedPrice: string;
+  selectedBrand: string;
+  selectedAvailability: string;
   sortBy: string;
   onCategoryChange: (v: string) => void;
   onColorChange: (v: string) => void;
   onSizeChange: (v: string) => void;
   onPriceChange: (v: string) => void;
+  onBrandChange: (v: string) => void;
+  onAvailabilityChange: (v: string) => void;
   onSortChange: (v: string) => void;
   onClose: () => void;
 }) {
@@ -637,6 +497,7 @@ function MobileFilterPanel({
     size: "Size",
     price: "Price Range",
     sort: "Sort By",
+    availability: "Availability",
   };
 
   const SORT_OPTIONS = [
@@ -672,6 +533,34 @@ function MobileFilterPanel({
                 label={cat}
                 active={selectedCategory === cat}
                 onClick={() => onCategoryChange(cat)}
+              />
+            ))}
+            {brands.length > 1 ? (
+              <>
+                <p className="mt-4 mb-1 text-[10px] tracking-[0.2em] uppercase text-[#94a3b8]">
+                  Brand
+                </p>
+                {brands.map((b) => (
+                  <MobileOption
+                    key={b}
+                    label={b}
+                    active={selectedBrand === b}
+                    onClick={() => onBrandChange(b)}
+                  />
+                ))}
+              </>
+            ) : null}
+          </div>
+        )}
+
+        {panel === "availability" && (
+          <div className="flex flex-col gap-1">
+            {AVAILABILITY_OPTIONS.map((opt) => (
+              <MobileOption
+                key={opt}
+                label={opt}
+                active={selectedAvailability === opt}
+                onClick={() => onAvailabilityChange(opt)}
               />
             ))}
           </div>

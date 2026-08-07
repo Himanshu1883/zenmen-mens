@@ -29,15 +29,79 @@ const ShippingSchema = new mongoose.Schema(
   { _id: false },
 );
 
+const StatusHistorySchema = new mongoose.Schema(
+  {
+    status: String,
+    changedAt: { type: Date, default: Date.now },
+    changedBy: String,
+    note: String,
+  },
+  { _id: false },
+);
+
+const CancellationSchema = new mongoose.Schema(
+  {
+    status: {
+      type: String,
+      enum: ["none", "requested", "approved", "rejected", "cancelled"],
+      default: "none",
+    },
+    requestedBy: { type: String, enum: ["user", "admin"] },
+    reason: String,
+    note: String,
+    adminNote: String,
+    requestedAt: Date,
+    resolvedAt: Date,
+    refundStatus: {
+      type: String,
+      enum: [
+        "not_applicable",
+        "pending",
+        "initiated",
+        "completed",
+        "failed",
+      ],
+      default: "not_applicable",
+    },
+    refundAmount: Number,
+    refundId: String,
+    refundInitiatedAt: Date,
+    refundCompletedAt: Date,
+  },
+  { _id: false },
+);
+
+const EmailLogSchema = new mongoose.Schema(
+  {
+    confirmationSentAt: Date,
+    lastResentAt: Date,
+    resendCount: { type: Number, default: 0 },
+    lastError: String,
+  },
+  { _id: false },
+);
+
 const OrderSchema = new mongoose.Schema(
   {
     orderNumber: { type: String, required: true, unique: true, index: true },
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     userEmail: { type: String, required: true },
     items: { type: [OrderItemSchema], required: true },
     subtotal: { type: Number, required: true, min: 0 },
     codFee: { type: Number, default: 0, min: 0 },
     total: { type: Number, required: true, min: 0 },
+    amountPaise: Number,
+    pricing: {
+      itemsTotal: Number,
+      shipping: Number,
+      codCharge: Number,
+      gstAmount: Number,
+      grandTotal: Number,
+    },
     paymentMethod: {
       type: String,
       enum: ["cod", "online"],
@@ -45,19 +109,36 @@ const OrderSchema = new mongoose.Schema(
     },
     paymentStatus: {
       type: String,
-      enum: ["pending", "paid", "failed"],
+      enum: ["pending", "paid", "failed", "refunded", "partially_refunded"],
       default: "pending",
     },
     status: {
       type: String,
-      enum: ["pending", "confirmed", "cancelled"],
       default: "pending",
+    },
+    orderStatus: {
+      type: String,
+      default: "pending_payment",
     },
     shipping: { type: ShippingSchema, required: true },
     notes: String,
-    razorpayOrderId: String,
-    razorpayPaymentId: String,
+    razorpayOrderId: { type: String, sparse: true, unique: true },
+    razorpayPaymentId: { type: String, sparse: true, unique: true },
     razorpaySignature: String,
+    stockDecremented: { type: Boolean, default: false },
+    payment: {
+      method: { type: String, enum: ["razorpay", "cod"] },
+      orderId: String,
+      paymentId: String,
+      signature: String,
+      status: {
+        type: String,
+        enum: ["pending", "paid", "cod", "cancelled"],
+      },
+    },
+    emailLog: { type: EmailLogSchema, default: () => ({}) },
+    statusHistory: { type: [StatusHistorySchema], default: [] },
+    cancellation: { type: CancellationSchema, default: () => ({ status: "none" }) },
   },
   { timestamps: true },
 );

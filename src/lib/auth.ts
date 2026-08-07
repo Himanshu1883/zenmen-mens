@@ -1,4 +1,5 @@
 import { connectDB } from "@/lib/db";
+import { parseContact, phoneFromInternalEmail } from "@/lib/auth-contact";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
 import { getServerSession, type NextAuthOptions } from "next-auth";
@@ -14,17 +15,28 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
+        email: { label: "Email or mobile", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials.password) {
-          throw new Error("Email and password are required");
+          throw new Error("Email/mobile and password are required");
+        }
+
+        const contact = parseContact(credentials.email);
+        if (!contact) {
+          throw new Error("Enter a valid email or mobile number");
         }
 
         await connectDB();
 
-        const user = await User.findOne({ email: credentials.email });
+        const user =
+          contact.kind === "email"
+            ? await User.findOne({ email: contact.email })
+            : await User.findOne({
+                $or: [{ phone: contact.phone }, { email: contact.email }],
+              });
+
         if (!user) {
           throw new Error("User not found");
         }
@@ -41,6 +53,7 @@ export const authOptions: NextAuthOptions = {
           id: String(user._id),
           name: user.name,
           email: user.email,
+          phone: user.phone ?? null,
           role: user.role ?? "user",
         };
       },
@@ -74,12 +87,17 @@ export const authOptions: NextAuthOptions = {
         const dbUser = await User.findOne({
           email: email.trim().toLowerCase(),
         })
-          .select("_id role")
+          .select("_id role phone email")
           .lean();
 
         if (dbUser) {
+          const rawPhone = (dbUser as { phone?: string }).phone;
           token.id = String(dbUser._id);
-          token.role = dbUser.role ?? "user";
+          token.role = (dbUser as { role?: string }).role ?? "user";
+          token.phone =
+            rawPhone ??
+            phoneFromInternalEmail((dbUser as { email?: string }).email) ??
+            null;
           return token;
         }
       }
@@ -87,6 +105,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.role = (user as typeof user & { role?: string }).role;
         token.id = (user as { id?: string }).id;
+        token.phone = (user as { phone?: string | null }).phone ?? null;
       }
 
       return token;
@@ -96,6 +115,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = token.id as string | undefined;
         session.user.role = (token.role as string) ?? "user";
+        session.user.phone = (token.phone as string | null | undefined) ?? null;
       }
 
       return session;

@@ -98,6 +98,9 @@ export async function POST(request: Request) {
       seoDescription,
       isFeatured,
       isAvailable,
+      deliveryLeadValue,
+      deliveryLeadUnit,
+      showDeliveryLead,
     } = body;
 
     // REQUIRED VALIDATION
@@ -188,6 +191,13 @@ export async function POST(request: Request) {
       seoDescription,
 
       isFeatured: isFeatured || false,
+
+      deliveryLeadValue:
+        typeof deliveryLeadValue === "number" && deliveryLeadValue >= 0
+          ? deliveryLeadValue
+          : undefined,
+      deliveryLeadUnit: deliveryLeadUnit ?? "days",
+      showDeliveryLead: Boolean(showDeliveryLead),
 
       isAvailable:
         typeof isAvailable === "boolean" ? isAvailable : (stock ?? 0) > 0,

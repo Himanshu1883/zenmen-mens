@@ -107,7 +107,7 @@ const ShopByCategory = () => {
             transition={{ delay: 0.1 }}
             className="text-[#0f172a] mb-6"
             style={{
-              fontFamily: "Playfair Display, serif",
+              fontFamily: "var(--heading-font-family)",
               fontSize: "clamp(40px, 6vw, 72px)",
               fontWeight: 600,
               lineHeight: 1.2,
@@ -167,7 +167,7 @@ const ShopByCategory = () => {
                 transition={{ delay: 0.4 }}
                 className="text-white mb-6"
                 style={{
-                  fontFamily: "Playfair Display, serif",
+                  fontFamily: "var(--heading-font-family)",
                   fontSize: "clamp(32px, 4vw, 56px)",
                   fontWeight: 600,
                   lineHeight: 1.2,
@@ -210,7 +210,7 @@ const ShopByCategory = () => {
               <h3
                 className="text-white mb-4"
                 style={{
-                  fontFamily: "Playfair Display, serif",
+                  fontFamily: "var(--heading-font-family)",
                   fontSize: "clamp(24px, 3vw, 36px)",
                   fontWeight: 600,
                   lineHeight: 1.2,
@@ -253,7 +253,7 @@ const ShopByCategory = () => {
               <h3
                 className="text-white mb-3"
                 style={{
-                  fontFamily: "Playfair Display, serif",
+                  fontFamily: "var(--heading-font-family)",
                   fontSize: "clamp(20px, 2.5vw, 28px)",
                   fontWeight: 600,
                   lineHeight: 1.2,
@@ -296,7 +296,7 @@ const ShopByCategory = () => {
               <h3
                 className="text-white mb-3"
                 style={{
-                  fontFamily: "Playfair Display, serif",
+                  fontFamily: "var(--heading-font-family)",
                   fontSize: "clamp(20px, 2.5vw, 28px)",
                   fontWeight: 600,
                   lineHeight: 1.2,
@@ -340,7 +340,7 @@ const ShopByCategory = () => {
                 <h3
                   className="text-white mb-4"
                   style={{
-                    fontFamily: "Playfair Display, serif",
+                    fontFamily: "var(--heading-font-family)",
                     fontSize: "clamp(28px, 4vw, 48px)",
                     fontWeight: 600,
                     lineHeight: 1.2,
@@ -384,7 +384,7 @@ const ShopByCategory = () => {
               <h3
                 className="text-white mb-4"
                 style={{
-                  fontFamily: "Playfair Display, serif",
+                  fontFamily: "var(--heading-font-family)",
                   fontSize: "clamp(24px, 3vw, 36px)",
                   fontWeight: 600,
                   lineHeight: 1.2,

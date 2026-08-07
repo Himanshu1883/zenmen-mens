@@ -1,4 +1,5 @@
 import Users from "@/app/components/adminComponents/pages/Users";
+import { resolveAccountContact } from "@/lib/auth-contact";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 import type { Types } from "mongoose";
@@ -17,6 +18,7 @@ type DbUser = {
   _id: Types.ObjectId;
   name?: string;
   email?: string;
+  phone?: string;
   role?: "user" | "admin";
   createdAt: Date | string;
 };
@@ -48,7 +50,7 @@ export default async function AdminUsersPage({
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(pageSize)
-      .select("name email role createdAt")
+      .select("name email phone role createdAt")
       .lean(),
     User.countDocuments({}),
     User.countDocuments({ role: "admin" }),
@@ -64,7 +66,8 @@ export default async function AdminUsersPage({
   const users: UserRow[] = (rows as DbUser[]).map((u) => ({
     id: String(u._id),
     name: u.name ?? "Unknown User",
-    email: u.email ?? "N/A",
+    email: resolveAccountContact({ email: u.email, phone: u.phone })
+      .displayContact,
     role: u.role === "admin" ? "Admin" : "User",
     joinedDate: formatDate(u.createdAt),
     status: "Active" as const,

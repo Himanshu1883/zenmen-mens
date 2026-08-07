@@ -1,7 +1,7 @@
 "use client";
 
+import { ZenIcon, type ZenIconName } from "@/components/icons";
 import { cn } from "@/lib/utils";
-import { MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -12,76 +12,18 @@ function openZenmenChat() {
   window.dispatchEvent(new CustomEvent(OPEN_CHAT_EVENT));
 }
 
-// ─── Types ───────────────────────────────────────────────────────────────────
 interface NavItem {
   id: string;
   label: string;
   href?: string;
   onClick?: () => void;
-  icon: React.ReactNode;
+  icon: ZenIconName;
 }
 
-// ─── Icons ───────────────────────────────────────────────────────────────────
-const HomeIcon = () => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={1.5}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="h-5 w-5"
-  >
-    <path d="M3 9.75L12 3l9 6.75V21a.75.75 0 0 1-.75.75H15v-5.25a.75.75 0 0 0-.75-.75h-4.5a.75.75 0 0 0-.75.75V21.75H3.75A.75.75 0 0 1 3 21V9.75Z" />
-  </svg>
-);
-
-const ExploreIcon = () => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={1.5}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="h-5 w-5"
-  >
-    <circle cx="11" cy="11" r="8" />
-    <path d="m21 21-4.35-4.35" />
-  </svg>
-);
-
-const WhatsAppIcon = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
-    <path d="M20.52 3.48A11.85 11.85 0 0 0 12.06 0C5.5 0 .16 5.34.16 11.9c0 2.1.55 4.16 1.6 5.98L0 24l6.3-1.65a11.86 11.86 0 0 0 5.76 1.47h.01c6.56 0 11.9-5.34 11.9-11.9 0-3.18-1.24-6.17-3.45-8.44Zm-8.46 18.33h-.01a9.9 9.9 0 0 1-5.04-1.38l-.36-.21-3.74.98 1-3.64-.24-.37a9.9 9.9 0 0 1-1.53-5.29c0-5.46 4.44-9.9 9.91-9.9 2.64 0 5.12 1.03 6.98 2.89a9.82 9.82 0 0 1 2.92 7.01c0 5.46-4.44 9.9-9.9 9.9Zm5.43-7.42c-.3-.15-1.78-.88-2.06-.98-.27-.1-.47-.15-.67.15-.2.3-.77.98-.95 1.18-.17.2-.35.23-.65.08-.3-.15-1.27-.47-2.42-1.49-.89-.79-1.5-1.76-1.68-2.06-.17-.3-.02-.46.13-.6.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.38-.03-.53-.08-.15-.67-1.62-.92-2.23-.24-.58-.48-.5-.67-.51l-.57-.01c-.2 0-.52.08-.8.38-.27.3-1.05 1.03-1.05 2.5 0 1.48 1.08 2.9 1.23 3.1.15.2 2.12 3.24 5.14 4.54.72.31 1.29.49 1.73.63.73.23 1.4.2 1.92.12.59-.09 1.78-.73 2.03-1.43.25-.7.25-1.3.17-1.43-.08-.13-.28-.2-.58-.35Z" />
-  </svg>
-);
-
-const BookIcon = () => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={1.5}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="h-5 w-5"
-  >
-    <rect x="3" y="4" width="18" height="18" rx="2" />
-    <path d="M16 2v4M8 2v4M3 10h18" />
-    <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01" />
-  </svg>
-);
-
-const ChatIcon = () => (
-  <MessageCircle className="h-5 w-5" strokeWidth={1.5} aria-hidden />
-);
-
-// ─── Main Component ───────────────────────────────────────────────────────────
 export default function MobileBottomNav() {
   const pathname = usePathname();
-  /** Product detail replaces global bottom nav with page-local CTAs */
   const isProductDetailPage = /^\/collection\/[^/]+$/.test(pathname);
+  const isCollectionListing = pathname === "/collection";
   const isAdminPage = pathname.startsWith("/admin");
 
   const [visible, setVisible] = useState(true);
@@ -122,41 +64,21 @@ export default function MobileBottomNav() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [isAdminPage]);
 
-  if (isProductDetailPage || isAdminPage) return null;
+  if (isProductDetailPage || isCollectionListing || isAdminPage) return null;
 
   const navItems: NavItem[] = [
-    {
-      id: "home",
-      label: "Home",
-      href: "/",
-      icon: <HomeIcon />,
-    },
-    {
-      id: "explore",
-      label: "Explore",
-      href: "/collection",
-      icon: <ExploreIcon />,
-    },
-    {
-      id: "whatsapp",
-      label: "WhatsApp",
-      href: whatsappLink,
-      icon: <WhatsAppIcon />,
-    },
-    {
-      id: "book",
-      label: "Book",
-      href: "/appointments",
-      icon: <BookIcon />,
-    },
+    { id: "home", label: "Home", href: "/", icon: "home" },
+    { id: "explore", label: "Explore", href: "/collection", icon: "search" },
+    { id: "whatsapp", label: "WhatsApp", href: whatsappLink, icon: "whatsapp" },
+    { id: "book", label: "Book", href: "/appointments", icon: "calendar" },
     {
       id: "chat",
       label: "Chat",
+      icon: "comment",
       onClick: () => {
         openZenmenChat();
         setActive("chat");
       },
-      icon: <ChatIcon />,
     },
   ];
 
@@ -200,7 +122,7 @@ export default function MobileBottomNav() {
                   isActive && item.id !== "whatsapp" ? "scale-[1.08]" : "scale-100",
                 )}
               >
-                {item.icon}
+                <ZenIcon name={item.icon} className="h-5 w-5" />
               </span>
             );
 

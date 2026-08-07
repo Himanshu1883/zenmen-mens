@@ -1,6 +1,7 @@
 "use client";
 
 import { useDisplayPrice } from "@/hooks/useDisplayPrice";
+import { resolveAccountContact } from "@/lib/auth-contact";
 import { COD_FEE_INR } from "@/lib/validations/checkout.schema";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { clearCart } from "@/store/slices/cartSlice";
@@ -74,6 +75,7 @@ export default function CheckoutClient() {
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [defaultsLoaded, setDefaultsLoaded] = useState(false);
 
   const subtotal = useMemo(
     () => items.reduce((sum, i) => sum + i.price * i.qty, 0),
@@ -82,15 +84,61 @@ export default function CheckoutClient() {
   const codFee = paymentMethod === "cod" ? COD_FEE_INR : 0;
   const total = subtotal + codFee;
 
+  // Prefill from last successful order + profile (reorder UX)
   useEffect(() => {
-    if (session?.user?.email) {
-      setShipping((s) => ({
-        ...s,
-        email: session.user?.email ?? s.email,
-        fullName: session.user?.name ?? s.fullName,
-      }));
+    if (status !== "authenticated" || !session?.user || defaultsLoaded) return;
+
+    let cancelled = false;
+
+    async function loadDefaults() {
+      try {
+        const res = await fetch("/api/checkout/defaults", {
+          method: "GET",
+          credentials: "same-origin",
+          cache: "no-store",
+        });
+        if (!res.ok) return;
+        const data = (await res.json()) as {
+          success?: boolean;
+          shipping?: ShippingInput & { source?: string };
+        };
+        if (cancelled || !data.success || !data.shipping) return;
+
+        const d = data.shipping;
+        setShipping((prev) => ({
+          fullName: prev.fullName || d.fullName || "",
+          email: prev.email || d.email || "",
+          phone: prev.phone || d.phone || "",
+          addressLine1: prev.addressLine1 || d.addressLine1 || "",
+          addressLine2: prev.addressLine2 || d.addressLine2 || "",
+          city: prev.city || d.city || "",
+          state: prev.state || d.state || "",
+          pincode: prev.pincode || d.pincode || "",
+          country: prev.country || d.country || "India",
+        }));
+      } catch {
+        // Fall back to session contact only
+        if (cancelled || !session?.user) return;
+        const contact = resolveAccountContact({
+          email: session.user.email,
+          phone: session.user.phone,
+        });
+        setShipping((s) => ({
+          ...s,
+          email: s.email || contact.publicEmail || "",
+          phone: s.phone || contact.phone || "",
+          fullName: s.fullName || session.user?.name || "",
+        }));
+      } finally {
+        if (!cancelled) setDefaultsLoaded(true);
+      }
     }
-  }, [session?.user?.email, session?.user?.name]);
+
+    void loadDefaults();
+    return () => {
+      cancelled = true;
+    };
+  }, [status, session, defaultsLoaded]);
 
   useEffect(() => {
     if (!cartHydrated || items.length > 0) return;
@@ -288,7 +336,7 @@ export default function CheckoutClient() {
         <div className="mx-auto max-w-6xl">
           <div className="mb-10 text-center">
             <Lock className="mx-auto mb-4 h-10 w-10 text-[#7da8c7]" />
-            <h1 className="font-['Playfair_Display'] text-3xl text-[#0f172a] md:text-4xl">
+            <h1 className="font-heading text-3xl text-[#0f172a] md:text-4xl">
               Sign in to checkout
             </h1>
             <p className="mx-auto mt-3 max-w-md text-sm text-[#64748b]">
@@ -301,7 +349,7 @@ export default function CheckoutClient() {
             <CheckoutAuthForm cartItems={guestItems} />
 
             <aside className="rounded-sm border border-[#e2e8f0] bg-white p-6 shadow-sm">
-              <h2 className="font-['Playfair_Display'] text-xl text-[#0f172a]">
+              <h2 className="font-heading text-xl text-[#0f172a]">
                 Your bag
               </h2>
               <p className="mt-1 text-sm text-[#64748b]">
@@ -338,7 +386,7 @@ export default function CheckoutClient() {
                 ))}
               </ul>
               {guestItems.length > 0 ? (
-                <p className="mt-6 border-t border-[#e2e8f0] pt-4 text-right font-['Cormorant_Garamond'] text-2xl text-[#0f172a]">
+                <p className="mt-6 border-t border-[#e2e8f0] pt-4 text-right font-heading text-2xl text-[#0f172a]">
                   {displayPrice(guestSubtotal)}
                 </p>
               ) : (
@@ -360,7 +408,7 @@ export default function CheckoutClient() {
     return (
       <div className="mx-auto max-w-lg px-6 py-24 text-center">
         <Package className="mx-auto mb-6 h-10 w-10 text-[#7da8c7]" />
-        <h1 className="font-['Playfair_Display'] text-3xl text-[#0f172a]">
+        <h1 className="font-heading text-3xl text-[#0f172a]">
           Your cart is empty
         </h1>
         <Link
@@ -405,16 +453,27 @@ export default function CheckoutClient() {
             <p className="mb-2 text-[11px] uppercase tracking-[0.3em] text-[#7da8c7]">
               Checkout
             </p>
-            <h1 className="font-['Playfair_Display'] text-3xl font-semibold text-[#0f172a] md:text-4xl">
+            <h1 className="font-heading text-3xl font-semibold text-[#0f172a] md:text-4xl">
               Complete your order
             </h1>
             <p className="mt-2 text-sm text-[#64748b]">
-              Signed in as {session?.user?.email}
+              Signed in as{" "}
+              {resolveAccountContact({
+                email: session?.user?.email,
+                phone: session?.user?.phone,
+              }).displayContact}
             </p>
+            {defaultsLoaded &&
+            (shipping.addressLine1 || shipping.phone || shipping.email) ? (
+              <p className="mt-1 text-xs text-[#94a3b8]">
+                Delivery details prefilled from your profile
+                {shipping.addressLine1 ? " / last order" : ""}.
+              </p>
+            ) : null}
           </div>
 
           <section className="rounded-sm border border-[#e2e8f0] bg-white p-6 shadow-sm md:p-8">
-            <h2 className="mb-6 flex items-center gap-2 font-['Playfair_Display'] text-xl text-[#0f172a]">
+            <h2 className="mb-6 flex items-center gap-2 font-heading text-xl text-[#0f172a]">
               <MapPin className="h-5 w-5 text-[#7da8c7]" />
               Delivery details
             </h2>
@@ -527,7 +586,7 @@ export default function CheckoutClient() {
           </section>
 
           <section className="rounded-sm border border-[#e2e8f0] bg-white p-6 shadow-sm md:p-8">
-            <h2 className="mb-6 font-['Playfair_Display'] text-xl text-[#0f172a]">
+            <h2 className="mb-6 font-heading text-xl text-[#0f172a]">
               Payment method
             </h2>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -571,7 +630,7 @@ export default function CheckoutClient() {
 
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <div className="rounded-sm border border-[#e2e8f0] bg-white p-6 shadow-sm">
-            <h2 className="mb-4 font-['Playfair_Display'] text-xl text-[#0f172a]">
+            <h2 className="mb-4 font-heading text-xl text-[#0f172a]">
               Order summary
             </h2>
             <ul className="mb-4 max-h-[280px] space-y-4 overflow-y-auto border-b border-[#e2e8f0] pb-4">

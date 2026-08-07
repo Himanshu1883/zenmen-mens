@@ -224,7 +224,7 @@ function InfoColumn() {
         <p className="mb-3 text-[10px] uppercase tracking-[0.38em] text-[#7da8c7]">
           Private Consultation
         </p>
-        <h2 className="mb-4 font-['Cormorant_Garamond'] text-[clamp(32px,4vw,52px)] font-light leading-[1.02] text-[#0f172a]">
+        <h2 className="mb-4 font-heading text-[clamp(32px,4vw,52px)] font-light leading-[1.02] text-[#0f172a]">
           Book Your
           <br />
           <em className="not-italic text-[#7da8c7]">Fitting Session</em>
@@ -293,7 +293,7 @@ function InfoColumn() {
             <p className="mb-1 text-[9px] uppercase tracking-[0.22em] text-[#7da8c7]">
               {k}
             </p>
-            <p className="font-['Cormorant_Garamond'] text-[17px] font-light leading-snug text-[#0f172a]">
+            <p className="font-heading text-[17px] font-light leading-snug text-[#0f172a]">
               {v}
             </p>
           </div>
@@ -468,7 +468,7 @@ export default function Contact() {
                     />
                   </svg>
                 </div>
-                <h3 className="mb-3 font-['Cormorant_Garamond'] text-[28px] font-light text-[#0f172a]">
+                <h3 className="mb-3 font-heading text-[28px] font-light text-[#0f172a]">
                   Request Sent
                 </h3>
                 <p className="mb-2 text-[13px] leading-relaxed text-[#475569]">
@@ -497,7 +497,7 @@ export default function Contact() {
               /* ── Form ── */
               <>
                 <div className="mb-8">
-                  <h3 className="mb-1 font-['Cormorant_Garamond'] text-[28px] font-light text-[#0f172a]">
+                  <h3 className="mb-1 font-heading text-[28px] font-light text-[#0f172a]">
                     Reserve Your Fitting
                   </h3>
                   <p className="text-[12px] uppercase tracking-[0.15em] text-[#94a3b8]">
