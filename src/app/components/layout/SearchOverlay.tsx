@@ -2,6 +2,7 @@
 
 import { ZenIcon } from "@/components/icons";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import type { Product } from "@/types/product";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
