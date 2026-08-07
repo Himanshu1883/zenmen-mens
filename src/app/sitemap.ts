@@ -1,5 +1,6 @@
 // src/app/sitemap.ts
 import { connectDB } from "@/lib/db";
+import { isStaticSafeSlug } from "@/lib/product-slug";
 import Product from "@/models/Product";
 import type { MetadataRoute } from "next";
 
@@ -9,12 +10,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   await connectDB();
   const products = await Product.find({}, { slug: 1, updatedAt: 1 }).lean();
 
-  const productUrls: MetadataRoute.Sitemap = products.map((p) => ({
-    url: `${baseUrl}/collection/${encodeURIComponent(p.slug)}`,
-    lastModified: p.updatedAt ?? new Date(),
-    changeFrequency: "weekly",
-    priority: 0.8,
-  }));
+  const productUrls: MetadataRoute.Sitemap = products
+    .filter((p) => isStaticSafeSlug(p.slug))
+    .map((p) => ({
+      url: `${baseUrl}/collection/${encodeURIComponent(String(p.slug))}`,
+      lastModified: p.updatedAt ?? new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    }));
 
   return [
     {

@@ -26,6 +26,18 @@ export function canonicalProductSlug(raw: string): string {
   });
 }
 
+/**
+ * Safe for Next.js static path segments (no newlines/spaces/slashes).
+ * Legacy dirty DB slugs still work at request time via dynamicParams.
+ */
+export function isStaticSafeSlug(slug: unknown): slug is string {
+  if (typeof slug !== "string") return false;
+  const s = slug.trim();
+  if (!s || s.length > 180) return false;
+  if (/[\n\r\t\\/<>:"|?*]/.test(s)) return false;
+  return /^[a-z0-9]+(?:-[a-z0-9]+)*$/i.test(s);
+}
+
 function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

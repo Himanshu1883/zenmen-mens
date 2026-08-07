@@ -2,6 +2,7 @@ import {
   parseDeliveryLeadValue,
   type DeliveryLeadUnit,
 } from "@/lib/delivery-estimate";
+import { resolveImagePublicId } from "@/lib/cloudinary-public-id";
 import type { Product, ProductAccordion, ProductSpec } from "@/types/product";
 
 export type EditableImage = {
