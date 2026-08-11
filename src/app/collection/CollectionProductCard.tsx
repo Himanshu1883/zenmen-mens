@@ -1,10 +1,11 @@
 "use client";
 
 import { useDisplayPrice } from "@/hooks/useDisplayPrice";
+import { getPrimaryImageIndex } from "@/lib/product-images";
 import { getDeliveryBadgeLabel } from "@/lib/delivery-estimate";
 import type { Product } from "@/types/product";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function colorToSwatch(name: string): string {
   const n = name.toLowerCase();
@@ -39,9 +40,15 @@ export default function CollectionProductCard({
   onEdit,
 }: Props) {
   const { format: displayPrice } = useDisplayPrice();
-  const [imgIndex, setImgIndex] = useState(0);
-
   const images = product.images ?? [];
+  const [imgIndex, setImgIndex] = useState(() =>
+    getPrimaryImageIndex(images),
+  );
+
+  useEffect(() => {
+    setImgIndex(getPrimaryImageIndex(product.images));
+  }, [product._id, product.images]);
+
   const currentImg = images[imgIndex]?.url ?? "";
   const href = product.slug
     ? `/collection/${encodeURIComponent(product.slug)}`

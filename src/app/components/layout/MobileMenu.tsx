@@ -1,6 +1,7 @@
 "use client";
 
 import { ZenIcon } from "@/components/icons";
+import { useNavCategories } from "@/hooks/useNavCategories";
 import { useAppSelector } from "@/store/hooks";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
@@ -13,27 +14,11 @@ interface MobileMenuProps {
   onOpenAuth?: () => void;
 }
 
-const collectionItems = [
-  { name: "Kurta-Pajama", q: "kurta" },
-  { name: "Pants/Trousers", q: "pants" },
-  { name: "Shirt", q: "shirt" },
-  { name: "Suit", q: "suit" },
-  { name: "Designer Suits", q: "designer suit" },
-  { name: "Double Breasted Suit", q: "double breasted" },
-  { name: "Three Piece Suit", q: "three piece" },
-  { name: "Five Piece Suit", q: "five piece" },
-  { name: "Two Piece Suit", q: "two piece" },
-  { name: "Indo-Western", q: "indo-western" },
-  { name: "Designer Shirt", q: "designer shirt" },
-  { name: "Buttons", q: "button" },
-  { name: "Tie", q: "tie" },
-  { name: "Broches", q: "brooch" },
-] as const;
-
 const linkClass =
   "block no-underline py-4 px-4 text-[13px] tracking-[0.15em] text-[#0f172a] hover:bg-[#f8fafc] hover:text-[#7da8c7] transition-all duration-300 uppercase rounded-sm";
 
 const MobileMenu = ({ isOpen, onClose, onOpenAuth }: MobileMenuProps) => {
+  const { groups } = useNavCategories();
   const activeCurrency = useAppSelector((s) => s.currency.code);
 
   let animIndex = 0;
@@ -108,21 +93,41 @@ const MobileMenu = ({ isOpen, onClose, onOpenAuth }: MobileMenuProps) => {
                     </Link>
                   </motion.div>
 
-                  {collectionItems.map((item) => (
-                    <motion.div
-                      key={item.name}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: stagger() }}
-                    >
-                      <Link
-                        href={`/collection?q=${encodeURIComponent(item.q)}`}
-                        className={`${linkClass} pl-8 text-[12px]`}
-                        onClick={onClose}
+                  {groups.map((group) => (
+                    <div key={group.parent._id ?? group.parent.slug}>
+                      <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: stagger() }}
                       >
-                        {item.name}
-                      </Link>
-                    </motion.div>
+                        <Link
+                          href={group.parent.href}
+                          className={`${linkClass} pl-8 text-[12px] font-medium`}
+                          onClick={onClose}
+                        >
+                          {group.parent.name}
+                        </Link>
+                      </motion.div>
+
+                      {group.isGroup
+                        ? group.children.map((child) => (
+                            <motion.div
+                              key={child._id ?? child.slug}
+                              initial={{ opacity: 0, x: 20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: stagger() }}
+                            >
+                              <Link
+                                href={child.href}
+                                className={`${linkClass} pl-12 text-[11px] text-[#64748b]`}
+                                onClick={onClose}
+                              >
+                                {child.name}
+                              </Link>
+                            </motion.div>
+                          ))
+                        : null}
+                    </div>
                   ))}
 
                   <motion.div

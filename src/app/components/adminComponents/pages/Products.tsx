@@ -4,6 +4,7 @@ import ProductFormModal from "@/app/components/adminComponents/ProductFormModal"
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Product } from "@/types/product";
+import { getPrimaryImage } from "@/lib/product-images";
 import { Edit, Eye, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -101,12 +102,12 @@ export default function Products() {
   }, [products]);
 
   const getImageUrl = (p: Product) => {
-    const primary = p.images?.find((img) => img.isPrimary) ?? p.images?.[0];
+    const primary = getPrimaryImage(p.images);
     return primary?.url ?? "/logo_zenmen.png";
   };
 
   const getImageAlt = (p: Product) => {
-    const primary = p.images?.find((img) => img.isPrimary) ?? p.images?.[0];
+    const primary = getPrimaryImage(p.images);
     return primary?.alt ?? p.title ?? "Product image";
   };
 

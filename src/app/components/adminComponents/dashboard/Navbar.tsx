@@ -21,6 +21,7 @@ const pageTitles: Record<string, { title: string; subtitle: string }> = {
   "/admin/sections": { title: "Website", subtitle: "Content Management" },
   "/admin/images": { title: "Gallery", subtitle: "Image Library" },
   "/admin/products": { title: "Products", subtitle: "Catalog Management" },
+  "/admin/categories": { title: "Categories", subtitle: "Collections & Megamenu" },
   "/admin/users": { title: "Clients", subtitle: "Customer Directory" },
   "/admin/orders": { title: "Orders", subtitle: "Order Management" },
   "/admin/analytics": { title: "Analytics", subtitle: "Business Insights" },

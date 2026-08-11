@@ -2,10 +2,18 @@ import { requireAdmin } from "@/lib/admin-auth";
 import cloudinary from "@/lib/cloudinary";
 import { connectDB } from "@/lib/db";
 import Product from "@/models/Product";
+import { normalizePrimaryFlags } from "@/lib/product-images";
 import { NextResponse } from "next/server";
 import slugify from "slugify";
 
 export const revalidate = 60;
+
+type IncomingImage = {
+  file?: string;
+  alt?: string;
+  isPrimary?: boolean;
+  order?: number;
+};
 
 // GET ALL PRODUCTS
 export async function GET(request: Request) {
@@ -113,25 +121,22 @@ export async function POST(request: Request) {
       );
     }
 
-    // UPLOAD IMAGES TO CLOUDINARY
-    const uploadedImages = await Promise.all(
-      images.map(async (img: any, index: number) => {
-        const uploaded = await cloudinary.uploader.upload(img.file, {
-          folder: "zenmen/products",
-        });
+    const uploadedImages = normalizePrimaryFlags(
+      await Promise.all(
+        images.map(async (img: IncomingImage, index: number) => {
+          const uploaded = await cloudinary.uploader.upload(img.file!, {
+            folder: "zenmen/products",
+          });
 
-        return {
-          url: uploaded.secure_url,
-
-          public_id: uploaded.public_id,
-
-          alt: img.alt || title,
-
-          isPrimary: img.isPrimary || index === 0,
-
-          order: img.order || index,
-        };
-      }),
+          return {
+            url: uploaded.secure_url,
+            public_id: uploaded.public_id,
+            alt: img.alt || title,
+            isPrimary: Boolean(img.isPrimary),
+            order: img.order ?? index,
+          };
+        }),
+      ),
     );
 
     // GENERATE SLUG

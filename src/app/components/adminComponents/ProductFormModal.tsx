@@ -8,6 +8,7 @@ import {
   productToEditForm,
   type ProductEditForm,
 } from "@/lib/product-edit-form";
+import { normalizePrimaryFlags } from "@/lib/product-images";
 import type { Product } from "@/types/product";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -17,6 +18,7 @@ type Props = {
   product?: Product;
   onClose: () => void;
   onSaved: () => void;
+  initialCategory?: string;
 };
 
 function Field({
@@ -41,15 +43,46 @@ export default function ProductFormModal({
   product,
   onClose,
   onSaved,
+  initialCategory,
 }: Props) {
   const isCreate = mode === "create";
-  const [form, setForm] = useState<ProductEditForm>(() =>
-    isCreate ? emptyProductForm() : productToEditForm(product!),
-  );
+  const [form, setForm] = useState<ProductEditForm>(() => {
+    if (isCreate) {
+      const base = emptyProductForm();
+      if (initialCategory?.trim()) {
+        base.category = initialCategory.trim();
+      }
+      return base;
+    }
+    return productToEditForm(product!);
+  });
+  const [categoryOptions, setCategoryOptions] = useState<string[]>([]);
   const [loading, setLoading] = useState(!isCreate);
   const [saving, setSaving] = useState(false);
   const [originalSlug] = useState(product?.slug ?? "");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/admin/categories");
+        if (!res.ok) return;
+        const data = await res.json();
+        const names = Array.isArray(data.categories)
+          ? (data.categories as { name: string }[])
+              .map((c) => c.name)
+              .filter(Boolean)
+          : [];
+        if (!cancelled) setCategoryOptions(names);
+      } catch {
+        /* optional helper list */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (isCreate || !product) {
@@ -96,10 +129,12 @@ export default function ProductFormModal({
   const setPrimaryImage = (index: number) => {
     setForm((prev) => ({
       ...prev,
-      images: prev.images.map((img, i) => ({
-        ...img,
-        isPrimary: i === index,
-      })),
+      images: normalizePrimaryFlags(
+        prev.images.map((img, i) => ({
+          ...img,
+          isPrimary: i === index,
+        })),
+      ),
     }));
   };
 
@@ -326,9 +361,17 @@ export default function ProductFormModal({
                   <Field label="Category">
                     <input
                       className="zm-input"
+                      list="product-category-options"
                       value={form.category}
                       onChange={(e) => patch({ category: e.target.value })}
                     />
+                    {categoryOptions.length > 0 ? (
+                      <datalist id="product-category-options">
+                        {categoryOptions.map((name) => (
+                          <option key={name} value={name} />
+                        ))}
+                      </datalist>
+                    ) : null}
                   </Field>
                   <Field label="Sub-category">
                     <input

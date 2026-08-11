@@ -1,6 +1,9 @@
 "use client";
 
 import MobileFilterBar from "@/app/components/MobileFilterBar";
+import ProductFormModal from "@/app/components/adminComponents/ProductFormModal";
+import { resolvePrefillProductCategory } from "@/lib/categories";
+import { useNavCategories } from "@/hooks/useNavCategories";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchProducts } from "@/store/slices/productSlice";
 import { useSession } from "next-auth/react";
@@ -46,6 +49,8 @@ export default function CollectionPage() {
   const [sortBy, setSortBy] = useState("featured");
   const [gridCols, setGridCols] = useState<3 | 4>(3);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [creatingProduct, setCreatingProduct] = useState(false);
+  const { categories: navCategories } = useNavCategories();
 
   const patchFilters = (patch: Partial<CollectionFilterState>) =>
     setFilters((prev) => ({ ...prev, ...patch }));
@@ -195,6 +200,15 @@ export default function CollectionPage() {
       search: "",
     });
 
+  const hasCollectionContext = Boolean(qFromUrl || categoryFromUrl);
+  const prefillCategory = resolvePrefillProductCategory(
+    categoryFromUrl,
+    qFromUrl,
+    navCategories,
+  );
+  const showAdminAddProduct =
+    isAdmin && hasCollectionContext && !loading && sortedProducts.length === 0;
+
   const gridClass =
     gridCols === 4
       ? "grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-x-5 gap-y-10 md:gap-x-8"
@@ -338,7 +352,25 @@ export default function CollectionPage() {
             </div>
           )}
 
-          {!loading && sortedProducts.length === 0 && (
+          {!loading && sortedProducts.length === 0 && showAdminAddProduct && (
+            <div className="py-24 text-center">
+              <p className="text-[#64748b] text-sm mb-2">
+                No products in this collection yet.
+              </p>
+              <p className="text-[#94a3b8] text-xs mb-6">
+                As an admin, you can add the first product directly here.
+              </p>
+              <button
+                type="button"
+                onClick={() => setCreatingProduct(true)}
+                className="px-8 py-3 bg-[#0f172a] text-white text-[11px] tracking-[0.15em] uppercase hover:bg-[#7da8c7] transition-colors rounded-sm"
+              >
+                Add Product
+              </button>
+            </div>
+          )}
+
+          {!loading && sortedProducts.length === 0 && !showAdminAddProduct && (
             <div className="py-24 text-center text-[#64748b] text-sm">
               No products found.
             </div>
@@ -364,6 +396,18 @@ export default function CollectionPage() {
           product={editingProduct}
           onClose={() => setEditingProduct(null)}
           onSaved={() => dispatch(fetchProducts())}
+        />
+      ) : null}
+
+      {creatingProduct ? (
+        <ProductFormModal
+          mode="create"
+          initialCategory={prefillCategory}
+          onClose={() => setCreatingProduct(false)}
+          onSaved={() => {
+            setCreatingProduct(false);
+            dispatch(fetchProducts());
+          }}
         />
       ) : null}
     </div>

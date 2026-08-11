@@ -3,6 +3,7 @@ import {
   type DeliveryLeadUnit,
 } from "@/lib/delivery-estimate";
 import { resolveImagePublicId } from "@/lib/cloudinary-public-id";
+import { normalizePrimaryFlags } from "@/lib/product-images";
 import type { Product, ProductAccordion, ProductSpec } from "@/types/product";
 
 export type EditableImage = {
@@ -117,13 +118,15 @@ export function productToEditForm(product: Product): ProductEditForm {
         : "",
     deliveryLeadUnit: product.deliveryLeadUnit ?? "days",
     showDeliveryLead: Boolean(product.showDeliveryLead),
-    images: (product.images ?? []).map((img, index) => ({
-      url: img.url,
-      alt: img.alt ?? product.title,
-      isPrimary: img.isPrimary ?? index === 0,
-      order: img.order ?? index,
-      public_id: resolveImagePublicId(img) ?? undefined,
-    })),
+    images: normalizePrimaryFlags(
+      (product.images ?? []).map((img, index) => ({
+        url: img.url,
+        alt: img.alt ?? product.title,
+        isPrimary: Boolean(img.isPrimary),
+        order: img.order ?? index,
+        public_id: resolveImagePublicId(img) ?? undefined,
+      })),
+    ),
   };
 }
 
@@ -194,7 +197,7 @@ function buildImagesPayload(form: ProductEditForm, requireFile = false) {
       return {
         url: img.url,
         alt: img.alt || form.title,
-        isPrimary: img.isPrimary ?? index === 0,
+        isPrimary: Boolean(img.isPrimary),
         order: img.order ?? index,
         public_id,
       };
@@ -205,7 +208,7 @@ function buildImagesPayload(form: ProductEditForm, requireFile = false) {
     images[0].isPrimary = true;
   }
 
-  return images;
+  return normalizePrimaryFlags(images);
 }
 
 export function editFormToCreatePayload(form: ProductEditForm) {

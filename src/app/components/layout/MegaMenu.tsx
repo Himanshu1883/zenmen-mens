@@ -1,3 +1,7 @@
+"use client";
+
+import { useNavCategories } from "@/hooks/useNavCategories";
+import type { NavCategory } from "@/types/category";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 
@@ -7,24 +11,55 @@ interface MegaMenuProps {
   onClose: () => void;
 }
 
-const collections = [
-  { name: "Kurta-Pajama", featured: true, q: "kurta" },
-  { name: "Pants/Trousers", featured: false, q: "pants" },
-  { name: "Shirt", featured: false, q: "shirt" },
-  { name: "Suit", featured: true, q: "suit" },
-  { name: "Designer Suits", featured: true, q: "designer suit" },
-  { name: "Double Breasted Suit", featured: false, q: "double breasted" },
-  { name: "Three Piece Suit", featured: true, q: "three piece" },
-  { name: "Five Piece Suit", featured: false, q: "five piece" },
-  { name: "Two Piece Suit", featured: false, q: "two piece" },
-  { name: "Indo-Western", featured: true, q: "indo-western" },
-  { name: "Designer Shirt", featured: false, q: "designer shirt" },
-  { name: "Buttons", featured: false, q: "button" },
-  { name: "Tie", featured: false, q: "tie" },
-  { name: "Broches", featured: false, q: "brooch" },
-] as const;
+function FeaturedBadge() {
+  return (
+    <span className="text-[9px] tracking-[0.2em] text-[#7da8c7] uppercase px-2 py-1 border border-[#7da8c7] rounded-sm">
+      Featured
+    </span>
+  );
+}
+
+function NavLink({
+  item,
+  onClose,
+  variant = "parent",
+}: {
+  item: NavCategory;
+  onClose: () => void;
+  variant?: "parent" | "child";
+}) {
+  const isChild = variant === "child";
+
+  return (
+    <Link
+      href={item.href}
+      onClick={onClose}
+      className={`group inline-block no-underline ${isChild ? "w-full" : "mb-1"}`}
+    >
+      <span
+        className={`relative inline-flex items-center gap-3 uppercase transition-colors duration-300 ${
+          isChild
+            ? "text-[11px] tracking-[0.12em] text-[#64748b] group-hover:text-[#7da8c7]"
+            : "text-[13px] tracking-[0.15em] text-[#0f172a] group-hover:text-[#7da8c7]"
+        }`}
+      >
+        {item.name}
+        {!isChild && (
+          <span className="absolute left-0 -bottom-2 h-[1px] w-0 bg-[#7da8c7] group-hover:w-full transition-all duration-500" />
+        )}
+        {!isChild && item.featured ? <FeaturedBadge /> : null}
+      </span>
+    </Link>
+  );
+}
 
 const MegaMenu = ({ isOpen, shellClass, onClose }: MegaMenuProps) => {
+  const { groups } = useNavCategories();
+  const heroImage =
+    groups.find((g) => g.parent.imageUrl)?.parent.imageUrl ??
+    groups.flatMap((g) => g.children).find((c) => c.imageUrl)?.imageUrl ??
+    "/zenmen_kurta.png";
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -38,31 +73,30 @@ const MegaMenu = ({ isOpen, shellClass, onClose }: MegaMenuProps) => {
           <motion.div className={`${shellClass} py-10 lg:py-14`}>
             <motion.div className="grid grid-cols-12 gap-16">
               <motion.div className="col-span-5">
-                <motion.div className="grid grid-cols-2 gap-x-14 gap-y-4">
-                  {collections.map((item, index) => (
+                <motion.div className="grid grid-cols-2 gap-x-10 gap-y-8">
+                  {groups.map((group, index) => (
                     <motion.div
-                      key={item.name}
+                      key={group.parent._id ?? group.parent.slug}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
+                      transition={{ delay: index * 0.04 }}
+                      className="min-w-0"
                     >
-                      <Link
-                        href={`/collection?q=${encodeURIComponent(item.q)}`}
-                        onClick={onClose}
-                        className="group inline-block no-underline mb-3"
-                      >
-                        <motion.div className="inline-flex items-center gap-6 relative">
-                          <span className="relative text-[13px] tracking-[0.15em] text-[#0f172a] group-hover:text-[#7da8c7] transition-colors duration-300 uppercase">
-                            {item.name}
-                            <span className="absolute left-0 -bottom-2 h-[1px] w-0 bg-[#7da8c7] group-hover:w-full transition-all duration-500" />
-                          </span>
-                          {item.featured && (
-                            <span className="text-[9px] tracking-[0.2em] text-[#7da8c7] uppercase px-2 py-1 border border-[#7da8c7] rounded-sm">
-                              Featured
-                            </span>
-                          )}
-                        </motion.div>
-                      </Link>
+                      <NavLink item={group.parent} onClose={onClose} />
+
+                      {group.isGroup ? (
+                        <ul className="mt-3 space-y-2 border-l border-[#e8edf2] pl-3 ml-0.5">
+                          {group.children.map((child) => (
+                            <li key={child._id ?? child.slug}>
+                              <NavLink
+                                item={child}
+                                onClose={onClose}
+                                variant="child"
+                              />
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
                     </motion.div>
                   ))}
                 </motion.div>
@@ -86,8 +120,8 @@ const MegaMenu = ({ isOpen, shellClass, onClose }: MegaMenuProps) => {
                   className="relative h-[480px] rounded-lg overflow-hidden group"
                 >
                   <img
-                    src="/zenmen_kurta.png"
-                    alt="Spring Collection"
+                    src={heroImage}
+                    alt="Featured collection"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   />
                   <motion.div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0" />

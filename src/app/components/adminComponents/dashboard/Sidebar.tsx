@@ -17,6 +17,7 @@ const menuItems: {
 }[] = [
   { icon: "dashboard", label: "Dashboard", path: "/admin", badge: null },
   { icon: "box", label: "Products", path: "/admin/products", badge: "156" },
+  { icon: "sparkles", label: "Categories", path: "/admin/categories", badge: null },
   { icon: "users", label: "Clients", path: "/admin/users", badge: null },
   { icon: "shopping-cart", label: "Orders", path: "/admin/orders", badge: "24" },
   { icon: "chart-bar", label: "Analytics", path: "/admin/analytics", badge: null },

@@ -5,6 +5,7 @@ import {
   getDeliveryBadgeLabel,
   getDeliverySummaryLine,
 } from "@/lib/delivery-estimate";
+import { getPrimaryImage, getPrimaryImageIndex } from "@/lib/product-images";
 import { addRecentlyViewed } from "@/lib/recently-viewed";
 import {
   buildProductWhatsAppMessage,
@@ -763,16 +764,15 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   }, [dispatch, productsLoaded, productsLoading]);
 
   useEffect(() => {
-    setActiveImage(0);
+    setActiveImage(getPrimaryImageIndex(product.images));
     setSelectedSize(product.sizes?.[0] ?? "M");
     setSelectedColor(product.colors?.[0] ?? COLORS[0].name);
     setWantsCustomization(false);
     setCustomizationNotes("");
-  }, [product._id]);
+  }, [product._id, product.images, product.sizes, product.colors]);
 
   useEffect(() => {
-    const primary =
-      product.images?.find((img) => img.isPrimary) ?? product.images?.[0];
+    const primary = getPrimaryImage(product.images);
     addRecentlyViewed({
       _id: product._id,
       slug: product.slug,
@@ -897,12 +897,13 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const handleWhatsAppOrder = () => openWhatsApp("order");
 
   function buildCartLine() {
+    const primary = getPrimaryImage(product.images);
     return {
       _id: product._id,
       title: product.title,
       slug: product.slug,
       price: product.price,
-      image: product.images?.[0] ?? { url: "" },
+      image: { url: primary?.url ?? "" },
       selectedColor: selectedColor || undefined,
       selectedSize: selectedSize || undefined,
       qty: 1,

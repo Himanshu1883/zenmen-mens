@@ -132,6 +132,12 @@ async function processIncomingImages(
     cleaned[0].isPrimary = true;
   }
 
+  const primaryIdx = cleaned.findIndex((i) => i.isPrimary);
+  const chosen = primaryIdx >= 0 ? primaryIdx : 0;
+  for (let i = 0; i < cleaned.length; i++) {
+    cleaned[i].isPrimary = i === chosen;
+  }
+
   return cleaned;
 }
 
@@ -280,7 +286,7 @@ export async function PUT(request: Request, context: Params) {
     const updated = await Product.findOneAndUpdate(
       { _id: existing._id },
       { $set: updates },
-      { new: true, runValidators: true },
+      { returnDocument: "after", runValidators: true },
     ).lean();
 
     if (!updated) {
