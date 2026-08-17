@@ -98,7 +98,7 @@ Admin Categories UI groups by `parentId`, then `DEFAULT_CHILD_PARENT_SLUGS` / `D
 
 | Change | Start |
 |---|---|
-| Mongo connect | `src/lib/db.ts` — `MONGODB_URI` |
+| Mongo connect | `src/lib/db.ts` — read `MONGODB_URI` inside `connectDB()` (do not throw at import, so `next build` can collect page data without Mongo). Sitemap falls back to static URLs if DB is unavailable. |
 | Cloudinary | `src/lib/cloudinary.ts` |
 | Razorpay keys / webhook | `src/lib/razorpay.ts` |
 | Email from/to | `src/config/emailConfig.ts` |

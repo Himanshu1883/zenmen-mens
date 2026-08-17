@@ -7,19 +7,7 @@ import type { MetadataRoute } from "next";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXTAUTH_URL ?? "https://zenmen.in";
 
-  await connectDB();
-  const products = await Product.find({}, { slug: 1, updatedAt: 1 }).lean();
-
-  const productUrls: MetadataRoute.Sitemap = products
-    .filter((p) => isStaticSafeSlug(p.slug))
-    .map((p) => ({
-      url: `${baseUrl}/collection/${encodeURIComponent(String(p.slug))}`,
-      lastModified: p.updatedAt ?? new Date(),
-      changeFrequency: "weekly" as const,
-      priority: 0.8,
-    }));
-
-  return [
+  const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
       lastModified: new Date(),
@@ -35,6 +23,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/services`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${baseUrl}/process`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${baseUrl}/contact`, changeFrequency: "monthly", priority: 0.5 },
-    ...productUrls,
   ];
+
+  try {
+    await connectDB();
+    const products = await Product.find({}, { slug: 1, updatedAt: 1 }).lean();
+
+    const productUrls: MetadataRoute.Sitemap = products
+      .filter((p) => isStaticSafeSlug(p.slug))
+      .map((p) => ({
+        url: `${baseUrl}/collection/${encodeURIComponent(String(p.slug))}`,
+        lastModified: p.updatedAt ?? new Date(),
+        changeFrequency: "weekly" as const,
+        priority: 0.8,
+      }));
+
+    return [...staticRoutes, ...productUrls];
+  } catch (err) {
+    console.error("[sitemap] skipped product URLs (database unavailable)", err);
+    return staticRoutes;
+  }
 }

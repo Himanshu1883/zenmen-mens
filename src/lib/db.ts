@@ -1,10 +1,12 @@
 // src/lib/db.ts
 import mongoose from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI!;
-
-if (!MONGODB_URI) {
-  throw new Error("Please add MONGODB_URI to .env.local");
+function getMongoUri() {
+  const uri = process.env.MONGODB_URI?.trim();
+  if (!uri) {
+    throw new Error("Please add MONGODB_URI to .env.local");
+  }
+  return uri;
 }
 
 // Properly typed global cache
@@ -21,13 +23,14 @@ const cached =
 export async function connectDB() {
   if (cached.conn) return cached.conn;
 
+  const uri = getMongoUri();
+
   if (!cached.promise) {
     cached.promise = mongoose
-      .connect(MONGODB_URI, { bufferCommands: false })
+      .connect(uri, { bufferCommands: false })
       .then((m) => m.connection);
   }
 
   cached.conn = await cached.promise;
   return cached.conn;
 }
-

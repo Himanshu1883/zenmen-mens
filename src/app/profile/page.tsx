@@ -17,6 +17,8 @@ import ProfileOrdersClient from "./ProfileOrdersClient";
 import RecentlyViewedSection from "./RecentlyViewedSection";
 import { collapseCodRetryDuplicates } from "@/services/codRetryCleanup";
 
+export const dynamic = "force-dynamic";
+
 type ProfileUser = {
   _id?: mongoose.Types.ObjectId;
   name?: string;

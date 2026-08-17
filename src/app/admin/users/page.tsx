@@ -5,6 +5,8 @@ import { escapeRegex } from "@/lib/utils";
 import User from "@/models/User";
 import type { Types } from "mongoose";
 
+export const dynamic = "force-dynamic";
+
 type SearchParams = Promise<{
   page?: string;
   q?: string;
