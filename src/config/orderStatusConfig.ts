@@ -11,6 +11,20 @@ export type OrderStatus =
   | "cancelled"
   | "failed";
 
+export const ORDER_STATUSES: OrderStatus[] = [
+  "created",
+  "pending_payment",
+  "pending",
+  "confirmed",
+  "processing",
+  "shipped",
+  "out_for_delivery",
+  "delivered",
+  "cancellation_requested",
+  "cancelled",
+  "failed",
+];
+
 const STATUS_TRANSITIONS: Record<string, OrderStatus[]> = {
   confirmed: ["shipped", "processing"],
   processing: ["shipped"],

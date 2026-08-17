@@ -166,8 +166,14 @@ export async function PUT(request: Request, context: Params) {
       title,
       tagline: body.tagline ?? existing.tagline,
       description: body.description ?? existing.description,
-      category: body.category ?? existing.category,
-      subCategory: body.subCategory ?? existing.subCategory,
+      category:
+        typeof body.category === "string"
+          ? body.category.trim()
+          : existing.category,
+      subCategory:
+        typeof body.subCategory === "string"
+          ? body.subCategory.trim()
+          : existing.subCategory,
       price: typeof body.price === "number" ? body.price : existing.price,
       comparePrice: body.comparePrice ?? existing.comparePrice,
       discount: body.discount ?? existing.discount,

@@ -1,5 +1,7 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+Agent-oriented project map (architecture, change map, conventions): [`docs/agent/`](docs/agent/).
+
 ## Getting Started
 
 First, run the development server:

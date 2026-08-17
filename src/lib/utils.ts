@@ -12,6 +12,10 @@ export function formatPrice(n: number): string {
   return formatInrAsCurrency(n, "INR");
 }
 
+export function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 export function slugify(str: string): string {
   return str
     .toLowerCase()

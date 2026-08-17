@@ -2,7 +2,12 @@
 
 import MobileFilterBar from "@/app/components/MobileFilterBar";
 import ProductFormModal from "@/app/components/adminComponents/ProductFormModal";
-import { resolvePrefillProductCategory } from "@/lib/categories";
+import {
+  productInCollectionGroup,
+  productMatchesNavItem,
+  resolveCollectionPageContext,
+  resolvePrefillProductCategory,
+} from "@/lib/categories";
 import { useNavCategories } from "@/hooks/useNavCategories";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchProducts } from "@/store/slices/productSlice";
@@ -50,7 +55,13 @@ export default function CollectionPage() {
   const [gridCols, setGridCols] = useState<3 | 4>(3);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [creatingProduct, setCreatingProduct] = useState(false);
-  const { categories: navCategories } = useNavCategories();
+  const { groups, categories: navCategories } = useNavCategories();
+
+  const pageCtx = useMemo(
+    () => resolveCollectionPageContext(qFromUrl, categoryFromUrl, groups),
+    [qFromUrl, categoryFromUrl, groups],
+  );
+  const taxonomyTitle = pageCtx.group ? "Category" : "Collection";
 
   const patchFilters = (patch: Partial<CollectionFilterState>) =>
     setFilters((prev) => ({ ...prev, ...patch }));
@@ -62,51 +73,46 @@ export default function CollectionPage() {
   useEffect(() => {
     setFilters((prev) => ({
       ...prev,
-      search: qFromUrl,
-      selectedCategory: categoryFromUrl || (qFromUrl ? "All" : prev.selectedCategory),
-      ...(qFromUrl || categoryFromUrl
-        ? {
-            selectedColor: "All",
-            selectedSize: "All",
-            selectedPrice: "All",
-            selectedBrand: "All",
-            selectedAvailability: "All",
-          }
-        : {}),
+      search: pageCtx.isTextSearch ? pageCtx.searchNeedle : "",
+      selectedCategory: pageCtx.childName ?? "All",
+      selectedColor: "All",
+      selectedSize: "All",
+      selectedPrice: "All",
+      selectedBrand: "All",
+      selectedAvailability: "All",
     }));
-  }, [qFromUrl, categoryFromUrl]);
+  }, [
+    qFromUrl,
+    categoryFromUrl,
+    pageCtx.childName,
+    pageCtx.isTextSearch,
+    pageCtx.searchNeedle,
+    pageCtx.group?.parent.slug,
+  ]);
+
+  const scopedProducts = useMemo(() => {
+    if (!pageCtx.group) return products;
+    return products.filter((p) =>
+      productInCollectionGroup(p, pageCtx.group!, groups),
+    );
+  }, [products, pageCtx.group, groups]);
 
   const categories = useMemo(() => {
-    const cats = Array.from(
-      new Set(
-        products
-          .map((p) => p.category)
-          .filter((c): c is string => typeof c === "string" && c.length > 0),
-      ),
-    );
-    return ["All", ...cats];
-  }, [products]);
-
-  const brands = useMemo(() => {
-    const subs = Array.from(
-      new Set(
-        products
-          .map((p) => p.subCategory)
-          .filter((c): c is string => typeof c === "string" && c.length > 0),
-      ),
-    );
-    return ["All", ...subs];
-  }, [products]);
+    if (pageCtx.group) {
+      return ["All", ...pageCtx.group.children.map((child) => child.name)];
+    }
+    return ["All", ...groups.map((group) => group.parent.name)];
+  }, [pageCtx.group, groups]);
 
   const colors = useMemo(() => {
-    const all = products.flatMap((p) => p.colors ?? []);
+    const all = scopedProducts.flatMap((p) => p.colors ?? []);
     return ["All", ...Array.from(new Set(all))];
-  }, [products]);
+  }, [scopedProducts]);
 
   const sizes = useMemo(() => {
-    const all = products.flatMap((p) => p.sizes ?? []);
+    const all = scopedProducts.flatMap((p) => p.sizes ?? []);
     return ["All", ...Array.from(new Set(all))];
-  }, [products]);
+  }, [scopedProducts]);
 
   const filteredProducts = useMemo(() => {
     const {
@@ -114,16 +120,26 @@ export default function CollectionPage() {
       selectedColor,
       selectedSize,
       selectedPrice,
-      selectedBrand,
       selectedAvailability,
       search,
     } = filters;
 
-    return products.filter((p) => {
-      const catMatch =
-        selectedCategory === "All" || p.category === selectedCategory;
-      const brandMatch =
-        selectedBrand === "All" || p.subCategory === selectedBrand;
+    return scopedProducts.filter((p) => {
+      let taxonomyMatch = selectedCategory === "All";
+      if (!taxonomyMatch) {
+        if (pageCtx.group) {
+          const child = pageCtx.group.children.find(
+            (c) => c.name === selectedCategory,
+          );
+          taxonomyMatch = child ? productMatchesNavItem(p, child) : false;
+        } else {
+          const group = groups.find((g) => g.parent.name === selectedCategory);
+          taxonomyMatch = group
+            ? productInCollectionGroup(p, group, groups)
+            : false;
+        }
+      }
+
       const colorMatch =
         selectedColor === "All" || p.colors?.includes(selectedColor);
       const sizeMatch =
@@ -151,8 +167,7 @@ export default function CollectionPage() {
         (p.tagline?.toLowerCase().includes(needle) ?? false) ||
         (p.colors?.some((c) => c.toLowerCase().includes(needle)) ?? false);
       return (
-        catMatch &&
-        brandMatch &&
+        taxonomyMatch &&
         colorMatch &&
         sizeMatch &&
         priceMatch &&
@@ -160,7 +175,7 @@ export default function CollectionPage() {
         srchMatch
       );
     });
-  }, [products, filters]);
+  }, [scopedProducts, filters, pageCtx.group, groups]);
 
   const sortedProducts = useMemo(() => {
     const list = [...filteredProducts];
@@ -236,7 +251,7 @@ export default function CollectionPage() {
           ZENmen
         </p>
         <h1 className="font-heading m-0 text-4xl md:text-[2.75rem] font-normal leading-tight text-[#0f172a]">
-          The Collection
+          {pageCtx.group ? pageCtx.group.parent.name : "The Collection"}
         </h1>
       </header>
 
@@ -246,7 +261,8 @@ export default function CollectionPage() {
           colors={colors}
           sizes={sizes}
           priceRanges={PRICE_RANGES}
-          brands={brands}
+          brands={[]}
+          taxonomyTitle={taxonomyTitle}
           selectedCategory={filters.selectedCategory}
           selectedColor={filters.selectedColor}
           selectedSize={filters.selectedSize}
@@ -256,7 +272,7 @@ export default function CollectionPage() {
           sortBy={sortBy}
           search={filters.search}
           resultCount={sortedProducts.length}
-          totalCount={products.length}
+          totalCount={scopedProducts.length}
           onCategoryChange={(v) => patchFilters({ selectedCategory: v })}
           onColorChange={(v) => patchFilters({ selectedColor: v })}
           onSizeChange={(v) => patchFilters({ selectedSize: v })}
@@ -277,7 +293,8 @@ export default function CollectionPage() {
           colors={colors}
           sizes={sizes}
           priceRanges={PRICE_RANGES}
-          brands={brands}
+          brands={[]}
+          taxonomyTitle={taxonomyTitle}
           filters={filters}
           onChange={patchFilters}
           onReset={resetFilters}
@@ -305,7 +322,7 @@ export default function CollectionPage() {
 
             <div className="hidden lg:flex items-center gap-4 text-[13px] text-[#64748b]">
               <span>
-                {sortedProducts.length} / {products.length}
+                {sortedProducts.length} / {scopedProducts.length}
               </span>
               <span className="text-[#e2e8f0]">|</span>
               <span className="flex items-center gap-2">

@@ -27,6 +27,7 @@ type Props = {
   sizes: string[];
   priceRanges: string[];
   brands: string[];
+  taxonomyTitle?: string;
   filters: CollectionFilterState;
   onChange: (patch: Partial<CollectionFilterState>) => void;
   onReset: () => void;
@@ -124,6 +125,7 @@ export default function CollectionSidebarFilters({
   sizes,
   priceRanges,
   brands,
+  taxonomyTitle = "Category",
   filters,
   onChange,
   onReset,
@@ -135,7 +137,7 @@ export default function CollectionSidebarFilters({
     brand: false,
     color: false,
     size: false,
-    category: false,
+    category: true,
   });
 
   const toggle = (key: FilterSection) =>
@@ -271,22 +273,24 @@ export default function CollectionSidebarFilters({
             </div>
           </Section>
 
-          <Section
-            id="category"
-            title="Category"
-            open={open.category}
-            onToggle={() => toggle("category")}
-          >
-            {categories.map((cat) => (
-              <OptionBtn
-                key={cat}
-                active={filters.selectedCategory === cat}
-                onClick={() => onChange({ selectedCategory: cat })}
-              >
-                {cat}
-              </OptionBtn>
-            ))}
-          </Section>
+          {categories.length > 1 ? (
+            <Section
+              id="category"
+              title={taxonomyTitle}
+              open={open.category}
+              onToggle={() => toggle("category")}
+            >
+              {categories.map((cat) => (
+                <OptionBtn
+                  key={cat}
+                  active={filters.selectedCategory === cat}
+                  onClick={() => onChange({ selectedCategory: cat })}
+                >
+                  {cat}
+                </OptionBtn>
+              ))}
+            </Section>
+          ) : null}
         </nav>
 
         {hasActiveFilters ? (

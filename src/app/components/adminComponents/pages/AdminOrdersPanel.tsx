@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { ORDER_STATUSES } from "@/config/orderStatusConfig";
 import {
   ADMIN_NEXT_STATUSES,
   adminStatusBadgeClass,
@@ -21,10 +22,17 @@ import {
   Mail,
   Package,
   RefreshCw,
+  Search,
   Truck,
+  X,
   XCircle,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+
+const selectClass =
+  "h-9 rounded-lg border border-[#e2e8f0] bg-white px-3 text-sm text-[#0f172a] outline-none focus:border-[#7da8c7]";
+const inputClass =
+  "h-9 w-full rounded-lg border border-[#e2e8f0] bg-white px-3 text-sm text-[#0f172a] outline-none placeholder:text-[#94a3b8] focus:border-[#7da8c7]";
 
 const CANCEL_LABELS: Record<string, string> = {
   changed_mind: "Changed my mind",
@@ -49,24 +57,70 @@ export default function AdminOrdersPanel() {
   const [selected, setSelected] = useState<SerializedOrder | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState("");
+  const [paymentFilter, setPaymentFilter] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const limit = 50;
+
+  const hasFilters =
+    Boolean(statusFilter) ||
+    Boolean(paymentFilter) ||
+    Boolean(searchInput.trim()) ||
+    Boolean(fromDate) ||
+    Boolean(toDate);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setSearch(searchInput.trim());
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(t);
+  }, [searchInput]);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/admin/orders?limit=100");
+      const params = new URLSearchParams();
+      params.set("limit", String(limit));
+      params.set("page", String(page));
+      if (statusFilter) params.set("status", statusFilter);
+      if (paymentFilter) params.set("paymentMethod", paymentFilter);
+      if (search) params.set("q", search);
+      if (fromDate) params.set("from", fromDate);
+      if (toDate) params.set("to", toDate);
+
+      const res = await fetch(`/api/admin/orders?${params.toString()}`);
       const data = await res.json();
       if (!res.ok || !data.success) {
         throw new Error(data.message ?? "Failed to load orders");
       }
       setOrders(data.orders ?? []);
-      setCounts(data.counts ?? counts);
+      setTotal(data.total ?? 0);
+      setPages(data.pages ?? 1);
+      if (data.counts) setCounts(data.counts);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load orders");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [page, statusFilter, paymentFilter, search, fromDate, toDate]);
+
+  const clearFilters = () => {
+    setStatusFilter("");
+    setPaymentFilter("");
+    setSearchInput("");
+    setSearch("");
+    setFromDate("");
+    setToDate("");
+    setPage(1);
+  };
 
   useEffect(() => {
     void load();
@@ -233,10 +287,91 @@ export default function AdminOrdersPanel() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <StatCard label="Total (loaded)" value={String(counts.total)} />
+        <StatCard label="Total orders" value={String(counts.total)} />
         <StatCard label="Pending payment" value={String(counts.pending)} accent="text-yellow-600" />
         <StatCard label="In fulfillment" value={String(counts.active)} accent="text-blue-600" />
         <StatCard label="Cancel requests" value={String(counts.cancellationRequested)} accent="text-orange-600" />
+      </div>
+
+      <div className="rounded-xl border border-[#e2e8f0] bg-white p-4 space-y-3">
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="relative min-w-[220px] flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#94a3b8]" />
+            <input
+              className={`${inputClass} pl-9`}
+              placeholder="Order ID, name, email, or phone"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              aria-label="Search orders"
+            />
+          </div>
+          <select
+            className={selectClass}
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setPage(1);
+            }}
+            aria-label="Order status"
+          >
+            <option value="">All statuses</option>
+            {ORDER_STATUSES.map((st) => (
+              <option key={st} value={st}>
+                {formatOrderStatusLabel(st)}
+              </option>
+            ))}
+          </select>
+          <select
+            className={selectClass}
+            value={paymentFilter}
+            onChange={(e) => {
+              setPaymentFilter(e.target.value);
+              setPage(1);
+            }}
+            aria-label="Payment method"
+          >
+            <option value="">All payments</option>
+            <option value="cod">COD</option>
+            <option value="online">Razorpay</option>
+          </select>
+          <input
+            type="date"
+            className={selectClass}
+            value={fromDate}
+            onChange={(e) => {
+              setFromDate(e.target.value);
+              setPage(1);
+            }}
+            aria-label="From date"
+          />
+          <input
+            type="date"
+            className={selectClass}
+            value={toDate}
+            onChange={(e) => {
+              setToDate(e.target.value);
+              setPage(1);
+            }}
+            aria-label="To date"
+          />
+          {hasFilters ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="border-[#e2e8f0] text-[#64748b]"
+              onClick={clearFilters}
+            >
+              <X className="mr-1 h-4 w-4" />
+              Clear
+            </Button>
+          ) : null}
+        </div>
+        <p className="text-sm text-[#64748b]">
+          {hasFilters
+            ? `${total.toLocaleString("en-IN")} matching`
+            : `${total.toLocaleString("en-IN")} orders`}
+        </p>
       </div>
 
       {error ? (
@@ -252,9 +387,13 @@ export default function AdminOrdersPanel() {
         ) : orders.length === 0 ? (
           <div className="p-12 text-center text-[#64748b]">
             <Package className="mx-auto mb-3 h-10 w-10 text-[#94a3b8]" />
-            <p className="font-medium text-[#0f172a]">No orders yet</p>
+            <p className="font-medium text-[#0f172a]">
+              {hasFilters ? "No orders match these filters" : "No orders yet"}
+            </p>
             <p className="text-sm mt-1">
-              Orders appear here when customers checkout on the storefront.
+              {hasFilters
+                ? "Try a different status, payment method, date, or search."
+                : "Orders appear here when customers checkout on the storefront."}
             </p>
           </div>
         ) : (
@@ -321,6 +460,32 @@ export default function AdminOrdersPanel() {
           </div>
         )}
       </div>
+
+      {pages > 1 ? (
+        <div className="flex items-center justify-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-[#e2e8f0] text-[#64748b]"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page <= 1 || loading}
+          >
+            Previous
+          </Button>
+          <span className="text-sm text-[#64748b]">
+            Page {page} of {pages}
+          </span>
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-[#e2e8f0] text-[#64748b]"
+            onClick={() => setPage((p) => Math.min(pages, p + 1))}
+            disabled={page >= pages || loading}
+          >
+            Next
+          </Button>
+        </div>
+      ) : null}
 
       <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">

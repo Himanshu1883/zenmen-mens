@@ -3,6 +3,12 @@ import {
   type DeliveryLeadUnit,
 } from "@/lib/delivery-estimate";
 import { resolveImagePublicId } from "@/lib/cloudinary-public-id";
+import {
+  DEFAULT_ACCORDION,
+  DEFAULT_CARE,
+  DEFAULT_DETAILS,
+  DEFAULT_SPECS,
+} from "@/lib/product-form-presets";
 import { normalizePrimaryFlags } from "@/lib/product-images";
 import type { Product, ProductAccordion, ProductSpec } from "@/types/product";
 
@@ -66,12 +72,12 @@ export function emptyProductForm(): ProductEditForm {
     discount: "",
     stock: 0,
     badge: "",
-    care: "",
+    care: DEFAULT_CARE,
     colorsText: "",
-    sizesText: "",
-    detailsText: "",
-    specifications: [{ label: "", value: "" }],
-    accordion: [{ title: "", content: "" }],
+    sizesText: "S, M, L, XL, XXL",
+    detailsText: DEFAULT_DETAILS,
+    specifications: DEFAULT_SPECS.map((s) => ({ ...s })),
+    accordion: DEFAULT_ACCORDION.map((a) => ({ ...a })),
     seoTitle: "",
     seoDescription: "",
     isFeatured: false,
@@ -98,16 +104,16 @@ export function productToEditForm(product: Product): ProductEditForm {
     discount: product.discount != null ? String(product.discount) : "",
     stock: product.stock ?? 0,
     badge: product.badge ?? "",
-    care: product.care ?? "",
+    care: product.care?.trim() ? product.care : DEFAULT_CARE,
     colorsText: (product.colors ?? []).join(", "),
     sizesText: (product.sizes ?? []).join(", "),
     detailsText: (product.details ?? []).join("\n"),
     specifications: product.specifications?.length
       ? product.specifications.map((s) => ({ ...s }))
-      : [{ label: "", value: "" }],
+      : DEFAULT_SPECS.map((s) => ({ ...s })),
     accordion: product.accordion?.length
       ? product.accordion.map((a) => ({ ...a }))
-      : [{ title: "", content: "" }],
+      : DEFAULT_ACCORDION.map((a) => ({ ...a })),
     seoTitle: product.seoTitle ?? "",
     seoDescription: product.seoDescription ?? "",
     isFeatured: Boolean(product.isFeatured),
@@ -142,7 +148,7 @@ function buildCommonFields(form: ProductEditForm) {
     tagline: form.tagline.trim() || undefined,
     description: form.description.trim(),
     category: form.category.trim(),
-    subCategory: form.subCategory.trim() || undefined,
+    subCategory: form.subCategory.trim(),
     price: Number(form.price),
     comparePrice:
       comparePrice != null && !Number.isNaN(comparePrice)

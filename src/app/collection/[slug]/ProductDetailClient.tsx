@@ -856,15 +856,21 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const reviewCount = product.numReviews ?? 42;
   const stars = Array.from({ length: 5 }, (_, i) => i < Math.floor(rating));
 
-  const specs = [
-    { label: "Category", value: product.category ?? "-" },
-    { label: "Color", value: product.colors?.[0] ?? "-" },
-    {
-      label: "Fit",
-      value: product.category === "Kurta" ? "Relaxed" : "Tailored",
-    },
-    { label: "Sizes", value: product.sizes?.join(", ") ?? "-" },
-  ];
+  const specs =
+    product.specifications?.filter((s) => s.label.trim() || s.value.trim())
+      .length
+      ? product.specifications
+          .filter((s) => s.label.trim() || s.value.trim())
+          .map((s) => ({ label: s.label, value: s.value }))
+      : [
+          { label: "Category", value: product.category ?? "-" },
+          { label: "Color", value: product.colors?.[0] ?? "-" },
+          {
+            label: "Fit",
+            value: product.category === "Kurta" ? "Relaxed" : "Tailored",
+          },
+          { label: "Sizes", value: product.sizes?.join(", ") ?? "-" },
+        ];
 
   const relatedProducts = useMemo(
     () =>

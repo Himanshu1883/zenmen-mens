@@ -3,9 +3,13 @@
 import CategoryFormModal from "@/app/components/adminComponents/CategoryFormModal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { categoryCollectionHref, DEFAULT_CHILD_PARENT_SLUGS } from "@/lib/categories";
+import {
+  categoryCollectionHref,
+  DEFAULT_CHILD_PARENT_BY_NAME,
+  DEFAULT_CHILD_PARENT_SLUGS,
+} from "@/lib/categories";
 import type { Category } from "@/types/category";
-import { ChevronDown, ChevronRight, Edit, ExternalLink, Plus, Trash2 } from "lucide-react";
+import { Edit, ExternalLink, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -16,13 +20,20 @@ type ModalState =
   | { mode: "edit"; category: Category }
   | null;
 
+type DisplayRow = {
+  category: Category;
+  depth: 0 | 1;
+  parentName?: string;
+  isGroupHeader: boolean;
+  childCount: number;
+};
+
 export default function Categories() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [modal, setModal] = useState<ModalState>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [expandedParents, setExpandedParents] = useState<Set<string>>(new Set());
 
   const reloadList = useCallback(() => {
     setRefreshKey((k) => k + 1);
@@ -77,18 +88,6 @@ export default function Categories() {
     }
   };
 
-  const toggleExpand = (parentId: string) => {
-    setExpandedParents((prev) => {
-      const next = new Set(prev);
-      if (next.has(parentId)) {
-        next.delete(parentId);
-      } else {
-        next.add(parentId);
-      }
-      return next;
-    });
-  };
-
   const navVisible = categories.filter((c) => c.isActive && c.showInNav);
   const slugToCategory = useMemo(
     () => new Map(categories.map((c) => [c.slug, c])),
@@ -98,16 +97,16 @@ export default function Categories() {
   const resolveParentId = useCallback(
     (cat: Category): string | null => {
       if (cat.parentId) return cat.parentId;
-      const parentSlug = DEFAULT_CHILD_PARENT_SLUGS[cat.slug];
+      const parentSlug =
+        DEFAULT_CHILD_PARENT_SLUGS[cat.slug] ??
+        DEFAULT_CHILD_PARENT_BY_NAME[cat.name.toLowerCase().trim()];
       if (!parentSlug) return null;
       return slugToCategory.get(parentSlug)?._id ?? null;
     },
     [slugToCategory],
   );
 
-  // Build parent -> children groups instead of a flat list, so children
-  // can be shown/hidden based on expand state.
-  const { parents, childrenByParent, orphans } = useMemo(() => {
+  const displayRows = useMemo(() => {
     const parentList = categories
       .filter((c) => !resolveParentId(c))
       .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
@@ -127,13 +126,46 @@ export default function Categories() {
       );
     }
 
-    const listedIds = new Set<string>([
-      ...parentList.map((p) => p._id),
-      ...Array.from(childMap.values()).flat().map((c) => c._id),
-    ]);
-    const orphanList = categories.filter((c) => !listedIds.has(c._id));
+    const rows: DisplayRow[] = [];
+    const listedIds = new Set<string>();
 
-    return { parents: parentList, childrenByParent: childMap, orphans: orphanList };
+    for (const parent of parentList) {
+      const children = childMap.get(parent._id) ?? [];
+      const hasChildren = children.length > 0;
+      rows.push({
+        category: parent,
+        depth: 0,
+        isGroupHeader: hasChildren,
+        childCount: children.length,
+      });
+      listedIds.add(parent._id);
+
+      for (const child of children) {
+        rows.push({
+          category: child,
+          depth: 1,
+          parentName: child.parentName ?? parent.name,
+          isGroupHeader: false,
+          childCount: 0,
+        });
+        listedIds.add(child._id);
+      }
+    }
+
+    const orphans = categories
+      .filter((c) => !listedIds.has(c._id))
+      .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
+
+    for (const orphan of orphans) {
+      rows.push({
+        category: orphan,
+        depth: 0,
+        isGroupHeader: false,
+        childCount: 0,
+      });
+    }
+
+    return rows;
   }, [categories, resolveParentId]);
 
   const renderActions = (category: Category) => (
@@ -241,120 +273,75 @@ export default function Categories() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[#e8edf2] text-left text-[#64748b]">
-                  <th className="px-4 py-3 font-medium">Order</th>
+                  <th className="px-4 py-3 font-medium w-16">#</th>
                   <th className="px-4 py-3 font-medium">Name</th>
-                  <th className="px-4 py-3 font-medium">Parent</th>
                   <th className="px-4 py-3 font-medium">Filter</th>
                   <th className="px-4 py-3 font-medium">Status</th>
                   <th className="px-4 py-3 font-medium text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
-              {parents.map((parent) => {
-  const children = childrenByParent.get(parent._id) ?? [];
-  const hasChildren = children.length > 0;
-  const isExpanded = expandedParents.has(parent._id);
+                {displayRows.map((row, index) => {
+                  const { category, depth, isGroupHeader, childCount } = row;
 
-  return (
-    <FragmentGroup key={parent._id}>
-      <tr
-        onClick={() => hasChildren && toggleExpand(parent._id)}
-        className={`border-b border-[#f1f5f9] hover:bg-[#f8fafc]/80 ${
-          hasChildren ? "cursor-pointer select-none" : ""
-        }`}
-      >
-        <td className="px-4 py-3 text-[#64748b]">{parent.order}</td>
-        <td className="px-4 py-3">
-          <div className="flex items-center gap-1.5">
-            {hasChildren ? (
-              <span className="inline-flex items-center justify-center h-5 w-5 text-[#64748b] shrink-0">
-                {isExpanded ? (
-                  <ChevronDown className="w-4 h-4" />
-                ) : (
-                  <ChevronRight className="w-4 h-4" />
-                )}
-              </span>
-            ) : (
-              <span className="inline-block h-5 w-5 shrink-0" />
-            )}
-            <div>
-              <div className="font-medium text-[#0f172a] flex items-center gap-2">
-                {parent.name}
-                {hasChildren ? (
-                  <span className="text-xs font-normal text-[#94a3b8]">
-                    ({children.length})
-                  </span>
-                ) : null}
-              </div>
-              <div className="text-xs text-[#94a3b8]">{parent.slug}</div>
-            </div>
-          </div>
-        </td>
-        <td className="px-4 py-3 text-[#64748b]">—</td>
-        <td className="px-4 py-3">
-          <Badge variant="outline" className="mr-2">
-            {parent.filterType === "category" ? "category" : "search"}
-          </Badge>
-          <span className="text-[#64748b]">{parent.filterValue}</span>
-        </td>
-        <td className="px-4 py-3">{renderStatusBadges(parent)}</td>
-        <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-          {renderActions(parent)}
-        </td>
-      </tr>
-
-      {hasChildren && isExpanded
-        ? children.map((child) => (
-            <tr
-              key={child._id}
-              className="border-b border-[#f1f5f9] hover:bg-[#f8fafc]/80 bg-[#f8fafc]/40"
-            >
-              <td className="px-4 py-3 text-[#64748b]">{child.order}</td>
-              <td className="px-4 py-3">
-                <div className="pl-6 border-l-2 border-[#7da8c7]/40 ml-1.5">
-                  <div className="font-medium text-[#0f172a]">{child.name}</div>
-                  <div className="text-xs text-[#94a3b8]">{child.slug}</div>
-                </div>
-              </td>
-              <td className="px-4 py-3 text-[#64748b]">
-                {child.parentName ?? parent.name}
-              </td>
-              <td className="px-4 py-3">
-                <Badge variant="outline" className="mr-2">
-                  {child.filterType === "category" ? "category" : "search"}
-                </Badge>
-                <span className="text-[#64748b]">{child.filterValue}</span>
-              </td>
-              <td className="px-4 py-3">{renderStatusBadges(child)}</td>
-              <td className="px-4 py-3">{renderActions(child)}</td>
-            </tr>
-          ))
-        : null}
-    </FragmentGroup>
-  );
-})}
-
-                {orphans.map((category) => (
-                  <tr
-                    key={category._id}
-                    className="border-b border-[#f1f5f9] hover:bg-[#f8fafc]/80"
-                  >
-                    <td className="px-4 py-3 text-[#64748b]">{category.order}</td>
-                    <td className="px-4 py-3">
-                      <div className="font-medium text-[#0f172a]">{category.name}</div>
-                      <div className="text-xs text-[#94a3b8]">{category.slug}</div>
-                    </td>
-                    <td className="px-4 py-3 text-[#64748b]">—</td>
-                    <td className="px-4 py-3">
-                      <Badge variant="outline" className="mr-2">
-                        {category.filterType === "category" ? "category" : "search"}
-                      </Badge>
-                      <span className="text-[#64748b]">{category.filterValue}</span>
-                    </td>
-                    <td className="px-4 py-3">{renderStatusBadges(category)}</td>
-                    <td className="px-4 py-3">{renderActions(category)}</td>
-                  </tr>
-                ))}
+                  return (
+                    <tr
+                      key={category._id}
+                      className={`border-b border-[#f1f5f9] hover:bg-[#f8fafc]/80 ${
+                        isGroupHeader ? "bg-[#f8fafc]" : ""
+                      } ${depth === 1 ? "bg-[#f8fafc]/40" : ""}`}
+                    >
+                      <td className="px-4 py-3 text-[#64748b] tabular-nums">
+                        {index + 1}
+                      </td>
+                      <td className="px-4 py-3">
+                        {depth === 1 ? (
+                          <div className="pl-8 border-l-2 border-[#7da8c7]/40 ml-1.5">
+                            <div className="font-medium text-[#0f172a]">
+                              {category.name}
+                            </div>
+                            <div className="text-xs text-[#94a3b8]">
+                              {category.slug}
+                              {row.parentName ? ` · under ${row.parentName}` : ""}
+                            </div>
+                          </div>
+                        ) : (
+                          <div>
+                            <div
+                              className={`text-[#0f172a] flex items-center gap-2 ${
+                                isGroupHeader ? "font-semibold" : "font-medium"
+                              }`}
+                            >
+                              {category.name}
+                              {isGroupHeader ? (
+                                <span className="text-xs font-normal text-[#94a3b8]">
+                                  ({childCount})
+                                </span>
+                              ) : null}
+                            </div>
+                            <div className="text-xs text-[#94a3b8]">
+                              {category.slug}
+                            </div>
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <Badge variant="outline" className="mr-2">
+                          {category.filterType === "category"
+                            ? "category"
+                            : "search"}
+                        </Badge>
+                        <span className="text-[#64748b]">
+                          {category.filterValue}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        {renderStatusBadges(category)}
+                      </td>
+                      <td className="px-4 py-3">{renderActions(category)}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -371,11 +358,4 @@ export default function Categories() {
       ) : null}
     </div>
   );
-}
-
-// Small helper so we can return a `<tr>` + conditional `<tr>[]` as one
-// key-able group inside `.map()` without wrapping them in an actual DOM
-// element (tables need direct `tr` children of `tbody`).
-function FragmentGroup({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
 }

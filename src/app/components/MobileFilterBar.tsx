@@ -49,6 +49,7 @@ interface MobileFilterBarProps {
   sizes: string[];
   priceRanges: string[];
   brands: string[];
+  taxonomyTitle?: string;
   selectedCategory: string;
   selectedColor: string;
   selectedSize: string;
@@ -89,6 +90,7 @@ export default function MobileFilterBar({
   sizes,
   priceRanges,
   brands,
+  taxonomyTitle = "Category",
   selectedCategory,
   selectedColor,
   selectedSize,
@@ -228,6 +230,7 @@ export default function MobileFilterBar({
               sizes={sizes}
               priceRanges={priceRanges}
               brands={brands}
+              taxonomyTitle={taxonomyTitle}
               selectedCategory={selectedCategory}
               selectedColor={selectedColor}
               selectedSize={selectedSize}
@@ -289,7 +292,7 @@ export default function MobileFilterBar({
                     <rect x="14" y="14" width="7" height="7" rx="1" />
                   </svg>
                 ),
-                label: label(selectedCategory, "Category"),
+                label: label(selectedCategory, taxonomyTitle),
                 active: selectedCategory !== "All",
               },
               {
@@ -394,7 +397,8 @@ export default function MobileFilterBar({
                 label: sortBy !== "featured" ? sortLabels[sortBy] : "Sort",
                 active: sortBy !== "featured",
               },
-            ].map((tab) => (
+            ].filter((tab) => tab.key !== "category" || categories.length > 1)
+            .map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => toggle(tab.key)}
@@ -453,6 +457,7 @@ function MobileFilterPanel({
   sizes,
   priceRanges,
   brands,
+  taxonomyTitle = "Category",
   selectedCategory,
   selectedColor,
   selectedSize,
@@ -475,6 +480,7 @@ function MobileFilterPanel({
   sizes: string[];
   priceRanges: string[];
   brands: string[];
+  taxonomyTitle?: string;
   selectedCategory: string;
   selectedColor: string;
   selectedSize: string;
@@ -492,7 +498,7 @@ function MobileFilterPanel({
   onClose: () => void;
 }) {
   const TITLES: Record<string, string> = {
-    category: "Category",
+    category: taxonomyTitle,
     color: "Color",
     size: "Size",
     price: "Price Range",

@@ -1,10 +1,17 @@
 import Users from "@/app/components/adminComponents/pages/Users";
 import { resolveAccountContact } from "@/lib/auth-contact";
 import { connectDB } from "@/lib/db";
+import { escapeRegex } from "@/lib/utils";
 import User from "@/models/User";
 import type { Types } from "mongoose";
 
-type SearchParams = Promise<{ page?: string }>;
+type SearchParams = Promise<{
+  page?: string;
+  q?: string;
+  role?: string;
+  from?: string;
+  to?: string;
+}>;
 type UserRow = {
   id: string;
   name: string;
@@ -33,6 +40,16 @@ function formatDate(input: Date | string) {
   });
 }
 
+function parseDayStart(value: string): Date | null {
+  const d = new Date(`${value}T00:00:00`);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function parseDayEnd(value: string): Date | null {
+  const d = new Date(`${value}T23:59:59.999`);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
 export default async function AdminUsersPage({
   searchParams,
 }: {
@@ -40,26 +57,57 @@ export default async function AdminUsersPage({
 }) {
   const params = await searchParams;
   const page = Math.max(1, Number(params.page ?? "1") || 1);
+  const q = (params.q ?? "").trim().slice(0, 80);
+  const roleParam = (params.role ?? "").trim();
+  const role =
+    roleParam === "admin" || roleParam === "user" ? roleParam : "";
+  const from = (params.from ?? "").trim();
+  const to = (params.to ?? "").trim();
   const pageSize = 10;
   const skip = (page - 1) * pageSize;
 
+  const query: Record<string, unknown> = {};
+
+  if (q) {
+    const regex = new RegExp(escapeRegex(q), "i");
+    query.$or = [{ name: regex }, { email: regex }, { phone: regex }];
+  }
+  if (role) {
+    query.role = role;
+  }
+
+  const createdAt: Record<string, Date> = {};
+  if (from) {
+    const start = parseDayStart(from);
+    if (start) createdAt.$gte = start;
+  }
+  if (to) {
+    const end = parseDayEnd(to);
+    if (end) createdAt.$lte = end;
+  }
+  if (Object.keys(createdAt).length > 0) {
+    query.createdAt = createdAt;
+  }
+
   await connectDB();
 
-  const [rows, total, totalAdmins, thisMonthUsers] = await Promise.all([
-    User.find({})
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(pageSize)
-      .select("name email phone role createdAt")
-      .lean(),
-    User.countDocuments({}),
-    User.countDocuments({ role: "admin" }),
-    User.countDocuments({
-      createdAt: {
-        $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-      },
-    }),
-  ]);
+  const [rows, total, totalUsers, totalAdmins, thisMonthUsers] =
+    await Promise.all([
+      User.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(pageSize)
+        .select("name email phone role createdAt")
+        .lean(),
+      User.countDocuments(query),
+      User.countDocuments({}),
+      User.countDocuments({ role: "admin" }),
+      User.countDocuments({
+        createdAt: {
+          $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+        },
+      }),
+    ]);
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
@@ -78,9 +126,10 @@ export default async function AdminUsersPage({
     <Users
       users={users}
       pagination={{ page, pageSize, total, totalPages }}
+      filters={{ q, role, from, to }}
       stats={{
-        totalUsers: total,
-        activeUsers: total,
+        totalUsers,
+        activeUsers: totalUsers,
         admins: totalAdmins,
         newThisMonth: thisMonthUsers,
       }}

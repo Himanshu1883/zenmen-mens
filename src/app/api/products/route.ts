@@ -3,6 +3,7 @@ import cloudinary from "@/lib/cloudinary";
 import { connectDB } from "@/lib/db";
 import Product from "@/models/Product";
 import { normalizePrimaryFlags } from "@/lib/product-images";
+import { escapeRegex } from "@/lib/utils";
 import { NextResponse } from "next/server";
 import slugify from "slugify";
 
@@ -27,23 +28,84 @@ export async function GET(request: Request) {
     const limit = limitParam ? Math.max(1, Number(limitParam)) : null;
 
     const category = url.searchParams.get("category") || undefined;
-
+    const categoriesParam = url.searchParams.get("categories");
+    const q = url.searchParams.get("q")?.trim() ?? "";
+    const stock = url.searchParams.get("stock");
+    const available = url.searchParams.get("available");
     const featured = url.searchParams.get("featured");
     const admin = url.searchParams.get("admin") === "1";
 
-    const query: Record<string, unknown> = {};
+    const filters: Record<string, unknown>[] = [];
 
     if (!admin) {
-      query.isAvailable = true;
+      filters.push({ isAvailable: true });
     }
 
-    if (category) {
-      query.category = category;
+    const categoryNames = categoriesParam
+      ? [
+          ...new Set(
+            categoriesParam
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean),
+          ),
+        ].slice(0, 50)
+      : [];
+
+    if (categoryNames.length > 0) {
+      const pattern = `^(${categoryNames.map(escapeRegex).join("|")})$`;
+      filters.push({
+        $or: [
+          { category: { $regex: pattern, $options: "i" } },
+          { subCategory: { $regex: pattern, $options: "i" } },
+        ],
+      });
+    } else if (category) {
+      // Storefront contract: exact Product.category match
+      filters.push({ category });
+    }
+
+    if (q) {
+      const pattern = escapeRegex(q.slice(0, 80));
+      filters.push({
+        $or: [
+          { title: { $regex: pattern, $options: "i" } },
+          { slug: { $regex: pattern, $options: "i" } },
+        ],
+      });
     }
 
     if (featured === "true") {
-      query.isFeatured = true;
+      filters.push({ isFeatured: true });
+    } else if (featured === "false") {
+      filters.push({ isFeatured: { $ne: true } });
     }
+
+    if (available === "true") {
+      filters.push({ isAvailable: { $ne: false } });
+    } else if (available === "false") {
+      filters.push({ isAvailable: false });
+    }
+
+    if (stock === "in") {
+      filters.push({ isAvailable: { $ne: false }, stock: { $gt: 3 } });
+    } else if (stock === "low") {
+      filters.push({
+        isAvailable: { $ne: false },
+        stock: { $gte: 1, $lte: 3 },
+      });
+    } else if (stock === "out") {
+      filters.push({
+        $or: [{ isAvailable: false }, { stock: { $lte: 0 } }],
+      });
+    }
+
+    const query =
+      filters.length === 0
+        ? {}
+        : filters.length === 1
+          ? filters[0]
+          : { $and: filters };
 
     const total = await Product.countDocuments(query);
 
@@ -58,11 +120,39 @@ export async function GET(request: Request) {
 
     const products = await productsQuery.lean();
 
+    let stats:
+      | {
+          total: number;
+          inStock: number;
+          lowStock: number;
+          outOfStock: number;
+        }
+      | undefined;
+
+    if (admin) {
+      const [all, inStock, lowStock, outOfStock] = await Promise.all([
+        Product.countDocuments({}),
+        Product.countDocuments({
+          isAvailable: { $ne: false },
+          stock: { $gt: 3 },
+        }),
+        Product.countDocuments({
+          isAvailable: { $ne: false },
+          stock: { $gte: 1, $lte: 3 },
+        }),
+        Product.countDocuments({
+          $or: [{ isAvailable: false }, { stock: { $lte: 0 } }],
+        }),
+      ]);
+      stats = { total: all, inStock, lowStock, outOfStock };
+    }
+
     return NextResponse.json({
       products,
       total,
       page,
       pages,
+      ...(stats ? { stats } : {}),
     });
   } catch (err) {
     console.error("[GET /api/products]", err);
