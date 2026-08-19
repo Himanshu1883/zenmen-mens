@@ -54,6 +54,7 @@ src/utils/               Invoice PDF buffer
 | `/checkout/success` | Post-order |
 | `/profile` | Account, orders, notifications, recently viewed |
 | `/appointment`, `/contact`, `/about`, `/services`, `/stories` | Marketing / booking |
+| `/privacy`, `/terms`, `/shipping` | Privacy Policy, Terms of Service, Shipping & Returns |
 
 ## Admin pages (`src/app/admin/*/page.tsx` → `adminComponents/pages/`)
 

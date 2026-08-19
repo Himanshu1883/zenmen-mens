@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useState } from "react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -748,8 +749,14 @@ export default function Contact() {
                       </div>
                       <span className="text-[12px] leading-relaxed text-[#475569]">
                         I agree that ZENmen may contact me via WhatsApp and
-                        email regarding my appointment. My data is kept private
-                        and never shared.
+                        email regarding my appointment. I have read the{" "}
+                        <Link
+                          href="/privacy"
+                          className="text-[#7da8c7] underline underline-offset-2 hover:text-[#5a8faf]"
+                        >
+                          Privacy Policy
+                        </Link>
+                        . My data is never shared.
                       </span>
                     </label>
                     <FieldError msg={errors.consent} />

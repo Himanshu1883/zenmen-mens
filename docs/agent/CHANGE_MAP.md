@@ -12,6 +12,7 @@ If you need to change **X**, start at these files. Do not hunt the whole repo.
 | Nav data / grouping | `src/lib/categories.ts` → `useNavCategories.ts` → `GET /api/categories` |
 | Default Shirt/Suit children | `DEFAULT_NAV_CATEGORIES` in `src/lib/categories.ts` **and** `src/lib/category-seed.ts` |
 | Footer, WhatsApp FAB, chat on storefront | `src/app/RootLayoutClient.tsx`, `src/app/layout.tsx` |
+| Footer links, Visit Us, legal pages | `src/app/components/layout/Footer.tsx`; storefront `/privacy`, `/terms`, `/shipping` (`src/app/privacy/page.tsx`, `terms/page.tsx`, `shipping/page.tsx` + `components/legal/LegalDocument.tsx`). Collection hrefs via `useNavCategories` / `categoryCollectionHref` / `accessoryCollectionHref`. |
 | Global providers (session, Redux, toasts, cart hydrate) | `src/app/providers.tsx` |
 | Mobile bottom nav | `src/app/components/layout/MobileBottomNav.tsx` |
 
@@ -23,14 +24,15 @@ If you need to change **X**, start at these files. Do not hunt the whole repo.
 | Hero | `sections/Hero.tsx` |
 | Category strip | `HomeCategoryStrip.tsx` + nav hook |
 | Product rail | `Products.tsx` / `ProductSlider.tsx` + Redux `fetchProducts` |
+| Accessories CTAs | `AccessoriesSection.tsx` + footer Collection → Accessories. Shop All / View All / headings → `/collection?q=accessories` (Buttons + Tie + Broches). Cards use nav hrefs `?q=tie` / `?q=button` / `?q=brooch`. |
 | Reels | `Reels.tsx` + `/api/instagram/reels` |
 
 ## Catalog / PDP
 
 | Change | Start |
 |---|---|
-| Collection grid / filters | `src/app/collection/page.tsx`, `CollectionSidebarFilters`, `MobileFilterBar`. All-collections (`/collection`) lists every nav **Collection**; a specific collection (`?q=` / `?category=`) lists that parent’s **Category** children from the nav tree (not only ones with products). Helpers: `resolveCollectionPageContext`, `productInCollectionGroup` in `src/lib/categories.ts` |
-| Collection URL contract | `categoryCollectionHref` in `src/lib/categories.ts`. Collection grid matches parent/child tags **and** title; a product whose `category` is another collection parent stays only on that collection. Empty `subCategory` is persisted on product PUT. |
+| Collection grid / filters | `src/app/collection/page.tsx`, `CollectionSidebarFilters`, `MobileFilterBar`. All-collections (`/collection`) lists every nav **Collection**; a specific collection (`?q=` / `?category=`) lists that parent’s **Category** children from the nav tree (not only ones with products). `?q=accessories` unions accessory parents (Buttons, Tie, Broches). Helpers: `resolveCollectionPageContext`, `productInCollectionGroup` in `src/lib/categories.ts` |
+| Collection URL contract | `categoryCollectionHref` in `src/lib/categories.ts`. Accessories hub: `ACCESSORIES_COLLECTION_HREF` (`/collection?q=accessories`). Collection grid matches parent/child tags **and** title; a product whose `category` is another collection parent stays only on that collection. Empty `subCategory` is persisted on product PUT. |
 | Admin product list filters | `adminComponents/pages/Products.tsx` — collections from `GET /api/admin/categories`; list query `GET /api/products?admin=1` with `categories=`, `q`, `stock`, `featured`, `available` |
 | Product card | `src/app/components/ui/ProductCard.tsx`, `collection/CollectionProductCard.tsx` |
 | Product selling / compare-at display | `src/lib/product-price.ts` — selling is always `product.price`; strike-through is `comparePrice` when higher. Home rails, collection cards, and PDP use this helper. |

@@ -130,6 +130,69 @@ export function categoryCollectionHref(
   return `/collection?${param}`;
 }
 
+/** Combined accessories catalog: Buttons, Tie, Broches (and spelling aliases). */
+export const ACCESSORIES_COLLECTION_Q = "accessories";
+export const ACCESSORIES_COLLECTION_HREF = categoryCollectionHref(
+  "search",
+  ACCESSORIES_COLLECTION_Q,
+);
+
+const ACCESSORY_NAV_ALIASES = new Set([
+  "button",
+  "buttons",
+  "tie",
+  "ties",
+  "brooch",
+  "brooches",
+  "broche",
+  "broches",
+  "accessories",
+  "accessory",
+]);
+
+export function isAccessoriesCollectionQuery(raw: string) {
+  const q = raw.trim().toLowerCase();
+  return q === ACCESSORIES_COLLECTION_Q || q === "accessory";
+}
+
+function isAccessoryNavParent(item: {
+  name: string;
+  filterValue: string;
+  slug: string;
+}) {
+  return [item.name, item.filterValue, item.slug].some((v) =>
+    ACCESSORY_NAV_ALIASES.has(normTag(v)),
+  );
+}
+
+export function accessoryNavGroups(groups: NavMenuGroup[]): NavMenuGroup[] {
+  return groups.filter((g) => isAccessoryNavParent(g.parent));
+}
+
+/** Live nav href for an accessory token (tie / button / brooch), else default `?q=`. */
+export function accessoryCollectionHref(
+  token: string,
+  groups: NavMenuGroup[] = [],
+): string {
+  const t = normTag(token);
+  const match = (groups.length ? groups : defaultNavGroupsFallback()).find(
+    (g) => {
+      const name = normTag(g.parent.name);
+      const fv = normTag(g.parent.filterValue);
+      const slug = normTag(g.parent.slug);
+      if (name === t || fv === t || slug === t) return true;
+      if (t.length >= 3 && (name.startsWith(t) || fv.startsWith(t) || slug.startsWith(t))) {
+        return isAccessoryNavParent(g.parent);
+      }
+      if (t.startsWith("broch") && (name.startsWith("broch") || fv.startsWith("broch"))) {
+        return true;
+      }
+      return false;
+    },
+  );
+  return match?.parent.href ?? categoryCollectionHref("search", token);
+}
+
 export function toNavCategory(item: {
   _id?: string;
   name: string;
@@ -303,6 +366,7 @@ export function resolvePrefillProductCategory(
   if (categoryFromUrl.trim()) return categoryFromUrl.trim();
   const q = qFromUrl.trim();
   if (!q) return "";
+  if (isAccessoriesCollectionQuery(q)) return "";
   const match = navCategories.find(
     (c) =>
       c.filterType === "search" &&
@@ -334,6 +398,8 @@ export type CollectionPageContext = {
   childName: string | null;
   isTextSearch: boolean;
   searchNeedle: string;
+  /** Union of accessory parents when `?q=accessories`. */
+  accessoryGroups?: NavMenuGroup[];
 };
 
 /** Map collection URL (?q= / ?category=) to a nav collection group. */
@@ -344,6 +410,19 @@ export function resolveCollectionPageContext(
 ): CollectionPageContext {
   const category = categoryFromUrl.trim();
   const q = qFromUrl.trim();
+
+  if (isAccessoriesCollectionQuery(q) && !category) {
+    const accessoryGroups = accessoryNavGroups(groups);
+    if (accessoryGroups.length > 0) {
+      return {
+        group: null,
+        childName: null,
+        isTextSearch: false,
+        searchNeedle: "",
+        accessoryGroups,
+      };
+    }
+  }
 
   for (const group of groups) {
     if (category && navItemMatchesQuery(group.parent, category)) {

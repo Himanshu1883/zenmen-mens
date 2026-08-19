@@ -1,9 +1,69 @@
 "use client";
 
+import { useNavCategories } from "@/hooks/useNavCategories";
+import {
+  accessoryCollectionHref,
+  categoryCollectionHref,
+} from "@/lib/categories";
+import type { NavMenuGroup } from "@/types/category";
 import Link from "next/link";
+
+const WHATSAPP_HREF =
+  "https://wa.me/919650753273?text=" +
+  encodeURIComponent(
+    "Hi ZENmen, I'd like to book an appointment for bespoke tailoring.",
+  );
+
+const MAPS_HREF = "https://maps.google.com/?q=E-39+Lajpat+Nagar+2+New+Delhi";
+
+const SHOP_LINKS = [
+  { label: "Shirt", token: "shirt" },
+  { label: "Suit", token: "suit" },
+  { label: "Indo-Western", token: "indo-western" },
+  { label: "Kurta", token: "kurta" },
+  { label: "Buttons", token: "button", accessory: true },
+  { label: "Tie", token: "tie", accessory: true },
+  { label: "Broches", token: "brooch", accessory: true },
+] as const;
+
+const COMPANY_LINKS = [
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
+  { label: "Appointment", href: "/appointment" },
+  { label: "Services", href: "/services" },
+  { label: "Stories", href: "/stories" },
+] as const;
+
+function shopHref(
+  groups: NavMenuGroup[],
+  item: (typeof SHOP_LINKS)[number],
+): string {
+  if ("accessory" in item && item.accessory) {
+    return accessoryCollectionHref(item.token, groups);
+  }
+  const t = item.token.toLowerCase();
+  const match = groups.find((g) => {
+    const name = g.parent.name.toLowerCase();
+    const fv = g.parent.filterValue.toLowerCase();
+    const slug = g.parent.slug.toLowerCase();
+    if (name === t || fv === t || slug === t) return true;
+    if (t === "kurta" && (name.includes("kurta") || fv.includes("kurta"))) {
+      return true;
+    }
+    if (
+      t === "indo-western" &&
+      (name.includes("indo") || fv.includes("indo") || slug.includes("indo"))
+    ) {
+      return true;
+    }
+    return false;
+  });
+  return match?.parent.href ?? categoryCollectionHref("search", item.token);
+}
 
 export default function Footer() {
   const year = new Date().getFullYear();
+  const { groups } = useNavCategories();
 
   return (
     <>
@@ -227,6 +287,19 @@ export default function Footer() {
         }
         .zf-col ul li a:hover::before { opacity: 1; width: 16px; }
 
+        .zf-col ul li.zf-visit-meta {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          margin-bottom: 4px;
+        }
+        .zf-col ul li .zf-visit-line {
+          font-size: 0.82rem;
+          color: var(--ivory-dim);
+          letter-spacing: 0.03em;
+          line-height: 1.55;
+        }
+
         /* ── Newsletter stripe ── */
         .zf-newsletter {
           background: #e6eef8;
@@ -300,6 +373,27 @@ export default function Footer() {
           white-space: nowrap;
         }
         .zf-newsletter-form button:hover {
+          background: #0f172a;
+          border-color: #0f172a;
+          color: #ffffff;
+        }
+
+        .zf-newsletter-cta {
+          display: inline-flex;
+          align-items: center;
+          background: var(--gold);
+          border: 1px solid var(--gold);
+          color: #ffffff;
+          font-family: var(--heading-font-family);
+          font-size: 0.7rem;
+          letter-spacing: 0.28em;
+          text-transform: uppercase;
+          padding: 11px 18px;
+          text-decoration: none;
+          transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+          white-space: nowrap;
+        }
+        .zf-newsletter-cta:hover {
           background: #0f172a;
           border-color: #0f172a;
           color: #ffffff;
@@ -514,51 +608,65 @@ export default function Footer() {
             </Link>
           </div>
 
-          {/* Services */}
-          <div className="zf-col">
-            <h4 className="zf-col-heading">Services</h4>
-            <ul>
-              {[
-                "Bespoke Suits",
-                "Custom Shirts",
-                "Tailored Trousers",
-                "Wedding Attire",
-                "Alterations",
-              ].map((s) => (
-                <li key={s}>
-                  <Link href="/services">{s}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
           {/* Collection */}
           <div className="zf-col">
             <h4 className="zf-col-heading">Collection</h4>
             <ul>
-              {["Suits", "Shirts", "Trousers", "Accessories"].map((s) => (
-                <li key={s}>
-                  <Link href="/collection">{s}</Link>
+              {SHOP_LINKS.map((item) => (
+                <li key={item.label}>
+                  <Link href={shopHref(groups, item)}>{item.label}</Link>
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Contact */}
+          {/* Company */}
+          <div className="zf-col">
+            <h4 className="zf-col-heading">Company</h4>
+            <ul>
+              {COMPANY_LINKS.map((item) => (
+                <li key={item.href}>
+                  <Link href={item.href}>{item.label}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Visit Us */}
           <div className="zf-col">
             <h4 className="zf-col-heading">Visit Us</h4>
             <ul>
-              {[
-                "Visit Store",
-                "Book Appointment",
-                "Fitting Guide",
-                "Care & Alterations",
-                "Support",
-              ].map((s) => (
-                <li key={s}>
-                  <a href="#contact">{s}</a>
-                </li>
-              ))}
+              <li className="zf-visit-meta">
+                <span className="zf-visit-line">E-39, Lajpat Nagar II</span>
+                <span className="zf-visit-line">New Delhi – 110024</span>
+                <span className="zf-visit-line">Mon–Sat · 11 AM – 8 PM</span>
+                <span className="zf-visit-line">
+                  South Extension Part II — by appointment
+                </span>
+              </li>
+              <li>
+                <a href={MAPS_HREF} target="_blank" rel="noopener noreferrer">
+                  Get directions
+                </a>
+              </li>
+              <li>
+                <Link href="/appointment">Book appointment</Link>
+              </li>
+              <li>
+                <Link href="/contact">Contact</Link>
+              </li>
+              <li>
+                <a
+                  href={WHATSAPP_HREF}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  WhatsApp
+                </a>
+              </li>
+              <li>
+                <a href="tel:+919650753273">+91 96507 53273</a>
+              </li>
             </ul>
           </div>
         </div>
@@ -573,12 +681,9 @@ export default function Footer() {
             </p>
           </div>
           <div className="zf-newsletter-form">
-            <input
-              type="email"
-              placeholder="Your email address"
-              aria-label="Email address"
-            />
-            <button type="button">Subscribe</button>
+            <Link href="/contact" className="zf-newsletter-cta">
+              Write to the atelier
+            </Link>
           </div>
         </div>
 
@@ -588,13 +693,13 @@ export default function Footer() {
 
           <ul className="zf-legal">
             <li>
-              <a href="#">Privacy Policy</a>
+              <Link href="/privacy">Privacy Policy</Link>
             </li>
             <li>
-              <a href="#">Terms of Service</a>
+              <Link href="/terms">Terms of Service</Link>
             </li>
             <li>
-              <a href="#">Shipping & Returns</a>
+              <Link href="/shipping">Shipping & Returns</Link>
             </li>
           </ul>
 
@@ -626,21 +731,14 @@ export default function Footer() {
                 />
               </svg>
             </a>
-            {/* Facebook */}
-            <a href="#" className="zf-social-btn" aria-label="Facebook">
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              >
-                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-              </svg>
-            </a>
             {/* WhatsApp */}
-            <a href="#" className="zf-social-btn" aria-label="WhatsApp">
+            <a
+              href={WHATSAPP_HREF}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="zf-social-btn"
+              aria-label="WhatsApp"
+            >
               <svg
                 width="15"
                 height="15"

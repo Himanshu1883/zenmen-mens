@@ -61,6 +61,8 @@ export default function CollectionPage() {
     () => resolveCollectionPageContext(qFromUrl, categoryFromUrl, groups),
     [qFromUrl, categoryFromUrl, groups],
   );
+  const accessoryGroups = pageCtx.accessoryGroups;
+  const isAccessoriesScope = (accessoryGroups?.length ?? 0) > 0;
   const taxonomyTitle = pageCtx.group ? "Category" : "Collection";
 
   const patchFilters = (patch: Partial<CollectionFilterState>) =>
@@ -88,21 +90,32 @@ export default function CollectionPage() {
     pageCtx.isTextSearch,
     pageCtx.searchNeedle,
     pageCtx.group?.parent.slug,
+    isAccessoriesScope,
   ]);
 
   const scopedProducts = useMemo(() => {
-    if (!pageCtx.group) return products;
-    return products.filter((p) =>
-      productInCollectionGroup(p, pageCtx.group!, groups),
-    );
-  }, [products, pageCtx.group, groups]);
+    if (pageCtx.group) {
+      return products.filter((p) =>
+        productInCollectionGroup(p, pageCtx.group!, groups),
+      );
+    }
+    if (isAccessoriesScope) {
+      return products.filter((p) =>
+        accessoryGroups!.some((g) => productInCollectionGroup(p, g, groups)),
+      );
+    }
+    return products;
+  }, [products, pageCtx.group, groups, isAccessoriesScope, accessoryGroups]);
 
   const categories = useMemo(() => {
     if (pageCtx.group) {
       return ["All", ...pageCtx.group.children.map((child) => child.name)];
     }
+    if (isAccessoriesScope && accessoryGroups) {
+      return ["All", ...accessoryGroups.map((group) => group.parent.name)];
+    }
     return ["All", ...groups.map((group) => group.parent.name)];
-  }, [pageCtx.group, groups]);
+  }, [pageCtx.group, groups, isAccessoriesScope, accessoryGroups]);
 
   const colors = useMemo(() => {
     const all = scopedProducts.flatMap((p) => p.colors ?? []);
@@ -251,7 +264,11 @@ export default function CollectionPage() {
           ZENmen
         </p>
         <h1 className="font-heading m-0 text-4xl md:text-[2.75rem] font-normal leading-tight text-[#0f172a]">
-          {pageCtx.group ? pageCtx.group.parent.name : "The Collection"}
+          {pageCtx.group
+            ? pageCtx.group.parent.name
+            : isAccessoriesScope
+              ? "Accessories"
+              : "The Collection"}
         </h1>
       </header>
 
