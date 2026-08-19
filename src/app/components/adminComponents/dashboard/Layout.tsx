@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import AdminAuthGuard from "../AdminAuthGuard";
 import { Navbar } from "./Navbar";
 import { Sidebar } from "./Sidebar";
 
@@ -28,24 +29,26 @@ export default function DashboardLayout({
   }, []);
 
   return (
-    <div className="min-h-screen relative bg-[#f8fafc] text-[#0f172a]">
-      <Sidebar
-        collapsed={sidebarCollapsed}
-        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
-      />
+    <AdminAuthGuard>
+      <div className="min-h-screen relative bg-[#f8fafc] text-[#0f172a]">
+        <Sidebar
+          collapsed={sidebarCollapsed}
+          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+        />
 
-      <Navbar
-        sidebarCollapsed={sidebarCollapsed}
-        onMenuClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-      />
+        <Navbar
+          sidebarCollapsed={sidebarCollapsed}
+          onMenuClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+        />
 
-      <main
-        className={`pt-20 transition-all duration-300 ${
-          sidebarCollapsed ? "md:pl-20" : "md:pl-72"
-        }`}
-      >
-        <div className="p-6 md:p-8 max-w-[1800px] mx-auto">{children}</div>
-      </main>
-    </div>
+        <main
+          className={`pt-20 transition-all duration-300 ${
+            sidebarCollapsed ? "md:pl-20" : "md:pl-72"
+          }`}
+        >
+          <div className="p-6 md:p-8 max-w-[1800px] mx-auto">{children}</div>
+        </main>
+      </div>
+    </AdminAuthGuard>
   );
 }

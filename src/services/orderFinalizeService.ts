@@ -69,6 +69,7 @@ export async function finalizePaidOrder(input: FinalizeInput) {
         productId: i.productId,
         qty: i.qty,
       })),
+      { reason: "order_sold", orderId: String(updated._id) },
     );
   } catch (err) {
     // Roll back “confirmed” so a failed stock write never leaves a live order
@@ -132,7 +133,10 @@ export async function finalizeCodOrder(orderId: string) {
     qty: i.qty,
   }));
 
-  await decrementStockForOrder(lines);
+  await decrementStockForOrder(lines, {
+    reason: "order_sold",
+    orderId: String(order._id),
+  });
 
   const updated = await Order.findOneAndUpdate(
     {
@@ -161,7 +165,11 @@ export async function finalizeCodOrder(orderId: string) {
 
   if (!updated) {
     // Another request won the race — put stock back
-    await restoreStockForOrder(lines);
+    await restoreStockForOrder(lines, {
+      reason: "order_cancel_restock",
+      orderId: String(orderId),
+      note: "COD finalize race — duplicate confirm restored stock",
+    });
     const existing = await Order.findById(orderId);
     if (!existing) throw new Error("Order not found");
     return { order: existing, alreadyFinalized: true as const };

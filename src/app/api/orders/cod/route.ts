@@ -1,4 +1,5 @@
 import { requireAuthUser } from "@/lib/api-auth";
+import { orderItemsFingerprint } from "@/lib/customer-orders";
 import { connectDB } from "@/lib/db";
 import {
   calcOrderTotals,
@@ -12,6 +13,8 @@ import {
   markOrderFailed,
 } from "@/services/orderFinalizeService";
 import { NextResponse } from "next/server";
+
+const COD_DEDUP_WINDOW_MS = 2 * 60 * 1000;
 
 export async function POST(req: Request) {
   let createdOrderId: string | null = null;
@@ -31,8 +34,36 @@ export async function POST(req: Request) {
 
     const items = await resolveCartItems(parsed.data.items);
     const { subtotal, codFee, total } = calcOrderTotals(items, "cod");
+    const fingerprint = orderItemsFingerprint(items, total);
 
     await connectDB();
+
+    const recent = await Order.findOne({
+      userId: auth.userId,
+      paymentMethod: "cod",
+      orderStatus: { $nin: ["failed", "cancelled"] },
+      createdAt: { $gte: new Date(Date.now() - COD_DEDUP_WINDOW_MS) },
+    })
+      .sort({ createdAt: -1 })
+      .select("orderNumber total items orderStatus")
+      .lean();
+
+    if (recent) {
+      const existingFp = orderItemsFingerprint(
+        (recent.items as { productId?: string; qty?: number }[]) ?? [],
+        Number(recent.total ?? 0),
+      );
+      if (existingFp === fingerprint) {
+        return NextResponse.json({
+          success: true,
+          orderId: String(recent._id),
+          orderNumber: recent.orderNumber,
+          total: recent.total ?? total,
+          paymentMethod: "cod",
+          alreadyPlaced: true,
+        });
+      }
+    }
 
     let orderNumber = generateOrderNumber();
     for (let attempt = 0; attempt < 3; attempt++) {

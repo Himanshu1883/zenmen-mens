@@ -12,9 +12,9 @@ Only choices verified in current code.
 
 `src/lib/auth-contact.ts`: `INTERNAL_MOBILE_EMAIL_DOMAIN = "mobile.zenmen.local"`. Mobile signup stores a unique email so NextAuth and the User email index work. UI must not show that address (`getPublicEmail`).
 
-## Admin is layout + helper, not middleware
+## Admin is proxy + layout + requireAdmin
 
-No `middleware.ts`. `src/app/admin/layout.tsx` redirects non-admins to `/`. APIs use `requireAdmin()`.
+Next.js 16 renamed Middleware to Proxy (`src/proxy.ts`). Admin HTML is blocked unless the NextAuth JWT has `role === "admin"`. `src/app/admin/layout.tsx` re-checks `getServerSession`. Client `AdminAuthGuard` redirects on unauthenticated / non-admin (covers bfcache Back). APIs use `requireAdmin()`. Cache-Control `no-store` is set on `/admin` and `/checkout`.
 
 ## Category documents ≠ product.category
 

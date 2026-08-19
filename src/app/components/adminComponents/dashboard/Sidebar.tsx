@@ -1,6 +1,7 @@
 "use client";
 
 import { ZenIcon, type ZenIconName } from "@/components/icons";
+import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -16,10 +17,11 @@ const menuItems: {
   badge: string | null;
 }[] = [
   { icon: "dashboard", label: "Dashboard", path: "/admin", badge: null },
-  { icon: "box", label: "Products", path: "/admin/products", badge: "156" },
+  { icon: "box", label: "Products", path: "/admin/products", badge: null },
+  { icon: "shopping-bag", label: "Inventory", path: "/admin/inventory", badge: null },
   { icon: "sparkles", label: "Categories", path: "/admin/categories", badge: null },
   { icon: "users", label: "Clients", path: "/admin/users", badge: null },
-  { icon: "shopping-cart", label: "Orders", path: "/admin/orders", badge: "24" },
+  { icon: "shopping-cart", label: "Orders", path: "/admin/orders", badge: null },
   { icon: "chart-bar", label: "Analytics", path: "/admin/analytics", badge: null },
   { icon: "cog", label: "Settings", path: "/admin/settings", badge: null },
 ];
@@ -127,6 +129,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
               <button
                 type="button"
+                onClick={() => void signOut({ callbackUrl: "/" })}
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-red-50 group text-[#64748b] hover:text-red-600"
               >
                 <ZenIcon name="sign-out" className="w-5 h-5" />
@@ -143,7 +146,9 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
               </button>
               <button
                 type="button"
+                onClick={() => void signOut({ callbackUrl: "/" })}
                 className="w-10 h-10 rounded-lg flex items-center justify-center hover:bg-red-50 text-[#64748b]"
+                title="Logout"
               >
                 <ZenIcon name="sign-out" className="w-5 h-5" />
               </button>

@@ -13,15 +13,19 @@ import {
   Loader2,
   Lock,
   MapPin,
-  Package,
   ShieldCheck,
 } from "lucide-react";
 import { loadCartFromStorage, saveCartToStorage } from "@/lib/cart-storage";
+import {
+  completedOrderSuccessHref,
+  readLastCompletedOrder,
+  saveLastCompletedOrder,
+} from "@/lib/checkout-complete";
 import { setCartItems } from "@/store/slices/cartSlice";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import CheckoutAuthForm from "./CheckoutAuthForm";
 
@@ -76,6 +80,7 @@ export default function CheckoutClient() {
   const [submitting, setSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [defaultsLoaded, setDefaultsLoaded] = useState(false);
+  const placedLock = useRef(false);
 
   const subtotal = useMemo(
     () => items.reduce((sum, i) => sum + i.price * i.qty, 0),
@@ -154,6 +159,35 @@ export default function CheckoutClient() {
     }
   }, [items, cartHydrated]);
 
+  useEffect(() => {
+    if (status !== "authenticated" || !cartHydrated || items.length > 0) return;
+    const stored = loadCartFromStorage();
+    if (stored.length > 0) {
+      dispatch(setCartItems(stored));
+      return;
+    }
+    const last = readLastCompletedOrder();
+    if (last?.orderNumber) {
+      router.replace(completedOrderSuccessHref(last));
+      return;
+    }
+    router.replace("/collection");
+  }, [status, cartHydrated, items.length, router, dispatch]);
+
+  useEffect(() => {
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (!event.persisted) return;
+      const stored = loadCartFromStorage();
+      if (stored.length > 0) return;
+      const last = readLastCompletedOrder();
+      window.location.replace(
+        last?.orderNumber ? completedOrderSuccessHref(last) : "/collection",
+      );
+    };
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
+  }, []);
+
   const updateShipping = useCallback(
     (field: keyof ShippingInput, value: string) => {
       setShipping((s) => ({ ...s, [field]: value }));
@@ -199,8 +233,10 @@ export default function CheckoutClient() {
         toast.error(data.error ?? "Could not place order");
         return;
       }
+      placedLock.current = true;
       dispatch(clearCart());
-      router.push(
+      saveLastCompletedOrder(String(data.orderNumber), "cod");
+      router.replace(
         `/checkout/success?orderNumber=${encodeURIComponent(data.orderNumber)}&method=cod`,
       );
     } catch {
@@ -277,8 +313,10 @@ export default function CheckoutClient() {
               toast.error(verifyData.error ?? "Payment verification failed");
               return;
             }
+            placedLock.current = true;
             dispatch(clearCart());
-            router.push(
+            saveLastCompletedOrder(String(verifyData.orderNumber), "online");
+            router.replace(
               `/checkout/success?orderNumber=${encodeURIComponent(verifyData.orderNumber)}&method=online`,
             );
           } catch {
@@ -304,6 +342,7 @@ export default function CheckoutClient() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (placedLock.current || submitting) return;
     if (items.length === 0) {
       toast.error("Your cart is empty");
       return;
@@ -406,17 +445,8 @@ export default function CheckoutClient() {
 
   if (items.length === 0) {
     return (
-      <div className="mx-auto max-w-lg px-6 py-24 text-center">
-        <Package className="mx-auto mb-6 h-10 w-10 text-[#7da8c7]" />
-        <h1 className="font-heading text-3xl text-[#0f172a]">
-          Your cart is empty
-        </h1>
-        <Link
-          href="/collection"
-          className="mt-8 inline-flex bg-[#0f172a] px-8 py-3.5 text-[11px] font-medium uppercase tracking-[0.2em] text-white no-underline hover:bg-[#7da8c7]"
-        >
-          Browse collection
-        </Link>
+      <div className="flex min-h-[60vh] items-center justify-center bg-[#f8fafc]">
+        <Loader2 className="h-8 w-8 animate-spin text-[#7da8c7]" />
       </div>
     );
   }

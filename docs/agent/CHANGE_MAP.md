@@ -43,15 +43,16 @@ If you need to change **X**, start at these files. Do not hunt the whole repo.
 | Change | Start |
 |---|---|
 | Cart UI | `CartDrawer.tsx`, `cartSlice.ts`, `cart-storage.ts` |
-| Checkout page | `src/app/checkout/page.tsx` |
+| Checkout page | `src/app/checkout/page.tsx`, `CheckoutClient.tsx`. Empty cart after a completed order redirects to success (or `/collection`). `router.replace` to success so Back skips payment. `src/lib/checkout-complete.ts` |
 | Validation / COD fee | `src/lib/validations/checkout.schema.ts` |
 | Server totals / line resolve | `src/lib/orders.ts` |
-| COD place | `POST /api/orders/cod` → `finalizeCodOrder` |
-| Razorpay place / verify | `api/orders/razorpay/create`, `…/verify`, `api/webhook/razorpay` |
+| COD place | `POST /api/orders/cod` → `finalizeCodOrder`. Same cart+total within 2 minutes returns the existing order |
+| Razorpay place / verify | `api/orders/razorpay/create`, `…/verify`, `api/webhook/razorpay` — verify is idempotent (`alreadyFinalized`) |
 | Finalize + stock + email | `src/services/orderFinalizeService.ts`, `stockService.ts`, `orderEmailService.ts` |
+| Stock rules | Decrement on paid/COD **finalize** (`stockDecremented`). **Not** on delivered. Restock on cancel (`orderCancellationService`) if stock was taken; then `stockDecremented=false`. Manual set/± via admin inventory |
 | Cancel rules | `src/config/cancellationConfig.ts`, `orderCancellationService.ts` |
 | Invoice PDF | `src/utils/generateInvoiceBuffer.ts`, `GET /api/orders/[id]/invoice` |
-| Success UI | `src/app/checkout/success/` |
+| Success UI | `src/app/checkout/success/` — no-store layout; restores last order id from sessionStorage if query missing |
 | WhatsApp product intent (not checkout) | `src/lib/whatsapp-product-order.ts` |
 
 ## Auth / users
@@ -70,15 +71,17 @@ If you need to change **X**, start at these files. Do not hunt the whole repo.
 
 | Change | Start |
 |---|---|
-| Admin gate | `src/app/admin/layout.tsx`, `src/lib/admin-auth.ts` |
+| Admin gate | `src/proxy.ts` (Next 16 Proxy — session JWT `role === "admin"`), `src/app/admin/layout.tsx`, `AdminAuthGuard.tsx`, `src/lib/admin-auth.ts`. Cache-Control no-store via `next.config.ts` + proxy |
 | Shell / sidebar | `adminComponents/dashboard/Layout.tsx`, `Sidebar.tsx`, `admin-theme.ts` |
-| Dashboard stats | `DashboardOverview.tsx` + `GET /api/admin/stats` |
+| Dashboard stats | `DashboardOverview.tsx` + `GET /api/admin/stats` (orders, revenue, users, catalog, health) |
 | Products CRUD UI | `adminComponents/pages/Products.tsx`, `ProductFormModal.tsx`, `api/products*` — form Collection = parent, Category = child; stored as `product.category` / `product.subCategory`. Add/edit modal: required-field errors, hints, and templates in `src/lib/product-form-presets.ts` |
+| **Inventory** | `pages/Inventory.tsx` + `GET/PATCH /api/admin/inventory*` (`q`, `categories`, `stock=in\|low\|out`, `page`). Low-stock threshold: `src/config/inventoryConfig.ts` (5). Movement log: `InventoryLog` |
 | **Categories nested table** | `adminComponents/pages/Categories.tsx` |
 | Category form / product assign | `CategoryFormModal.tsx`, `api/admin/categories*` |
 | Orders UI | `pages/Orders.tsx` → `AdminOrdersPanel.tsx` + `api/admin/orders*` (`status`, `paymentMethod`, `q`, `from`, `to`, `page`) |
-| Analytics / images / sections | Those page components — **mostly mock/static**, not Mongo |
-| Settings chrome | `pages/Settings.tsx` (placeholder profile fields) |
+| Analytics | `Analytics.tsx` + `GET /api/admin/analytics` (users, catalog by `Product.category`, order status, payment mix, AOV) |
+| Settings | `pages/Settings.tsx` — profile/password via `GET/PATCH /api/profile`; store snapshot + email inbox via `GET /api/admin/settings`; Instagram reels UI |
+| Images / sections | Those page components — **mostly mock/static**, not Mongo |
 | Instagram reels admin | `AdminInstagramReelsSettings.tsx` + `api/admin/instagram-reels*` |
 
 ## Categories / megamenu data
@@ -104,6 +107,7 @@ Admin Categories UI groups by `parentId`, then `DEFAULT_CHILD_PARENT_SLUGS` / `D
 | Email from/to | `src/config/emailConfig.ts` |
 | Invoice legal copy | `src/config/invoiceConfig.ts` |
 | Next images / pdfkit | `next.config.ts` |
+| Admin / checkout cache | `next.config.ts` `headers()` + `src/proxy.ts` — `Cache-Control: no-store` |
 | Instagram boot refresh | `src/instrumentation.ts` |
 | Chat models | `src/lib/chat/gemini.ts`, `api/chat/route.ts` |
 

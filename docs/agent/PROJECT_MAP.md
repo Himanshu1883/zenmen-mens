@@ -15,7 +15,7 @@ ZENmen is a Next.js App Router storefront + admin dashboard for a New Delhi besp
 | Storefront | `/`, `/collection`, `/collection/[slug]`, `/checkout`, `/profile`, `/about`, `/contact`, `/appointment`, `/services`, `/stories` | Root `layout.tsx` → Navbar + Providers; `RootLayoutClient` adds Footer, chat, WhatsApp FAB. Hidden on `/admin`. |
 | Admin | `/admin/*` | `src/app/admin/layout.tsx` — session must exist and `role === "admin"`, else redirect `/`. Wrapped in `DashboardLayout` (sidebar + glass UI). |
 
-There is **no `middleware.ts`**. Admin UI is gated by the layout; admin APIs call `requireAdmin()`.
+There is **no `middleware.ts`**. Next.js 16 uses `src/proxy.ts` (Proxy) instead: unauthenticated / non-admin requests to `/admin` redirect to `/`. Admin APIs still call `requireAdmin()`. Layout + client `AdminAuthGuard` re-check the session so browser Back cannot keep a logged-out admin UI.
 
 ---
 
@@ -29,7 +29,7 @@ src/app/                 App Router pages + API routes
   admin/                 Admin pages (thin wrappers around components)
   api/                   Route handlers
   components/            Storefront layout/sections + `adminComponents/`
-src/models/              Mongoose: User, Product, Category, Order, UserNotification, AdminInstagramReelsConfig
+src/models/              Mongoose: User, Product, Category, Order, UserNotification, InventoryLog, AdminInstagramReelsConfig
 src/lib/                 DB, auth, categories, orders, images, payments, chat, Instagram
 src/store/               Canonical Redux store (products, cart, currency)
 src/services/            Order finalize, stock, email, cancel, COD cleanup
@@ -61,6 +61,7 @@ src/utils/               Invoice PDF buffer
 |---|---|
 | `/admin` | DashboardOverview |
 | `/admin/products` | Products |
+| `/admin/inventory` | Inventory (live Mongo stock + movement log) |
 | `/admin/categories` | Categories (nested parent/child table) |
 | `/admin/orders` | Orders / AdminOrdersPanel |
 | `/admin/users` | Users |
@@ -80,7 +81,7 @@ Sidebar: `src/app/components/adminComponents/dashboard/Sidebar.tsx`.
 - **Admin catalog:** `admin/categories`, `admin/categories/[id]`, `admin/categories/[id]/products`, `admin/products/[slug]/category`
 - **Checkout:** `orders/cod`, `orders/razorpay/create`, `orders/razorpay/verify`, `payment/create-order`, `payment/verify`, `webhook/razorpay`, `checkout/defaults`, `order`
 - **Orders / profile:** `orders/[id]/*` (cancel, invoice, eligibility), `profile`, `profile/notifications*`
-- **Admin ops:** `admin/orders*`, `admin/stats`, `admin/instagram-reels*`
+- **Admin ops:** `admin/orders*`, `admin/inventory*`, `admin/stats`, `admin/analytics`, `admin/settings`, `admin/instagram-reels*`
 - **Other:** `contact`, `chat`, `instagram/*`, `cron/instagram`
 
 ---
@@ -91,6 +92,7 @@ Sidebar: `src/app/components/adminComponents/dashboard/Sidebar.tsx`.
 |---|---|---|
 | User | `src/models/User.ts` | `role`: `user` \| `admin`; unique email; sparse unique phone |
 | Product | `src/models/Product.ts` | `category` / `subCategory` are **strings**, not Category ObjectIds |
+| InventoryLog | `src/models/InventoryLog.ts` | Stock movements: sold, cancel restock, manual set/adjust |
 | Category | `src/models/Category.ts` | Nav/megamenu rows; optional `parentId` (one level) |
 | Order | `src/models/Order.ts` | COD / online; dual status fields; Razorpay ids; cancellation; emailLog |
 | UserNotification | `src/models/UserNotification.ts` | In-app order events |

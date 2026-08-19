@@ -186,6 +186,14 @@ async function cancelOrderCore(
   if (order.stockDecremented) {
     await restoreStockForOrder(
       order.items.map((i) => ({ productId: i.productId, qty: i.qty })),
+      {
+        reason: "order_cancel_restock",
+        orderId: String(order._id),
+      },
+    );
+    await Order.updateOne(
+      { _id: order._id },
+      { $set: { stockDecremented: false } },
     );
   }
 

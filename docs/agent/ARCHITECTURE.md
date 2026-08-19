@@ -26,9 +26,10 @@ Browser  →  NextAuth SessionProvider (`src/app/providers.tsx`)
 **Role:** stored on `User.role`, copied onto JWT in `jwt` callback, exposed on `session.user.role`.
 
 **Gates:**
-- Admin pages: `src/app/admin/layout.tsx` (`getServerSession` + `role === "admin"`).
+- Admin pages: `src/proxy.ts` (JWT `role === "admin"`) + `src/app/admin/layout.tsx` + client `AdminAuthGuard`.
 - Admin APIs: `requireAdmin()` → 401 `{ error: "Admin access required" }`.
 - Checkout / customer order APIs: `requireAuthUser()` (session email → Mongo `_id` via `resolveMongoUserId`).
+- `/admin` and `/checkout` send `Cache-Control: no-store` so Back cannot restore stale HTML.
 
 Google first login creates a User with `password: ""`.
 

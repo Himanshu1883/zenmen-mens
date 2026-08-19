@@ -9,6 +9,7 @@ import {
 import Order from "@/models/Order";
 import { sendOrderStatusEmail } from "@/services/orderEmailService";
 import { createUserNotification } from "@/services/orderNotifyService";
+import { restoreStockForOrder } from "@/services/stockService";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -48,6 +49,22 @@ export async function PATCH(req: Request, ctx: Ctx) {
   if (next === "delivered" && order.paymentMethod === "cod") {
     order.paymentStatus = "paid";
     if (order.payment) order.payment.status = "paid";
+  }
+
+  // Delivered never touches stock — it was taken at paid/COD finalize.
+  if (next === "cancelled" && order.stockDecremented) {
+    await restoreStockForOrder(
+      order.items.map((i: { productId: string; qty: number }) => ({
+        productId: i.productId,
+        qty: i.qty,
+      })),
+      {
+        reason: "order_cancel_restock",
+        orderId: String(order._id),
+        note: "Admin status set to cancelled",
+      },
+    );
+    order.stockDecremented = false;
   }
 
   await order.save();

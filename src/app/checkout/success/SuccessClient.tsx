@@ -1,15 +1,61 @@
 "use client";
 
+import {
+  completedOrderSuccessHref,
+  readLastCompletedOrder,
+  saveLastCompletedOrder,
+} from "@/lib/checkout-complete";
 import { CheckCircle2, PartyPopper, ShoppingBag } from "lucide-react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 export default function SuccessClient() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const orderNumber = searchParams.get("orderNumber") ?? "";
   const method = searchParams.get("method") ?? "online";
 
   const isCod = method === "cod";
+
+  useEffect(() => {
+    if (orderNumber) {
+      saveLastCompletedOrder(orderNumber, method);
+      return;
+    }
+    const last = readLastCompletedOrder();
+    if (last?.orderNumber) {
+      router.replace(completedOrderSuccessHref(last));
+      return;
+    }
+    router.replace("/profile");
+  }, [orderNumber, method, router]);
+
+  useEffect(() => {
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (!event.persisted) return;
+      const params = new URLSearchParams(window.location.search);
+      const current = params.get("orderNumber");
+      const last = readLastCompletedOrder();
+      if (current) {
+        window.history.replaceState(null, "", window.location.href);
+        return;
+      }
+      window.location.replace(
+        last?.orderNumber ? completedOrderSuccessHref(last) : "/profile",
+      );
+    };
+    window.addEventListener("pageshow", onPageShow);
+    return () => window.removeEventListener("pageshow", onPageShow);
+  }, []);
+
+  if (!orderNumber) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center bg-[#f8fafc]">
+        <p className="text-sm text-[#64748b]">Loading…</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#f8fafc] px-6 py-20">
@@ -34,16 +80,14 @@ export default function SuccessClient() {
             : "Payment received successfully. Our team will reach out shortly with tailoring and delivery details."}
         </p>
 
-        {orderNumber ? (
-          <div className="mx-auto mt-10 inline-block rounded-sm border border-[#e2e8f0] bg-white px-8 py-5 shadow-sm">
-            <p className="text-[10px] uppercase tracking-[0.22em] text-[#64748b]">
-              Order ID
-            </p>
-            <p className="mt-2 font-heading text-2xl tracking-wide text-[#0f172a]">
-              {orderNumber}
-            </p>
-          </div>
-        ) : null}
+        <div className="mx-auto mt-10 inline-block rounded-sm border border-[#e2e8f0] bg-white px-8 py-5 shadow-sm">
+          <p className="text-[10px] uppercase tracking-[0.22em] text-[#64748b]">
+            Order ID
+          </p>
+          <p className="mt-2 font-heading text-2xl tracking-wide text-[#0f172a]">
+            {orderNumber}
+          </p>
+        </div>
 
         <div className="mt-12 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link
