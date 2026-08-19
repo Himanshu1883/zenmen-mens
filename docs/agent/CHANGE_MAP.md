@@ -33,6 +33,7 @@ If you need to change **X**, start at these files. Do not hunt the whole repo.
 | Collection URL contract | `categoryCollectionHref` in `src/lib/categories.ts`. Collection grid matches parent/child tags **and** title; a product whose `category` is another collection parent stays only on that collection. Empty `subCategory` is persisted on product PUT. |
 | Admin product list filters | `adminComponents/pages/Products.tsx` — collections from `GET /api/admin/categories`; list query `GET /api/products?admin=1` with `categories=`, `q`, `stock`, `featured`, `available` |
 | Product card | `src/app/components/ui/ProductCard.tsx`, `collection/CollectionProductCard.tsx` |
+| Product selling / compare-at display | `src/lib/product-price.ts` — selling is always `product.price`; strike-through is `comparePrice` when higher. Home rails, collection cards, and PDP use this helper. |
 | PDP | `src/app/collection/[slug]/ProductDetailClient.tsx` + `GET /api/products/[slug]` |
 | Primary image | `src/lib/product-images.ts` |
 | Product model / slug | `src/models/Product.ts`, `src/lib/product-slug.ts` |

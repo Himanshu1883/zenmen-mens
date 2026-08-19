@@ -2,6 +2,7 @@
 
 import { useDisplayPrice } from "@/hooks/useDisplayPrice";
 import { useSwipeSlider } from "@/hooks/useSwipeSlider";
+import { getCompareAtPrice, getSellingPrice } from "@/lib/product-price";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { addItem } from "@/store/slices/cartSlice";
 import { fetchProducts } from "@/store/slices/productSlice";
@@ -19,6 +20,7 @@ type SlideProduct = {
   name: string;
   category: string;
   priceInr: number;
+  compareInr: number | null;
   image: string;
   imageAlt: string;
   href: string;
@@ -31,13 +33,6 @@ type SlideProduct = {
 
 function primaryImage(product: Product) {
   return product.images?.find((i) => i.isPrimary) ?? product.images?.[0];
-}
-
-function displayPriceInr(product: Product): number {
-  const hasDiscount = Boolean(product.discount && product.discount > 0);
-  return hasDiscount
-    ? Math.round(product.price * (1 - (product.discount ?? 0) / 100))
-    : product.price;
 }
 
 function isEligible(product: Product): boolean {
@@ -73,7 +68,8 @@ function pickSliderProducts(catalog: Product[]): SlideProduct[] {
       key: product._id,
       name: product.title,
       category: product.category ?? product.subCategory ?? "Collection",
-      priceInr: displayPriceInr(product),
+      priceInr: getSellingPrice(product),
+      compareInr: getCompareAtPrice(product),
       image: img.url,
       imageAlt: img.alt ?? product.title,
       href: `/collection/${encodeURIComponent(product.slug)}`,
@@ -331,7 +327,7 @@ const ProductSlider = () => {
                     {product.name}
                   </h3>
                   <p
-                    className="text-[#0f172a]"
+                    className="flex flex-wrap items-baseline gap-2 text-[#0f172a]"
                     style={{
                       fontFamily: "var(--heading-font-family)",
                       fontSize: "20px",
@@ -339,6 +335,14 @@ const ProductSlider = () => {
                     }}
                   >
                     {formatPrice(product.priceInr)}
+                    {product.compareInr != null ? (
+                      <span
+                        className="text-[13px] font-normal text-[#94a3b8] line-through"
+                        style={{ fontFamily: "inherit" }}
+                      >
+                        {formatPrice(product.compareInr)}
+                      </span>
+                    ) : null}
                   </p>
                 </Link>
               </motion.div>

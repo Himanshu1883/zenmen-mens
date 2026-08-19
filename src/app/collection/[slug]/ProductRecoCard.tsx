@@ -1,6 +1,7 @@
 "use client";
 
 import { useDisplayPrice } from "@/hooks/useDisplayPrice";
+import { getDisplayPricing } from "@/lib/product-price";
 import { quickAddProductToCart } from "@/lib/quick-add-cart";
 import { useAppDispatch } from "@/store/hooks";
 import type { Product } from "@/types/product";
@@ -14,6 +15,7 @@ type Props = {
 export default function ProductRecoCard({ product }: Props) {
   const dispatch = useAppDispatch();
   const { format: displayPrice } = useDisplayPrice();
+  const { selling, compare } = getDisplayPricing(product);
 
   const image =
     product.images?.find((img) => img.isPrimary) ?? product.images?.[0];
@@ -48,8 +50,13 @@ export default function ProductRecoCard({ product }: Props) {
             {product.category ?? "Collection"}
             {product.colors?.[0] ? ` · ${product.colors[0]}` : ""}
           </p>
-          <p className="mt-1.5 text-[1.05rem] text-[#0f172a] sm:text-[1.15rem]">
-            {displayPrice(product.price)}
+          <p className="mt-1.5 flex flex-wrap items-baseline gap-2 text-[1.05rem] text-[#0f172a] sm:text-[1.15rem]">
+            {displayPrice(selling)}
+            {compare != null ? (
+              <span className="text-[0.9rem] font-normal text-[#94a3b8] line-through">
+                {displayPrice(compare)}
+              </span>
+            ) : null}
           </p>
         </div>
       </Link>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useDisplayPrice } from "@/hooks/useDisplayPrice";
+import { getCompareAtPrice, getSellingPrice } from "@/lib/product-price";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { addItem } from "@/store/slices/cartSlice";
 import { fetchProducts } from "@/store/slices/productSlice";
@@ -639,10 +640,8 @@ export default function Products() {
                   .reduce((sum, ch) => sum + ch.charCodeAt(0), 0) + index;
               const shouldAutoPreview =
                 hasImagePair && autoPreviewSeed % 3 === 0;
-              const hasDiscount = product.discount && product.discount > 0;
-              const discountedPrice = hasDiscount
-                ? product.price * (1 - (product.discount || 0) / 100)
-                : product.price;
+              const sellingPrice = getSellingPrice(product);
+              const compareAt = getCompareAtPrice(product);
 
               return (
                 <Link
@@ -707,15 +706,13 @@ export default function Products() {
                     <div className="card-footer">
                       <div className="card-price-wrap">
                         <span className="card-price">
-                          {displayPrice(
-                            hasDiscount ? discountedPrice : product.price,
-                          )}
+                          {displayPrice(sellingPrice)}
                         </span>
-                        {hasDiscount && (
+                        {compareAt != null ? (
                           <span className="card-price-compare">
-                            {displayPrice(product.price)}
+                            {displayPrice(compareAt)}
                           </span>
-                        )}
+                        ) : null}
                       </div>
                       <button
                         type="button"
@@ -738,9 +735,7 @@ export default function Products() {
                               _id: product._id,
                               title: product.title,
                               slug: product.slug ?? product._id,
-                              price: hasDiscount
-                                ? Math.round(discountedPrice)
-                                : product.price,
+                              price: sellingPrice,
                               image: primaryImage ?? {
                                 url: "",
                                 alt: product.title,

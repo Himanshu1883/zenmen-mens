@@ -1,8 +1,9 @@
 "use client";
 
 import { useDisplayPrice } from "@/hooks/useDisplayPrice";
-import { getPrimaryImageIndex } from "@/lib/product-images";
 import { getDeliveryBadgeLabel } from "@/lib/delivery-estimate";
+import { getPrimaryImageIndex } from "@/lib/product-images";
+import { getDisplayPricing } from "@/lib/product-price";
 import type { Product } from "@/types/product";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -54,14 +55,7 @@ export default function CollectionProductCard({
     ? `/collection/${encodeURIComponent(product.slug)}`
     : "/collection";
 
-  const compare =
-    product.comparePrice && product.comparePrice > product.price
-      ? product.comparePrice
-      : null;
-  const pct =
-    compare != null
-      ? Math.round(((compare - product.price) / compare) * 100)
-      : product.discount;
+  const { selling, compare, salePercent: pct } = getDisplayPricing(product);
 
   const showSale = (pct != null && pct > 0) || compare != null;
   const showTop =
@@ -155,7 +149,7 @@ export default function CollectionProductCard({
         <p className="m-0 mt-1 text-[12px] text-[#94a3b8]">ZENmen</p>
         <div className="mt-1.5 flex flex-wrap items-baseline gap-2">
           <span className="text-[14px] font-medium text-[#0f172a]">
-            {displayPrice(product.price)}
+            {displayPrice(selling)}
           </span>
           {compare != null ? (
             <span className="text-[13px] text-[#94a3b8] line-through">

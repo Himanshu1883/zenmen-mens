@@ -6,6 +6,7 @@ import {
   getDeliverySummaryLine,
 } from "@/lib/delivery-estimate";
 import { getPrimaryImage, getPrimaryImageIndex } from "@/lib/product-images";
+import { getDisplayPricing } from "@/lib/product-price";
 import { addRecentlyViewed } from "@/lib/recently-viewed";
 import {
   buildProductWhatsAppMessage,
@@ -855,6 +856,8 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const rating = product.rating ?? 4.6;
   const reviewCount = product.numReviews ?? 42;
   const stars = Array.from({ length: 5 }, (_, i) => i < Math.floor(rating));
+  const { selling: sellingPrice, compare: compareAt } =
+    getDisplayPricing(product);
 
   const specs =
     product.specifications?.filter((s) => s.label.trim() || s.value.trim())
@@ -1073,9 +1076,16 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   {rating} · {reviewCount} reviews
                 </span>
               </div>
-              <p className="font-heading text-[2.4rem] font-normal leading-none text-[#0f172a]">
-                {displayPrice(product.price)}
-              </p>
+              <div className="flex items-baseline gap-2.5">
+                <p className="font-heading text-[2.4rem] font-normal leading-none text-[#0f172a]">
+                  {displayPrice(sellingPrice)}
+                </p>
+                {compareAt != null ? (
+                  <span className="text-[1.05rem] text-[#94a3b8] line-through">
+                    {displayPrice(compareAt)}
+                  </span>
+                ) : null}
+              </div>
             </div>
 
             {/* Color picker */}
@@ -1371,7 +1381,12 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 {selectedColor} · Size {selectedSize}
               </p>
               <p className="mt-1.5 font-['Cormorant_Garamond'] text-[1.25rem] leading-none text-[#0f172a] sm:text-[1.45rem]">
-                {displayPrice(product.price)}
+                {displayPrice(sellingPrice)}
+                {compareAt != null ? (
+                  <span className="ml-2 text-[0.95rem] text-[#94a3b8] line-through sm:text-[1.05rem]">
+                    {displayPrice(compareAt)}
+                  </span>
+                ) : null}
               </p>
             </div>
 
