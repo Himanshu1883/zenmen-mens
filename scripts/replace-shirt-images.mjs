@@ -38,8 +38,7 @@ async function uploadFile(bucket, filePath, filename, metadata) {
   const buffer = fs.readFileSync(filePath);
   const id = await new Promise((resolve, reject) => {
     const stream = bucket.openUploadStream(filename, {
-      contentType: "image/jpeg",
-      metadata,
+      metadata: { contentType: "image/jpeg", ...metadata },
     });
     stream.once("error", reject);
     stream.once("finish", () => resolve(stream.id));

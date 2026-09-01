@@ -24,12 +24,16 @@ function mimeFromFilename(filename?: string) {
 function fileHeaders(file: {
   filename?: string;
   contentType?: string | null;
+  metadata?: { contentType?: string } | null;
   length?: number;
 }) {
+  const stored =
+    file.contentType?.trim() ||
+    file.metadata?.contentType?.trim() ||
+    "";
   const type =
-    file.contentType?.trim() &&
-    file.contentType !== "application/octet-stream"
-      ? file.contentType
+    stored && stored !== "application/octet-stream"
+      ? stored
       : mimeFromFilename(file.filename) || "application/octet-stream";
   const filename = file.filename?.replace(/[^\w.-]+/g, "_") || "image";
   const headers: Record<string, string> = {

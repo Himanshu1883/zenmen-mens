@@ -165,8 +165,7 @@ async function uploadFile(bucket, filePath, metadata) {
   const filename = path.basename(filePath);
   const id = await new Promise((resolve, reject) => {
     const stream = bucket.openUploadStream(filename, {
-      contentType: mimeFromName(filename),
-      metadata,
+      metadata: { contentType: mimeFromName(filename), ...metadata },
     });
     stream.once("error", reject);
     stream.once("finish", () => resolve(stream.id));

@@ -85,8 +85,10 @@ export async function uploadProductImageBuffer(opts: {
   const bucket = await getProductImageBucket();
   const id = await new Promise<ObjectId>((resolve, reject) => {
     const stream = bucket.openUploadStream(opts.filename, {
-      contentType: opts.contentType,
-      metadata: opts.metadata,
+      metadata: {
+        ...opts.metadata,
+        contentType: opts.contentType,
+      },
     });
     stream.once("error", reject);
     stream.once("finish", () => resolve(stream.id as ObjectId));
