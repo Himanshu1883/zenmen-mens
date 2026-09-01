@@ -1,8 +1,13 @@
-import cloudinary from "@/lib/cloudinary";
-import { resolveImagePublicId } from "@/lib/cloudinary-public-id";
 import { requireAdmin } from "@/lib/admin-auth";
 import { connectDB } from "@/lib/db";
 import { findProductBySlug } from "@/lib/product-slug";
+import { productHasStorefrontImage } from "@/lib/product-images";
+import {
+  destroyGridFsImages,
+  destroyRemovedGridFsImages,
+  processIncomingProductImages,
+  type IncomingProductImage,
+} from "@/lib/product-image-store";
 import Product from "@/models/Product";
 import { NextResponse } from "next/server";
 import slugify from "slugify";
@@ -12,15 +17,6 @@ interface Params {
     slug: string;
   }>;
 }
-
-type IncomingImage = {
-  url: string;
-  alt?: string;
-  isPrimary?: boolean;
-  order?: number;
-  public_id?: string;
-  file?: string;
-};
 
 // GET SINGLE PRODUCT
 export async function GET(req: Request, context: Params) {
@@ -40,7 +36,11 @@ export async function GET(req: Request, context: Params) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    if (!adminView && product.isAvailable === false) {
+    if (
+      !adminView &&
+      (product.isAvailable === false ||
+        !productHasStorefrontImage(product.images))
+    ) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
@@ -53,92 +53,6 @@ export async function GET(req: Request, context: Params) {
       { status: 500 },
     );
   }
-}
-
-async function destroyCloudinaryImages(
-  images: { public_id?: string }[],
-): Promise<void> {
-  await Promise.all(
-    images.map(async (img) => {
-      if (img.public_id) {
-        try {
-          await cloudinary.uploader.destroy(img.public_id);
-        } catch (e) {
-          console.error("[cloudinary destroy]", img.public_id, e);
-        }
-      }
-    }),
-  );
-}
-
-async function processIncomingImages(
-  images: IncomingImage[],
-  title: string,
-  existingImages: IncomingImage[],
-): Promise<
-  {
-    url: string;
-    alt: string;
-    isPrimary: boolean;
-    order: number;
-    public_id: string;
-  }[]
-> {
-  const result = await Promise.all(
-    images.map(async (img, index) => {
-      if (img.file) {
-        const uploaded = await cloudinary.uploader.upload(img.file, {
-          folder: "zenmen/products",
-        });
-        return {
-          url: uploaded.secure_url,
-          public_id: uploaded.public_id,
-          alt: img.alt || title,
-          isPrimary: Boolean(img.isPrimary),
-          order: img.order ?? index,
-        };
-      }
-
-      if (img.url) {
-        const public_id = resolveImagePublicId(img, existingImages);
-
-        if (!public_id) {
-          console.warn("[PUT] could not resolve public_id:", img.url);
-          return null;
-        }
-
-        return {
-          url: img.url,
-          public_id,
-          alt: img.alt || title,
-          isPrimary: Boolean(img.isPrimary),
-          order: img.order ?? index,
-        };
-      }
-
-      return null;
-    }),
-  );
-
-  const cleaned = result.filter(Boolean) as {
-    url: string;
-    alt: string;
-    isPrimary: boolean;
-    order: number;
-    public_id: string;
-  }[];
-
-  if (cleaned.length > 0 && !cleaned.some((i) => i.isPrimary)) {
-    cleaned[0].isPrimary = true;
-  }
-
-  const primaryIdx = cleaned.findIndex((i) => i.isPrimary);
-  const chosen = primaryIdx >= 0 ? primaryIdx : 0;
-  for (let i = 0; i < cleaned.length; i++) {
-    cleaned[i].isPrimary = i === chosen;
-  }
-
-  return cleaned;
 }
 
 // UPDATE PRODUCT
@@ -249,22 +163,11 @@ export async function PUT(request: Request, context: Params) {
         );
       }
 
-      const existingImages = (existing.images ?? []) as IncomingImage[];
-      const incomingIds = new Set(
-        body.images
-          .map((img: IncomingImage) => resolveImagePublicId(img, existingImages))
-          .filter(Boolean) as string[],
-      );
-
-      const removed = existingImages.filter((img) => {
-        const pid = resolveImagePublicId(img, existingImages);
-        return pid && !incomingIds.has(pid);
-      });
-      await destroyCloudinaryImages(removed);
+      const existingImages = (existing.images ?? []) as IncomingProductImage[];
 
       try {
-        const processedImages = await processIncomingImages(
-          body.images,
+        const processedImages = await processIncomingProductImages(
+          body.images as IncomingProductImage[],
           title,
           existingImages,
         );
@@ -273,12 +176,13 @@ export async function PUT(request: Request, context: Params) {
           return NextResponse.json(
             {
               error:
-                "No valid images to save. Use Cloudinary-hosted image URLs or re-upload.",
+                "No valid images to save. Upload an image file or keep an existing photo.",
             },
             { status: 400 },
           );
         }
 
+        await destroyRemovedGridFsImages(existingImages, processedImages);
         updates.images = processedImages;
       } catch (imgErr) {
         console.error("[PUT images]", imgErr);
@@ -331,7 +235,7 @@ export async function DELETE(_req: Request, context: Params) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    await destroyCloudinaryImages(doc.images);
+    await destroyGridFsImages(doc.images);
 
     await Product.findOneAndDelete({ _id: doc._id });
 

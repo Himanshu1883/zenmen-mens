@@ -1,8 +1,8 @@
 import { requireAdmin } from "@/lib/admin-auth";
-import cloudinary from "@/lib/cloudinary";
 import { connectDB } from "@/lib/db";
+import { processIncomingProductImages } from "@/lib/product-image-store";
+import { STOREFRONT_HAS_IMAGE_FILTER } from "@/lib/product-images";
 import Product from "@/models/Product";
-import { normalizePrimaryFlags } from "@/lib/product-images";
 import { escapeRegex } from "@/lib/utils";
 import { NextResponse } from "next/server";
 import slugify from "slugify";
@@ -39,6 +39,7 @@ export async function GET(request: Request) {
 
     if (!admin) {
       filters.push({ isAvailable: true });
+      filters.push(STOREFRONT_HAS_IMAGE_FILTER);
     }
 
     const categoryNames = categoriesParam
@@ -211,23 +212,17 @@ export async function POST(request: Request) {
       );
     }
 
-    const uploadedImages = normalizePrimaryFlags(
-      await Promise.all(
-        images.map(async (img: IncomingImage, index: number) => {
-          const uploaded = await cloudinary.uploader.upload(img.file!, {
-            folder: "zenmen/products",
-          });
-
-          return {
-            url: uploaded.secure_url,
-            public_id: uploaded.public_id,
-            alt: img.alt || title,
-            isPrimary: Boolean(img.isPrimary),
-            order: img.order ?? index,
-          };
-        }),
-      ),
+    const uploadedImages = await processIncomingProductImages(
+      images as IncomingImage[],
+      title,
     );
+
+    if (!uploadedImages.length) {
+      return NextResponse.json(
+        { error: "Upload at least one product image" },
+        { status: 400 },
+      );
+    }
 
     // GENERATE SLUG
     const slug = slugify(title, {

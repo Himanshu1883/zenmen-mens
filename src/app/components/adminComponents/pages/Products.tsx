@@ -7,7 +7,10 @@ import {
   productCategoryMatchTokens,
   resolveCategoryParentId,
 } from "@/lib/categories";
-import { getPrimaryImage } from "@/lib/product-images";
+import {
+  getPrimaryImage,
+  shouldUnoptimizeProductImage,
+} from "@/lib/product-images";
 import type { Category } from "@/types/category";
 import type { Product } from "@/types/product";
 import { ChevronDown, Edit, Eye, Plus, Search, Trash2, X } from "lucide-react";
@@ -286,7 +289,7 @@ export default function Products() {
     const label = product.title || product.slug;
     if (
       !confirm(
-        `Delete "${label}"? Images will be removed from Cloudinary and the database.`,
+        `Delete "${label}"? Images will be removed from MongoDB and the product record.`,
       )
     ) {
       return;
@@ -538,6 +541,9 @@ export default function Products() {
                     alt={getImageAlt(product)}
                     fill
                     sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                    unoptimized={shouldUnoptimizeProductImage(
+                      getImageUrl(product),
+                    )}
                     className="object-cover transition-transform group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">

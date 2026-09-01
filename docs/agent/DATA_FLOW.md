@@ -30,7 +30,7 @@ Admin-only extras (with admin=1):
   stats                catalog-wide stock counts (unfiltered)
 ```
 
-Admin creating products: `POST /api/products` (requireAdmin) uploads images to Cloudinary, `normalizePrimaryFlags`, slugify title.
+Admin creating products: `POST /api/products` (requireAdmin) uploads images to Mongo GridFS, `normalizePrimaryFlags`, slugify title. Files are served at `GET /api/media/[id]`.
 
 ---
 

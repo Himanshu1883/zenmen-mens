@@ -1,5 +1,6 @@
 // src/app/sitemap.ts
 import { connectDB } from "@/lib/db";
+import { STOREFRONT_HAS_IMAGE_FILTER } from "@/lib/product-images";
 import { isStaticSafeSlug } from "@/lib/product-slug";
 import Product from "@/models/Product";
 import type { MetadataRoute } from "next";
@@ -30,7 +31,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     await connectDB();
-    const products = await Product.find({}, { slug: 1, updatedAt: 1 }).lean();
+    const products = await Product.find(
+      { isAvailable: true, ...STOREFRONT_HAS_IMAGE_FILTER },
+      { slug: 1, updatedAt: 1 },
+    ).lean();
 
     const productUrls: MetadataRoute.Sitemap = products
       .filter((p) => isStaticSafeSlug(p.slug))

@@ -38,6 +38,7 @@ Project-specific. Not generic style advice.
 
 ## Images
 
+- Product photos live in Mongo GridFS (`src/lib/gridfs.ts`). Serve via `/api/media/[id]`.
 - Use `normalizePrimaryFlags` on write and `getPrimaryImage` / `getPrimaryImageIndex` on read (`src/lib/product-images.ts`).
 
 ## Money

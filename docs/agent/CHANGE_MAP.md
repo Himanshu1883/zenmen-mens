@@ -32,7 +32,7 @@ If you need to change **X**, start at these files. Do not hunt the whole repo.
 | Change | Start |
 |---|---|
 | Collection grid / filters | `src/app/collection/page.tsx`, `CollectionSidebarFilters`, `MobileFilterBar`. All-collections (`/collection`) lists every nav **Collection**; a specific collection (`?q=` / `?category=`) lists that parent’s **Category** children from the nav tree (not only ones with products). `?q=accessories` unions accessory parents (Buttons, Tie, Broches). Helpers: `resolveCollectionPageContext`, `productInCollectionGroup` in `src/lib/categories.ts` |
-| Collection URL contract | `categoryCollectionHref` in `src/lib/categories.ts`. Accessories hub: `ACCESSORIES_COLLECTION_HREF` (`/collection?q=accessories`). Collection grid matches parent/child tags **and** title; a product whose `category` is another collection parent stays only on that collection. Empty `subCategory` is persisted on product PUT. |
+| Collection URL contract | `categoryCollectionHref` in `src/lib/categories.ts`. Accessories hub: `ACCESSORIES_COLLECTION_HREF` (`/collection?q=accessories`). Collection grid matches parent/child tags **and** title; a product whose `category` is another collection parent stays only on that collection. Empty `subCategory` is persisted on product PUT. Storefront hides products that still use Cloudinary URLs (`STOREFRONT_HAS_IMAGE_FILTER` in `product-images.ts`); admin `?admin=1` still lists them. |
 | Admin product list filters | `adminComponents/pages/Products.tsx` — collections from `GET /api/admin/categories`; list query `GET /api/products?admin=1` with `categories=`, `q`, `stock`, `featured`, `available` |
 | Product card | `src/app/components/ui/ProductCard.tsx`, `collection/CollectionProductCard.tsx` |
 | Product selling / compare-at display | `src/lib/product-price.ts` — selling is always `product.price`; strike-through is `comparePrice` when higher. Home rails, collection cards, and PDP use this helper. |
@@ -105,7 +105,8 @@ Admin Categories UI groups by `parentId`, then `DEFAULT_CHILD_PARENT_SLUGS` / `D
 | Change | Start |
 |---|---|
 | Mongo connect | `src/lib/db.ts` — read `MONGODB_URI` inside `connectDB()` (do not throw at import, so `next build` can collect page data without Mongo). Sitemap falls back to static URLs if DB is unavailable. |
-| Cloudinary | `src/lib/cloudinary.ts` |
+| Cloudinary | `src/lib/cloudinary.ts` (unused for product photos) |
+| Product images / GridFS | `src/lib/gridfs.ts`, `src/lib/product-image-store.ts`, `GET /api/media/[id]`. Admin uploads save to Mongo. Seed local files with `node scripts/migrate-images-to-gridfs.mjs` (`assests/current` + `assests/allCollections`). |
 | Razorpay keys / webhook | `src/lib/razorpay.ts` |
 | Email from/to | `src/config/emailConfig.ts` |
 | Invoice legal copy | `src/config/invoiceConfig.ts` |

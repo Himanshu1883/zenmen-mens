@@ -113,6 +113,7 @@ Sidebar: `src/app/components/adminComponents/dashboard/Sidebar.tsx`.
 | `src/lib/categories.ts` | Default hierarchy, `buildNavMenuGroups`, collection hrefs |
 | `src/lib/category-seed.ts` | Idempotent upsert + parent linking |
 | `src/lib/product-images.ts` | Primary-image helpers |
+| `src/lib/gridfs.ts` | Mongo GridFS bucket for product photos |
 | `src/lib/orders.ts` | Resolve cart from DB, totals, order numbers |
-| `src/lib/razorpay.ts` / `cloudinary.ts` | Payment / image SDKs |
+| `src/lib/razorpay.ts` / `cloudinary.ts` | Payment SDK; Cloudinary leftover (product photos use GridFS) |
 | `src/lib/currency.ts` | Display FX (prices stored INR) |

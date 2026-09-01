@@ -59,9 +59,9 @@ Checkout re-resolves line items from Mongo (`resolveCartItems`) — client price
 
 ## Images
 
-Uploads go through Cloudinary (`src/lib/cloudinary.ts`). Product images are `{ url, alt, isPrimary, order, public_id }`. Always use `getPrimaryImage` / `normalizePrimaryFlags` from `src/lib/product-images.ts` — do not assume `images[0]` is primary except as fallback.
+Uploads go through MongoDB GridFS (`src/lib/gridfs.ts`, bucket `productImages`). Product images are `{ url, alt, isPrimary, order, public_id }` where `url` is `/api/media/<fileId>` and `public_id` is the GridFS ObjectId. Always use `getPrimaryImage` / `normalizePrimaryFlags` from `src/lib/product-images.ts` — do not assume `images[0]` is primary except as fallback.
 
-`next.config.ts` allows `res.cloudinary.com` and `images.unsplash.com`.
+`next.config.ts` still allows `res.cloudinary.com` and `images.unsplash.com` for leftover remote URLs. Storefront product cards use `<img>` so GridFS paths work without the image optimizer.
 
 ---
 

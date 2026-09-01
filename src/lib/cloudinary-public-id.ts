@@ -1,8 +1,24 @@
 /**
- * Resolve Cloudinary public_id when legacy products only stored image URLs.
+ * Resolve a stored image id: GridFS ObjectId, `/api/media/:id`, or
+ * a legacy Cloudinary public_id parsed from a delivery URL.
  */
 
 type ImageRef = { url?: string; public_id?: string };
+
+/** `/api/media/<24-char ObjectId>` from a relative or absolute URL */
+export function idFromMediaUrl(url: string): string | null {
+  if (!url) return null;
+  try {
+    const path =
+      url.startsWith("http://") || url.startsWith("https://")
+        ? new URL(url).pathname
+        : url.split("?")[0];
+    const match = path.match(/^\/api\/media\/([a-f0-9]{24})$/i);
+    return match?.[1] ?? null;
+  } catch {
+    return null;
+  }
+}
 
 /** Parse public_id from a Cloudinary delivery URL */
 export function publicIdFromCloudinaryUrl(url: string): string | null {
@@ -44,7 +60,9 @@ export function resolveImagePublicId(
   const fromExisting = existingImages?.find((e) => e.url === img.url)?.public_id;
   if (fromExisting?.trim()) return fromExisting.trim();
 
-  if (img.url) return publicIdFromCloudinaryUrl(img.url);
+  if (img.url) {
+    return idFromMediaUrl(img.url) ?? publicIdFromCloudinaryUrl(img.url);
+  }
 
   return null;
 }

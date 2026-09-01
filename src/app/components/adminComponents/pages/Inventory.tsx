@@ -6,6 +6,7 @@ import {
   productCategoryMatchTokens,
   resolveCategoryParentId,
 } from "@/lib/categories";
+import { shouldUnoptimizeProductImage } from "@/lib/product-images";
 import type { Category } from "@/types/category";
 import { History, Minus, Plus, Search, X } from "lucide-react";
 import Image from "next/image";
@@ -599,6 +600,9 @@ export default function Inventory() {
                               alt={product.image.alt}
                               fill
                               sizes="48px"
+                              unoptimized={shouldUnoptimizeProductImage(
+                                product.image.url,
+                              )}
                               className="object-cover"
                             />
                           </div>

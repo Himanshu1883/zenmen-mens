@@ -33,3 +33,21 @@ export function normalizePrimaryFlags<T extends ProductImageRef>(
     isPrimary: i === primaryIdx,
   }));
 }
+
+/** Next/Image cannot optimize GridFS `/api/media/` streams. */
+export function shouldUnoptimizeProductImage(src: string) {
+  return src.startsWith("/api/media/") || src.startsWith("data:");
+}
+
+/** Storefront only lists products whose photos are in Mongo GridFS. */
+export const STOREFRONT_HAS_IMAGE_FILTER = {
+  "images.url": { $regex: "^/api/media/" },
+};
+
+export function productHasStorefrontImage(
+  images: ProductImageRef[] | undefined,
+): boolean {
+  return (images ?? []).some(
+    (img) => typeof img.url === "string" && img.url.startsWith("/api/media/"),
+  );
+}
