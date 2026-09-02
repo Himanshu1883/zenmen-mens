@@ -4,6 +4,7 @@ import { ZenIcon } from "@/components/icons";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setCartOpen } from "@/store/slices/cartSlice";
 import { fetchProducts } from "@/store/slices/productSlice";
+import { productCollectionHref } from "@/lib/product-slug";
 import type { Product } from "@/types/product";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -222,7 +223,7 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
             ) : (
               <ul className="divide-y divide-[#e8e0d6] rounded-lg border border-[#e8e0d6] bg-white">
                 {results.map((p) => {
-                  const href = `/collection/${encodeURIComponent(p.slug)}`;
+                  const href = productCollectionHref(p.slug);
                   const img = primaryImage(p);
                   const color = p.colors?.[0];
                   return (
@@ -311,7 +312,7 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
                 return (
                   <Link
                     key={p._id}
-                    href={`/collection/${encodeURIComponent(p.slug)}`}
+                    href={productCollectionHref(p.slug)}
                     onClick={onClose}
                     className="group w-[7.5rem] shrink-0 sm:w-[8.5rem]"
                   >

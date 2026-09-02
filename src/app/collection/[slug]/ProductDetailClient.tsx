@@ -8,6 +8,7 @@ import {
 import { getPrimaryImage, getPrimaryImageIndex } from "@/lib/product-images";
 import { getDisplayPricing } from "@/lib/product-price";
 import { addRecentlyViewed } from "@/lib/recently-viewed";
+import { encodeProductSlug } from "@/lib/product-slug";
 import {
   buildProductWhatsAppMessage,
   openWhatsAppWithMessage,
@@ -776,7 +777,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     const primary = getPrimaryImage(product.images);
     addRecentlyViewed({
       _id: product._id,
-      slug: product.slug,
+      slug: encodeProductSlug(product.slug),
       title: product.title,
       price: product.price,
       imageUrl: primary?.url ?? "",
@@ -935,32 +936,33 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     product.images?.[activeImage]?.url ??
     product.images?.[0]?.url ??
     "/new.jpg";
+  const displayTitle = product.title.replace(/\s+/g, " ").trim();
 
   return (
     <main
       className={`relative min-h-screen overflow-x-hidden bg-[#f8fafc] text-[#0f172a] pb-[calc(5.25rem+env(safe-area-inset-bottom,0px))] ${showStickyPurchase ? "md:pb-28" : "md:pb-0"}`}
     >
       {/* ── Breadcrumb ── */}
-      <div className="relative z-10 mx-auto flex max-w-[1800px] items-center gap-2 px-5 pb-0 pt-8 text-[.6rem] uppercase tracking-[.25em] text-[#94a3b8] sm:px-8 lg:px-10">
+      <div className="relative z-10 mx-auto flex max-w-[1800px] min-w-0 items-center gap-2 overflow-hidden px-4 pb-0 pt-5 text-[.6rem] uppercase tracking-[.2em] text-[#94a3b8] sm:px-8 sm:pt-8 sm:tracking-[.25em] lg:px-10">
         <Link
           href="/"
-          className="transition-colors hover:text-[#7da8c7] no-underline text-[#94a3b8]"
+          className="shrink-0 transition-colors hover:text-[#7da8c7] no-underline text-[#94a3b8]"
         >
           Home
         </Link>
-        <span className="opacity-40">/</span>
+        <span className="shrink-0 opacity-40">/</span>
         <Link
           href="/collection"
-          className="transition-colors hover:text-[#7da8c7] no-underline text-[#94a3b8]"
+          className="shrink-0 transition-colors hover:text-[#7da8c7] no-underline text-[#94a3b8]"
         >
           Collection
         </Link>
-        <span className="opacity-40">/</span>
-        <span className="text-[#7da8c7]">{product.title}</span>
+        <span className="shrink-0 opacity-40">/</span>
+        <span className="min-w-0 truncate text-[#7da8c7]">{displayTitle}</span>
       </div>
 
       {/* ── Main layout: full-bleed image left + wide details right ── */}
-      <div className="relative z-10 mx-auto grid w-full max-w-[1800px] grid-cols-1 items-start gap-0 px-5 pt-6 pb-16 sm:px-8 lg:px-10 xl:grid-cols-[1fr_560px] xl:gap-10 2xl:grid-cols-[1fr_620px]">
+      <div className="relative z-10 mx-auto grid w-full max-w-[1800px] grid-cols-1 items-start gap-0 px-4 pt-4 pb-12 sm:px-8 sm:pt-6 sm:pb-16 lg:px-10 xl:grid-cols-[1fr_560px] xl:gap-10 2xl:grid-cols-[1fr_620px]">
         {/* ── LEFT: Full image gallery ── */}
         <div className="xl:sticky xl:top-[76px] xl:self-start">
           <div className="flex items-start gap-3">
@@ -1002,9 +1004,9 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
               <ZoomableImage
                 src={currentImageSrc}
-                alt={product.title}
+                alt={displayTitle}
                 className="w-full"
-                style={{ aspectRatio: "3/4", maxHeight: "82vh" }}
+                style={{ aspectRatio: "3/4", maxHeight: "min(82vh, 640px)" }}
               />
             </div>
           </div>
@@ -1043,17 +1045,17 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         </div>
 
         {/* ── RIGHT: Wide details panel ── */}
-        <aside className="mt-8 xl:mt-0 xl:max-h-[calc(100vh-92px)] xl:overflow-y-auto xl:[scrollbar-width:none] xl:[&::-webkit-scrollbar]:hidden">
-          <div className="rounded-[3px] border border-[#e2e8f0] bg-white px-8 py-9 sm:px-10 sm:py-10">
+        <aside className="mt-6 min-w-0 xl:mt-0 xl:max-h-[calc(100vh-92px)] xl:overflow-y-auto xl:[scrollbar-width:none] xl:[&::-webkit-scrollbar]:hidden">
+          <div className="min-w-0 overflow-hidden rounded-[3px] border border-[#e2e8f0] bg-white px-4 py-6 sm:px-8 sm:py-9 md:px-10 md:py-10">
             {/* Label + title */}
-            <p className="mb-1.5 text-xs font-medium uppercase tracking-wider text-[#7da8c7]">
+            <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wider text-[#7da8c7] sm:text-xs">
               {product.category}
               {product.subCategory ? ` · ${product.subCategory}` : ""}
             </p>
-            <h1 className="font-heading text-[3.2rem] font-normal leading-[.93] text-[#0f172a] sm:text-[3.8rem]">
-              {product.title}
+            <h1 className="font-heading min-w-0 text-[1.75rem] font-normal leading-[1.15] break-words [overflow-wrap:anywhere] text-[#0f172a] sm:text-[2.6rem] sm:leading-[1.05] xl:text-[3.2rem] xl:leading-[.93]">
+              {displayTitle}
             </h1>
-            <p className="mt-3 text-[15px] leading-relaxed text-[#475569]">
+            <p className="mt-3 text-[14px] leading-relaxed text-[#475569] sm:text-[15px]">
               {product.tagline ??
                 "Crafted for timeless style and everyday confidence."}
             </p>
@@ -1064,24 +1066,24 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               </p>
             ) : null}
 
-            {/* Stars + price on same row */}
-            <div className="mt-5 flex items-center justify-between border-t border-[#e2e8f0] pt-5">
-              <div className="flex items-center gap-2.5">
-                <div className="flex gap-[3px]">
+            {/* Stars + price */}
+            <div className="mt-5 flex flex-col gap-3 border-t border-[#e2e8f0] pt-5 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+              <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-2.5">
+                <div className="flex shrink-0 gap-[3px]">
                   {stars.map((filled, i) => (
                     <StarIcon key={i} filled={filled} />
                   ))}
                 </div>
-                <span className="text-sm text-[#64748b]">
+                <span className="text-[13px] text-[#64748b] sm:text-sm">
                   {rating} · {reviewCount} reviews
                 </span>
               </div>
               <div className="flex items-baseline gap-2.5">
-                <p className="font-heading text-[2.4rem] font-normal leading-none text-[#0f172a]">
+                <p className="font-heading text-[1.85rem] font-normal leading-none text-[#0f172a] sm:text-[2.4rem]">
                   {displayPrice(sellingPrice)}
                 </p>
                 {compareAt != null ? (
-                  <span className="text-[1.05rem] text-[#94a3b8] line-through">
+                  <span className="text-[0.95rem] text-[#94a3b8] line-through sm:text-[1.05rem]">
                     {displayPrice(compareAt)}
                   </span>
                 ) : null}
@@ -1090,10 +1092,10 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
             {/* Color picker */}
             <div className="mt-6">
-              <p className="mb-3 flex items-center justify-between text-[.6rem] uppercase tracking-[.22em] text-[#0f172a]">
-                Color
+              <p className="mb-3 flex flex-col gap-1 text-[.6rem] uppercase tracking-[.22em] text-[#0f172a] sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                <span>Color</span>
                 <span
-                  className={`normal-case tracking-normal text-[.75rem] ${!isColorAvailable && selectedColor !== COLORS[0].name ? "text-[#7da8c7]" : "text-[#94a3b8]"}`}
+                  className={`normal-case tracking-normal text-[.75rem] leading-snug break-words ${!isColorAvailable && selectedColor !== COLORS[0].name ? "text-[#7da8c7]" : "text-[#94a3b8]"}`}
                 >
                   {selectedColor}
                   {!isColorAvailable && selectedColor !== COLORS[0].name && (
@@ -1103,7 +1105,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   )}
                 </span>
               </p>
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-3">
                 {COLORS.map((c) => (
                   <button
                     key={c.name}
@@ -1281,12 +1283,12 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
             {/* Tabs */}
             <div className="mt-8 overflow-hidden rounded-[3px] border border-[#e2e8f0] bg-[#f8fafc]">
-              <div className="flex border-b border-[#e2e8f0]">
+              <div className="flex overflow-x-auto border-b border-[#e2e8f0] [-webkit-overflow-scrolling:touch]">
                 {(["desc", "details", "specs", "care"] as const).map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`flex-1 border-0 bg-transparent py-4 font-['Jost'] text-[.6rem] uppercase tracking-[.2em] transition-all ${
+                    className={`shrink-0 border-0 bg-transparent px-3.5 py-3.5 font-['Jost'] text-[.58rem] uppercase tracking-[.14em] transition-all sm:flex-1 sm:px-0 sm:py-4 sm:text-[.6rem] sm:tracking-[.2em] ${
                       activeTab === tab
                         ? "-mb-px border-b-[1.5px] border-[#7da8c7] bg-white text-[#7da8c7]"
                         : "text-[#94a3b8] hover:text-[#0f172a]"
@@ -1302,7 +1304,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   </button>
                 ))}
               </div>
-              <div className="p-7 sm:p-8">
+              <div className="p-4 sm:p-7 md:p-8">
                 {activeTab === "desc" && (
                   <p className="text-[.85rem] leading-[1.95] text-[#64748b]">
                     {product.description}
@@ -1322,13 +1324,13 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   </ul>
                 )}
                 {activeTab === "specs" && (
-                  <div className="grid grid-cols-2">
+                  <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
                     {specs.map((s) => (
                       <div key={s.label} className="contents">
-                        <span className="border-b border-[#e2e8f0] py-3 text-[.68rem] uppercase tracking-[.15em] text-[#94a3b8]">
+                        <span className="border-b border-[#e2e8f0] py-3 pr-2 text-[.62rem] uppercase tracking-[.12em] text-[#94a3b8] break-words sm:text-[.68rem] sm:tracking-[.15em]">
                           {s.label}
                         </span>
-                        <span className="border-b border-[#e2e8f0] py-3 text-right text-[.82rem] text-[#0f172a]">
+                        <span className="border-b border-[#e2e8f0] py-3 pl-2 text-right text-[.78rem] text-[#0f172a] break-words sm:text-[.82rem]">
                           {s.value}
                         </span>
                       </div>
@@ -1375,7 +1377,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
             <div className="min-w-0 flex-1">
               <p className="truncate font-['Cormorant_Garamond'] text-[1.15rem] font-light leading-snug text-[#0f172a] sm:text-[1.35rem]">
-                {product.title}
+                {displayTitle}
               </p>
               <p className="mt-1 truncate text-[10px] uppercase tracking-[0.14em] text-[#94a3b8]">
                 {selectedColor} · Size {selectedSize}

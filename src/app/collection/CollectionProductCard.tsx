@@ -4,6 +4,7 @@ import { useDisplayPrice } from "@/hooks/useDisplayPrice";
 import { getDeliveryBadgeLabel } from "@/lib/delivery-estimate";
 import { getPrimaryImageIndex } from "@/lib/product-images";
 import { getDisplayPricing } from "@/lib/product-price";
+import { productCollectionHref } from "@/lib/product-slug";
 import type { Product } from "@/types/product";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -52,7 +53,7 @@ export default function CollectionProductCard({
 
   const currentImg = images[imgIndex]?.url ?? "";
   const href = product.slug
-    ? `/collection/${encodeURIComponent(product.slug)}`
+    ? productCollectionHref(product.slug)
     : "/collection";
 
   const { selling, compare, salePercent: pct } = getDisplayPricing(product);

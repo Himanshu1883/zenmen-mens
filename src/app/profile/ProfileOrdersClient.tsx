@@ -4,6 +4,7 @@ import { CANCEL_REASONS } from "@/config/cancellationConfig";
 import { saveCartToStorage } from "@/lib/cart-storage";
 import type { SerializedOrder } from "@/lib/order-display";
 import { formatInr, formatOrderDateTime } from "@/lib/order-display";
+import { productCollectionHref } from "@/lib/product-slug";
 import { useAppDispatch } from "@/store/hooks";
 import { setCartItems, type CartItem } from "@/store/slices/cartSlice";
 import Link from "next/link";
@@ -159,7 +160,7 @@ export default function ProfileOrdersClient({ initialOrders }: Props) {
                   )}
                   <div className="order-item-body">
                     <Link
-                      href={`/collection/${encodeURIComponent(item.slug)}`}
+                      href={productCollectionHref(item.slug)}
                       className="order-item-title"
                     >
                       {item.title}

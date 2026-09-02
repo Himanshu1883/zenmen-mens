@@ -1,6 +1,7 @@
 import { requireAdmin } from "@/lib/admin-auth";
 import { connectDB } from "@/lib/db";
-import { findProductBySlug } from "@/lib/product-slug";
+import { findProductBySlug } from "@/lib/find-product-by-slug";
+import { canonicalProductSlug } from "@/lib/product-slug";
 import { productHasStorefrontImage } from "@/lib/product-images";
 import {
   destroyGridFsImages,
@@ -10,7 +11,6 @@ import {
 } from "@/lib/product-image-store";
 import Product from "@/models/Product";
 import { NextResponse } from "next/server";
-import slugify from "slugify";
 
 interface Params {
   params: Promise<{
@@ -71,7 +71,9 @@ export async function PUT(request: Request, context: Params) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    const title = typeof body.title === "string" ? body.title.trim() : existing.title;
+    const title = typeof body.title === "string"
+      ? body.title.replace(/\s+/g, " ").trim()
+      : existing.title;
     if (!title) {
       return NextResponse.json({ error: "Title is required" }, { status: 400 });
     }
@@ -139,12 +141,8 @@ export async function PUT(request: Request, context: Params) {
       updates.isAvailable = body.stock > 0;
     }
 
-    if (title !== existing.title) {
-      let nextSlug = slugify(title, {
-        lower: true,
-        strict: true,
-        trim: true,
-      });
+    let nextSlug = canonicalProductSlug(title);
+    if (nextSlug && nextSlug !== existing.slug) {
       const clash = await Product.findOne({
         slug: nextSlug,
         _id: { $ne: existing._id },

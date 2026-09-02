@@ -11,6 +11,7 @@ import {
   getPrimaryImage,
   shouldUnoptimizeProductImage,
 } from "@/lib/product-images";
+import { productCollectionHref } from "@/lib/product-slug";
 import type { Category } from "@/types/category";
 import type { Product } from "@/types/product";
 import { ChevronDown, Edit, Eye, Plus, Search, Trash2, X } from "lucide-react";
@@ -554,7 +555,7 @@ export default function Products() {
                       asChild
                     >
                       <Link
-                        href={`/collection/${encodeURIComponent(product.slug)}`}
+                        href={productCollectionHref(product.slug)}
                         target="_blank"
                         rel="noopener noreferrer"
                       >

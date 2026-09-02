@@ -3,6 +3,7 @@
 import { useDisplayPrice } from "@/hooks/useDisplayPrice";
 import { useSwipeSlider } from "@/hooks/useSwipeSlider";
 import { getCompareAtPrice, getSellingPrice } from "@/lib/product-price";
+import { productCollectionHref } from "@/lib/product-slug";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { addItem } from "@/store/slices/cartSlice";
 import { fetchProducts } from "@/store/slices/productSlice";
@@ -72,7 +73,7 @@ function pickSliderProducts(catalog: Product[]): SlideProduct[] {
       compareInr: getCompareAtPrice(product),
       image: img.url,
       imageAlt: img.alt ?? product.title,
-      href: `/collection/${encodeURIComponent(product.slug)}`,
+      href: productCollectionHref(product.slug),
       catalogId: product._id,
       slug: product.slug,
       colors: product.colors,

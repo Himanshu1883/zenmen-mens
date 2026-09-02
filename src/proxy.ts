@@ -1,4 +1,5 @@
 import { applyNoStoreHeaders } from "@/lib/no-store";
+import { encodeProductSlug } from "@/lib/product-slug";
 import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
@@ -18,7 +19,22 @@ function hasSessionCookie(request: NextRequest) {
   );
 }
 
+function canonicalCollectionRedirect(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  if (!pathname.startsWith("/collection/")) return null;
+  const raw = pathname.slice("/collection/".length);
+  if (!raw || raw.includes("/")) return null;
+  const dest = encodeProductSlug(raw);
+  if (!dest || dest === raw) return null;
+  const url = request.nextUrl.clone();
+  url.pathname = `/collection/${dest}`;
+  return NextResponse.redirect(url, 308);
+}
+
 export async function proxy(request: NextRequest) {
+  const slugRedirect = canonicalCollectionRedirect(request);
+  if (slugRedirect) return slugRedirect;
+
   const { pathname } = request.nextUrl;
   const admin = isAdminPath(pathname);
   const checkout = isCheckoutPath(pathname);
@@ -55,5 +71,11 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin", "/admin/:path*", "/checkout", "/checkout/:path*"],
+  matcher: [
+    "/admin",
+    "/admin/:path*",
+    "/checkout",
+    "/checkout/:path*",
+    "/collection/:path+",
+  ],
 };

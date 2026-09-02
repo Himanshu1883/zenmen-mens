@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useDisplayPrice } from "@/hooks/useDisplayPrice";
 import { useSwipeSlider } from "@/hooks/useSwipeSlider";
+import { productCollectionHref } from "@/lib/product-slug";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -226,7 +227,7 @@ const ProductVideosSection = () => {
           >
             {slides.map((video, index) => {
               const detailHref = video.slug
-                ? `/collection/${encodeURIComponent(video.slug)}`
+                ? productCollectionHref(video.slug)
                 : "/collection";
 
               return (

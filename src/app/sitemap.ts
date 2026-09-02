@@ -1,7 +1,7 @@
 // src/app/sitemap.ts
 import { connectDB } from "@/lib/db";
 import { STOREFRONT_HAS_IMAGE_FILTER } from "@/lib/product-images";
-import { isStaticSafeSlug } from "@/lib/product-slug";
+import { encodeProductSlug } from "@/lib/product-slug";
 import { siteUrl } from "@/lib/site";
 import {
   ACCESSORIES_COLLECTION_HREF,
@@ -55,10 +55,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ).lean();
 
     const productUrls: MetadataRoute.Sitemap = products
-      .filter((p) => isStaticSafeSlug(p.slug))
       .map((p) => ({
-        url: `${baseUrl}/collection/${encodeURIComponent(String(p.slug))}`,
+        slug: encodeProductSlug(String(p.slug ?? "")),
         lastModified: p.updatedAt ?? new Date(),
+      }))
+      .filter((p) => p.slug)
+      .map((p) => ({
+        url: `${baseUrl}/collection/${p.slug}`,
+        lastModified: p.lastModified,
         changeFrequency: "weekly" as const,
         priority: 0.8,
       }));

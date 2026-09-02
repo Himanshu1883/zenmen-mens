@@ -4,6 +4,7 @@ import {
   getRecentlyViewed,
   type RecentlyViewedItem,
 } from "@/lib/recently-viewed";
+import { productCollectionHref } from "@/lib/product-slug";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
@@ -51,7 +52,7 @@ export default function RecentlyViewedGrid() {
       {items.map((item) => (
         <li key={item._id}>
           <Link
-            href={`/collection/${encodeURIComponent(item.slug)}`}
+            href={productCollectionHref(item.slug)}
             className="recent-card"
           >
             {item.imageUrl ? (

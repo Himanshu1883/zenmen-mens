@@ -1,29 +1,42 @@
-import Product from "@/models/Product";
 import slugifyLib from "slugify";
 
-/** Decode slug from URL path segment (handles %20, etc.) */
+/** Decode slug from URL path segment (handles %20, %0A, etc.) */
 export function decodeSlugParam(raw: string): string {
   try {
-    return decodeURIComponent(raw.trim());
+    return decodeURIComponent(raw).trim();
   } catch {
     return raw.trim();
   }
 }
 
-/** URL-safe slug for links and API paths */
-export function encodeProductSlug(slug: string): string {
-  return encodeURIComponent(slug);
+/** Collapse newlines/tabs/control chars so slugs never embed %0A. */
+export function sanitizeSlugSource(raw: string): string {
+  return raw
+    .replace(/[\u0000-\u001F\u007F]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 /** Canonical slug (same rules as product create API) */
 export function canonicalProductSlug(raw: string): string {
-  const decoded = decodeSlugParam(raw);
+  const decoded = sanitizeSlugSource(decodeSlugParam(raw));
   if (!decoded) return "";
   return slugifyLib(decoded, {
     lower: true,
     strict: true,
     trim: true,
   });
+}
+
+/** URL-safe slug for storefront links and API paths */
+export function encodeProductSlug(slug: string): string {
+  const clean = canonicalProductSlug(slug);
+  return encodeURIComponent(clean || sanitizeSlugSource(slug));
+}
+
+export function productCollectionHref(slug: string): string {
+  const encoded = encodeProductSlug(slug);
+  return encoded ? `/collection/${encoded}` : "/collection";
 }
 
 /**
@@ -36,43 +49,4 @@ export function isStaticSafeSlug(slug: unknown): slug is string {
   if (!s || s.length > 180) return false;
   if (/[\n\r\t\\/<>:"|?*]/.test(s)) return false;
   return /^[a-z0-9]+(?:-[a-z0-9]+)*$/i.test(s);
-}
-
-function escapeRegex(s: string): string {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-/**
- * Resolve a product by slug from URL or DB value.
- * Handles legacy slugs with spaces, mixed case, and slugify-canonical forms.
- */
-export async function findProductBySlug(slugParam: string) {
-  const decoded = decodeSlugParam(slugParam);
-  if (!decoded) return null;
-
-  const canonical = canonicalProductSlug(slugParam);
-  const loose = decoded
-    .toLowerCase()
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-+|-+$/g, "");
-
-  const candidates = [...new Set([decoded, canonical, loose].filter(Boolean))];
-
-  for (const slug of candidates) {
-    const exact = await Product.findOne({ slug }).lean();
-    if (exact) return exact;
-  }
-
-  const ci = await Product.findOne({
-    slug: { $regex: new RegExp(`^${escapeRegex(decoded)}$`, "i") },
-  }).lean();
-  if (ci) return ci;
-
-  if (canonical) {
-    const byCanonical = await Product.findOne({ slug: canonical }).lean();
-    if (byCanonical) return byCanonical;
-  }
-
-  return null;
 }

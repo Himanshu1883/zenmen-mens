@@ -39,7 +39,7 @@ If you need to change **X**, start at these files. Do not hunt the whole repo.
 | Product selling / compare-at display | `src/lib/product-price.ts` — selling is always `product.price`; strike-through is `comparePrice` when higher. Home rails, collection cards, and PDP use this helper. |
 | PDP | `src/app/collection/[slug]/ProductDetailClient.tsx` + `GET /api/products/[slug]` |
 | Primary image | `src/lib/product-images.ts` |
-| Product model / slug | `src/models/Product.ts`, `src/lib/product-slug.ts` |
+| Product model / slug | `src/models/Product.ts`, `src/lib/product-slug.ts` (client-safe `canonicalProductSlug` / `productCollectionHref`), `src/lib/find-product-by-slug.ts`. Newlines/`%0A` are stripped. |
 | Admin inline create on collection | `ProductFormModal` (same as admin products) |
 
 ## Cart / checkout / orders

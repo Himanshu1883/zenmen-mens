@@ -2,6 +2,7 @@
 
 import { useDisplayPrice } from "@/hooks/useDisplayPrice";
 import { getCompareAtPrice, getSellingPrice } from "@/lib/product-price";
+import { productCollectionHref } from "@/lib/product-slug";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { addItem } from "@/store/slices/cartSlice";
 import { fetchProducts } from "@/store/slices/productSlice";
@@ -646,7 +647,7 @@ export default function Products() {
               return (
                 <Link
                   key={product._id}
-                  href={`/collection/${encodeURIComponent(product.slug ?? "")}`}
+                  href={productCollectionHref(product.slug ?? "")}
                   className={`product-card ${shouldAutoPreview ? "auto-preview" : ""}`}
                   style={{ animationDelay: `${index * 80}ms` }}
                 >
@@ -688,7 +689,7 @@ export default function Products() {
                         onClick={(e) => {
                           e.preventDefault();
                           if (!product.slug) return;
-                          window.location.href = `/collection/${encodeURIComponent(product.slug)}`;
+                          window.location.href = productCollectionHref(product.slug);
                         }}
                       >
                         Quick View

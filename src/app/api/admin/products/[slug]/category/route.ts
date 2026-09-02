@@ -1,6 +1,6 @@
 import { requireAdmin } from "@/lib/admin-auth";
 import { connectDB } from "@/lib/db";
-import { findProductBySlug } from "@/lib/product-slug";
+import { findProductBySlug } from "@/lib/find-product-by-slug";
 import Product from "@/models/Product";
 import { NextResponse } from "next/server";
 

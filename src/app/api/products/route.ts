@@ -3,9 +3,9 @@ import { connectDB } from "@/lib/db";
 import { processIncomingProductImages } from "@/lib/product-image-store";
 import { STOREFRONT_HAS_IMAGE_FILTER } from "@/lib/product-images";
 import Product from "@/models/Product";
+import { canonicalProductSlug } from "@/lib/product-slug";
 import { escapeRegex } from "@/lib/utils";
 import { NextResponse } from "next/server";
-import slugify from "slugify";
 
 export const revalidate = 60;
 
@@ -212,9 +212,11 @@ export async function POST(request: Request) {
       );
     }
 
+    const cleanTitle = String(title).replace(/\s+/g, " ").trim();
+
     const uploadedImages = await processIncomingProductImages(
       images as IncomingImage[],
-      title,
+      cleanTitle,
     );
 
     if (!uploadedImages.length) {
@@ -224,12 +226,13 @@ export async function POST(request: Request) {
       );
     }
 
-    // GENERATE SLUG
-    const slug = slugify(title, {
-      lower: true,
-      strict: true,
-      trim: true,
-    });
+    const slug = canonicalProductSlug(cleanTitle);
+    if (!slug) {
+      return NextResponse.json(
+        { error: "Could not generate a URL slug from the title" },
+        { status: 400 },
+      );
+    }
 
     // CHECK EXISTING PRODUCT
     const existing = await Product.findOne({
@@ -246,7 +249,7 @@ export async function POST(request: Request) {
     }
 
     const product = await Product.create({
-      title,
+      title: cleanTitle,
       slug,
       tagline,
       description,

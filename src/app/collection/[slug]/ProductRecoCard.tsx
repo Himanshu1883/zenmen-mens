@@ -2,6 +2,7 @@
 
 import { useDisplayPrice } from "@/hooks/useDisplayPrice";
 import { getDisplayPricing } from "@/lib/product-price";
+import { productCollectionHref } from "@/lib/product-slug";
 import { quickAddProductToCart } from "@/lib/quick-add-cart";
 import { useAppDispatch } from "@/store/hooks";
 import type { Product } from "@/types/product";
@@ -30,7 +31,7 @@ export default function ProductRecoCard({ product }: Props) {
       role="listitem"
     >
       <Link
-        href={`/collection/${encodeURIComponent(product.slug)}`}
+        href={productCollectionHref(product.slug)}
         className="group block flex-1 text-inherit no-underline"
       >
         <div className="overflow-hidden" style={{ aspectRatio: "3/4" }}>

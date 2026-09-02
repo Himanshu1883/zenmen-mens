@@ -7,6 +7,7 @@ import {
   resolveCategoryParentId,
 } from "@/lib/categories";
 import { shouldUnoptimizeProductImage } from "@/lib/product-images";
+import { productCollectionHref } from "@/lib/product-slug";
 import type { Category } from "@/types/category";
 import { History, Minus, Plus, Search, X } from "lucide-react";
 import Image from "next/image";
@@ -608,7 +609,7 @@ export default function Inventory() {
                           </div>
                           <div className="min-w-0">
                             <Link
-                              href={`/collection/${encodeURIComponent(product.slug)}`}
+                              href={productCollectionHref(product.slug)}
                               target="_blank"
                               className="block truncate font-medium text-[#0f172a] hover:text-[#5a8faf]"
                             >

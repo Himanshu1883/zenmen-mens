@@ -8,11 +8,12 @@ import {
 } from "@/lib/product-images";
 import { getDisplayPricing } from "@/lib/product-price";
 import { absoluteUrl, siteUrl, SITE_NAME } from "@/lib/site";
+import { findProductBySlug } from "@/lib/find-product-by-slug";
 import {
   decodeSlugParam,
   encodeProductSlug,
-  findProductBySlug,
   isStaticSafeSlug,
+  productCollectionHref,
 } from "@/lib/product-slug";
 import Product from "@/models/Product";
 import type { Metadata } from "next";
@@ -42,7 +43,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     `Shop ${product.title} at ZENmen, New Delhi.`;
   const primary = getPrimaryImage(product.images);
   const imageUrl = primary?.url;
-  const path = `/collection/${encodeURIComponent(product.slug)}`;
+  const path = productCollectionHref(product.slug);
 
   return {
     title: product.seoTitle ?? product.title,
@@ -89,14 +90,15 @@ export default async function ProductPage({ params }: Props) {
   if (!product) notFound();
   if (!productHasStorefrontImage(product.images)) notFound();
 
+  const canonical = encodeProductSlug(product.slug);
   const requested = decodeSlugParam(slug);
-  if (requested !== product.slug) {
-    redirect(`/collection/${encodeProductSlug(product.slug)}`);
+  if (canonical && requested !== canonical && slug !== canonical) {
+    redirect(`/collection/${canonical}`);
   }
 
   const primary = getPrimaryImage(product.images);
   const { selling } = getDisplayPricing(product);
-  const path = `/collection/${encodeURIComponent(product.slug)}`;
+  const path = productCollectionHref(product.slug);
   const productUrl = absoluteUrl(path);
   const origin = siteUrl();
 
