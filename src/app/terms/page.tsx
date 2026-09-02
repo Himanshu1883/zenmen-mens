@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Terms of Service",
   description:
     "Terms for shopping, appointments, and bespoke tailoring with ZENmen in New Delhi.",
+  alternates: { canonical: "/terms" },
 };
 
 export default function TermsPage() {

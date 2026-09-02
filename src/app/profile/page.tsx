@@ -1,4 +1,5 @@
 import { getAuthSession } from "@/lib/auth";
+import type { Metadata } from "next";
 import {
   formatPhoneDisplay,
   resolveAccountContact,
@@ -18,6 +19,11 @@ import RecentlyViewedSection from "./RecentlyViewedSection";
 import { collapseCodRetryDuplicates } from "@/services/codRetryCleanup";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Account",
+  robots: { index: false, follow: false },
+};
 
 type ProfileUser = {
   _id?: mongoose.Types.ObjectId;

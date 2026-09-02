@@ -12,6 +12,7 @@ If you need to change **X**, start at these files. Do not hunt the whole repo.
 | Nav data / grouping | `src/lib/categories.ts` → `useNavCategories.ts` → `GET /api/categories` |
 | Default Shirt/Suit children | `DEFAULT_NAV_CATEGORIES` in `src/lib/categories.ts` **and** `src/lib/category-seed.ts` |
 | Footer, WhatsApp FAB, chat on storefront | `src/app/RootLayoutClient.tsx`, `src/app/layout.tsx` |
+| Favicon / SEO metadata / JSON-LD | `public/favicon.ico`, `src/app/icon.png`, `apple-icon.png`, `opengraph-image.tsx`, `manifest.ts`, `robots.ts`, `src/lib/site.ts`, `src/lib/seo.ts`, `src/app/components/seo/JsonLd.tsx`. Page titles in each route `layout.tsx` / `generateMetadata`. |
 | Footer links, Visit Us, legal pages | `src/app/components/layout/Footer.tsx`; storefront `/privacy`, `/terms`, `/shipping` (`src/app/privacy/page.tsx`, `terms/page.tsx`, `shipping/page.tsx` + `components/legal/LegalDocument.tsx`). Collection hrefs via `useNavCategories` / `categoryCollectionHref` / `accessoryCollectionHref`. |
 | Global providers (session, Redux, toasts, cart hydrate) | `src/app/providers.tsx` |
 | Mobile bottom nav | `src/app/components/layout/MobileBottomNav.tsx` |
@@ -115,4 +116,4 @@ Admin Categories UI groups by `parentId`, then `DEFAULT_CHILD_PARENT_SLUGS` / `D
 | Instagram boot refresh | `src/instrumentation.ts` |
 | Chat models | `src/lib/chat/gemini.ts`, `api/chat/route.ts` |
 
-Env vars actually read in code: `MONGODB_URI`, `GOOGLE_CLIENT_ID/SECRET`, `NEXTAUTH_URL`, `CLOUDINARY_*`, `RAZORPAY_KEY_ID/SECRET`, `RAZORPAY_WEBHOOK_SECRET`, `RESEND_API_KEY`, `MAIL_FROM`, `MAIL_REPLY_TO`, `ADMIN_ORDER_EMAIL`, `EMAIL_LOGO_URL`, `GEMINI_*` / `GOOGLE_GENERATIVE_AI_API_KEY` / `OPENAI_API_KEY`, `INSTAGRAM_ACCESS_TOKEN`, `CRON_SECRET`, `CANCEL_USER_WINDOW_MINUTES`, `INVOICE_*`. NextAuth also expects `NEXTAUTH_SECRET` in the environment (not referenced in app source).
+Env vars actually read in code: `MONGODB_URI`, `GOOGLE_CLIENT_ID/SECRET`, `NEXTAUTH_URL`, `NEXT_PUBLIC_SITE_URL` (canonical origin for sitemap/OG; falls back to `NEXTAUTH_URL` then `https://zenmen.in` in production), `CLOUDINARY_*`, `RAZORPAY_KEY_ID/SECRET`, `RAZORPAY_WEBHOOK_SECRET`, `RESEND_API_KEY`, `MAIL_FROM`, `MAIL_REPLY_TO`, `ADMIN_ORDER_EMAIL`, `EMAIL_LOGO_URL`, `GEMINI_*` / `GOOGLE_GENERATIVE_AI_API_KEY` / `OPENAI_API_KEY`, `INSTAGRAM_ACCESS_TOKEN`, `CRON_SECRET`, `CANCEL_USER_WINDOW_MINUTES`, `INVOICE_*`. NextAuth also expects `NEXTAUTH_SECRET` in the environment (not referenced in app source).

@@ -2,7 +2,8 @@ import SuccessClient from "./SuccessClient";
 import { Suspense } from "react";
 
 export const metadata = {
-  title: "Order confirmed | ZENmen",
+  title: "Order confirmed",
+  robots: { index: false, follow: false },
 };
 
 export default function CheckoutSuccessPage() {

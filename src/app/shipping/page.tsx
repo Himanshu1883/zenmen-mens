@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Shipping & Returns",
   description:
     "Delivery, Cash on Delivery, Razorpay, made-to-order lead times, and return limits for ZENmen New Delhi.",
+  alternates: { canonical: "/shipping" },
 };
 
 export default function ShippingPage() {

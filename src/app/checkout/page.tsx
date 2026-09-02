@@ -1,8 +1,9 @@
 import CheckoutClient from "./CheckoutClient";
 
 export const metadata = {
-  title: "Checkout | ZENmen",
-  description: "Secure checkout for your ZENmen order",
+  title: "Checkout",
+  description: "Secure checkout for your ZENmen order.",
+  robots: { index: false, follow: false },
 };
 
 export default function CheckoutPage() {

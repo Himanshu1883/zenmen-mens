@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
     "How ZENmen, the New Delhi bespoke menswear atelier, collects and uses your information.",
+  alternates: { canonical: "/privacy" },
 };
 
 export default function PrivacyPage() {
