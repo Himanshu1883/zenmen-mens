@@ -7,8 +7,8 @@ export const fetchProducts = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await fetch("/api/products", {
-        next: { revalidate: 60 },
-      } as RequestInit);
+        cache: "no-store",
+      });
       if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
       const data = await res.json();
       // Handle both paginated { products: [...], total, pages, page } and direct array responses

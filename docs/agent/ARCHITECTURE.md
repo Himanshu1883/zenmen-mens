@@ -96,7 +96,7 @@ GET /api/categories?nav=1
 useNavCategories() → MegaMenu, MobileMenu, HomeCategoryStrip, collection filters
 ```
 
-Defaults live in `DEFAULT_NAV_CATEGORIES` (`src/lib/categories.ts`). Shirt / Suit are parents; their styles are children (`parentSlug`). Other items (Kurta-Pajama, Pants, etc.) are standalone parents.
+Defaults live in `DEFAULT_NAV_CATEGORIES` (`src/lib/categories.ts`). Shirt, Suit, and Tuxedo are parents; their styles are children (`parentSlug`). Other items (Kurta-Pajama, Pants, etc.) are standalone parents.
 
 Nesting is **one level**. API rejects a parent that itself has a `parentId`.
 

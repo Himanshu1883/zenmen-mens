@@ -2,6 +2,9 @@
 
 import {
   buildCollectionGroups,
+  collectionGroupsFromNav,
+  defaultNavGroupsFallback,
+  findCollectionGroup,
   resolveProductCollectionFields,
   type CollectionGroup,
 } from "@/lib/categories";
@@ -33,6 +36,7 @@ import type { Category } from "@/types/category";
 import type { Product } from "@/types/product";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
+import TaxonomySelect from "./TaxonomySelect";
 
 type Props = {
   mode: "create" | "edit";
@@ -134,30 +138,73 @@ export default function ProductFormModal({
     return productToEditForm(product!);
   });
   const [collectionGroups, setCollectionGroups] = useState<CollectionGroup[]>(
-    [],
+    () => collectionGroupsFromNav(defaultNavGroupsFallback()),
   );
   const [loading, setLoading] = useState(!isCreate);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [originalSlug] = useState(product?.slug ?? "");
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const mappedCollectionsRef = useRef(false);
   const collectionGroupsRef = useRef(collectionGroups);
   collectionGroupsRef.current = collectionGroups;
 
   const selectedGroup = useMemo(
-    () =>
-      collectionGroups.find(
-        (g) =>
-          g.parent.name.toLowerCase() === form.category.trim().toLowerCase(),
-      ) ?? null,
+    () => findCollectionGroup(collectionGroups, form.category),
     [collectionGroups, form.category],
   );
   const childCategories = selectedGroup?.children ?? [];
+  const collectionIsCanonical = Boolean(
+    selectedGroup &&
+      selectedGroup.parent.name.toLowerCase() ===
+        form.category.trim().toLowerCase(),
+  );
+
+  const collectionOptions = useMemo(() => {
+    const opts = collectionGroups.map((g) => ({
+      value: g.parent.name,
+      label: g.parent.name,
+      hint: g.children.length
+        ? `${g.children.length} ${g.children.length === 1 ? "category" : "categories"}`
+        : "Collection",
+    }));
+    if (form.category.trim() && !collectionIsCanonical) {
+      opts.unshift({
+        value: form.category.trim(),
+        label: form.category.trim(),
+        hint: "Current tag — pick a collection",
+      });
+    }
+    return opts;
+  }, [collectionGroups, form.category, collectionIsCanonical]);
+
+  const categoryOptions = useMemo(
+    () =>
+      childCategories.map((child) => ({
+        value: child.name,
+        label: child.name,
+      })),
+    [childCategories],
+  );
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      try {
+        const navRes = await fetch("/api/categories?nav=1");
+        if (navRes.ok) {
+          const navData = await navRes.json();
+          if (
+            !cancelled &&
+            Array.isArray(navData.groups) &&
+            navData.groups.length > 0
+          ) {
+            setCollectionGroups(collectionGroupsFromNav(navData.groups));
+          }
+        }
+      } catch {
+        /* keep fallback */
+      }
+
       try {
         const res = await fetch("/api/admin/categories");
         if (!res.ok) return;
@@ -165,9 +212,11 @@ export default function ProductFormModal({
         const docs = Array.isArray(data.categories)
           ? (data.categories as Category[])
           : [];
-        if (!cancelled) setCollectionGroups(buildCollectionGroups(docs));
+        if (!cancelled && docs.length > 0) {
+          setCollectionGroups(buildCollectionGroups(docs));
+        }
       } catch {
-        /* optional helper list */
+        /* nav groups already loaded */
       }
     })();
     return () => {
@@ -176,24 +225,26 @@ export default function ProductFormModal({
   }, []);
 
   useEffect(() => {
-    if (!collectionGroups.length || mappedCollectionsRef.current) return;
-    mappedCollectionsRef.current = true;
-    const mapped = resolveProductCollectionFields(
-      form.category,
-      form.subCategory,
-      collectionGroups,
-    );
-    if (
-      mapped.collectionName !== form.category ||
-      mapped.categoryName !== form.subCategory
-    ) {
-      setForm((prev) => ({
+    if (!collectionGroups.length) return;
+    setForm((prev) => {
+      const mapped = resolveProductCollectionFields(
+        prev.category,
+        prev.subCategory,
+        collectionGroups,
+      );
+      if (
+        mapped.collectionName === prev.category &&
+        mapped.categoryName === prev.subCategory
+      ) {
+        return prev;
+      }
+      return {
         ...prev,
         category: mapped.collectionName,
         subCategory: mapped.categoryName,
-      }));
-    }
-  }, [collectionGroups, form.category, form.subCategory]);
+      };
+    });
+  }, [collectionGroups]);
 
   useEffect(() => {
     if (isCreate || !product) {
@@ -321,7 +372,9 @@ export default function ProductFormModal({
     const next: FormErrors = {};
     if (!form.title.trim()) next.title = REQUIRED_FIELD_MESSAGE;
     if (!form.description.trim()) next.description = REQUIRED_FIELD_MESSAGE;
-    if (!form.category.trim()) next.category = REQUIRED_FIELD_MESSAGE;
+    if (!form.category.trim() || !collectionIsCanonical) {
+      next.category = "Select a collection from the list.";
+    }
     if (childCategories.length > 0 && !form.subCategory.trim()) {
       next.subCategory =
         "Select a category for this collection before saving.";
@@ -352,14 +405,31 @@ export default function ProductFormModal({
     return true;
   };
 
+  const canonicalForm = (): ProductEditForm => {
+    const group = findCollectionGroup(collectionGroups, form.category);
+    const collectionName = group?.parent.name ?? form.category.trim();
+    const child =
+      group?.children.find(
+        (c) => c.name.toLowerCase() === form.subCategory.trim().toLowerCase(),
+      ) ?? null;
+    return {
+      ...form,
+      category: collectionName,
+      subCategory: group?.children.length
+        ? (child?.name ?? form.subCategory.trim())
+        : "",
+    };
+  };
+
   const handleSave = async () => {
     if (!validateForm()) return;
 
     try {
       setSaving(true);
+      const canonical = canonicalForm();
 
       if (isCreate) {
-        const payload = editFormToCreatePayload(form);
+        const payload = editFormToCreatePayload(canonical);
         const res = await fetch("/api/products", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -373,7 +443,7 @@ export default function ProductFormModal({
         }
         toast.success("Product created");
       } else {
-        const payload = editFormToUpdatePayload(form);
+        const payload = editFormToUpdatePayload(canonical);
         const res = await fetch(
           `/api/products/${encodeURIComponent(originalSlug)}`,
           {
@@ -414,8 +484,8 @@ export default function ProductFormModal({
     <>
       <style>{`
         @keyframes zm-modal-in {
-          from { opacity: 0; transform: translateY(16px) scale(0.99); }
-          to   { opacity: 1; transform: translateY(0) scale(1); }
+          from { opacity: 0; }
+          to   { opacity: 1; }
         }
         .zm-overlay {
           position: fixed; inset: 0; z-index: 999;
@@ -468,7 +538,34 @@ export default function ProductFormModal({
           font-family: inherit;
         }
         .zm-input::placeholder, .zm-textarea::placeholder { color: #94a3b8; font-size: 13px; }
-        .zm-input:focus, .zm-textarea:focus, .zm-select:focus { border-color: #7da8c7; background: #f0f6fb; }
+        .zm-select-btn {
+          background: #f8fafc; border: 1px solid #e2e8f0; color: #0f172a;
+          font-size: 14px; line-height: 1.45; padding: 11px 12px; width: 100%;
+          box-sizing: border-box; outline: none; font-family: inherit;
+          display: flex; align-items: center; justify-content: space-between; gap: 8px;
+          text-align: left; cursor: pointer;
+        }
+        .zm-select-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .zm-select-btn:focus { border-color: #7da8c7; background: #f0f6fb; }
+        .zm-select-placeholder { color: #94a3b8; }
+        .zm-select-value { color: #0f172a; }
+        .zm-select-caret { color: #64748b; font-size: 12px; }
+        .zm-field.has-error .zm-select-btn { border-color: #fecaca; background: #fef2f2; }
+        .zm-select-menu {
+          position: fixed; z-index: 4000;
+          background: #fff; border: 1px solid #cbd5e1;
+          box-shadow: 0 18px 40px -18px rgba(15,23,42,0.35);
+          overflow-y: auto; padding: 6px;
+        }
+        .zm-select-empty { padding: 12px; font-size: 13px; color: #64748b; }
+        .zm-select-option {
+          width: 100%; display: flex; align-items: baseline; justify-content: space-between;
+          gap: 12px; border: 0; background: transparent; text-align: left;
+          padding: 10px 12px; font-size: 14px; color: #0f172a; cursor: pointer;
+          font-family: inherit;
+        }
+        .zm-select-option:hover, .zm-select-option.is-on { background: #f0f6fb; }
+        .zm-select-option em { font-style: normal; font-size: 11px; color: #64748b; letter-spacing: 0.04em; text-transform: uppercase; }
         .zm-textarea { resize: vertical; min-height: 88px; line-height: 1.65; }
         .zm-hint { font-size: 12.5px; line-height: 1.5; color: #64748b; margin: 0; }
         .zm-error { font-size: 12.5px; line-height: 1.45; color: #b91c1c; margin: 0; font-weight: 500; }
@@ -565,25 +662,20 @@ export default function ProductFormModal({
                     label="Collection"
                     required
                     error={errors.category}
-                    hint="Parent group in the menu — Shirt, Suit, Indo-Western, and so on."
+                    hint="Parent group in the menu — Shirt, Suit, Tuxedo, Indo-Western, and so on."
                   >
-                    <select
-                      className="zm-input"
+                    <TaxonomySelect
+                      id="zm-collection-select"
                       value={form.category}
-                      onChange={(e) =>
+                      options={collectionOptions}
+                      placeholder="Select collection"
+                      onChange={(next) =>
                         patch({
-                          category: e.target.value,
+                          category: next,
                           subCategory: "",
                         })
                       }
-                    >
-                      <option value="">Select collection</option>
-                      {collectionGroups.map((g) => (
-                        <option key={g.parent._id} value={g.parent.name}>
-                          {g.parent.name}
-                        </option>
-                      ))}
-                    </select>
+                    />
                   </Field>
                   <Field
                     id="zm-field-subCategory"
@@ -597,26 +689,19 @@ export default function ProductFormModal({
                     }
                   >
                     {childCategories.length > 0 ? (
-                      <select
-                        className="zm-input"
+                      <TaxonomySelect
+                        id="zm-category-select"
                         value={form.subCategory}
-                        onChange={(e) =>
-                          patch({ subCategory: e.target.value })
-                        }
-                        disabled={!form.category}
-                      >
-                        <option value="">Select category</option>
-                        {childCategories.map((child) => (
-                          <option key={child._id} value={child.name}>
-                            {child.name}
-                          </option>
-                        ))}
-                      </select>
+                        options={categoryOptions}
+                        placeholder="Select category"
+                        disabled={!collectionIsCanonical}
+                        onChange={(next) => patch({ subCategory: next })}
+                      />
                     ) : (
                       <input
                         className="zm-input"
                         value={
-                          form.category
+                          collectionIsCanonical
                             ? "No categories — saved under this collection"
                             : "Select a collection first"
                         }
@@ -1216,8 +1301,21 @@ export default function ProductFormModal({
 
                 <SectionHead
                   title="Visibility"
-                  lead="Featured products appear on the home rail. Unavailable products stay hidden from the storefront."
+                  lead="Control where this piece appears. Pinning puts it first in its collection; featured is for the home page."
                 />
+                <label className="zm-check-row">
+                  <input
+                    type="checkbox"
+                    className="zm-check-box"
+                    checked={form.pinToCollection}
+                    onChange={(e) =>
+                      patch({ pinToCollection: e.target.checked })
+                    }
+                  />
+                  <span className="text-sm text-[#475569]">
+                    Show first in this collection
+                  </span>
+                </label>
                 <label className="zm-check-row">
                   <input
                     type="checkbox"

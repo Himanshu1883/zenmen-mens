@@ -72,6 +72,8 @@ const ProductSchema = new mongoose.Schema(
 
     badge: String,
     isFeatured: { type: Boolean, default: false, index: true },
+    pinToCollection: { type: Boolean, default: false, index: true },
+    collectionPinAt: { type: Date, default: null },
 
     deliveryLeadValue: { type: Number, min: 0 },
     deliveryLeadUnit: {
@@ -92,6 +94,21 @@ const ProductSchema = new mongoose.Schema(
 // Compound index for collection filtering
 ProductSchema.index({ category: 1, isAvailable: 1 });
 ProductSchema.index({ isFeatured: 1, isAvailable: 1 });
+ProductSchema.index({ pinToCollection: 1, collectionPinAt: -1 });
 
-export default mongoose.models.Product ||
-  mongoose.model("Product", ProductSchema);
+const Product =
+  mongoose.models.Product || mongoose.model("Product", ProductSchema);
+
+// Dev servers keep the first compiled schema. Add new paths onto it.
+if (!Product.schema.path("pinToCollection")) {
+  Product.schema.add({
+    pinToCollection: { type: Boolean, default: false, index: true },
+  });
+}
+if (!Product.schema.path("collectionPinAt")) {
+  Product.schema.add({
+    collectionPinAt: { type: Date, default: null },
+  });
+}
+
+export default Product;

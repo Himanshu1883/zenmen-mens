@@ -44,6 +44,7 @@ export type ProductEditForm = {
   seoTitle: string;
   seoDescription: string;
   isFeatured: boolean;
+  pinToCollection: boolean;
   isAvailable: boolean;
   deliveryLeadValue: string;
   deliveryLeadUnit: DeliveryLeadUnit;
@@ -81,6 +82,7 @@ export function emptyProductForm(): ProductEditForm {
     seoTitle: "",
     seoDescription: "",
     isFeatured: false,
+    pinToCollection: false,
     isAvailable: true,
     deliveryLeadValue: "",
     deliveryLeadUnit: "days",
@@ -117,6 +119,7 @@ export function productToEditForm(product: Product): ProductEditForm {
     seoTitle: product.seoTitle ?? "",
     seoDescription: product.seoDescription ?? "",
     isFeatured: Boolean(product.isFeatured),
+    pinToCollection: Boolean(product.pinToCollection),
     isAvailable: product.isAvailable !== false,
     deliveryLeadValue:
       product.deliveryLeadValue != null
@@ -175,6 +178,7 @@ function buildCommonFields(form: ProductEditForm) {
     seoTitle: form.seoTitle.trim() || undefined,
     seoDescription: form.seoDescription.trim() || undefined,
     isFeatured: form.isFeatured,
+    pinToCollection: form.pinToCollection,
     deliveryLeadValue,
     deliveryLeadUnit: form.deliveryLeadUnit,
     showDeliveryLead:

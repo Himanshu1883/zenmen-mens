@@ -1,4 +1,5 @@
 import { requireAdmin } from "@/lib/admin-auth";
+import { applyCollectionPin } from "@/lib/collection-pin";
 import { connectDB } from "@/lib/db";
 import { findProductBySlug } from "@/lib/find-product-by-slug";
 import { canonicalProductSlug } from "@/lib/product-slug";
@@ -111,6 +112,20 @@ export async function PUT(request: Request, context: Params) {
           ? body.isFeatured
           : existing.isFeatured,
     };
+
+    const nextCategory =
+      typeof updates.category === "string"
+        ? updates.category
+        : (existing.category ?? "");
+    if (typeof body.pinToCollection === "boolean") {
+      const pin = await applyCollectionPin({
+        productId: existing._id,
+        category: nextCategory,
+        pin: body.pinToCollection,
+      });
+      updates.pinToCollection = pin.pinToCollection;
+      updates.collectionPinAt = pin.collectionPinAt;
+    }
 
     if (typeof body.deliveryLeadValue === "number") {
       updates.deliveryLeadValue =

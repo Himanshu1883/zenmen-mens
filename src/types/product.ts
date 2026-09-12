@@ -59,6 +59,8 @@ export interface Product {
 
   badge?: string;
   isFeatured?: boolean;
+  pinToCollection?: boolean;
+  collectionPinAt?: string | null;
 
   deliveryLeadValue?: number;
   deliveryLeadUnit?: "days" | "weeks" | "months";

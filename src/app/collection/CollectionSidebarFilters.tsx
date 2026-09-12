@@ -21,6 +21,13 @@ export type CollectionFilterState = {
   search: string;
 };
 
+export type CollectionPromoCard = {
+  href: string;
+  image: string;
+  alt: string;
+  titleLines: [string, string];
+};
+
 type Props = {
   categories: string[];
   colors: string[];
@@ -28,6 +35,7 @@ type Props = {
   priceRanges: string[];
   brands: string[];
   taxonomyTitle?: string;
+  promo?: CollectionPromoCard;
   filters: CollectionFilterState;
   onChange: (patch: Partial<CollectionFilterState>) => void;
   onReset: () => void;
@@ -119,6 +127,23 @@ function OptionBtn({
 
 const AVAILABILITY = ["All", "In stock", "Out of stock"];
 
+const DEFAULT_PROMO: CollectionPromoCard = {
+  href: "/collection?q=tuxedo",
+  image: "/zenmen_blackcoat.jpeg",
+  alt: "Tuxedos and evening wear",
+  titleLines: ["Tuxedos &", "Evening wear"],
+};
+
+function hasFacetOptions(items: string[]) {
+  return items.some((item) => item !== "All");
+}
+
+function ComingSoon() {
+  return (
+    <p className="py-1.5 text-[13px] italic text-[#94a3b8]">Coming soon</p>
+  );
+}
+
 export default function CollectionSidebarFilters({
   categories,
   colors,
@@ -126,6 +151,7 @@ export default function CollectionSidebarFilters({
   priceRanges,
   brands,
   taxonomyTitle = "Category",
+  promo = DEFAULT_PROMO,
   filters,
   onChange,
   onReset,
@@ -180,25 +206,29 @@ export default function CollectionSidebarFilters({
             open={open.price}
             onToggle={() => toggle("price")}
           >
-            {priceRanges.map((range) => (
-              <OptionBtn
-                key={range}
-                active={filters.selectedPrice === range}
-                onClick={() => onChange({ selectedPrice: range })}
-              >
-                {range}
-              </OptionBtn>
-            ))}
+            {hasFacetOptions(priceRanges) ? (
+              priceRanges.map((range) => (
+                <OptionBtn
+                  key={range}
+                  active={filters.selectedPrice === range}
+                  onClick={() => onChange({ selectedPrice: range })}
+                >
+                  {range}
+                </OptionBtn>
+              ))
+            ) : (
+              <ComingSoon />
+            )}
           </Section>
 
-          {brands.length > 1 ? (
-            <Section
-              id="brand"
-              title="Brand"
-              open={open.brand}
-              onToggle={() => toggle("brand")}
-            >
-              {brands.map((b) => (
+          <Section
+            id="brand"
+            title="Brand"
+            open={open.brand}
+            onToggle={() => toggle("brand")}
+          >
+            {hasFacetOptions(brands) ? (
+              brands.map((b) => (
                 <OptionBtn
                   key={b}
                   active={filters.selectedBrand === b}
@@ -206,9 +236,11 @@ export default function CollectionSidebarFilters({
                 >
                   {b}
                 </OptionBtn>
-              ))}
-            </Section>
-          ) : null}
+              ))
+            ) : (
+              <ComingSoon />
+            )}
+          </Section>
 
           <Section
             id="color"
@@ -216,37 +248,40 @@ export default function CollectionSidebarFilters({
             open={open.color}
             onToggle={() => toggle("color")}
           >
-            <div className="space-y-1">
-              {colors.map((col) => (
-                <button
-                  key={col}
-                  type="button"
-                  onClick={() => onChange({ selectedColor: col })}
-                  className="flex w-full items-center gap-2.5 py-1.5 text-left"
-                >
-                  <span
-                    className={`h-3.5 w-3.5 shrink-0 border ${
-                      filters.selectedColor === col
-                        ? "border-[#0f172a] ring-1 ring-[#0f172a]"
-                        : "border-[#cbd5e1]"
-                    }`}
-                    style={{
-                      background:
-                        col === "All" ? "#fff" : colorToSwatch(col),
-                    }}
-                  />
-                  <span
-                    className={`text-[13px] ${
-                      filters.selectedColor === col
-                        ? "text-[#0f172a] font-medium"
-                        : "text-[#64748b]"
-                    }`}
+            {hasFacetOptions(colors) ? (
+              <div className="space-y-1">
+                {colors.map((col) => (
+                  <button
+                    key={col}
+                    type="button"
+                    onClick={() => onChange({ selectedColor: col })}
+                    className="flex w-full items-center gap-2.5 py-1.5 text-left"
                   >
-                    {col}
-                  </span>
-                </button>
-              ))}
-            </div>
+                    <span
+                      className={`h-3.5 w-3.5 shrink-0 border ${
+                        filters.selectedColor === col
+                          ? "border-[#0f172a] ring-1 ring-[#0f172a]"
+                          : "border-[#cbd5e1]"
+                      }`}
+                      style={{
+                        background: col === "All" ? "#fff" : colorToSwatch(col),
+                      }}
+                    />
+                    <span
+                      className={`text-[13px] ${
+                        filters.selectedColor === col
+                          ? "text-[#0f172a] font-medium"
+                          : "text-[#64748b]"
+                      }`}
+                    >
+                      {col}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <ComingSoon />
+            )}
           </Section>
 
           <Section
@@ -255,32 +290,36 @@ export default function CollectionSidebarFilters({
             open={open.size}
             onToggle={() => toggle("size")}
           >
-            <div className="flex flex-wrap gap-2">
-              {sizes.map((size) => (
-                <button
-                  key={size}
-                  type="button"
-                  onClick={() => onChange({ selectedSize: size })}
-                  className={`min-w-[2.5rem] border px-2 py-1.5 text-[12px] transition-colors ${
-                    filters.selectedSize === size
-                      ? "border-[#0f172a] bg-[#0f172a] text-white"
-                      : "border-[#e2e8f0] text-[#64748b] hover:border-[#94a3b8]"
-                  }`}
-                >
-                  {size}
-                </button>
-              ))}
-            </div>
+            {hasFacetOptions(sizes) ? (
+              <div className="flex flex-wrap gap-2">
+                {sizes.map((size) => (
+                  <button
+                    key={size}
+                    type="button"
+                    onClick={() => onChange({ selectedSize: size })}
+                    className={`min-w-[2.5rem] border px-2 py-1.5 text-[12px] transition-colors ${
+                      filters.selectedSize === size
+                        ? "border-[#0f172a] bg-[#0f172a] text-white"
+                        : "border-[#e2e8f0] text-[#64748b] hover:border-[#94a3b8]"
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <ComingSoon />
+            )}
           </Section>
 
-          {categories.length > 1 ? (
-            <Section
-              id="category"
-              title={taxonomyTitle}
-              open={open.category}
-              onToggle={() => toggle("category")}
-            >
-              {categories.map((cat) => (
+          <Section
+            id="category"
+            title={taxonomyTitle}
+            open={open.category}
+            onToggle={() => toggle("category")}
+          >
+            {hasFacetOptions(categories) ? (
+              categories.map((cat) => (
                 <OptionBtn
                   key={cat}
                   active={filters.selectedCategory === cat}
@@ -288,9 +327,11 @@ export default function CollectionSidebarFilters({
                 >
                   {cat}
                 </OptionBtn>
-              ))}
-            </Section>
-          ) : null}
+              ))
+            ) : (
+              <ComingSoon />
+            )}
+          </Section>
         </nav>
 
         {hasActiveFilters ? (
@@ -304,21 +345,21 @@ export default function CollectionSidebarFilters({
         ) : null}
 
         <Link
-          href="/collection?category=Suit"
+          href={promo.href}
           className="mt-10 block overflow-hidden no-underline group"
         >
           <div className="relative aspect-[3/4] bg-[#e2e8f0]">
             <img
-              src="/zenmen_blackcoat.jpeg"
-              alt="Jackets and tailoring"
+              src={promo.image}
+              alt={promo.alt}
               className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a]/85 via-[#0f172a]/25 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-5">
               <p className="font-heading text-[1.65rem] leading-tight text-white">
-                Jackets &amp;
+                {promo.titleLines[0]}
                 <br />
-                Trousers
+                {promo.titleLines[1]}
               </p>
               <span className="mt-3 inline-block text-[10px] font-medium uppercase tracking-[0.22em] text-white/90 underline-offset-4 group-hover:underline">
                 See all products
@@ -352,6 +393,10 @@ function colorToSwatch(name: string): string {
     pink: "#d4a5a5",
     tan: "#c4a882",
     olive: "#556b2f",
+    charcoal: "#2f2f2f",
+    emerald: "#1f6b4a",
+    wine: "#6b1d1d",
+    ivory: "#f5f0e6",
   };
   for (const [key, hex] of Object.entries(map)) {
     if (n.includes(key)) return hex;

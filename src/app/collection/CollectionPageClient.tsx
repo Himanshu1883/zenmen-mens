@@ -2,13 +2,13 @@
 
 import MobileFilterBar from "@/app/components/MobileFilterBar";
 import ProductFormModal from "@/app/components/adminComponents/ProductFormModal";
+import { useNavCategories } from "@/hooks/useNavCategories";
 import {
   productInCollectionGroup,
   productMatchesNavItem,
   resolveCollectionPageContext,
   resolvePrefillProductCategory,
 } from "@/lib/categories";
-import { useNavCategories } from "@/hooks/useNavCategories";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchProducts } from "@/store/slices/productSlice";
 import { useSession } from "next-auth/react";
@@ -18,16 +18,54 @@ import { useEffect, useMemo, useState } from "react";
 import CollectionProductCard from "./CollectionProductCard";
 import CollectionSidebarFilters, {
   type CollectionFilterState,
+  type CollectionPromoCard,
 } from "./CollectionSidebarFilters";
 import ProductEditModal from "./ProductEditModal";
 
-const PRICE_RANGES = [
-  "All",
-  "Under ₹10k",
-  "₹10k-₹20k",
-  "₹20k-₹35k",
-  "Above ₹35k",
-];
+const PRICE_BUCKETS = [
+  { label: "Under ₹10k", includes: (n: number) => n < 10000 },
+  { label: "₹10k-₹20k", includes: (n: number) => n >= 10000 && n <= 20000 },
+  { label: "₹20k-₹35k", includes: (n: number) => n > 20000 && n <= 35000 },
+  { label: "Above ₹35k", includes: (n: number) => n > 35000 },
+] as const;
+
+function uniqueFacetValues(values: Array<string | undefined | null>) {
+  return Array.from(
+    new Set(
+      values
+        .map((value) => value?.trim())
+        .filter((value): value is string => Boolean(value)),
+    ),
+  );
+}
+
+function withAllOption(values: string[]) {
+  return values.length ? ["All", ...values] : [];
+}
+
+function matchesPriceBucket(price: number, selected: string) {
+  if (selected === "All") return true;
+  const bucket = PRICE_BUCKETS.find((item) => item.label === selected);
+  return bucket ? bucket.includes(price) : true;
+}
+
+function sidebarPromo(filterValue?: string): CollectionPromoCard {
+  const current = filterValue?.toLowerCase() ?? "";
+  if (current === "tuxedo") {
+    return {
+      href: "/collection?q=suit",
+      image: "/zenmen_blackcoat.jpeg",
+      alt: "Suits and jackets",
+      titleLines: ["Suits &", "Jackets"],
+    };
+  }
+  return {
+    href: "/collection?q=tuxedo",
+    image: "/zenmen_blackcoat.jpeg",
+    alt: "Tuxedos and evening wear",
+    titleLines: ["Tuxedos &", "Evening wear"],
+  };
+}
 
 export default function CollectionPageClient() {
   const { data: session } = useSession();
@@ -52,7 +90,7 @@ export default function CollectionPageClient() {
     search: qFromUrl,
   });
   const [sortBy, setSortBy] = useState("featured");
-  const [gridCols, setGridCols] = useState<3 | 4>(3);
+  const [gridCols, setGridCols] = useState<3 | 4>(4);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [creatingProduct, setCreatingProduct] = useState(false);
   const { groups, categories: navCategories } = useNavCategories();
@@ -117,15 +155,34 @@ export default function CollectionPageClient() {
     return ["All", ...groups.map((group) => group.parent.name)];
   }, [pageCtx.group, groups, isAccessoriesScope, accessoryGroups]);
 
-  const colors = useMemo(() => {
-    const all = scopedProducts.flatMap((p) => p.colors ?? []);
-    return ["All", ...Array.from(new Set(all))];
+  const colors = useMemo(
+    () => withAllOption(uniqueFacetValues(scopedProducts.flatMap((p) => p.colors ?? []))),
+    [scopedProducts],
+  );
+
+  const sizes = useMemo(
+    () => withAllOption(uniqueFacetValues(scopedProducts.flatMap((p) => p.sizes ?? []))),
+    [scopedProducts],
+  );
+
+  const brands = useMemo(
+    () =>
+      withAllOption(
+        uniqueFacetValues(
+          scopedProducts.map((p) => (p as Product & { brand?: string }).brand),
+        ),
+      ),
+    [scopedProducts],
+  );
+
+  const priceRanges = useMemo(() => {
+    const present = PRICE_BUCKETS.filter((bucket) =>
+      scopedProducts.some((p) => bucket.includes(p.price)),
+    ).map((bucket) => bucket.label);
+    return withAllOption(present);
   }, [scopedProducts]);
 
-  const sizes = useMemo(() => {
-    const all = scopedProducts.flatMap((p) => p.sizes ?? []);
-    return ["All", ...Array.from(new Set(all))];
-  }, [scopedProducts]);
+  const promo = sidebarPromo(pageCtx.group?.parent.filterValue);
 
   const filteredProducts = useMemo(() => {
     const {
@@ -157,16 +214,10 @@ export default function CollectionPageClient() {
         selectedColor === "All" || p.colors?.includes(selectedColor);
       const sizeMatch =
         selectedSize === "All" || p.sizes?.includes(selectedSize);
-      const priceMatch =
-        selectedPrice === "All" ||
-        (selectedPrice === "Under ₹10k" && p.price < 10000) ||
-        (selectedPrice === "₹10k-₹20k" &&
-          p.price >= 10000 &&
-          p.price <= 20000) ||
-        (selectedPrice === "₹20k-₹35k" &&
-          p.price > 20000 &&
-          p.price <= 35000) ||
-        (selectedPrice === "Above ₹35k" && p.price > 35000);
+      const brandMatch =
+        filters.selectedBrand === "All" ||
+        (p as Product & { brand?: string }).brand === filters.selectedBrand;
+      const priceMatch = matchesPriceBucket(p.price, selectedPrice);
       const availMatch =
         selectedAvailability === "All" ||
         (selectedAvailability === "In stock" && p.isAvailable !== false) ||
@@ -183,6 +234,7 @@ export default function CollectionPageClient() {
         taxonomyMatch &&
         colorMatch &&
         sizeMatch &&
+        brandMatch &&
         priceMatch &&
         availMatch &&
         srchMatch
@@ -191,21 +243,34 @@ export default function CollectionPageClient() {
   }, [scopedProducts, filters, pageCtx.group, groups]);
 
   const sortedProducts = useMemo(() => {
-    const list = [...filteredProducts];
-    if (sortBy === "price_low_high") list.sort((a, b) => a.price - b.price);
-    if (sortBy === "price_high_low") list.sort((a, b) => b.price - a.price);
-    if (sortBy === "name_az")
-      list.sort((a, b) => a.title.localeCompare(b.title));
-    if (sortBy === "name_za")
-      list.sort((a, b) => b.title.localeCompare(a.title));
-    if (sortBy === "featured") {
-      list.sort((a, b) => {
+    const pinTime = (value?: string | Date | null) => {
+      if (!value) return 0;
+      const t = value instanceof Date ? value.getTime() : Date.parse(String(value));
+      return Number.isFinite(t) ? t : 0;
+    };
+    const pinned = filteredProducts
+      .filter((p) => p.pinToCollection)
+      .sort(
+        (a, b) => pinTime(b.collectionPinAt) - pinTime(a.collectionPinAt),
+      );
+    const rest = filteredProducts.filter((p) => !p.pinToCollection);
+
+    if (sortBy === "price_low_high") rest.sort((a, b) => a.price - b.price);
+    else if (sortBy === "price_high_low") rest.sort((a, b) => b.price - a.price);
+    else if (sortBy === "name_az")
+      rest.sort((a, b) => a.title.localeCompare(b.title));
+    else if (sortBy === "name_za")
+      rest.sort((a, b) => b.title.localeCompare(a.title));
+    else {
+      rest.sort((a, b) => {
         const af = a.isFeatured ? 1 : 0;
         const bf = b.isFeatured ? 1 : 0;
-        return bf - af;
+        if (bf !== af) return bf - af;
+        return 0;
       });
     }
-    return list;
+
+    return [...pinned, ...rest];
   }, [filteredProducts, sortBy]);
 
   const hasActiveFilters =
@@ -277,8 +342,8 @@ export default function CollectionPageClient() {
           categories={categories}
           colors={colors}
           sizes={sizes}
-          priceRanges={PRICE_RANGES}
-          brands={[]}
+          priceRanges={priceRanges}
+          brands={brands}
           taxonomyTitle={taxonomyTitle}
           selectedCategory={filters.selectedCategory}
           selectedColor={filters.selectedColor}
@@ -309,9 +374,10 @@ export default function CollectionPageClient() {
           categories={categories}
           colors={colors}
           sizes={sizes}
-          priceRanges={PRICE_RANGES}
-          brands={[]}
+          priceRanges={priceRanges}
+          brands={brands}
           taxonomyTitle={taxonomyTitle}
+          promo={promo}
           filters={filters}
           onChange={patchFilters}
           onReset={resetFilters}
@@ -405,8 +471,17 @@ export default function CollectionPageClient() {
           )}
 
           {!loading && sortedProducts.length === 0 && !showAdminAddProduct && (
-            <div className="py-24 text-center text-[#64748b] text-sm">
-              No products found.
+            <div className="py-24 text-center">
+              <p className="text-[#64748b] text-sm">
+                {scopedProducts.length === 0
+                  ? "Coming soon"
+                  : "No products match these filters."}
+              </p>
+              {scopedProducts.length === 0 ? (
+                <p className="mt-2 text-[13px] italic text-[#94a3b8]">
+                  This collection is being prepared.
+                </p>
+              ) : null}
             </div>
           )}
 

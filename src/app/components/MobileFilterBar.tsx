@@ -82,6 +82,16 @@ type FilterPanel =
 
 const AVAILABILITY_OPTIONS = ["All", "In stock", "Out of stock"];
 
+function hasFacetOptions(items: string[]) {
+  return items.some((item) => item !== "All");
+}
+
+function ComingSoon() {
+  return (
+    <p className="px-3 py-3 text-[13px] italic text-[#94a3b8]">Coming soon</p>
+  );
+}
+
 // ── Component ────────────────────────────────────────────────────────────────
 
 export default function MobileFilterBar({
@@ -397,8 +407,7 @@ export default function MobileFilterBar({
                 label: sortBy !== "featured" ? sortLabels[sortBy] : "Sort",
                 active: sortBy !== "featured",
               },
-            ].filter((tab) => tab.key !== "category" || categories.length > 1)
-            .map((tab) => (
+            ].map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => toggle(tab.key)}
@@ -533,29 +542,33 @@ function MobileFilterPanel({
       <div className="px-5 py-4">
         {panel === "category" && (
           <div className="flex flex-col gap-1">
-            {categories.map((cat) => (
-              <MobileOption
-                key={cat}
-                label={cat}
-                active={selectedCategory === cat}
-                onClick={() => onCategoryChange(cat)}
-              />
-            ))}
-            {brands.length > 1 ? (
-              <>
-                <p className="mt-4 mb-1 text-[10px] tracking-[0.2em] uppercase text-[#94a3b8]">
-                  Brand
-                </p>
-                {brands.map((b) => (
-                  <MobileOption
-                    key={b}
-                    label={b}
-                    active={selectedBrand === b}
-                    onClick={() => onBrandChange(b)}
-                  />
-                ))}
-              </>
-            ) : null}
+            {hasFacetOptions(categories) ? (
+              categories.map((cat) => (
+                <MobileOption
+                  key={cat}
+                  label={cat}
+                  active={selectedCategory === cat}
+                  onClick={() => onCategoryChange(cat)}
+                />
+              ))
+            ) : (
+              <ComingSoon />
+            )}
+            <p className="mt-4 mb-1 text-[10px] tracking-[0.2em] uppercase text-[#94a3b8]">
+              Brand
+            </p>
+            {hasFacetOptions(brands) ? (
+              brands.map((b) => (
+                <MobileOption
+                  key={b}
+                  label={b}
+                  active={selectedBrand === b}
+                  onClick={() => onBrandChange(b)}
+                />
+              ))
+            ) : (
+              <ComingSoon />
+            )}
           </div>
         )}
 
@@ -574,65 +587,75 @@ function MobileFilterPanel({
 
         {panel === "price" && (
           <div className="flex flex-col gap-1">
-            {priceRanges.map((range) => (
-              <MobileOption
-                key={range}
-                label={range}
-                active={selectedPrice === range}
-                onClick={() => onPriceChange(range)}
-              />
-            ))}
-          </div>
-        )}
-
-        {panel === "size" && (
-          <div className="grid grid-cols-3 gap-2">
-            {sizes.map((size) => (
-              <button
-                key={size}
-                onClick={() => onSizeChange(size)}
-                className={`py-3 text-center text-[12px] tracking-[0.08em] border transition-colors ${
-                  selectedSize === size
-                    ? "border-[#7da8c7] bg-[#f0f6fb] text-[#0f172a]"
-                    : "border-[#e2e8f0] text-[#64748b] hover:border-[#7da8c7]"
-                }`}
-              >
-                {size}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {panel === "color" && (
-          <div className="grid grid-cols-2 gap-2">
-            {colors.map((col) => (
-              <button
-                key={col}
-                onClick={() => onColorChange(col)}
-                className={`flex items-center gap-3 px-3 py-2.5 border transition-colors text-left ${
-                  selectedColor === col
-                    ? "border-[#7da8c7] bg-[#f0f6fb]"
-                    : "border-[#f1f5f9] bg-[#f8fafc] hover:border-[#7da8c7]"
-                }`}
-              >
-                <span
-                  className={`w-4 h-4 rounded-full flex-shrink-0 border-2 ${
-                    selectedColor === col
-                      ? "border-[#7da8c7] bg-[#7da8c7]"
-                      : "border-[#e2e8f0] bg-white"
-                  }`}
+            {hasFacetOptions(priceRanges) ? (
+              priceRanges.map((range) => (
+                <MobileOption
+                  key={range}
+                  label={range}
+                  active={selectedPrice === range}
+                  onClick={() => onPriceChange(range)}
                 />
-                <span
-                  className={`text-[11px] tracking-[0.06em] truncate ${
-                    selectedColor === col ? "text-[#0f172a]" : "text-[#64748b]"
+              ))
+            ) : (
+              <ComingSoon />
+            )}
+          </div>
+        )}
+
+        {panel === "size" &&
+          (hasFacetOptions(sizes) ? (
+            <div className="grid grid-cols-3 gap-2">
+              {sizes.map((size) => (
+                <button
+                  key={size}
+                  onClick={() => onSizeChange(size)}
+                  className={`py-3 text-center text-[12px] tracking-[0.08em] border transition-colors ${
+                    selectedSize === size
+                      ? "border-[#7da8c7] bg-[#f0f6fb] text-[#0f172a]"
+                      : "border-[#e2e8f0] text-[#64748b] hover:border-[#7da8c7]"
                   }`}
                 >
-                  {col}
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
+                  {size}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <ComingSoon />
+          ))}
+
+        {panel === "color" &&
+          (hasFacetOptions(colors) ? (
+            <div className="grid grid-cols-2 gap-2">
+              {colors.map((col) => (
+                <button
+                  key={col}
+                  onClick={() => onColorChange(col)}
+                  className={`flex items-center gap-3 px-3 py-2.5 border transition-colors text-left ${
+                    selectedColor === col
+                      ? "border-[#7da8c7] bg-[#f0f6fb]"
+                      : "border-[#f1f5f9] bg-[#f8fafc] hover:border-[#7da8c7]"
+                  }`}
+                >
+                  <span
+                    className={`w-4 h-4 rounded-full flex-shrink-0 border-2 ${
+                      selectedColor === col
+                        ? "border-[#7da8c7] bg-[#7da8c7]"
+                        : "border-[#e2e8f0] bg-white"
+                    }`}
+                  />
+                  <span
+                    className={`text-[11px] tracking-[0.06em] truncate ${
+                      selectedColor === col ? "text-[#0f172a]" : "text-[#64748b]"
+                    }`}
+                  >
+                    {col}
+                  </span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <ComingSoon />
+          ))}
 
         {panel === "sort" && (
           <div className="flex flex-col gap-1">

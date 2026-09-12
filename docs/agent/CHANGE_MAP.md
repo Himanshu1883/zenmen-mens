@@ -10,7 +10,7 @@ If you need to change **X**, start at these files. Do not hunt the whole repo.
 |---|---|
 | Navbar / megamenu UI | `src/app/components/layout/Navbar.tsx`, `MegaMenu.tsx`, `MobileMenu.tsx` |
 | Nav data / grouping | `src/lib/categories.ts` → `useNavCategories.ts` → `GET /api/categories` |
-| Default Shirt/Suit children | `DEFAULT_NAV_CATEGORIES` in `src/lib/categories.ts` **and** `src/lib/category-seed.ts` |
+| Default Shirt / Suit / Tuxedo children | `DEFAULT_NAV_CATEGORIES` in `src/lib/categories.ts` **and** `src/lib/category-seed.ts` |
 | Footer, WhatsApp FAB, chat on storefront | `src/app/RootLayoutClient.tsx`, `src/app/layout.tsx` |
 | Favicon / SEO metadata / JSON-LD | `public/favicon.ico`, `src/app/icon.png`, `apple-icon.png`, `opengraph-image.tsx`, `manifest.ts`, `robots.ts`, `src/lib/site.ts`, `src/lib/seo.ts`, `src/app/components/seo/JsonLd.tsx`. Page titles in each route `layout.tsx` / `generateMetadata`. |
 | Footer links, Visit Us, legal pages | `src/app/components/layout/Footer.tsx`; storefront `/privacy`, `/terms`, `/shipping` (`src/app/privacy/page.tsx`, `terms/page.tsx`, `shipping/page.tsx` + `components/legal/LegalDocument.tsx`). Collection hrefs via `useNavCategories` / `categoryCollectionHref` / `accessoryCollectionHref`. |
@@ -23,16 +23,18 @@ If you need to change **X**, start at these files. Do not hunt the whole repo.
 |---|---|
 | Section order | `src/app/components/sections/HomeSections.tsx`, `src/app/page.tsx` |
 | Hero | `sections/Hero.tsx` |
-| Category strip | `HomeCategoryStrip.tsx` + nav hook |
-| Product rail | `Products.tsx` / `ProductSlider.tsx` + Redux `fetchProducts` |
-| Accessories CTAs | `AccessoriesSection.tsx` + footer Collection → Accessories. Shop All / View All / headings → `/collection?q=accessories` (Buttons + Tie + Broches). Cards use nav hrefs `?q=tie` / `?q=button` / `?q=brooch`. |
+| Home catalog picks (Signature / Curated / Shop By Category / strip / accessories) | `src/lib/home-catalog.ts` + `clothingNavGroups` / `accessoryNavGroups` in `src/lib/categories.ts`. Signature = one product per **Collection**. Curated = one product per **Category**. Shop By Category + `HomeCategoryStrip` use live nav collections. |
+| Category strip | `HomeCategoryStrip.tsx` + `useNavCategories` + Redux products |
+| Product rails | `Products.tsx` (Curated), `ProductSlider.tsx` (Signature), `HomeSections.tsx` (Shop By Category) |
+| Accessories CTAs | `AccessoriesSection.tsx` — live accessory collections/products; hub `/collection?q=accessories`. |
 | Reels | `Reels.tsx` + `/api/instagram/reels` |
+| Featured product videos | `ProductVideosSection.tsx` + `public/product-videos/`. Slugs must match catalog products. Source clips live in gitignored `assests/new_products`. |
 
 ## Catalog / PDP
 
 | Change | Start |
 |---|---|
-| Collection grid / filters | `src/app/collection/page.tsx`, `CollectionSidebarFilters`, `MobileFilterBar`. All-collections (`/collection`) lists every nav **Collection**; a specific collection (`?q=` / `?category=`) lists that parent’s **Category** children from the nav tree (not only ones with products). `?q=accessories` unions accessory parents (Buttons, Tie, Broches). Helpers: `resolveCollectionPageContext`, `productInCollectionGroup` in `src/lib/categories.ts` |
+| Collection grid / filters | `src/app/collection/page.tsx`, `CollectionSidebarFilters`, `MobileFilterBar`. All-collections (`/collection`) lists every nav **Collection**; a specific collection (`?q=` / `?category=`) lists that parent’s **Category** children from the nav tree (not only ones with products). Empty facets (color, size, brand, price, category) stay visible and show **Coming soon**. Price buckets are derived from the scoped products. `?q=accessories` unions accessory parents (Buttons, Tie, Broches). Helpers: `resolveCollectionPageContext`, `productInCollectionGroup` in `src/lib/categories.ts` |
 | Collection URL contract | `categoryCollectionHref` in `src/lib/categories.ts`. Accessories hub: `ACCESSORIES_COLLECTION_HREF` (`/collection?q=accessories`). Collection grid matches parent/child tags **and** title; a product whose `category` is another collection parent stays only on that collection. Empty `subCategory` is persisted on product PUT. Storefront hides products that still use Cloudinary URLs (`STOREFRONT_HAS_IMAGE_FILTER` in `product-images.ts`); admin `?admin=1` still lists them. |
 | Admin product list filters | `adminComponents/pages/Products.tsx` — collections from `GET /api/admin/categories`; list query `GET /api/products?admin=1` with `categories=`, `q`, `stock`, `featured`, `available` |
 | Product card | `src/app/components/ui/ProductCard.tsx`, `collection/CollectionProductCard.tsx` |
@@ -40,7 +42,8 @@ If you need to change **X**, start at these files. Do not hunt the whole repo.
 | PDP | `src/app/collection/[slug]/ProductDetailClient.tsx` + `GET /api/products/[slug]` |
 | Primary image | `src/lib/product-images.ts` |
 | Product model / slug | `src/models/Product.ts`, `src/lib/product-slug.ts` (client-safe `canonicalProductSlug` / `productCollectionHref`), `src/lib/find-product-by-slug.ts`. Newlines/`%0A` are stripped. |
-| Admin inline create on collection | `ProductFormModal` (same as admin products) |
+| Admin inline create / edit on collection | `ProductFormModal` — Collection/Category dropdowns from live nav (`/api/categories?nav=1` + admin categories). `pinToCollection` pins a product first on that collection page. |
+| Collection grid columns | `CollectionPageClient.tsx` — default **4** cards per row (`gridCols`). |
 
 ## Cart / checkout / orders
 

@@ -410,17 +410,44 @@ function PinchZoomModal({
   );
 }
 
+function fitImageBox(nw: number, nh: number, maxW: number, maxH: number) {
+  if (maxW <= 0 || maxH <= 0) return { w: 0, h: 0 };
+  if (!nw || !nh) {
+    const h = Math.min(maxH, maxW * (4 / 3));
+    return { w: Math.min(maxW, h * (3 / 4)), h };
+  }
+  const scale = Math.min(maxW / nw, maxH / nh);
+  return { w: Math.round(nw * scale), h: Math.round(nh * scale) };
+}
+
+function viewportHeight() {
+  if (typeof window === "undefined") return 860;
+  return Math.round(window.visualViewport?.height ?? window.innerHeight);
+}
+
+function galleryBottomReserve() {
+  if (typeof window === "undefined") return 48;
+  const w = window.innerWidth;
+  if (w < 768) return 168;
+  if (w < 1280) return 136;
+  return 52;
+}
+
+function remainingGalleryHeight(el: HTMLElement) {
+  const top = el.getBoundingClientRect().top;
+  return Math.max(220, Math.floor(viewportHeight() - top - galleryBottomReserve()));
+}
+
 function ZoomableImage({
   src,
   alt,
   className,
-  style,
 }: {
   src: string;
   alt: string;
   className?: string;
-  style?: React.CSSProperties;
 }) {
+  const shellRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
   const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -435,6 +462,9 @@ function ZoomableImage({
   const [lensSample, setLensSample] = useState({ x: 50, y: 50 });
   const [showLens, setShowLens] = useState(false);
   const [containerSize, setContainerSize] = useState({ w: 0, h: 0 });
+  const [natural, setNatural] = useState({ w: 0, h: 0 });
+  const [avail, setAvail] = useState({ w: 0, h: 640 });
+  const fitted = fitImageBox(natural.w, natural.h, avail.w, avail.h);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 767px)");
@@ -473,6 +503,43 @@ function ZoomableImage({
   }, [src, isMobile, hideLens]);
 
   useEffect(() => {
+    let cancelled = false;
+    const probe = new window.Image();
+    probe.onload = () => {
+      if (!cancelled) {
+        setNatural({ w: probe.naturalWidth, h: probe.naturalHeight });
+      }
+    };
+    probe.src = src;
+    return () => {
+      cancelled = true;
+    };
+  }, [src]);
+
+  useEffect(() => {
+    const shell = shellRef.current;
+    if (!shell) return;
+    const readAvail = () => {
+      setAvail({
+        w: shell.clientWidth,
+        h: remainingGalleryHeight(shell),
+      });
+    };
+    readAvail();
+    const ro = new ResizeObserver(readAvail);
+    ro.observe(shell);
+    window.addEventListener("resize", readAvail);
+    window.visualViewport?.addEventListener("resize", readAvail);
+    window.addEventListener("scroll", readAvail, { passive: true });
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", readAvail);
+      window.visualViewport?.removeEventListener("resize", readAvail);
+      window.removeEventListener("scroll", readAvail);
+    };
+  }, []);
+
+  useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     const ro = new ResizeObserver((entries) => {
@@ -484,7 +551,7 @@ function ZoomableImage({
     });
     ro.observe(el);
     return () => ro.disconnect();
-  }, []);
+  }, [fitted.w, fitted.h]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -625,47 +692,60 @@ function ZoomableImage({
 
   return (
     <div
-      ref={containerRef}
-      className={`relative overflow-hidden ${className ?? ""}`}
-      onMouseEnter={handleMouseEnter}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-      onTouchCancel={handleTouchCancel}
+      ref={shellRef}
+      className={`relative w-full ${className ?? ""}`}
       style={{
-        cursor: isMobile ? "zoom-in" : desktopZoomed ? "zoom-out" : "zoom-in",
-        touchAction: isMobile ? "pan-y" : undefined,
-        WebkitTouchCallout: "none",
-        WebkitUserSelect: "none",
-        userSelect: "none",
-        ...style,
+        minHeight: fitted.h || 220,
+        maxHeight: avail.h || undefined,
       }}
     >
-      <img
-        src={src}
-        alt={alt}
-        loading="eager"
-        fetchPriority="high"
-        decoding="async"
-        draggable={false}
-        className="block h-full w-full select-none object-cover object-[center_15%]"
-        style={
-          isMobile
-            ? undefined
-            : {
-                transform: desktopZoomed
-                  ? `scale(${DESKTOP_ZOOM_SCALE})`
-                  : "scale(1)",
-                transformOrigin: `${desktopOrigin.x}% ${desktopOrigin.y}%`,
-                transition: desktopZoomed
-                  ? "transform 0.12s ease-out"
-                  : "transform 0.2s ease",
-                willChange: "transform",
-              }
-        }
-      />
+      <div
+        ref={containerRef}
+        className="relative mx-auto overflow-hidden bg-[#f1f5f9]"
+        onMouseEnter={handleMouseEnter}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchCancel}
+        style={{
+          width: fitted.w || "100%",
+          height: fitted.h || avail.h || 360,
+          cursor: isMobile ? "zoom-in" : desktopZoomed ? "zoom-out" : "zoom-in",
+          touchAction: isMobile ? "pan-y" : undefined,
+          WebkitTouchCallout: "none",
+          WebkitUserSelect: "none",
+          userSelect: "none",
+        }}
+      >
+        <img
+          src={src}
+          alt={alt}
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
+          draggable={false}
+          onLoad={(e) => {
+            const img = e.currentTarget;
+            setNatural({ w: img.naturalWidth, h: img.naturalHeight });
+          }}
+          className="block h-full w-full select-none object-contain object-center"
+          style={
+            isMobile
+              ? undefined
+              : {
+                  transform: desktopZoomed
+                    ? `scale(${DESKTOP_ZOOM_SCALE})`
+                    : "scale(1)",
+                  transformOrigin: `${desktopOrigin.x}% ${desktopOrigin.y}%`,
+                  transition: desktopZoomed
+                    ? "transform 0.12s ease-out"
+                    : "transform 0.2s ease",
+                  willChange: "transform",
+                }
+          }
+        />
 
       {isMobile && showLens && containerSize.w > 0 && (
         <div
@@ -690,7 +770,7 @@ function ZoomableImage({
               src={src}
               alt=""
               draggable={false}
-              className="absolute max-w-none select-none object-cover object-[center_15%]"
+              className="absolute max-w-none select-none object-contain object-center"
               style={{
                 width: lensW,
                 height: lensH,
@@ -726,6 +806,7 @@ function ZoomableImage({
         open={pinchModalOpen}
         onClose={() => setPinchModalOpen(false)}
       />
+      </div>
     </div>
   );
 }
@@ -964,10 +1045,10 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       {/* ── Main layout: full-bleed image left + wide details right ── */}
       <div className="relative z-10 mx-auto grid w-full max-w-[1800px] grid-cols-1 items-start gap-0 px-4 pt-4 pb-12 sm:px-8 sm:pt-6 sm:pb-16 lg:px-10 xl:grid-cols-[1fr_560px] xl:gap-10 2xl:grid-cols-[1fr_620px]">
         {/* ── LEFT: Full image gallery ── */}
-        <div className="xl:sticky xl:top-[76px] xl:self-start">
+        <div className="xl:sticky xl:top-[110px] xl:max-h-[calc(100dvh-110px)] xl:overflow-hidden xl:self-start">
           <div className="flex items-start gap-3">
             {/* Desktop vertical thumbnails */}
-            <div className="hidden xl:flex w-[74px] shrink-0 flex-col gap-2.5">
+            <div className="hidden xl:flex w-[74px] max-h-[calc(100dvh-12rem)] shrink-0 flex-col gap-2.5 overflow-y-auto">
               {(product.images ?? []).map((img, i) => (
                 <button
                   key={`thumb-${i}`}
@@ -983,7 +1064,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                     alt={img.alt ?? `Thumbnail ${i + 1}`}
                     loading="lazy"
                     decoding="async"
-                    className="block h-[88px] w-full object-cover object-[center_15%]"
+                    className="block h-[88px] w-full bg-[#f1f5f9] object-contain object-center"
                   />
                 </button>
               ))}
@@ -1006,7 +1087,6 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 src={currentImageSrc}
                 alt={displayTitle}
                 className="w-full"
-                style={{ aspectRatio: "3/4", maxHeight: "min(82vh, 640px)" }}
               />
             </div>
           </div>
@@ -1028,7 +1108,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                   alt={img.alt ?? `Thumbnail ${i + 1}`}
                   loading="lazy"
                   decoding="async"
-                  className="block h-[72px] w-full object-cover object-[center_15%]"
+                  className="block h-[72px] w-full bg-[#f1f5f9] object-contain object-center"
                 />
               </button>
             ))}
@@ -1045,7 +1125,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         </div>
 
         {/* ── RIGHT: Wide details panel ── */}
-        <aside className="mt-6 min-w-0 xl:mt-0 xl:max-h-[calc(100vh-92px)] xl:overflow-y-auto xl:[scrollbar-width:none] xl:[&::-webkit-scrollbar]:hidden">
+        <aside className="mt-6 min-w-0 xl:mt-0 xl:max-h-[calc(100dvh-110px)] xl:overflow-y-auto xl:[scrollbar-width:none] xl:[&::-webkit-scrollbar]:hidden">
           <div className="min-w-0 overflow-hidden rounded-[3px] border border-[#e2e8f0] bg-white px-4 py-6 sm:px-8 sm:py-9 md:px-10 md:py-10">
             {/* Label + title */}
             <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wider text-[#7da8c7] sm:text-xs">

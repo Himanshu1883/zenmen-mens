@@ -99,6 +99,15 @@ export const DEFAULT_NAV_CATEGORIES: DefaultCategorySeed[] = [
     featured: false,
     parentSlug: "suit",
   },
+
+  // ── Tuxedo group ──
+  { name: "Tuxedo", filterValue: "tuxedo", featured: true },
+  {
+    name: "Embroidered Tuxedo",
+    filterValue: "embroidered tuxedo",
+    featured: true,
+    parentSlug: "tuxedo",
+  },
 ];
 
 /** child slug → parent slug */
@@ -535,10 +544,53 @@ export function productCategoryMatchTokens(
   return out;
 }
 
-export type CollectionGroup = {
-  parent: { _id: string; name: string };
-  children: { _id: string; name: string }[];
+export type CollectionGroupItem = {
+  _id: string;
+  name: string;
+  slug?: string;
+  filterValue?: string;
 };
+
+export type CollectionGroup = {
+  parent: CollectionGroupItem;
+  children: CollectionGroupItem[];
+};
+
+function itemMatches(item: CollectionGroupItem, value: string) {
+  const n = value.trim().toLowerCase();
+  if (!n) return false;
+  return [item.name, item.slug, item.filterValue]
+    .filter((v): v is string => Boolean(v?.trim()))
+    .some((v) => v.toLowerCase() === n);
+}
+
+export function findCollectionGroup(
+  groups: CollectionGroup[],
+  value: string,
+): CollectionGroup | null {
+  const parentHit = groups.find((g) => itemMatches(g.parent, value));
+  if (parentHit) return parentHit;
+  return groups.find((g) => g.children.some((c) => itemMatches(c, value))) ?? null;
+}
+
+export function collectionGroupsFromNav(
+  groups: NavMenuGroup[],
+): CollectionGroup[] {
+  return groups.map((g) => ({
+    parent: {
+      _id: g.parent._id ?? g.parent.slug,
+      name: g.parent.name,
+      slug: g.parent.slug,
+      filterValue: g.parent.filterValue,
+    },
+    children: g.children.map((c) => ({
+      _id: c._id ?? c.slug,
+      name: c.name,
+      slug: c.slug,
+      filterValue: c.filterValue,
+    })),
+  }));
+}
 
 /** Collection = parent; Category = child of that parent. */
 export function resolveProductCollectionFields(
@@ -548,27 +600,25 @@ export function resolveProductCollectionFields(
 ): { collectionName: string; categoryName: string } {
   const cat = category.trim();
   const sub = subCategory.trim();
-  const eq = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
 
-  const parentMatch = groups.find((g) => eq(g.parent.name, cat));
-  if (parentMatch) {
-    const childMatch = parentMatch.children.find((c) => eq(c.name, sub));
+  const parentMatch = findCollectionGroup(groups, cat);
+  if (parentMatch && itemMatches(parentMatch.parent, cat)) {
+    const childMatch =
+      parentMatch.children.find((c) => itemMatches(c, sub)) ?? null;
     return {
       collectionName: parentMatch.parent.name,
       categoryName: childMatch?.name ?? sub,
     };
   }
 
-  for (const g of groups) {
-    const child =
-      g.children.find((c) => eq(c.name, cat)) ??
-      g.children.find((c) => eq(c.name, sub));
-    if (child) {
-      return {
-        collectionName: g.parent.name,
-        categoryName: child.name,
-      };
-    }
+  if (parentMatch) {
+    const childFromCat = parentMatch.children.find((c) => itemMatches(c, cat));
+    const childFromSub = parentMatch.children.find((c) => itemMatches(c, sub));
+    const child = childFromSub ?? childFromCat;
+    return {
+      collectionName: parentMatch.parent.name,
+      categoryName: child?.name ?? sub,
+    };
   }
 
   return { collectionName: cat, categoryName: sub };
@@ -579,6 +629,7 @@ export function buildCollectionGroups(
     _id: string;
     name: string;
     slug: string;
+    filterValue?: string;
     parentId?: string | null;
     order?: number;
   }>,
@@ -601,13 +652,23 @@ export function buildCollectionGroups(
   }
 
   return parentList.map((parent) => ({
-    parent: { _id: parent._id, name: parent.name },
+    parent: {
+      _id: parent._id,
+      name: parent.name,
+      slug: parent.slug,
+      filterValue: parent.filterValue,
+    },
     children: (childMap.get(parent._id) ?? [])
       .sort(
         (a, b) =>
           (a.order ?? 0) - (b.order ?? 0) || a.name.localeCompare(b.name),
       )
-      .map((c) => ({ _id: c._id, name: c.name })),
+      .map((c) => ({
+        _id: c._id,
+        name: c.name,
+        slug: c.slug,
+        filterValue: c.filterValue,
+      })),
   }));
 }
 

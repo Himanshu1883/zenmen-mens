@@ -20,6 +20,7 @@ const SHOP_LINKS = [
   { label: "Shirt", token: "shirt" },
   { label: "Suit", token: "suit" },
   { label: "Indo-Western", token: "indo-western" },
+  { label: "Tuxedo", token: "tuxedo" },
   { label: "Kurta", token: "kurta" },
   { label: "Buttons", token: "button", accessory: true },
   { label: "Tie", token: "tie", accessory: true },

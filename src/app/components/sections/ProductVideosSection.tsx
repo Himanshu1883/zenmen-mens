@@ -1,5 +1,11 @@
 "use client";
 
+import { useDisplayPrice } from "@/hooks/useDisplayPrice";
+import { useSwipeSlider } from "@/hooks/useSwipeSlider";
+import { getSellingPrice } from "@/lib/product-price";
+import { productCollectionHref } from "@/lib/product-slug";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchProducts } from "@/store/slices/productSlice";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -8,71 +14,86 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
-import { useDisplayPrice } from "@/hooks/useDisplayPrice";
-import { useSwipeSlider } from "@/hooks/useSwipeSlider";
-import { productCollectionHref } from "@/lib/product-slug";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-/** Edit copy, prices, and slugs here — not loaded from the API */
-const PRODUCT_VIDEO_SLIDES = [
+/** Studio clips from `assests/new_products` — slugs match live catalog products. */
+const FEATURED_PRODUCT_VIDEOS = [
   {
     id: 1,
-    videoSrc: "/product_video_1.mp4",
-    productName: "Royal Purple Jodhpuri Suit",
-    category: "Three Piece Collection",
-    priceInr: 58000,
-    description: "Handcrafted excellence in navy blue",
-    slug: "royal-purple-jodhpuri-suit",
+    videoSrc: "/product-videos/royal-blue-floral-bandhgala.mp4",
+    slug: "royal-blue-floral-bandhgala",
+    fallbackName: "Royal Blue Floral Bandhgala",
+    fallbackCategory: "Jodhpuri Suit",
+    fallbackPrice: 32500,
   },
   {
     id: 2,
-    videoSrc: "/product_video_3.mp4",
-    productName: "Classic Black Peak Lapel Tuxedo",
-    category: "Wedding Collection",
-    priceInr: 42000,
-    description: "Contemporary fusion elegance",
-    slug: "classic-black-peak-lapel-tuxedo",
+    videoSrc: "/product-videos/navy-diamond-lattice-indo-western.mp4",
+    slug: "navy-diamond-lattice-indo-western",
+    fallbackName: "Navy Diamond-Lattice Indo-Western",
+    fallbackCategory: "Indo-Western",
+    fallbackPrice: 26500,
   },
   {
     id: 3,
-    videoSrc: "/product_video_2.mp4",
-    productName: "Midnight Black Bandh gala",
-    category: "Bandhgala Collection",
-    priceInr: 72000,
-    description: "Timeless sophistication",
-    slug: "midnight-black-bandh-gala",
-  },
-  {
-    id: 4,
-    videoSrc: "/product_video_4.mp4",
-    productName: "White Fringe Detail Statement Blazer",
-    category: "Western Wear",
-    priceInr: 65000,
-    description: "Royal elegance redefined",
-    slug: "white-fringe-detail-statement-blazer",
+    videoSrc: "/product-videos/navy-leaf-bead-shawl-tuxedo.mp4",
+    slug: "navy-leaf-bead-shawl-tuxedo",
+    fallbackName: "Navy Leaf-Bead Shawl Tuxedo",
+    fallbackCategory: "Embroidered Tuxedo",
+    fallbackPrice: 39500,
   },
 ] as const;
 
-type VideoSlide = (typeof PRODUCT_VIDEO_SLIDES)[number];
+type VideoSlide = {
+  id: number;
+  videoSrc: string;
+  slug: string;
+  productName: string;
+  category: string;
+  priceInr: number;
+};
 
 function getVisibleCount() {
   if (typeof window === "undefined") return 1;
-  if (window.innerWidth >= 1280) return 4;
+  if (window.innerWidth >= 1280) return 3;
   if (window.innerWidth >= 1024) return 3;
   if (window.innerWidth >= 640) return 2;
   return 1;
 }
 
-const slides: VideoSlide[] = [...PRODUCT_VIDEO_SLIDES];
-
 const ProductVideosSection = () => {
+  const dispatch = useAppDispatch();
   const { format: formatPrice } = useDisplayPrice();
+  const { products, loading, loaded } = useAppSelector((s) => s.products);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMuted, setIsMuted] = useState<Record<number, boolean>>({});
   const [visibleCount, setVisibleCount] = useState(1);
   const [gapPx, setGapPx] = useState(16);
   const videoRefs = useRef<Record<number, HTMLVideoElement | null>>({});
+
+  useEffect(() => {
+    if (!loaded && !loading) dispatch(fetchProducts());
+  }, [dispatch, loaded, loading]);
+
+  const slides: VideoSlide[] = useMemo(
+    () =>
+      FEATURED_PRODUCT_VIDEOS.map((row) => {
+        const product = products.find((p) => p.slug === row.slug);
+        return {
+          id: row.id,
+          videoSrc: row.videoSrc,
+          slug: row.slug,
+          productName: product?.title ?? row.fallbackName,
+          category:
+            product?.subCategory ||
+            product?.category ||
+            row.fallbackCategory,
+          priceInr: product ? getSellingPrice(product) : row.fallbackPrice,
+        };
+      }),
+    [products],
+  );
 
   useEffect(() => {
     const updateLayout = () => {
@@ -257,7 +278,7 @@ const ProductVideosSection = () => {
                           if (inView) void el.play().catch(() => {});
                         }
                       }}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                      className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-[1.03]"
                       loop
                       playsInline
                       autoPlay

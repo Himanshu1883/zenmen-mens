@@ -1,4 +1,5 @@
 import { requireAdmin } from "@/lib/admin-auth";
+import { applyCollectionPin } from "@/lib/collection-pin";
 import { connectDB } from "@/lib/db";
 import { processIncomingProductImages } from "@/lib/product-image-store";
 import { STOREFRONT_HAS_IMAGE_FILTER } from "@/lib/product-images";
@@ -7,7 +8,7 @@ import { canonicalProductSlug } from "@/lib/product-slug";
 import { escapeRegex } from "@/lib/utils";
 import { NextResponse } from "next/server";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 type IncomingImage = {
   file?: string;
@@ -196,6 +197,7 @@ export async function POST(request: Request) {
       seoTitle,
       seoDescription,
       isFeatured,
+      pinToCollection,
       isAvailable,
       deliveryLeadValue,
       deliveryLeadUnit,
@@ -248,6 +250,11 @@ export async function POST(request: Request) {
       );
     }
 
+    const pin = await applyCollectionPin({
+      category: String(category ?? ""),
+      pin: Boolean(pinToCollection),
+    });
+
     const product = await Product.create({
       title: cleanTitle,
       slug,
@@ -284,6 +291,8 @@ export async function POST(request: Request) {
       seoDescription,
 
       isFeatured: isFeatured || false,
+      pinToCollection: pin.pinToCollection,
+      collectionPinAt: pin.collectionPinAt,
 
       deliveryLeadValue:
         typeof deliveryLeadValue === "number" && deliveryLeadValue >= 0
