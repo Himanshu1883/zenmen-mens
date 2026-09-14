@@ -10,6 +10,7 @@ import {
   processIncomingProductImages,
   type IncomingProductImage,
 } from "@/lib/product-image-store";
+import { revalidateStorefrontProducts } from "@/lib/revalidate-storefront";
 import Product from "@/models/Product";
 import { NextResponse } from "next/server";
 
@@ -216,6 +217,12 @@ export async function PUT(request: Request, context: Params) {
       return NextResponse.json({ error: "Update failed" }, { status: 500 });
     }
 
+    const slugForRevalidate = String(updated.slug ?? existing.slug);
+    revalidateStorefrontProducts([
+      slugForRevalidate,
+      String(existing.slug ?? ""),
+    ]);
+
     return NextResponse.json(updated);
   } catch (err) {
     console.error("[PUT /api/products/[slug]]", err);
@@ -251,6 +258,8 @@ export async function DELETE(_req: Request, context: Params) {
     await destroyGridFsImages(doc.images);
 
     await Product.findOneAndDelete({ _id: doc._id });
+
+    revalidateStorefrontProducts([String(product.slug ?? "")]);
 
     return NextResponse.json({
       success: true,

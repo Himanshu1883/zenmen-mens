@@ -813,13 +813,25 @@ function ZoomableImage({
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export default function ProductDetailClient({ product }: { product: Product }) {
+export default function ProductDetailClient({
+  product: initialProduct,
+}: {
+  product: Product;
+}) {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { format: displayPrice } = useDisplayPrice();
   const allProducts = useAppSelector((s) => s.products.products);
   const productsLoaded = useAppSelector((s) => s.products.loaded);
   const productsLoading = useAppSelector((s) => s.products.loading);
+
+  const product = useMemo(() => {
+    const match = allProducts.find(
+      (item) =>
+        item._id === initialProduct._id || item.slug === initialProduct.slug,
+    );
+    return match ? { ...initialProduct, ...match } : initialProduct;
+  }, [initialProduct, allProducts]);
 
   const [activeImage, setActiveImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] ?? "M");

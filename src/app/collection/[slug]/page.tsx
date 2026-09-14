@@ -24,6 +24,8 @@ type Props = { params: Promise<{ slug: string }> };
 
 /** Allow request-time rendering for legacy / non-canonical slugs */
 export const dynamicParams = true;
+/** Always read latest price/stock from Mongo — collection grid uses Redux, PDP uses this page. */
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;

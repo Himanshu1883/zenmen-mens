@@ -3,6 +3,7 @@ import { applyCollectionPin } from "@/lib/collection-pin";
 import { connectDB } from "@/lib/db";
 import { processIncomingProductImages } from "@/lib/product-image-store";
 import { STOREFRONT_HAS_IMAGE_FILTER } from "@/lib/product-images";
+import { revalidateStorefrontProducts } from "@/lib/revalidate-storefront";
 import Product from "@/models/Product";
 import { canonicalProductSlug } from "@/lib/product-slug";
 import { escapeRegex } from "@/lib/utils";
@@ -304,6 +305,8 @@ export async function POST(request: Request) {
       isAvailable:
         typeof isAvailable === "boolean" ? isAvailable : (stock ?? 0) > 0,
     });
+
+    revalidateStorefrontProducts([String(product.slug ?? "")]);
 
     return NextResponse.json(product, {
       status: 201,

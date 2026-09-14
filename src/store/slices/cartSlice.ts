@@ -93,6 +93,23 @@ const cartSlice = createSlice({
     setCartOpen(state, action: PayloadAction<boolean>) {
       state.open = action.payload;
     },
+    syncCartProductUpdate(
+      state,
+      action: PayloadAction<{
+        _id: string;
+        title?: string;
+        slug?: string;
+        price?: number;
+      }>,
+    ) {
+      const { _id, title, slug, price } = action.payload;
+      for (const item of state.items) {
+        if (item._id !== _id) continue;
+        if (title) item.title = title;
+        if (slug) item.slug = slug;
+        if (typeof price === "number") item.price = price;
+      }
+    },
   },
 });
 
@@ -104,5 +121,6 @@ export const {
   setCartItems,
   setCartHydrated,
   setCartOpen,
+  syncCartProductUpdate,
 } = cartSlice.actions;
 export default cartSlice.reducer;

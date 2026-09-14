@@ -504,7 +504,7 @@ export default function CollectionPageClient() {
         <ProductEditModal
           product={editingProduct}
           onClose={() => setEditingProduct(null)}
-          onSaved={() => dispatch(fetchProducts())}
+          onSaved={() => setEditingProduct(null)}
         />
       ) : null}
 
@@ -513,10 +513,7 @@ export default function CollectionPageClient() {
           mode="create"
           initialCategory={prefillCategory}
           onClose={() => setCreatingProduct(false)}
-          onSaved={() => {
-            setCreatingProduct(false);
-            dispatch(fetchProducts());
-          }}
+          onSaved={() => setCreatingProduct(false)}
         />
       ) : null}
     </div>

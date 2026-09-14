@@ -1,5 +1,6 @@
 "use client";
 
+import { useRefreshProductCatalog } from "@/hooks/useRefreshProductCatalog";
 import {
   buildCollectionGroups,
   collectionGroupsFromNav,
@@ -127,6 +128,7 @@ export default function ProductFormModal({
   initialCategory,
 }: Props) {
   const isCreate = mode === "create";
+  const refreshCatalog = useRefreshProductCatalog();
   const [form, setForm] = useState<ProductEditForm>(() => {
     if (isCreate) {
       const base = emptyProductForm();
@@ -427,6 +429,7 @@ export default function ProductFormModal({
     try {
       setSaving(true);
       const canonical = canonicalForm();
+      let savedProduct: unknown;
 
       if (isCreate) {
         const payload = editFormToCreatePayload(canonical);
@@ -441,6 +444,7 @@ export default function ProductFormModal({
             typeof data.error === "string" ? data.error : "Create failed",
           );
         }
+        savedProduct = data;
         toast.success("Product created");
       } else {
         const payload = editFormToUpdatePayload(canonical);
@@ -458,9 +462,11 @@ export default function ProductFormModal({
             typeof data.error === "string" ? data.error : "Update failed",
           );
         }
+        savedProduct = data;
         toast.success("Product updated");
       }
 
+      await refreshCatalog({ product: savedProduct });
       onSaved();
       onClose();
     } catch (err) {

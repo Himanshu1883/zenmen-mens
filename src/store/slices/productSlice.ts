@@ -41,6 +41,25 @@ const productSlice = createSlice({
     clearError(state) {
       state.error = null;
     },
+    upsertProduct(state, action: { payload: Product }) {
+      const next = action.payload;
+      const index = state.products.findIndex(
+        (item) => item._id === next._id || item.slug === next.slug,
+      );
+      if (index >= 0) {
+        state.products[index] = { ...state.products[index], ...next };
+      } else {
+        state.products.unshift(next);
+      }
+      state.loaded = true;
+      state.error = null;
+    },
+    removeProduct(state, action: { payload: string }) {
+      const needle = action.payload;
+      state.products = state.products.filter(
+        (item) => item._id !== needle && item.slug !== needle,
+      );
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -60,5 +79,5 @@ const productSlice = createSlice({
   },
 });
 
-export const { clearError } = productSlice.actions;
+export const { clearError, upsertProduct, removeProduct } = productSlice.actions;
 export default productSlice.reducer;

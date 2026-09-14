@@ -37,6 +37,44 @@ export function addRecentlyViewed(
   }
 }
 
+export function patchRecentlyViewedProduct(product: {
+  _id: string;
+  slug: string;
+  title: string;
+  price: number;
+  category?: string;
+}): void {
+  if (typeof window === "undefined") return;
+
+  try {
+    const raw = localStorage.getItem(RECENTLY_VIEWED_KEY);
+    if (!raw) return;
+
+    const existing: RecentlyViewedItem[] = JSON.parse(raw);
+    if (!Array.isArray(existing)) return;
+
+    let changed = false;
+    const merged = existing.map((item) => {
+      if (item._id !== product._id && item.slug !== product.slug) return item;
+      changed = true;
+      return {
+        ...item,
+        title: product.title,
+        slug: product.slug,
+        price: product.price,
+        category: product.category ?? item.category,
+      };
+    });
+
+    if (!changed) return;
+
+    localStorage.setItem(RECENTLY_VIEWED_KEY, JSON.stringify(merged));
+    window.dispatchEvent(new CustomEvent("zenmen:recently-viewed"));
+  } catch {
+    // ignore quota / parse errors
+  }
+}
+
 export function getRecentlyViewed(): RecentlyViewedItem[] {
   if (typeof window === "undefined") return [];
 
