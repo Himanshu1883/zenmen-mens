@@ -15,11 +15,23 @@ import { useCallback } from "react";
 function normalizeProduct(raw: unknown): Product | null {
   if (!raw || typeof raw !== "object") return null;
   const row = raw as Record<string, unknown>;
-  if (!row._id && !row.slug) return null;
+  const _id = row._id != null ? String(row._id) : "";
+  const slug = row.slug != null ? String(row.slug) : "";
+  if (!_id && !slug) return null;
+  if (typeof row.title !== "string") return null;
+  if (typeof row.price !== "number") return null;
+  if (!Array.isArray(row.images)) return null;
+
+  const product = row as unknown as Product;
   return {
-    ...(row as Product),
-    _id: String(row._id ?? ""),
-    slug: String(row.slug ?? ""),
+    ...product,
+    _id: _id || product._id,
+    slug: slug || product.slug,
+    title: row.title,
+    price: row.price,
+    images: row.images as Product["images"],
+    isAvailable:
+      typeof row.isAvailable === "boolean" ? row.isAvailable : product.isAvailable,
   };
 }
 
