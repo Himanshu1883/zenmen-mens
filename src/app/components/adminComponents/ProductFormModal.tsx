@@ -32,7 +32,10 @@ import {
   detailsPresetForCollection,
   toggleCsvValue,
 } from "@/lib/product-form-presets";
+import { inferredStyleGroup, splitDesignAndColor } from "@/lib/product-color";
 import { normalizePrimaryFlags } from "@/lib/product-images";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchProducts } from "@/store/slices/productSlice";
 import type { Category } from "@/types/category";
 import type { Product } from "@/types/product";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -129,6 +132,10 @@ export default function ProductFormModal({
 }: Props) {
   const isCreate = mode === "create";
   const refreshCatalog = useRefreshProductCatalog();
+  const dispatch = useAppDispatch();
+  const catalogProducts = useAppSelector((s) => s.products.products);
+  const catalogLoaded = useAppSelector((s) => s.products.loaded);
+  const catalogLoading = useAppSelector((s) => s.products.loading);
   const [form, setForm] = useState<ProductEditForm>(() => {
     if (isCreate) {
       const base = emptyProductForm();
@@ -187,6 +194,54 @@ export default function ProductFormModal({
       })),
     [childCategories],
   );
+
+  const existingStyleGroups = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const item of catalogProducts) {
+      const key = item.styleGroup?.trim();
+      if (!key || map.has(key)) continue;
+      const label = item.title.split(/\s+[—–-]\s+/)[0]?.trim() || key;
+      map.set(key, label);
+    }
+    return [...map.entries()]
+      .map(([value, label]) => ({ value, label }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [catalogProducts]);
+
+  const linkedColourways = useMemo(() => {
+    const key = form.styleGroup.trim();
+    if (!key) return [];
+    return catalogProducts
+      .filter(
+        (item) =>
+          item.styleGroup?.trim() === key && item._id !== product?._id,
+      )
+      .map((item) => {
+        const fromTitle = splitDesignAndColor(item.title).color;
+        const color = item.colors?.[0]?.trim() || fromTitle || item.title;
+        return color;
+      })
+      .filter(Boolean);
+  }, [catalogProducts, form.styleGroup, product?._id]);
+
+  useEffect(() => {
+    if (!catalogLoaded && !catalogLoading) dispatch(fetchProducts());
+  }, [catalogLoaded, catalogLoading, dispatch]);
+
+  useEffect(() => {
+    setForm((prev) => {
+      const inferredGroup = inferredStyleGroup(prev.title);
+      const inferredColor = splitDesignAndColor(prev.title).color;
+      const nextGroup = prev.styleGroup.trim() ? prev.styleGroup : inferredGroup;
+      const nextColor = prev.colorsText.trim()
+        ? prev.colorsText
+        : inferredColor ?? "";
+      if (nextGroup === prev.styleGroup && nextColor === prev.colorsText) {
+        return prev;
+      }
+      return { ...prev, styleGroup: nextGroup, colorsText: nextColor };
+    });
+  }, [form.title]);
 
   useEffect(() => {
     let cancelled = false;
@@ -524,6 +579,21 @@ export default function ProductFormModal({
         .zm-section { grid-column: 1 / -1; margin-top: 6px; }
         .zm-section-title { font-family: var(--heading-font-family); font-size: 1.15rem; font-weight: var(--heading-font-weight); color: #0f172a; margin: 0 0 4px; letter-spacing: -0.015em; }
         .zm-section-lead { font-size: 13px; line-height: 1.55; color: #64748b; margin: 0 0 8px; }
+        .zm-admin-note {
+          grid-column: 1 / -1;
+          background: #f0f6fb;
+          border: 1px solid #d5e6f1;
+          padding: 14px 16px;
+          color: #334155;
+        }
+        .zm-admin-note strong { color: #0f172a; font-weight: 600; }
+        .zm-admin-note ol { margin: 8px 0 0; padding-left: 18px; }
+        .zm-admin-note li { font-size: 13px; line-height: 1.55; margin: 0 0 4px; }
+        .zm-admin-note p { margin: 8px 0 0; font-size: 12.5px; line-height: 1.5; color: #64748b; }
+        .zm-admin-note code {
+          font-size: 12px; background: #fff; border: 1px solid #d5e6f1;
+          padding: 1px 6px; color: #0f172a;
+        }
         .zm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .zm-field { display: flex; flex-direction: column; gap: 7px; }
         .zm-field.full { grid-column: 1 / -1; }
@@ -633,7 +703,7 @@ export default function ProductFormModal({
               <>
                 <SectionHead
                   title="Essentials"
-                  lead="Name, collection, and price. These appear first on the product page and in the catalog."
+                  lead="Name, collection, and price. For a colourway, title it Design — Colour (example: Embroidered Kurta-Pajama Set — Ivory) so the design group fills in automatically."
                 />
                 <div className="zm-row">
                   <Field
@@ -641,14 +711,14 @@ export default function ProductFormModal({
                     label="Title"
                     required
                     error={errors.title}
-                    hint="Customer-facing product name. Example: Ivory Linen Safari Shirt"
+                    hint="For colourways use Design — Colour. That auto-fills the design group below. One-off pieces can use a normal name."
                     full
                   >
                     <input
                       className="zm-input"
                       value={form.title}
                       onChange={(e) => patch({ title: e.target.value })}
-                      placeholder="Ivory Linen Safari Shirt"
+                      placeholder="Embroidered Kurta-Pajama Set — Ivory"
                     />
                   </Field>
                   <Field
@@ -877,38 +947,116 @@ export default function ProductFormModal({
 
                 <SectionHead
                   title="Colours & sizes"
-                  lead="These become the colour and size pickers on the product page. Tap a chip to add or remove it."
+                  lead="Colour chips on the product page only show colours you actually stock. Link colourways with a design group."
                 />
+                <div className="zm-admin-note">
+                  <strong>How colour switching works</strong>
+                  <ol>
+                    <li>
+                      This product = <strong>one colour</strong> (Ivory). Do not
+                      list Black, Blush, Navy here unless those are this same
+                      garment.
+                    </li>
+                    <li>
+                      Title format:{" "}
+                      <code>Embroidered Kurta-Pajama Set — Ivory</code>
+                    </li>
+                    <li>
+                      Give every colour of that design the{" "}
+                      <strong>same design group</strong>. Tap a chip below or
+                      type the key once — then reuse it on Maroon, Black, etc.
+                    </li>
+                    <li>
+                      Upload photos of <strong>this colour only</strong>. The
+                      shopper taps a chip and opens that product.
+                    </li>
+                  </ol>
+                  <p>
+                    New design with only one colour? Leave the design group
+                    empty until you add a second colourway.
+                  </p>
+                </div>
                 <div className="zm-row">
                   <Field
                     id="zm-field-colors"
-                    label="Colours"
+                    label="This product's colour"
                     required
                     error={errors.colors}
-                    hint="Comma-separated. Example: Navy, Ivory, Black"
+                    hint="One colour for this listing. Example: Ivory"
                     full
                   >
                     <input
                       className="zm-input"
                       value={form.colorsText}
                       onChange={(e) => patch({ colorsText: e.target.value })}
-                      placeholder="Navy, Ivory, Black"
+                      placeholder="Ivory"
                     />
                     <Chips
                       options={COLOR_PRESETS}
                       onPick={(v) =>
                         patch({
-                          colorsText: toggleCsvValue(form.colorsText, v),
+                          colorsText:
+                            form.colorsText.trim().toLowerCase() ===
+                            v.toLowerCase()
+                              ? ""
+                              : v,
                         })
                       }
                       active={(v) =>
-                        form.colorsText
-                          .split(",")
-                          .some(
-                            (c) => c.trim().toLowerCase() === v.toLowerCase(),
-                          )
+                        form.colorsText.trim().toLowerCase() ===
+                        v.toLowerCase()
                       }
                     />
+                  </Field>
+                  <Field
+                    id="zm-field-style-group"
+                    label="Same design group"
+                    hint={
+                      existingStyleGroups.length
+                        ? "Tap an existing family below, or type a new key. Same key = colour chips switch between those products."
+                        : "Type a key such as embroidered-kurta-pajama-set. A title like Design — Ivory also fills this."
+                    }
+                    full
+                  >
+                    <input
+                      className="zm-input"
+                      value={form.styleGroup}
+                      onChange={(e) => patch({ styleGroup: e.target.value })}
+                      placeholder="embroidered-kurta-pajama-set  (or tap a family below)"
+                    />
+                    {existingStyleGroups.length ? (
+                      <Chips
+                        options={existingStyleGroups.map((g) => g.label)}
+                        onPick={(label) => {
+                          const hit = existingStyleGroups.find(
+                            (g) => g.label === label,
+                          );
+                          if (hit) patch({ styleGroup: hit.value });
+                        }}
+                        active={(label) =>
+                          existingStyleGroups.some(
+                            (g) =>
+                              g.label === label && g.value === form.styleGroup,
+                          )
+                        }
+                      />
+                    ) : (
+                      <p className="zm-hint" style={{ margin: 0 }}>
+                        No colour families yet. Save two products with the same
+                        group key to start switching colours.
+                      </p>
+                    )}
+                    {linkedColourways.length ? (
+                      <p className="zm-hint" style={{ margin: 0 }}>
+                        Already in this family: {linkedColourways.join(", ")}.
+                        This product becomes another colour chip on those pages.
+                      </p>
+                    ) : form.styleGroup.trim() ? (
+                      <p className="zm-hint" style={{ margin: 0 }}>
+                        First colour in this family. Add another listing with
+                        the same group to switch colours on the product page.
+                      </p>
+                    ) : null}
                   </Field>
                   <Field
                     id="zm-field-sizes"

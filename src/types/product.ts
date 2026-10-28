@@ -49,6 +49,8 @@ export interface Product {
 
   colors?: string[];
   sizes?: string[];
+  /** Shared key for colourways of the same design. PDP colour chips switch to that product. */
+  styleGroup?: string;
 
   stock?: number;
   isAvailable: boolean;

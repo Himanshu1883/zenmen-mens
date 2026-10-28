@@ -6,9 +6,13 @@ import {
   getDeliverySummaryLine,
 } from "@/lib/delivery-estimate";
 import { getPrimaryImage, getPrimaryImageIndex } from "@/lib/product-images";
+import {
+  colorVariantsForProduct,
+  productColorName,
+} from "@/lib/product-color";
 import { getDisplayPricing } from "@/lib/product-price";
 import { addRecentlyViewed } from "@/lib/recently-viewed";
-import { encodeProductSlug } from "@/lib/product-slug";
+import { encodeProductSlug, productCollectionHref } from "@/lib/product-slug";
 import {
   buildProductWhatsAppMessage,
   openWhatsAppWithMessage,
@@ -25,14 +29,6 @@ import ProductRecoSlider from "./ProductRecoSlider";
 import RecentlyViewedCarousel from "./RecentlyViewedCarousel";
 
 // ─── Static data ────────────────────────────────────────────────────────────
-
-const COLORS = [
-  { name: "Midnight Navy", cls: "bg-[#1a2a4a]" },
-  { name: "Charcoal Noir", cls: "bg-[#2a2a2a]" },
-  { name: "Deep Wine", cls: "bg-[#5c2030]" },
-  { name: "Warm Sand", cls: "bg-[#c8b49a]" },
-  { name: "Ivory", cls: "bg-[#e8e0d0]" },
-];
 
 const ACCORDION_ITEMS = [
   {
@@ -836,7 +832,7 @@ export default function ProductDetailClient({
   const [activeImage, setActiveImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] ?? "M");
   const [selectedColor, setSelectedColor] = useState(
-    product.colors?.[0] ?? COLORS[0].name,
+    () => productColorName(product),
   );
   const [activeTab, setActiveTab] = useState<
     "desc" | "details" | "specs" | "care"
@@ -861,7 +857,7 @@ export default function ProductDetailClient({
   useEffect(() => {
     setActiveImage(getPrimaryImageIndex(product.images));
     setSelectedSize(product.sizes?.[0] ?? "M");
-    setSelectedColor(product.colors?.[0] ?? COLORS[0].name);
+    setSelectedColor(productColorName(product));
     setWantsCustomization(false);
     setCustomizationNotes("");
   }, [product._id, product.images, product.sizes, product.colors]);
@@ -920,14 +916,11 @@ export default function ProductDetailClient({
     };
   }, [product._id]);
 
-  const isColorAvailable = useMemo(
-    () => !!product.colors?.includes(selectedColor),
-    [product.colors, selectedColor],
+  const colorVariants = useMemo(
+    () => colorVariantsForProduct(product, allProducts),
+    [product, allProducts],
   );
-  const canAddToCart = useMemo(
-    () => isColorAvailable || selectedColor === product.colors?.[0],
-    [isColorAvailable, selectedColor, product.colors],
-  );
+  const canAddToCart = product.isAvailable !== false;
   const requiresWhatsAppOrder = wantsCustomization || !canAddToCart;
   const deliveryBadge = getDeliveryBadgeLabel(product);
 
@@ -1182,55 +1175,53 @@ export default function ProductDetailClient({
               </div>
             </div>
 
-            {/* Color picker */}
-            <div className="mt-6">
-              <p className="mb-3 flex flex-col gap-1 text-[.6rem] uppercase tracking-[.22em] text-[#0f172a] sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-                <span>Color</span>
-                <span
-                  className={`normal-case tracking-normal text-[.75rem] leading-snug break-words ${!isColorAvailable && selectedColor !== COLORS[0].name ? "text-[#7da8c7]" : "text-[#94a3b8]"}`}
-                >
-                  {selectedColor}
-                  {!isColorAvailable && selectedColor !== COLORS[0].name && (
-                    <span className="ml-2 text-[.6rem] text-[#7da8c7]">
-                      (Custom Order)
-                    </span>
-                  )}
-                </span>
-              </p>
-              <div className="flex flex-wrap gap-3">
-                {COLORS.map((c) => (
-                  <button
-                    key={c.name}
-                    title={c.name}
-                    onClick={() => setSelectedColor(c.name)}
-                    className={`relative h-7 w-7 rounded-full border-0 transition-transform hover:scale-110 ${c.cls} ${
-                      selectedColor === c.name
-                        ? "ring-[1.5px] ring-[#7da8c7] ring-offset-2 ring-offset-white"
-                        : ""
-                    } ${
-                      !product.colors?.includes(c.name) &&
-                      c.name !== product.colors?.[0]
-                        ? "opacity-50 ring-1 ring-[rgba(125,168,199,0.3)]"
-                        : ""
-                    }`}
-                  >
-                    {!product.colors?.includes(c.name) &&
-                      c.name !== product.colors?.[0] && (
-                        <span className="absolute inset-0 flex items-center justify-center">
-                          <span className="h-full w-[1.5px] rotate-45 bg-[rgba(125,168,199,0.5)]" />
-                        </span>
-                      )}
-                  </button>
-                ))}
+            {colorVariants.length > 0 ? (
+              <div className="mt-6">
+                <p className="mb-3 flex flex-col gap-1 text-[.6rem] uppercase tracking-[.22em] text-[#0f172a] sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                  <span>Color</span>
+                  <span className="normal-case tracking-normal text-[.75rem] leading-snug break-words text-[#94a3b8]">
+                    {selectedColor || colorVariants.find((v) => v.current)?.name}
+                  </span>
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  {colorVariants.map((c) => {
+                    const active =
+                      c.current || selectedColor === c.name;
+                    return (
+                      <button
+                        key={`${c.productId}-${c.name}`}
+                        type="button"
+                        title={c.name}
+                        onClick={() => {
+                          setSelectedColor(c.name);
+                          if (c.slug && c.slug !== product.slug) {
+                            router.push(productCollectionHref(c.slug));
+                          }
+                        }}
+                        className={`relative h-7 w-7 rounded-full transition-transform hover:scale-110 ${
+                          active
+                            ? "ring-[1.5px] ring-[#7da8c7] ring-offset-2 ring-offset-white"
+                            : ""
+                        }`}
+                        style={{
+                          backgroundColor: c.hex,
+                          boxShadow: c.light
+                            ? "inset 0 0 0 1px #e2e8f0"
+                            : undefined,
+                        }}
+                        aria-label={c.name}
+                        aria-pressed={active}
+                      />
+                    );
+                  })}
+                </div>
+                <p className="mt-2 text-[.65rem] text-[#94a3b8]">
+                  {colorVariants.length > 1
+                    ? "✓ In stock · choose a colour to view that piece"
+                    : "✓ In stock · ready to ship"}
+                </p>
               </div>
-              <p className="mt-2 text-[.65rem] text-[#94a3b8]">
-                {!isColorAvailable && selectedColor !== product.colors?.[0]
-                  ? "✨ This color is available on custom order. Contact us for details."
-                  : product.colors?.includes(selectedColor)
-                    ? "✓ In stock · ready to ship"
-                    : "Select a color to check availability"}
-              </p>
-            </div>
+            ) : null}
 
             {/* Size picker */}
             <div className="mt-6">

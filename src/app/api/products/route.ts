@@ -3,6 +3,7 @@ import { applyCollectionPin } from "@/lib/collection-pin";
 import { connectDB } from "@/lib/db";
 import { processIncomingProductImages } from "@/lib/product-image-store";
 import { STOREFRONT_HAS_IMAGE_FILTER } from "@/lib/product-images";
+import { inferredStyleGroup } from "@/lib/product-color";
 import { revalidateStorefrontProducts } from "@/lib/revalidate-storefront";
 import Product from "@/models/Product";
 import { canonicalProductSlug } from "@/lib/product-slug";
@@ -192,6 +193,7 @@ export async function POST(request: Request) {
       care,
       colors,
       sizes,
+      styleGroup,
       stock,
       badge,
       accordion,
@@ -280,6 +282,11 @@ export async function POST(request: Request) {
       colors,
 
       sizes,
+
+      styleGroup: inferredStyleGroup(
+        cleanTitle,
+        typeof styleGroup === "string" ? styleGroup : "",
+      ),
 
       stock: stock || 0,
 

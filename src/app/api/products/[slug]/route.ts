@@ -2,6 +2,7 @@ import { requireAdmin } from "@/lib/admin-auth";
 import { applyCollectionPin } from "@/lib/collection-pin";
 import { connectDB } from "@/lib/db";
 import { findProductBySlug } from "@/lib/find-product-by-slug";
+import { inferredStyleGroup } from "@/lib/product-color";
 import { canonicalProductSlug } from "@/lib/product-slug";
 import { productHasStorefrontImage } from "@/lib/product-images";
 import {
@@ -99,6 +100,10 @@ export async function PUT(request: Request, context: Params) {
       care: body.care ?? existing.care,
       colors: Array.isArray(body.colors) ? body.colors : existing.colors,
       sizes: Array.isArray(body.sizes) ? body.sizes : existing.sizes,
+      styleGroup:
+        typeof body.styleGroup === "string"
+          ? inferredStyleGroup(title, body.styleGroup)
+          : inferredStyleGroup(title, existing.styleGroup),
       details: Array.isArray(body.details) ? body.details : existing.details,
       specifications: Array.isArray(body.specifications)
         ? body.specifications

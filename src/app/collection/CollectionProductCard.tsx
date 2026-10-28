@@ -2,33 +2,17 @@
 
 import { useDisplayPrice } from "@/hooks/useDisplayPrice";
 import { getDeliveryBadgeLabel } from "@/lib/delivery-estimate";
+import {
+  colorVariantsForProduct,
+  productColorName,
+} from "@/lib/product-color";
 import { getPrimaryImageIndex } from "@/lib/product-images";
 import { getDisplayPricing } from "@/lib/product-price";
 import { productCollectionHref } from "@/lib/product-slug";
+import { useAppSelector } from "@/store/hooks";
 import type { Product } from "@/types/product";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-
-function colorToSwatch(name: string): string {
-  const n = name.toLowerCase();
-  const map: Record<string, string> = {
-    black: "#1a1a1a",
-    white: "#f8fafc",
-    navy: "#1e3a5f",
-    blue: "#3b6ea8",
-    brown: "#6b4423",
-    beige: "#d4c4a8",
-    cream: "#f5f0e6",
-    grey: "#94a3b8",
-    gray: "#94a3b8",
-    maroon: "#6b1d1d",
-    green: "#3d5c4a",
-  };
-  for (const [key, hex] of Object.entries(map)) {
-    if (n.includes(key)) return hex;
-  }
-  return "#cbd5e1";
-}
+import { useEffect, useMemo, useState } from "react";
 
 type Props = {
   product: Product;
@@ -42,6 +26,12 @@ export default function CollectionProductCard({
   onEdit,
 }: Props) {
   const { format: displayPrice } = useDisplayPrice();
+  const catalog = useAppSelector((s) => s.products.products);
+  const colorVariants = useMemo(
+    () => colorVariantsForProduct(product, catalog),
+    [product, catalog],
+  );
+  const colorLabel = productColorName(product);
   const images = product.images ?? [];
   const [imgIndex, setImgIndex] = useState(() =>
     getPrimaryImageIndex(images),
@@ -130,14 +120,16 @@ export default function CollectionProductCard({
         </div>
       </div>
 
-      {(product.colors?.length ?? 0) > 0 ? (
+      {colorVariants.length > 0 ? (
         <div className="mb-2 flex flex-wrap gap-1.5">
-          {product.colors!.slice(0, 5).map((c) => (
-            <span
-              key={c}
-              title={c}
+          {colorVariants.slice(0, 6).map((c) => (
+            <Link
+              key={`${c.productId}-${c.name}`}
+              href={productCollectionHref(c.slug)}
+              title={c.name}
               className="h-2.5 w-5 border border-[#e2e8f0]"
-              style={{ background: colorToSwatch(c) }}
+              style={{ background: c.hex }}
+              onClick={(e) => e.stopPropagation()}
             />
           ))}
         </div>
@@ -147,7 +139,9 @@ export default function CollectionProductCard({
         <h3 className="m-0 text-[15px] font-normal leading-snug text-[#0f172a] group-hover:text-[#475569] transition-colors line-clamp-2">
           {product.title}
         </h3>
-        <p className="m-0 mt-1 text-[12px] text-[#94a3b8]">ZENmen</p>
+        <p className="m-0 mt-1 text-[12px] text-[#94a3b8]">
+          {colorLabel || "ZENmen"}
+        </p>
         <div className="mt-1.5 flex flex-wrap items-baseline gap-2">
           <span className="text-[14px] font-medium text-[#0f172a]">
             {displayPrice(selling)}

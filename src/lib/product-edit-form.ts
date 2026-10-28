@@ -1,3 +1,4 @@
+import { inferredStyleGroup } from "@/lib/product-color";
 import {
   parseDeliveryLeadValue,
   type DeliveryLeadUnit,
@@ -38,6 +39,7 @@ export type ProductEditForm = {
   care: string;
   colorsText: string;
   sizesText: string;
+  styleGroup: string;
   detailsText: string;
   specifications: ProductSpec[];
   accordion: ProductAccordion[];
@@ -76,6 +78,7 @@ export function emptyProductForm(): ProductEditForm {
     care: DEFAULT_CARE,
     colorsText: "",
     sizesText: "S, M, L, XL, XXL",
+    styleGroup: "",
     detailsText: DEFAULT_DETAILS,
     specifications: DEFAULT_SPECS.map((s) => ({ ...s })),
     accordion: DEFAULT_ACCORDION.map((a) => ({ ...a })),
@@ -109,6 +112,7 @@ export function productToEditForm(product: Product): ProductEditForm {
     care: product.care?.trim() ? product.care : DEFAULT_CARE,
     colorsText: (product.colors ?? []).join(", "),
     sizesText: (product.sizes ?? []).join(", "),
+    styleGroup: product.styleGroup ?? "",
     detailsText: (product.details ?? []).join("\n"),
     specifications: product.specifications?.length
       ? product.specifications.map((s) => ({ ...s }))
@@ -165,6 +169,7 @@ function buildCommonFields(form: ProductEditForm) {
     care: form.care.trim() || undefined,
     colors: splitLines(form.colorsText),
     sizes: splitLines(form.sizesText),
+    styleGroup: inferredStyleGroup(form.title, form.styleGroup),
     details: form.detailsText
       .split("\n")
       .map((s) => s.trim())

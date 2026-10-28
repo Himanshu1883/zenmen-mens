@@ -40,6 +40,7 @@ If you need to change **X**, start at these files. Do not hunt the whole repo.
 | Product card | `src/app/components/ui/ProductCard.tsx`, `collection/CollectionProductCard.tsx` |
 | Product selling / compare-at display | `src/lib/product-price.ts` — selling is always `product.price`; strike-through is `comparePrice` when higher. Home rails, collection cards, and PDP use this helper. |
 | PDP | `src/app/collection/[slug]/ProductDetailClient.tsx` + `GET /api/products/[slug]` |
+| Colour variants of the same design | `styleGroup` on Product + `src/lib/product-color.ts`. PDP colour chips list stocked colourways and open that product. Title `Design — Colour` auto-fills the group. Admin: “Same design group” + chips of existing groups. |
 | Primary image | `src/lib/product-images.ts` |
 | Product model / slug | `src/models/Product.ts`, `src/lib/product-slug.ts` (client-safe `canonicalProductSlug` / `productCollectionHref`), `src/lib/find-product-by-slug.ts`. Newlines/`%0A` are stripped. |
 | Admin inline create / edit on collection | `ProductFormModal` — Collection/Category dropdowns from live nav (`/api/categories?nav=1` + admin categories). `pinToCollection` pins a product first on that collection page. |

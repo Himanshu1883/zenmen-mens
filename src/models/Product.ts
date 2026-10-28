@@ -62,6 +62,7 @@ const ProductSchema = new mongoose.Schema(
 
     colors: [String],
     sizes: [String],
+    styleGroup: { type: String, index: true, trim: true, default: "" },
 
     stock: { type: Number, default: 0, min: 0 },
     isAvailable: { type: Boolean, default: true },
@@ -108,6 +109,11 @@ if (!Product.schema.path("pinToCollection")) {
 if (!Product.schema.path("collectionPinAt")) {
   Product.schema.add({
     collectionPinAt: { type: Date, default: null },
+  });
+}
+if (!Product.schema.path("styleGroup")) {
+  Product.schema.add({
+    styleGroup: { type: String, index: true, trim: true, default: "" },
   });
 }
 
