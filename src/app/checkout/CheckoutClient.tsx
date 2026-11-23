@@ -8,8 +8,6 @@ import { clearCart } from "@/store/slices/cartSlice";
 import type { ShippingInput } from "@/lib/validations/checkout.schema";
 import {
   ArrowLeft,
-  Banknote,
-  CreditCard,
   Loader2,
   Lock,
   MapPin,
@@ -28,6 +26,8 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import CheckoutAuthForm from "./CheckoutAuthForm";
+import PaymentMethodPicker from "./PaymentMethodPicker";
+import RazorpayLogo from "./RazorpayLogo";
 
 type PaymentMethod = "cod" | "online";
 
@@ -615,47 +615,11 @@ export default function CheckoutClient() {
             </div>
           </section>
 
-          <section className="rounded-sm border border-[#e2e8f0] bg-white p-6 shadow-sm md:p-8">
-            <h2 className="mb-6 font-heading text-xl text-[#0f172a]">
-              Payment method
-            </h2>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <button
-                type="button"
-                onClick={() => setPaymentMethod("online")}
-                className={`flex flex-col items-start gap-2 rounded-sm border p-5 text-left transition-all ${
-                  paymentMethod === "online"
-                    ? "border-[#7da8c7] bg-[#f0f6fb] ring-1 ring-[#7da8c7]"
-                    : "border-[#e2e8f0] bg-white hover:border-[#cbd5e1]"
-                }`}
-              >
-                <CreditCard className="h-5 w-5 text-[#7da8c7]" />
-                <span className="text-[11px] font-semibold uppercase tracking-[0.15em] text-[#0f172a]">
-                  Pay online
-                </span>
-                <span className="text-xs text-[#64748b]">
-                  UPI, cards, netbanking via Razorpay (test mode)
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setPaymentMethod("cod")}
-                className={`flex flex-col items-start gap-2 rounded-sm border p-5 text-left transition-all ${
-                  paymentMethod === "cod"
-                    ? "border-[#7da8c7] bg-[#f0f6fb] ring-1 ring-[#7da8c7]"
-                    : "border-[#e2e8f0] bg-white hover:border-[#cbd5e1]"
-                }`}
-              >
-                <Banknote className="h-5 w-5 text-[#7da8c7]" />
-                <span className="text-[11px] font-semibold uppercase tracking-[0.15em] text-[#0f172a]">
-                  Cash on delivery
-                </span>
-                <span className="text-xs text-[#64748b]">
-                  +{displayPrice(COD_FEE_INR)} COD handling fee
-                </span>
-              </button>
-            </div>
-          </section>
+          <PaymentMethodPicker
+            value={paymentMethod}
+            onChange={setPaymentMethod}
+            codFeeLabel={displayPrice(COD_FEE_INR)}
+          />
         </div>
 
         <aside className="lg:sticky lg:top-24 lg:self-start">
@@ -714,20 +678,41 @@ export default function CheckoutClient() {
             <button
               type="submit"
               disabled={submitting}
-              className="mt-6 flex w-full items-center justify-center gap-2 bg-[#0f172a] py-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-white transition-colors hover:bg-[#7da8c7] hover:text-[#0f172a] disabled:opacity-60"
+              className="mt-6 flex w-full flex-col items-center justify-center gap-1 bg-[#0f172a] px-4 py-3.5 text-white transition-colors hover:bg-[#7da8c7] hover:text-[#0f172a] disabled:opacity-60"
             >
               {submitting ? (
-                <>
+                <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em]">
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Processing…
-                </>
+                </span>
               ) : paymentMethod === "cod" ? (
-                "Place COD order"
+                <>
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.2em]">
+                    Place COD order
+                  </span>
+                  <span className="text-[11px] font-normal normal-case tracking-normal opacity-80">
+                    Pay {displayPrice(total)} on delivery
+                  </span>
+                </>
               ) : (
-                "Pay securely online"
+                <>
+                  <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em]">
+                    <Lock className="h-3.5 w-3.5" />
+                    Pay {displayPrice(total)}
+                  </span>
+                  <span className="text-[11px] font-normal normal-case tracking-normal opacity-80">
+                    UPI, cards, netbanking via Razorpay
+                  </span>
+                </>
               )}
             </button>
-            <p className="mt-4 text-center text-[10px] leading-relaxed text-[#94a3b8]">
+            {paymentMethod === "online" ? (
+              <p className="mt-3 flex items-center justify-center gap-2 text-[11px] text-[#94a3b8]">
+                Secured by
+                <RazorpayLogo className="h-4 w-[72px] opacity-80" />
+              </p>
+            ) : null}
+            <p className="mt-3 text-center text-[10px] leading-relaxed text-[#94a3b8]">
               By placing this order you agree to our tailoring timeline and
               return policy. Atelier will confirm fitting details after payment.
             </p>
